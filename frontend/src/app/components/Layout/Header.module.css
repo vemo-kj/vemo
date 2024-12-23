@@ -1,11 +1,37 @@
 .mainNav {
   width: 100%;
-  height: 60px;
-  position: fixed;
+  height: 70px;
+  
   top: 0;
+  left: 0;
+  position: fixed;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: grey;
+  background: white;
+  box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+}
+
+.buttonHome {
+  background-color: white;
+  border: 0px;
+}
+
+.searchBar {
+  width: 350px;
+  height: 30px;
+  border-radius: 5px;
+  border-color: rgb(197, 195, 195);
+}
+.mainNavUser {
+  width: ;
+  height: 30px;
+
+  background-color: white;
+  border: 0px;
+}
+.mainNavCreate {
+  width: 70px;
+  height: 30px;
 }

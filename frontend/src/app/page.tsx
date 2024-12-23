@@ -12,6 +12,7 @@ export default function Home() {
     const [selectedCategory, setSelectedCategory] = useState('ALL')
 
     // mainCard props
+    // 데이터 기반 렌더링 되도록 작성해야함
     const mainCards = [
         {
             thumbnail:"1",
@@ -21,13 +22,13 @@ export default function Home() {
             cardMemoCount:1,
         },
     ]
-
     return (
         <main>
             <Category 
             categories={categories}
             onCategorySelect={setSelectedCategory}/>
             <div>
+                {/* 추가 수정 필요 */}
                 {mainCards.map((mainCard, index) => (
                     <MainCard key={index} {...mainCard} />
                 ))}

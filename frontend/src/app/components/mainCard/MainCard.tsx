@@ -19,17 +19,17 @@ export default function MainCard({
 
   return(
     // 링크로 처리해야함
-    <div className="mainCard">
+    <div className={styles.mainCard}>
       <div>
-        <image className="youtubeImage" />
+        <image className={styles.youtubeImage} />
       </div>
       <div>
-        <span>썸네일이 들어옵니다.</span>
+        <span className={styles.thumbnail}>썸네일이 들어옵니다.</span>
         <div>
-          <image className="youtuberLogo" />
-          <span>유튜브채널명</span>
+          <image className={styles.youtuberLogo} />
+          <span className={styles.youtuberProfile}>유튜브채널명</span>
         </div>
-        <span>vemo의 수</span>
+        <span className={styles.cardMemoCount}>vemo의 수</span>
       </div>
     </div>
   )
