@@ -2,6 +2,7 @@
 
 import Category from './components/category/Category';
 import Header from './components/Layout/Header';
+import MainCard from './components/mainCard/MainCard';
 import styles from './page.module.css';
 import { useState } from 'react';
 
@@ -10,12 +11,27 @@ export default function Home() {
     const categories = ["ALL", "STUDY", "VLOG"]
     const [selectedCategory, setSelectedCategory] = useState('ALL')
 
+    // mainCard props
+    const mainCards = [
+        {
+            thumbnail:"1",
+            mainCardTitle:"1",
+            youtuberLogo:"1",
+            youtuberProfile:"1",
+            cardMemoCount:1,
+        },
+    ]
+
     return (
         <main>
             <Category 
             categories={categories}
             onCategorySelect={setSelectedCategory}/>
-            <h1>여기는메모카드들이공간예정</h1>
+            <div>
+                {mainCards.map((mainCard, index) => (
+                    <MainCard key={index} {...mainCard} />
+                ))}
+            </div>
         </main>
     );
 }
