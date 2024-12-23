@@ -9,6 +9,7 @@ import { TimestampList } from './entities/timestamp-list.entity';
 import { Timestamp } from './entities/timestamp.entity';
 import { SeedService } from './services/seed.service';
 import { SeedController } from './controllers/seed.controller';
+import { HealthController } from './controllers/health.controller';
 
 @Module({
   imports: [
@@ -29,11 +30,12 @@ import { SeedController } from './controllers/seed.controller';
         entities: [User, Video, Playlist, Memo, TimestampList, Timestamp],
         synchronize: true,
         logging: true,
+        logger: 'advanced-console',
       }),
     }),
     TypeOrmModule.forFeature([User, Video, Playlist, Memo, TimestampList, Timestamp]),
   ],
-  controllers: [SeedController],
+  controllers: [SeedController, HealthController],
   providers: [SeedService],
 })
 export class AppModule {}

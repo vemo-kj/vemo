@@ -1,0 +1,17 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "vemo-rds-cluster-instance-1.cts8se4y8qgx.ap-northeast-2.rds.amazonaws.com",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "Vemo",
+      "database": "Vemo",
+      "username": "admin"
+    }
+  ]
+}
