@@ -1,0 +1,54 @@
+<html></html>
+    <head>
+        <title>YouTube Player API 테스트</title>
+    </head>
+    <body>
+        <div id='player'></div>
+        <div id='currentTime'>현재 시간: 0초</div>
+        <button onclick='checkCurrentTime()'>현재 시간 확인</button>
+
+        <script>
+            // YouTube API 스크립트 로드
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            var player;
+
+            // YouTube 플레이어 초기화
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    height: '360',
+                    width: '640',
+                    videoId: 'M7lc1UVf-VE',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+
+            // 플레이어 준비 완료 시 실행
+            function onPlayerReady(event) {
+                event.target.playVideo();
+            }
+
+            // 플레이어 상태 변경 시 실행
+            function onPlayerStateChange(event) {
+                // 상태 변경 시 필요한 로직 추가
+            }
+
+            // 현재 재생 시간 확인
+            function checkCurrentTime() {
+                if (player && player.getCurrentTime) {
+                    var currentTime = player.getCurrentTime();
+                    document.getElementById('currentTime').innerHTML = 
+                        '현재 시간: ' + currentTime.toFixed(2) + '초';
+                } else {
+                    alert('플레이어가 아직 준비되지 않았습니다.');
+                }
+            }
+        </script>
+    </body>
+</html>
