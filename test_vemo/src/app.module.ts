@@ -10,6 +10,9 @@ import { Timestamp } from './entities/timestamp.entity';
 import { SeedService } from './services/seed.service';
 import { SeedController } from './controllers/seed.controller';
 import { HealthController } from './controllers/health.controller';
+import { FileController } from './controllers/file.controller';
+import { S3Service } from './services/s3.service';
+import { File } from './entities/file.entity';
 
 @Module({
   imports: [
@@ -27,15 +30,15 @@ import { HealthController } from './controllers/health.controller';
         username: configService.get('DATABASE_USERNAME'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [User, Video, Playlist, Memo, TimestampList, Timestamp],
+        entities: [User, Video, Playlist, Memo, TimestampList, Timestamp, File],
         synchronize: true,
         logging: true,
         logger: 'advanced-console',
       }),
     }),
-    TypeOrmModule.forFeature([User, Video, Playlist, Memo, TimestampList, Timestamp]),
+    TypeOrmModule.forFeature([User, Video, Playlist, Memo, TimestampList, Timestamp, File]),
   ],
-  controllers: [SeedController, HealthController],
-  providers: [SeedService],
+  controllers: [SeedController, HealthController, FileController],
+  providers: [SeedService, S3Service],
 })
 export class AppModule {}
