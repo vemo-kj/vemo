@@ -4,17 +4,17 @@ import { TimestampList } from './timestamp_list.entity';
 @Entity()
 export class Timestamp {
     @PrimaryGeneratedColumn()
-    timestampId: number;
+    id: number;
 
-    // 타임 스탬프 시간
     @Column('time')
     time: string;
 
-    // 메모
     @Column({ length: 100 })
     description: string;
 
-    // 다대일 관계 설정
-    @ManyToOne(() => TimestampList, timestampList => timestampList.timestamps)
+    @ManyToOne(() => TimestampList, timestampList => timestampList.timestamps, {
+        onDelete: 'CASCADE', // 옵션 (필요시)
+        nullable: false, // 필수 참조 필드
+    })
     timestampList: TimestampList;
 }
