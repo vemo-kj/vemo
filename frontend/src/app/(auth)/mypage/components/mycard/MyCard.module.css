@@ -1,6 +1,6 @@
-.signUpBox {
+.myCard {
   border: 2px solid;
   border-radius: 8px;
 
-  margin-top: 100px;
+  width: 320px;
 }

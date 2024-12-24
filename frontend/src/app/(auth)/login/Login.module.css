@@ -1,0 +1,10 @@
+.loginBox {
+  border: 2px solid;
+  border-radius: 8px;
+  width: 800px;
+
+  
+  justify-content: center;
+  /* 글러벌css 작성 후 수정 */
+  margin-top: 100px;
+}

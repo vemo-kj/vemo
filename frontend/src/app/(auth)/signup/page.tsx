@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function SingUpPage() {
   return(
-    <div>
+    <div className={styles.signUpBox}>
       <h1>회원가입</h1>
       <form>
         <div>

@@ -1,5 +1,6 @@
 "use client"
 
+import styles from './Login.module.css';
 import Link from "next/link"
 import { useState } from "react"
 
@@ -13,7 +14,7 @@ export default function LoginPage() {
   }
 
   return(
-  <div>
+  <div className={styles.loginBox}>
     <h1>로그인</h1>
     <form onSubmit={handleSubmit}>
     <div>
