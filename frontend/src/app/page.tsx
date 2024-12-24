@@ -8,8 +8,8 @@ import { useState } from 'react';
 
 export default function Home() {
     // 카테고리컴포넌트 props
-    const categories = ["ALL", "STUDY", "VLOG"]
-    const [selectedCategory, setSelectedCategory] = useState('ALL')
+    const categories = ["All", "Education", "Travel", "Technology", "Lifestyle", "News"]
+    const [selectedCategory, setSelectedCategory] = useState('All')
 
     // mainCard props
     // 데이터 기반 렌더링 되도록 작성해야함

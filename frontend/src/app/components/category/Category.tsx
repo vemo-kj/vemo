@@ -1,6 +1,5 @@
 "use client"
 
-import Link from 'next/link'
 import styles from './Category.module.css'
 import { useState } from 'react'
 
@@ -10,7 +9,9 @@ type CategoryProps = {
 }
 
 export default function Category({categories,  onCategorySelect}: CategoryProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // 클릭된 카테고리 저장 -> 초기값 All?null? 토의
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("All");
 
   const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);
@@ -19,10 +20,11 @@ export default function Category({categories,  onCategorySelect}: CategoryProps)
 
   return(
     <div className={styles.mainCategory}>
-      <h1>CATEGORY</h1>
+      <h1>Category</h1>
       <div>
       {categories.map((category, index) => (
         <button
+          className={styles.mainCategoryButton}
           key={index}
           onClick={() => handleCategoryClick(category)}
         >
