@@ -1,21 +1,16 @@
 import Link from "next/link"
 import Image from "next/image";
 import styles from './MainCard.module.css'
+import { MainCardProps } from '../../types/MainCardProps';
 
-export type MainCardProps = {
-  thumbnail: string;
-  mainCardTitle: string;
-  youtuberLogo: string;
-  youtuberProfile: string;
-  cardMemoCount: number;
-}
 
 export default function MainCard({
   thumbnail,
   mainCardTitle,
   youtuberLogo,
   youtuberProfile,
-  cardMemoCount
+  cardMemoCount,
+  category,
 }: MainCardProps) {
 
   return(
