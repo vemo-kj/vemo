@@ -1,5 +1,4 @@
-"use client"
-
+'use client'
 import styles from './Category.module.css'
 import { useState } from 'react'
 
@@ -20,8 +19,8 @@ export default function Category({categories,  onCategorySelect}: CategoryProps)
 
   return(
     <div className={styles.mainCategory}>
-      <h1>Category</h1>
-      <div>
+      <h2>Category</h2>
+      <div className={styles.mainCategoryButtonContainer}>
       {categories.map((category, index) => (
         <button
           className={styles.mainCategoryButton}

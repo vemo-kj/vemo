@@ -17,13 +17,6 @@
   background-color: white;
   border: 0px;
 }
-
-.searchBar {
-  width: 350px;
-  height: 30px;
-  border-radius: 5px;
-  border-color: rgb(197, 195, 195);
-}
 .mainNavButton {
   display: flex;
   justify-content: space-between;

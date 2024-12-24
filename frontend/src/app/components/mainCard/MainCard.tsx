@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image";
 import styles from './MainCard.module.css'
 
-type mainCardProps = {
+export type MainCardProps = {
   thumbnail: string;
   mainCardTitle: string;
   youtuberLogo: string;
@@ -16,7 +16,7 @@ export default function MainCard({
   youtuberLogo,
   youtuberProfile,
   cardMemoCount
-}: mainCardProps) {
+}: MainCardProps) {
 
   return(
     // 링크로 처리해야함
@@ -26,12 +26,12 @@ export default function MainCard({
         <img src="/images/example.svg" className={styles.youtubeImage} />
       </div>
       <div>
-        <span className={styles.thumbnail}>썸네일이 들어옵니다.</span>
+        <span className={styles.thumbnail}>TITLE: {mainCardTitle}</span>
         <div>
           <img src="/images/example2.svg" className={styles.youtuberLogo} />
           <span className={styles.youtuberProfile}>유튜브채널명</span>
         </div>
-        <span className={styles.cardMemoCount}>vemo의 수</span>
+        <span className={styles.cardMemoCount}>vemo의 수{cardMemoCount}</span>
       </div>
     </div>
   )
