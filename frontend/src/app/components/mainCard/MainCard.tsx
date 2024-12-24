@@ -11,23 +11,26 @@ export default function MainCard({
   youtuberProfile,
   cardMemoCount,
   category,
+  youtubeLink,
+
 }: MainCardProps) {
 
   return(
-    // 링크로 처리해야함
-    // 우선 카드 양식만 만들었음
-    <div className={styles.mainCard}>
-      <div>
-        <img src="/images/example.svg" className={styles.youtubeImage} />
-      </div>
-      <div>
-        <span className={styles.thumbnail}>TITLE: {mainCardTitle}</span>
+    // 썸네일, 유튜버로고 {}형태 추가
+    <Link href='/vemo'>
+      <div className={styles.mainCard}>
         <div>
-          <img src="/images/example2.svg" className={styles.youtuberLogo} />
-          <span className={styles.youtuberProfile}>유튜브채널명</span>
+          <img src="/images/example.svg" className={styles.youtubeImage} />
         </div>
-        <span className={styles.cardMemoCount}>vemo의 수{cardMemoCount}</span>
+        <div>
+          <span className={styles.thumbnail}>TITLE:{mainCardTitle}</span>
+          <div>
+            <img src="/images/example2.svg" className={styles.youtuberLogo} />
+            <span className={styles.youtuberProfile}>유튜브채널명{youtuberProfile}</span>
+          </div>
+          <span className={styles.cardMemoCount}>vemo의 수{cardMemoCount}</span>
+        </div>
       </div>
-    </div>
+    </Link>
   )
 }

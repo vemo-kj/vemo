@@ -5,4 +5,5 @@ export type MainCardProps = {
   youtuberProfile: string;
   cardMemoCount: number;
   category: string;
+  youtubeLink: string;
 };

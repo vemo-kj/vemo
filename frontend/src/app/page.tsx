@@ -20,6 +20,7 @@ const mainCards: MainCardProps[] = [
         youtuberProfile: 'React Channel',
         cardMemoCount: 5,
         category: 'Education',
+        youtubeLink: 'https://www.youtube.com/watch?v=Ke90Tje7VS0',
     },
     {
         thumbnail: '2',
@@ -28,6 +29,7 @@ const mainCards: MainCardProps[] = [
         youtuberProfile: 'Next.js Channel',
         cardMemoCount: 8,
         category: 'Technology',
+        youtubeLink: 'https://www.youtube.com/watch?v=Ke90Tje7VS0',
     },
     {
         thumbnail: '3',
@@ -36,6 +38,7 @@ const mainCards: MainCardProps[] = [
         youtuberProfile: 'Travel Channel',
         cardMemoCount: 3,
         category: 'Travel',
+        youtubeLink: 'https://www.youtube.com/watch?v=Ke90Tje7VS0',
     },
     {
         thumbnail: '4',
@@ -44,6 +47,7 @@ const mainCards: MainCardProps[] = [
         youtuberProfile: 'Lifestyle Channel',
         cardMemoCount: 6,
         category: 'Lifestyle',
+        youtubeLink: 'https://www.youtube.com/watch?v=Ke90Tje7VS0',
     },
     ];
 
