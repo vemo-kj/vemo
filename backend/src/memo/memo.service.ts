@@ -50,4 +50,12 @@ export class MemoService {
 
         return await this.memoRepository.save(memo);
     }
+
+    async delete(id: number): Promise<void> {
+        const result = await this.memoRepository.delete(id);
+
+        if (result.affected === 0) {
+            throw new Error('Memo not found');
+        }
+    }
 }
