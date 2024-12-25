@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TimestampModule } from './timestamp/timestamp.module';
-import { TimestampList } from './timestamp/entity/timestamp_list.entity';
-import { Timestamp } from './timestamp/entity/timestamp.entity';
+import { MemoModule } from './memo/memo.module';
+import { Memo } from './memo/entity/memo.entity';
 
 @Module({
     imports: [
@@ -20,13 +19,13 @@ import { Timestamp } from './timestamp/entity/timestamp.entity';
                 username: configService.get('DATABASE_USERNAME'),
                 password: configService.get('DATABASE_PASSWORD'),
                 database: configService.get('DATABASE_NAME'),
-                entities: [TimestampList, Timestamp, File],
+                entities: [Memo, File],
                 synchronize: true,
-                logging: true,
-                logger: 'advanced-console',
+                logging: false,
+                // logger: 'advanced-console',
             }),
         }),
-        TimestampModule,
+        MemoModule,
     ],
 })
 export class AppModule {}
