@@ -1,10 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { TimestampList } from './timestamp_list.entity';
 
 @Entity()
 export class Timestamp {
     @PrimaryGeneratedColumn()
-    id: number;
+    timestampId: number;
 
     @Column('time')
     time: string;
@@ -12,9 +12,6 @@ export class Timestamp {
     @Column({ length: 100 })
     description: string;
 
-    @ManyToOne(() => TimestampList, timestampList => timestampList.timestamps, {
-        onDelete: 'CASCADE', // 옵션 (필요시)
-        nullable: false, // 필수 참조 필드
-    })
+    @ManyToOne(() => TimestampList, timestamplist => timestamplist.timestamps)
     timestampList: TimestampList;
 }
