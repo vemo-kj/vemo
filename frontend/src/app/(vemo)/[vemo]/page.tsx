@@ -1,8 +1,8 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link'; // Next.js의 Link 컴포넌트 가져오기
 import styles from './Vemo.module.css';
+import CustomEditor from './components/editor';
 
 export default function VemoPage() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -25,30 +25,29 @@ export default function VemoPage() {
             <div className={styles.section1}>
                 {/* 로고 버튼 */}
                 <Link href="/" passHref>
-                    <img
-                        src="/icons/Button_home.svg" // 로고 이미지 경로
-                        alt="VEMO logo"
-                        className={styles.logoButton}
-                    />
+                    <Link href="/" passHref>
+                        <img
+                            src="/icons/Button_home.svg" // 로고 이미지 경로
+                            alt="VEMO logo"
+                            className={styles.logoButton}
+                        />
+                    </Link>
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
-                        src="https://www.youtube.com/embed/K1kt8VHX9eI" // watch 대신 embed 사용
+                        src="https://www.youtube.com/embed/example"
                         title="Video Player"
-                        frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className={styles.video}
                     ></iframe>
-                    {/* <p className={styles.videoTitle}>
-                        This is where the title can go for your video
-                    </p> */}
+                    <p className={styles.videoTitle}></p>
                 </div>
             </div>
 
             {/* Section 2: Notes */}
             <div className={styles.section2}>
-                <h1 className={styles.notesHeader}>나만의 노트</h1>
+                <h2 className={styles.notesHeader}>나만의 노트</h2>
                 <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                 <div className={styles.notesContent}>
                     <p className={styles.noteTitle}>자바 스크립트 스터디</p>
@@ -67,6 +66,7 @@ export default function VemoPage() {
                             )}
                         </div>
                     </div>
+
                     <div className={styles.textInput}>
                         <textarea
                             className={styles.textArea}
@@ -81,14 +81,14 @@ export default function VemoPage() {
                     </div>
                 </div>
                 <div className={styles.footerButtons}>
-                    <button>캡처하기</button>
-                    <button>부분캡처</button>
+                    <button>편집하기</button>
+                    <button>부분편집</button>
                     <button>요약하기</button>
                     <button>내보내기</button>
                 </div>
             </div>
 
-            {/* Section 3: SideNav */}
+            {/* Section 3: Sidebar */}
             <div className={styles.section3}>
                 <button className={styles.sidebarButton}>작성하기</button>
                 <button className={styles.sidebarButton}>커뮤니티</button>

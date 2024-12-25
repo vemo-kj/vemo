@@ -1,0 +1,44 @@
+/* 전체 에디터 컨테이너 */
+.editorContainer {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ReactQuill 에디터 */
+.ql-container {
+    min-height: 200px;
+    font-size: 16px;
+}
+
+/* 툴바 스타일 */
+.ql-toolbar {
+    background-color: #f1f3f5;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 하단 툴바 버튼 */
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+}
+
+.addButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.addButton:hover {
+    background-color: #0056b3;
+}
