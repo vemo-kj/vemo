@@ -3,26 +3,63 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './Vemo.module.css';
-import Editor from './components/editor';
+import dynamic from 'next/dynamic';
+
+// [변경 전] import DraftEditor from './components/editor';
+// [변경 후] DraftEditor를 동적으로 import (ssr: false)
+//           1) 컴포넌트 이름을 대문자로 시작 (EditorNoSSR)
+//           2) ssr: false 옵션으로 서버 사이드 렌더링 비활성화
+const EditorNoSSR = dynamic(() => import('./components/editor'), {
+    ssr: false,
+});
 
 export default function VemoPage() {
-    const videoRef = useRef<HTMLIFrameElement>(null); // IFrame 참조를 위한 useRef
-
-    useEffect(() => {
-        if (videoRef.current) {
-            console.log('IFrame is loaded', videoRef.current);
-        }
-    }, []);
-
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
+    const [currentTimestamp, setCurrentTimestamp] = useState('00:00'); // 타임스탬프 상태
+    const playerRef = useRef<any>(null); // YouTube Player Ref
 
-    // 드롭다운 열기/닫기 토글
+    useEffect(() => {
+        // YouTube IFrame API를 로드
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+        (window as any).onYouTubeIframeAPIReady = () => {
+            playerRef.current = new (window as any).YT.Player('youtube-player', {
+                videoId: 'pEt89CrE-6A', // YouTube 비디오 ID
+                events: {
+                    onReady: () => {
+                        console.log('YouTube Player Ready');
+                    },
+                },
+            });
+        };
+    }, []);
+
+    useEffect(() => {
+        // 1초마다 현재 재생 시간 업데이트
+        const interval = setInterval(() => {
+            if (playerRef.current && playerRef.current.getCurrentTime) {
+                const time = playerRef.current.getCurrentTime(); // 현재 재생 시간(초)
+                const minutes = Math.floor(time / 60);
+                const seconds = Math.floor(time % 60);
+                setCurrentTimestamp(
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+                );
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // 드롭다운 열기/닫기
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-    // 항목 선택
+    // 옵션 선택
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
         setIsDropdownOpen(false);
@@ -41,14 +78,14 @@ export default function VemoPage() {
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
-                        ref={videoRef} // IFrame에 대한 참조
-                        src="https://www.youtube.com/embed/example"
-                        title="Video Player"
+                        id="youtube-player"
+                        // JS API를 사용하기 위해 ?enablejsapi=1 파라미터가 필요합니다.
+                        src="https://www.youtube.com/embed/pEt89CrE-6A?enablejsapi=1"
+                        title="YouTube Video Player"
+                        frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                        className={styles.video}
-                    ></iframe>
-                    <p className={styles.videoTitle}></p>
+                    />
                 </div>
             </div>
 
@@ -56,10 +93,12 @@ export default function VemoPage() {
             <div className={styles.section2}>
                 <h2 className={styles.notesHeader}>나만의 노트</h2>
                 <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
+
                 <div className={styles.notesContent}>
                     <p className={styles.noteTitle}>자바 스크립트 스터디</p>
+                    {/* 여기에서 현재 재생 시간 확인 */}
+                    <p>현재 재생 시간: {currentTimestamp}</p>
                     <div className={styles.noteActions}>
-                        {/* 드롭다운 버튼 */}
                         <div className={styles.dropdown}>
                             <button className={styles.noteDropdown} onClick={toggleDropdown}>
                                 {selectedOption} ▼
@@ -75,22 +114,12 @@ export default function VemoPage() {
                     </div>
                 </div>
 
+                {/* [변경 전] <editorNoSSR getTimestamp={() => currentTimestamp} /> 
+                    [변경 후] 컴포넌트 이름을 대문자로: <EditorNoSSR ... />
+                */}
                 <div className={styles.textInput}>
-                    <Editor />
+                    <EditorNoSSR getTimestamp={() => currentTimestamp} />
                 </div>
-                <div className={styles.footerButtons}>
-                    <button>편집하기</button>
-                    <button>부분편집</button>
-                    <button>요약하기</button>
-                    <button>내보내기</button>
-                </div>
-            </div>
-
-            {/* Section 3: Sidebar */}
-            <div className={styles.section3}>
-                <button className={styles.sidebarButton}>작성하기</button>
-                <button className={styles.sidebarButton}>커뮤니티</button>
-                <button className={styles.sidebarButton}>재생목록</button>
             </div>
         </div>
     );
