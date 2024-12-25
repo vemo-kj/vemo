@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Header from './components/Layout/Header';
+import './globals.css'; // 글로벌 CSS 가져오기
 
 export const metadata: Metadata = {
     title: 'Create Next App',

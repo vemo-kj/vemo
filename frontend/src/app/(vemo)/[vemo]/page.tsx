@@ -26,8 +26,8 @@ export default function VemoPage() {
                 {/* 로고 버튼 */}
                 <Link href="/" passHref>
                     <img
-                        src="./" // 로고 이미지 경로
-                        alt="VEMO 로고"
+                        src="/icons/Button_home.svg" // 로고 이미지 경로
+                        alt="VEMO logo"
                         className={styles.logoButton}
                     />
                 </Link>
@@ -48,7 +48,7 @@ export default function VemoPage() {
 
             {/* Section 2: Notes */}
             <div className={styles.section2}>
-                <h2 className={styles.notesHeader}>나만의 노트</h2>
+                <h1 className={styles.notesHeader}>나만의 노트</h1>
                 <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                 <div className={styles.notesContent}>
                     <p className={styles.noteTitle}>자바 스크립트 스터디</p>
