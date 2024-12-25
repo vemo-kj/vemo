@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Memo } from './entity/memo.entity';
 import { Repository } from 'typeorm';
 import { CreateMemoDto } from './dto/create-memo.dto';
+import { UpdateMemoDto } from './dto/update-memo.dto';
+import { waitForDebugger } from 'inspector';
 
 @Injectable()
 export class MemoService {
@@ -27,5 +29,25 @@ export class MemoService {
         return await this.memoRepository.find({
             where: { memosId },
         });
+    }
+
+    // Memo Update
+    async update(dto: UpdateMemoDto): Promise<Memo> {
+        const { id, timestamp, description } = dto;
+        const memo = await this.memoRepository.findOne({ where: { id } });
+
+        if (!memo) {
+            throw new Error('Memo not found');
+        }
+
+        if (timestamp) {
+            memo.timestamp = timestamp;
+        }
+
+        if (description) {
+            memo.description = description;
+        }
+
+        return await this.memoRepository.save(memo);
     }
 }
