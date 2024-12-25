@@ -6,10 +6,10 @@ export class Timestamp {
     @PrimaryGeneratedColumn()
     timestampId: number;
 
-    @Column('time')
+    @Column('timestamp')
     time: string;
 
-    @Column({ length: 100 })
+    @Column({ length: 1000, nullable: true })
     description: string;
 
     @ManyToOne(() => TimestampList, timestamplist => timestamplist.timestamps)

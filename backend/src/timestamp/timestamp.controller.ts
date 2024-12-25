@@ -7,7 +7,7 @@ export class TimestampController {
     constructor(private readonly timestampService: TimestampService) {}
 
     @Post()
-    async create(@Body() createTimestampDto: CreateTimestampDto) {
-        return await this.timestampService.create(createTimestampDto);
+    async createTimestamp(@Body() createTimestampDto: CreateTimestampDto) {
+        return await this.timestampService.createTimestamp(createTimestampDto);
     }
 }

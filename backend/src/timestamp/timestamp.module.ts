@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TimestampController } from './timestamp.controller';
 import { TimestampService } from './timestamp.service';
 import { TimestampList } from './entity/timestamp_list.entity';

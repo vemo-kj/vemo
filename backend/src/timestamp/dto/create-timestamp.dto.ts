@@ -1,6 +1,12 @@
-// 타임스탬프 생성 요청시 필요한 데이터 받는 역할
+import { IsNotEmpty, IsOptional } from 'class-validator';
+
 export class CreateTimestampDto {
+    @IsNotEmpty()
     videoId: string;
-    time: string;
-    description: string;
+
+    @IsNotEmpty()
+    timestamp: string;
+
+    @IsOptional()
+    description?: string;
 }

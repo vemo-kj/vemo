@@ -14,9 +14,9 @@ export class TimestampService {
         private timestampRepository: Repository<Timestamp>,
     ) {}
 
-    // create 생성
+    // Timestamp create
     // vedeoId에 해당하는 리스트가 있는지 확인
-    async create(createTimestampDto: CreateTimestampDto): Promise<Timestamp> {
+    async createTimestamp(createTimestampDto: CreateTimestampDto): Promise<Timestamp> {
         let timestampList = await this.timestampListRepository.findOne({
             where: { videoId: createTimestampDto.videoId },
         });
@@ -31,7 +31,7 @@ export class TimestampService {
 
         // 타임스탬프 생성
         const timestamp = this.timestampRepository.create({
-            time: createTimestampDto.time,
+            time: createTimestampDto.timestamp,
             description: createTimestampDto.description,
             timestampList: timestampList,
         });
