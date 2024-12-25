@@ -5,10 +5,10 @@ import { Video } from '../video/video.entity';
 @Entity()
 export class PlaylistVideo {
     @PrimaryColumn()
-    playlist_id: number;
+    playlistId: number;
 
     @PrimaryColumn()
-    video_id: string;
+    videoId: string;
 
     @ManyToOne(() => Playlist, playlist => playlist.playlistVideos)
     playlist: Playlist;

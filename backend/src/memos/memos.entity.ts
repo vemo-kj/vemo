@@ -15,10 +15,10 @@ export class Memos {
     description: string;
 
     @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
-    created_at: Date;
+    createdAt: Date;
 
     @Column({ type: 'datetime', nullable: true })
-    updated_at: Date;
+    updatedAt: Date;
 
     @ManyToOne(() => User, user => user.memos)
     user: User;

@@ -23,7 +23,7 @@ export class User {
     nickname: string;
 
     @Column({ length: 255, nullable: true })
-    profile_image: string;
+    profileImage: string;
 
     @Column({ length: 255, nullable: true })
     introduction: string;

@@ -5,7 +5,7 @@ import { PlaylistVideo } from './playlist_video.entity';
 @Entity()
 export class Playlist {
     @PrimaryGeneratedColumn()
-    playlist_id: number;
+    playlistId: number;
 
     @Column({ length: 50 })
     name: string;
