@@ -16,4 +16,16 @@ export class MemoService {
         const memo = this.memoRepository.create(createMemoDto);
         return await this.memoRepository.save(memo);
     }
+
+    // Find All Memo
+    async findAll(): Promise<Memo[]> {
+        return await this.memoRepository.find();
+    }
+
+    // Find Memo By memosId
+    async findByMemosId(memosId: string): Promise<Memo[]> {
+        return await this.memoRepository.find({
+            where: { memosId },
+        });
+    }
 }

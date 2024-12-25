@@ -10,4 +10,14 @@ export class MemoController {
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
         return await this.memoService.create(createMemoDto);
     }
+
+    @Get()
+    async findAll() {
+        return await this.memoService.findAll();
+    }
+
+    @Get('memosid')
+    async findByMemosId(@Body('memosId') memosId: string) {
+        return await this.memoService.findByMemosId(memosId);
+    }
 }
