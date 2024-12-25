@@ -1,10 +1,19 @@
 'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link'; // Next.js의 Link 컴포넌트 가져오기
+import Link from 'next/link';
 import styles from './Vemo.module.css';
-import CustomEditor from './components/editor';
+import Editor from './components/editor';
 
 export default function VemoPage() {
+    const videoRef = useRef<HTMLIFrameElement>(null); // IFrame 참조를 위한 useRef
+
+    useEffect(() => {
+        if (videoRef.current) {
+            console.log('IFrame is loaded', videoRef.current);
+        }
+    }, []);
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
 
@@ -16,25 +25,23 @@ export default function VemoPage() {
     // 항목 선택
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
-        setIsDropdownOpen(false); // 드롭다운 닫기
+        setIsDropdownOpen(false);
     };
 
     return (
         <div className={styles.container}>
             {/* Section 1: Video */}
             <div className={styles.section1}>
-                {/* 로고 버튼 */}
                 <Link href="/" passHref>
-                    <Link href="/" passHref>
-                        <img
-                            src="/icons/Button_home.svg" // 로고 이미지 경로
-                            alt="VEMO logo"
-                            className={styles.logoButton}
-                        />
-                    </Link>
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
+                        ref={videoRef} // IFrame에 대한 참조
                         src="https://www.youtube.com/embed/example"
                         title="Video Player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -66,19 +73,10 @@ export default function VemoPage() {
                             )}
                         </div>
                     </div>
+                </div>
 
-                    <div className={styles.textInput}>
-                        <textarea
-                            className={styles.textArea}
-                            placeholder="내용을 입력하세요..."
-                        ></textarea>
-                        <div className={styles.textToolbar}>
-                            <button>B</button>
-                            <button>I</button>
-                            <button>U</button>
-                            <button>{`< >`}</button>
-                        </div>
-                    </div>
+                <div className={styles.textInput}>
+                    <Editor />
                 </div>
                 <div className={styles.footerButtons}>
                     <button>편집하기</button>
