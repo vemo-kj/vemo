@@ -17,7 +17,7 @@ body {
 .version {
     color: #888;
     font-size: 14px;
-    margin-bottom: 30px;
+    margin-bottom: 0px;
 }
 
 .content {
@@ -41,6 +41,19 @@ body {
     background-color: #1f5bb5;
 }
 
+#after-login.hidden {
+    display: none;
+}
+
+#after-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 가로 중앙 정렬 */
+    justify-content: center; /* 세로 중앙 정렬 */
+    text-align: center;
+    height: 69%;
+}
+
 .menu-item {
     width: 100%;
     padding: 15px 0;
@@ -53,9 +66,10 @@ body {
 }
 
 .toggle-section {
-    width: 85%;
-    margin-top: 30px;
-    padding: 20px;
+    width: 99%;
+    margin-top: 15px;
+    padding-right: 23;
+    padding: 15px;
     border: 1px solid #ddd;
     border-radius: 10px;
 }
