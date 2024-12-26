@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>VEMO</title>
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body>
+        <div class="logo">
+            <img src="icons/logo.png" alt="VEMO Logo" width="140" />
+            <div class="version">v 1.0.0</div>
+        </div>
+
+        <!-- 로그인 전 화면 -->
+        <div id="before-login">
+            <div class="content">
+                설치해주셔서 감사합니다. 👍<br /><br />
+                계정을 연결하시면<br />
+                유튜브에서 요약 및 메모 기능을<br />
+                더욱 편리하게 사용할 수 있습니다.
+            </div>
+            <button class="login-btn" id="login-btn">로그인</button>
+        </div>
+
+        <!-- 로그인 후 화면 -->
+        <div id="after-login" class="hidden">
+            <div class="menu-item">📄 동영상 필기 노트 열기</div>
+            <div class="menu-item">🗂️ 내 노트함 열기</div>
+            <div class="menu-item">🤖 AI 영상 요약</div>
+            <div class="menu-item">📌 영상 퀴즈</div>
+            <div class="toggle-section">
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <img src="icons/youtube.png" alt="YouTube" width="20" />
+                        영상 메모 바로가기
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked id="toggleButton" />
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            <a href="#">VEMO 서비스 열기</a>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>

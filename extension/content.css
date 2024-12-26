@@ -1,0 +1,15 @@
+/* 스타일 정의가 필요한 경우 여기에 작성 */
+.vemo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+}
+
+.vemo-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+}
