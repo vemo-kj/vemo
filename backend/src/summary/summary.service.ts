@@ -23,15 +23,11 @@ export class SummaryService {
     async getVideoSubtitles(url: string): Promise<any> {
         try {
             const tempDir = path.join(__dirname, '../..', 'temp');
-            console.log('임시 디렉토리 경로:', tempDir);
 
             // yt-dlp 명령어 실행 전 로깅
             const command = `yt-dlp --write-auto-sub --sub-lang ko --skip-download --output "${tempDir}/%(id)s.%(ext)s" "${url}"`;
-            console.log('실행할 명령어:', command);
 
             const { stdout, stderr } = await execPromise(command);
-            console.log('stdout:', stdout);
-            console.log('stderr:', stderr);
 
             // ffmpeg 경고는 무시하고, 실제 에러만 체크
             if (stderr && !stderr.includes('WARNING') && !stderr.includes('Downloading subtitle')) {
@@ -58,7 +54,6 @@ export class SummaryService {
 
             return parsedSubtitles;
         } catch (error) {
-            console.error('자막 다운로드 오류:', error);
             throw new Error(`자막 다운로드 중 오류 발생: ${error.message}`);
         }
     }
@@ -117,87 +112,91 @@ export class SummaryService {
 
     async summarizeSubtitles(subtitles: Subtitle[]): Promise<Summary> {
         try {
-            // 타임라인과 함께 자막 텍스트 결합
             const formattedText = subtitles
                 .map(sub => `[${sub.startTime} ~ ${sub.endTime}] ${sub.text}`)
                 .join('\n');
 
             console.log('Formatted text:', formattedText); // 디버깅용 로그
 
+            // 1단계: 주요 내용 추출
+            let extractedContent;
             try {
-                const response = await this.openai.chat.completions.create({
-                    model: 'gpt-3.5-turbo',
+                const extractionResponse = await this.openai.chat.completions.create({
+                    model: 'gpt-4o',
                     messages: [
                         {
                             role: 'system',
-                            content: `당신은 영상 내용을 요약하는 도우미입니다. 
-                            주어진 자막을 다음 형식으로 요약해주세요:
-                            
-                            1. 주요 카테고리 정리를 해주세요.
-                            2. 주요 카테고리를 기반으로 카테고리의 세부 내용으로 정리해주세요.
-                            3. 2번 내용의 정리된 내용의 타임라인을 맞춰주세요. 
-                            4. 카테고리별 점검 퀴즈도 1문제씩 만들어줘.
-                            
-                            다음은 예시입니다. 
-                            "
-                            00:00 - 01:04:
-                            M1 맥북 구매 고민에 대한 시작.
-                            다양한 사용 사례 언급 (게이밍, 영상 편집 등).
-                            M1 맥북의 장점과 주목할 만한 기능 언급.
-                            01:04 - 02:12:
-
-                            M1 칩의 성능에 대한 개인적 경험 공유.
-                            게임 및 동영상 편집에서 M1 맥북이 효율적이라는 점 강조.
-                            기존 인텔 기반 맥북과의 차이점 언급.
-                            02:12 - 03:14:
-
-                            M1 맥북의 배터리 수명과 발열 문제에 대한 논의.
-                            소프트웨어 호환성 문제 언급 (특히 게임 및 특정 앱).
-                            ARM 기반의 전환으로 인한 초기 불안정성 지적.
-                            03:14 - 04:23:
-
-                            M1 맥북의 디자인 및 하드웨어 특징 설명.
-                            개인적인 사용 패턴과 그에 따른 장단점 비교.
-                            M1 맥북을 추천하는 상황과 아닌 경우 설명.
-                            04:23 - 05:30:
-
-                            가격 대비 성능(가성비)에 대한 개인적인 평가.
-                            현재 M1 맥북의 위치와 미래 전망 언급.
-                            시청자들에게 감사 인사 및 결론.
-                            핵심 요약:
-                            M1 맥북은 뛰어난 성능과 배터리 수명을 자랑하지만, 소프트웨어 호환성 문제와 초기 단계의 불안정성이 존재함. 기존 인텔 기반 맥북과의 차별성을 고려하여 구입 여부를 판단하는 것이 중요함.
-
-                            1. M1 맥북의 가장 큰 장점으로 언급된 두 가지는 무엇인가요?
-
-                                a) 디자인과 무게
-                                b) 성능과 배터리 수명
-                                c) 가격과 호환성
-                                d) 키보드와 트랙패드
-                            "
+                            content: `
+                            당신은 자막을 분석해 **모든 주요 내용**을 타임스탬프와 함께 추출하는 전문가입니다.  
+                            주어진 자막을 **순서대로 분석**하여 중요한 정보만 간결하게 정리해 주세요.  
+                            타임스탬프는 반드시 포함해야 합니다. 
+                            ex) 다음은 표현 방식입니다.
+                            [40:30] CSR의 동작 과정 설명: 초기 로딩은 느리지만 이후 빠른 구동 속도.
                             `,
                         },
                         {
                             role: 'user',
-                            content: `다음 자막을 요약해주세요:\n${formattedText}`,
+                            content: `다음 자막에서 주요 내용을 추출해주세요:\n${formattedText}`,
                         },
                     ],
-                    max_tokens: 1000,
-                    temperature: 0.7,
+                    max_tokens: 4000,
+                    temperature: 0.3,
+                    top_p: 0.8,
                 });
 
-                console.log('OpenAI Response:', response); // 디버깅용 로그
+                extractedContent = extractionResponse.choices[0].message.content;
+                console.log('Extracted Content:', extractedContent); // 디버깅용 로그
+            } catch (extractionError) {
+                console.error('내용 추출 오류:', extractionError);
+                throw new Error(`내용 추출 중 오류 발생: ${extractionError.message}`);
+            }
+
+            // 2단계: 요약 및 퀴즈 생성
+            try {
+                const summaryResponse = await this.openai.chat.completions.create({
+                    model: 'gpt-4o',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `
+                            당신은 자막의 요약 및 퀴즈 생성 전문가입니다.  
+                            주어진 주요 내용을 바탕으로 다음 사항을 작성하세요:  
+                            
+                            1. **요약**: 자막의 주요 내용을 타임스탬프와 함께 정리하세요.  
+                            2. **결론**: 영상의 핵심 메시지를 요약하세요.  
+                            3. **퀴즈**: 영상의 중요 내용을 묻는 4개의 퀴즈와 타임스탬프, 정답을 작성하세요.  
+
+                            ex) 다음 퀴즈의 예시입니다.
+                            도커를 사용하여 독립된 가상 공간을 만들어 서로 다른 서비스들을 각각의 컨테이너에서 돌아갈 수 있도록 하는 기술은 무엇인가요?
+                                a) 가상머신
+                                b) 클라우드 컴퓨팅
+                                c) 도커
+                                d) 서버 관리"
+                            `,
+                        },
+                        {
+                            role: 'user',
+                            content: `다음 주요 내용을 기반으로 요약과 퀴즈를 생성해주세요:\n${extractedContent}`,
+                        },
+                    ],
+                    max_tokens: 4000,
+                    temperature: 0.3,
+                    top_p: 0.8,
+                });
+
+                console.log('Summary Response:', summaryResponse); // 디버깅용 로그
 
                 return {
                     originalSubtitles: subtitles,
-                    summary: response.choices[0].message.content,
+                    summary: summaryResponse.choices[0].message.content,
                 };
-            } catch (openaiError) {
-                console.error('OpenAI API 오류:', openaiError); // 상세 에러 로그
-                throw new Error(`OpenAI API 오류: ${openaiError.message}`);
+            } catch (summaryError) {
+                console.error('요약 생성 오류:', summaryError);
+                throw new Error(`요약 생성 중 오류 발생: ${summaryError.message}`);
             }
         } catch (error) {
-            console.error('요약 생성 오류:', error);
-            throw new Error(`자막 요약 중 오류 발생: ${error.message}`);
+            console.error('요약 프로세스 전체 오류:', error);
+            throw new Error(`자막 요약 중 전체 오류 발생: ${error.message}`);
         }
     }
 }
