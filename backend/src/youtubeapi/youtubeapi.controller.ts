@@ -1,7 +1,4 @@
 import { Controller, Get, InternalServerErrorException, Query, Redirect } from '@nestjs/common';
-import { getChannelDto } from './\bdto/youtubeapi.getChannel.dto';
-import { getVideoDto } from './\bdto/youtubeapi.getvideo.dto';
-import { oauth2CallbackDto } from './\bdto/youtubeapi.oauth2callback.dto';
 import { YoutubeapiService } from './youtubeapi.service';
 
 @Controller('youtubeapi')
@@ -15,19 +12,19 @@ export class YoutubeapiController {
     }
 
     @Get('OAuth2Callback')
-    async oauth2Callback(@Query('code') query: oauth2CallbackDto) {
-        const tokens = await this.youtubeService.getAccessToken(query.code);
+    async oauth2Callback(@Query('code') code: string) {
+        const tokens = await this.youtubeService.getAccessToken(code);
         return { tokens };
     }
 
     @Get('getVideo')
-    async getVideo(@Query('videoId') query: getVideoDto) {
+    async getVideo(@Query('videoId') videoId: string) {
         if (!this.youtubeService.isAuthenticated()) {
             return { error: 'Not authenticated' };
         }
 
         try {
-            const video = await this.youtubeService.getVideo(query.videoId);
+            const video = await this.youtubeService.getVideo(videoId);
             return { video };
         } catch (error) {
             console.error(error);
@@ -36,13 +33,13 @@ export class YoutubeapiController {
     }
 
     @Get('getChannel')
-    async getChannel(@Query('channelId') query: getChannelDto) {
+    async getChannel(@Query('channelId') channelId: string) {
         if (!this.youtubeService.isAuthenticated()) {
             return { error: 'Not authenticated' };
         }
 
         try {
-            const channel = await this.youtubeService.getChannel(query.channelId);
+            const channel = await this.youtubeService.getChannel(channelId);
             return { channel };
         } catch (error) {
             console.error(error);
