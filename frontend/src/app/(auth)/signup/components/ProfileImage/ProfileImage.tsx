@@ -11,7 +11,8 @@ import { ProfileImageProps } from '../../../../types/ProfileImageProps';
 
 export default function ProfileImage({
   id = 'profileImage',
-  accept = 'image/*',
+  // 오류해결해야함
+  // accept = 'image/*',
 }: ProfileImageProps ): React.JSX.Element {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

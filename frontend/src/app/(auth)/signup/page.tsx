@@ -18,7 +18,9 @@ export default function SignUpPage() {
 
         <ProfileImage 
           id=''
-          accept=''/>
+          />
+          {/* 오류해결해야함 */}
+          {/* accept=''/> */}
         
         <InputBox
           label='이름'
