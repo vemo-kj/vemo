@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { typeOrmConfig } from './config/typeorm.config';
 import { MemosModule } from './memos/memos.module';
 import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
+import { VideoModule } from './video/video.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
         }),
         MemosModule,
         YoutubeapiModule,
+        VideoModule,
     ],
     controllers: [AppController],
     providers: [AppService],
