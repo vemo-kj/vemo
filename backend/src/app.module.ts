@@ -3,8 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MemosModule } from './memos/memos.module';
 import { typeOrmConfig } from './config/typeorm.config';
+import { MemosModule } from './memos/memos.module';
+import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { typeOrmConfig } from './config/typeorm.config';
             inject: [ConfigService],
         }),
         MemosModule,
+        YoutubeapiModule,
     ],
     controllers: [AppController],
     providers: [AppService],
