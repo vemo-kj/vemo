@@ -4,14 +4,27 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
+import DropdownMenu from './components/DropdownMenu';
 
 // DraftEditor 동적 로드
+// 클라이언트와 서버가 달라서 발생되는 에러를 막기 위해서 서버에서만 동작하고 나중에 값을 넘겨주기 위해
 const EditorNoSSR = dynamic(() => import('./components/editor'), { ssr: false });
 
 export default function VemoPage() {
-    const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-    const playerRef = useRef<any>(null);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const [selectedOption, setSelectedOption] = useState('내 메모 보기'); // 드롭다운에서 선택된 옵션 상태
+
+    // 현재 재생 시간
+    const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
+    const playerRef = useRef<any>(null); // 유튜브 플레이어 참조
+
+    const handleOptionSelect = (option: string) => {
+        setSelectedOption(option); // 선택된 옵션 값 업데이트
+        console.log(`선택된 옵션: ${option}`);
+    };
+
+    // 유튜브 타임스탬프 구현
     // 유튜브 iFrame API 로드
     useEffect(() => {
         const tag = document.createElement('script');
@@ -20,6 +33,7 @@ export default function VemoPage() {
 
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
+                // 비디오 ID 향후 동적으로 할당
                 videoId: 'pEt89CrE-6A',
                 events: {
                     onReady: () => {
@@ -80,7 +94,11 @@ export default function VemoPage() {
             {/* 에디터 영역 */}
             <div className={styles.section2}>
                 <p>현재 재생 시간: {currentTimestamp}</p>
-
+                <DropdownMenu
+                    options={['내 메모 보기', 'AI 요약 보기', '옵션 3']}
+                    defaultOption={selectedOption}
+                    onSelect={handleOptionSelect} // 선택된 옵션을 업데이트하는 함수 전달
+                />
                 {/* 에디터 컴포넌트에 "현재 시간" 함수와 "타임스탬프 클릭" 함수를 넘김 */}
                 <EditorNoSSR
                     getTimestamp={() => currentTimestamp}

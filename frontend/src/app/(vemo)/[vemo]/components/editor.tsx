@@ -122,9 +122,11 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
                     >
                         {'<>'}
                     </button>
-                    <button className={styles.addButton} onClick={handleSave}>
-                        +
-                    </button>
+                    <div>
+                        <button className={styles.addButton} onClick={handleSave}>
+                            +
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
