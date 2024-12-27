@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Editor, EditorState, RichUtils } from 'draft-js';
 import styles from './editor.module.css';
 
@@ -13,6 +13,7 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const editorRef = useRef<Editor | null>(null);
 
+    // 메모 타이핑 후 저장
     const handleSave = () => {
         const text = editorState.getCurrentContent().getPlainText();
         if (text.trim().length > 0) {
@@ -39,10 +40,7 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
 
     // 인라인 스타일 토글
     const toggleInlineStyle = (style: string) => {
-        const newState = RichUtils.toggleInlineStyle(editorState, style);
-        setEditorState(newState);
-        // 에디터 포커스 복원
-        editorRef.current?.focus();
+        setEditorState(prevState => RichUtils.toggleInlineStyle(prevState, style));
     };
 
     // Enter 키로 저장
@@ -67,7 +65,8 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
                         >
                             {section.timestamp}
                         </button>
-                        <span className={styles.content}>{section.content}</span>
+                        {/* // 타임스탬프 이동 */}
+                        <span className={styles.timestamp}>{section.content}</span>
                     </div>
                 ))}
             </div>
@@ -80,8 +79,10 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
                     onChange={handleEditorChange}
                     placeholder="내용을 입력하세요..."
                     keyBindingFn={e => {
-                        if (e.key === 'Enter') return 'submit';
-                        return undefined;
+                        if (e.key === 'Enter') {
+                            return 'submit'; // 커스텀 명령어 "submit" 반환
+                        }
+                        return null; // 반환 값이 없으면 null 반환
                     }}
                     handleKeyCommand={handleKeyCommand}
                 />
@@ -91,6 +92,7 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
                         onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
+                            editorRef.current?.focus(); // 포커스 복원
                         }}
                     >
                         B
@@ -100,6 +102,7 @@ export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEdi
                         onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('ITALIC');
+                            // editorRef.current?.focus(); // 포커스 복원
                         }}
                     >
                         I

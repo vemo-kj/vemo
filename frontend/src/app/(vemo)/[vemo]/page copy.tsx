@@ -60,18 +60,7 @@ export default function VemoPage() {
                     <p className={styles.noteTitle}>자바 스크립트 스터디</p>
                     <div className={styles.noteActions}>
                         {/* 드롭다운 버튼 */}
-                        <div className={styles.dropdown}>
-                            <button className={styles.noteDropdown} onClick={toggleDropdown}>
-                                {selectedOption} ▼
-                            </button>
-                            {isDropdownOpen && (
-                                <ul className={styles.dropdownMenu}>
-                                    <li onClick={() => handleOptionSelect('옵션 1')}>옵션 1</li>
-                                    <li onClick={() => handleOptionSelect('옵션 2')}>옵션 2</li>
-                                    <li onClick={() => handleOptionSelect('옵션 3')}>옵션 3</li>
-                                </ul>
-                            )}
-                        </div>
+                        <div className={styles.dropdown}></div>
                     </div>
                 </div>
 

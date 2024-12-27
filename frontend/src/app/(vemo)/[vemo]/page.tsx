@@ -93,17 +93,40 @@ export default function VemoPage() {
 
             {/* 에디터 영역 */}
             <div className={styles.section2}>
-                <p>현재 재생 시간: {currentTimestamp}</p>
-                <DropdownMenu
-                    options={['내 메모 보기', 'AI 요약 보기', '옵션 3']}
-                    defaultOption={selectedOption}
-                    onSelect={handleOptionSelect} // 선택된 옵션을 업데이트하는 함수 전달
-                />
+                <h1 className={styles.notesHeader}>나만의 노트</h1>
+                <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
+                <div className={styles.notesContent}>
+                    <p className={styles.noteTitle}>자바 스크립트 스터디</p>
+                    <div className={styles.noteActions}>
+                        {/* 드롭다운 버튼 */}
+                        <div className={styles.dropdown}>
+                            <DropdownMenu
+                                options={['내 메모 보기', 'AI 요약 보기', '옵션 3']}
+                                defaultOption={selectedOption}
+                                onSelect={handleOptionSelect} // 선택된 옵션을 업데이트하는 함수 전달
+                            />
+                        </div>
+                    </div>
+                </div>
+                {/* <p>현재 재생 시간: {currentTimestamp}</p> */}
+
                 {/* 에디터 컴포넌트에 "현재 시간" 함수와 "타임스탬프 클릭" 함수를 넘김 */}
                 <EditorNoSSR
                     getTimestamp={() => currentTimestamp}
                     onTimestampClick={handleSeekToTime}
                 />
+                <div className={styles.footerButtons}>
+                    <button>캡처하기</button>
+                    <button>부분캡처</button>
+                    <button>요약하기</button>
+                    <button>내보내기</button>
+                </div>
+            </div>
+            {/* Section 3: Sidebar */}
+            <div className={styles.section3}>
+                <button className={styles.sidebarButton}>작성하기</button>
+                <button className={styles.sidebarButton}>커뮤니티</button>
+                <button className={styles.sidebarButton}>재생목록</button>
             </div>
         </div>
     );
