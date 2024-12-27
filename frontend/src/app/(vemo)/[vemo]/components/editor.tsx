@@ -1,63 +1,78 @@
 import React, { useState, useRef } from 'react';
 import { Editor, EditorState, RichUtils } from 'draft-js';
-import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 
 interface DraftEditorProps {
+    // 부모로부터
     getTimestamp: () => string;
+    onTimestampClick?: (timestamp: string) => void;
 }
 
-const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
+export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEditorProps) {
     const [sections, setSections] = useState<{ timestamp: string; content: string }[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-    // Editor에 포커스를 주기 위한 ref
     const editorRef = useRef<Editor | null>(null);
 
-    // EditorState 변경 핸들러
-    const handleEditorChange = (state: EditorState) => {
-        setEditorState(state);
-    };
-
-    // 메모 저장
     const handleSave = () => {
-        const content = editorState.getCurrentContent().getPlainText();
-        if (content.trim()) {
-            const newSection = {
-                timestamp: getTimestamp(),
-                content,
-            };
-            setSections([newSection, ...sections]);
+        const text = editorState.getCurrentContent().getPlainText();
+        if (text.trim().length > 0) {
+            setSections([
+                {
+                    timestamp: getTimestamp(), // 부모의 현재 재생 시간
+                    content: text,
+                },
+                ...sections,
+            ]);
             setEditorState(EditorState.createEmpty());
         }
     };
 
-    // 인라인 스타일 활성화 여부 체크
-    const isStyleActive = (style: string): boolean => {
-        const currentStyle = editorState.getCurrentInlineStyle();
-        return currentStyle.has(style);
+    // 에디터 상태 업데이트
+    const handleEditorChange = (newState: EditorState) => {
+        setEditorState(newState);
+    };
+
+    // Draft.js 인라인 스타일 활성화 체크
+    const isStyleActive = (style: string) => {
+        return editorState.getCurrentInlineStyle().has(style);
     };
 
     // 인라인 스타일 토글
     const toggleInlineStyle = (style: string) => {
         const newState = RichUtils.toggleInlineStyle(editorState, style);
         setEditorState(newState);
-        // 스타일 토글 후 다시 에디터에 포커스
+        // 에디터 포커스 복원
         editorRef.current?.focus();
+    };
+
+    // Enter 키로 저장
+    const handleKeyCommand = (command: string) => {
+        if (command === 'submit') {
+            handleSave();
+            return 'handled';
+        }
+        return 'not-handled';
     };
 
     return (
         <div className={styles.container}>
-            {/* 저장된 섹션(메모) 목록 */}
+            {/* 저장된 메모 목록 */}
             <div className={styles.displayArea}>
                 {sections.map((section, idx) => (
                     <div key={idx} className={styles.displayItem}>
-                        <span className={styles.timestamp}>{section.timestamp}</span>
+                        {/* 타임스탬프 버튼 (클릭 시 부모의 onTimestampClick 호출) */}
+                        <button
+                            className={styles.timestampBtn}
+                            onClick={() => onTimestampClick?.(section.timestamp)}
+                        >
+                            {section.timestamp}
+                        </button>
                         <span className={styles.content}>{section.content}</span>
                     </div>
                 ))}
             </div>
 
-            {/* Draft.js 에디터 영역 */}
+            {/* Draft.js 에디터 */}
             <div className={styles.editorArea}>
                 <Editor
                     ref={editorRef}
@@ -68,20 +83,11 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
                         if (e.key === 'Enter') return 'submit';
                         return undefined;
                     }}
-                    handleKeyCommand={command => {
-                        if (command === 'submit') {
-                            handleSave();
-                            return 'handled';
-                        }
-                        return 'not-handled';
-                    }}
+                    handleKeyCommand={handleKeyCommand}
                 />
-
-                {/* 툴바 버튼 */}
                 <div className={styles.toolbar}>
                     <button
                         className={isStyleActive('BOLD') ? styles.activeButton : ''}
-                        // onClick 대신 onMouseDown + e.preventDefault()
                         onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
@@ -89,7 +95,6 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
                     >
                         B
                     </button>
-
                     <button
                         className={isStyleActive('ITALIC') ? styles.activeButton : ''}
                         onMouseDown={e => {
@@ -99,7 +104,6 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
                     >
                         I
                     </button>
-
                     <button
                         className={isStyleActive('UNDERLINE') ? styles.activeButton : ''}
                         onMouseDown={e => {
@@ -109,7 +113,6 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
                     >
                         U
                     </button>
-
                     <button
                         className={isStyleActive('CODE') ? styles.activeButton : ''}
                         onMouseDown={e => {
@@ -117,10 +120,8 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
                             toggleInlineStyle('CODE');
                         }}
                     >
-                        {`< >`}
+                        {'<>'}
                     </button>
-
-                    {/* 메모 저장 버튼 */}
                     <button className={styles.addButton} onClick={handleSave}>
                         +
                     </button>
@@ -128,6 +129,4 @@ const DraftEditor: React.FC<DraftEditorProps> = ({ getTimestamp }) => {
             </div>
         </div>
     );
-};
-
-export default DraftEditor;
+}
