@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Memo } from './entity/memo.entity';
+import { Memo } from './memo.entity';
 import { Repository } from 'typeorm';
 import { CreateMemoDto } from './dto/create-memo.dto';
 import { UpdateMemoDto } from './dto/update-memo.dto';
-import { waitForDebugger } from 'inspector';
 
 @Injectable()
 export class MemoService {
