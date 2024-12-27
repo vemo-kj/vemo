@@ -1,10 +1,62 @@
 .loginBox {
-  border: 2px solid;
-  border-radius: 8px;
-  width: 800px;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-  
-  justify-content: center;
-  /* 글러벌css 작성 후 수정 */
-  margin-top: 100px;
+.loginBox h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.loginBox form {
+  display: flex;
+  flex-direction: column;
+}
+
+.loginBox form div {
+  margin-bottom: 15px;
+}
+
+.loginBox label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.loginBox input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.loginBox button {
+  padding: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.loginBox button:hover {
+  background-color: #0051a2;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.loginBox p {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.loginBox a {
+  color: #0070f3;
+  text-decoration: underline;
 }

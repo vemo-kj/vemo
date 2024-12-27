@@ -5,4 +5,5 @@ export type InputBoxProps = {
   name: string; 
   required?: boolean;
   className?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };

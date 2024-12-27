@@ -6,9 +6,18 @@ import style from './Create.module.css';
 import { useState } from 'react';
 
 export default function CreatePage() {
-
   const [title, setTitle] = useState('');
   const [links, setLinks] = useState<string[]>(['']);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -20,17 +29,24 @@ export default function CreatePage() {
       alert('모든 링크를 입력해주세요.');
       return;
     }
-    // 어떤 user인지 확인해야 할듯
+
+    if (links.some((link) => !isValidUrl(link))) {
+      alert('유효한 URL을 입력해주세요.');
+      return;
+    }
+
     const data = {
       title,
       links,
     };
 
     try {
+      setIsLoading(true);
       const response = await fetch('/api/memo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // 인증 토큰 추가
         },
         body: JSON.stringify(data),
       });
@@ -40,12 +56,14 @@ export default function CreatePage() {
         setTitle('');
         setLinks(['']);
       } else {
-        alert('저장 실패!');
-        console.log('데이터:  ', data);     
+        const errorData = await response.json();
+        alert(`저장 실패: ${errorData.message}`);
       }
     } catch (error) {
       console.error('Error:', error);
       alert('서버와 통신 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,7 +80,7 @@ export default function CreatePage() {
         }}
         onAdd={() => setLinks([...links, ''])}
       />
-      <CreateButton onSave={handleSave} />
+      <CreateButton onSave={handleSave} isLoading={isLoading} />
     </div>
   );
 }
