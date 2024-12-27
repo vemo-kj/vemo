@@ -55,7 +55,7 @@ function createOverlay() {
 
     // 모든 썸네일 선택
     const thumbnails = document.querySelectorAll(
-        'img.yt-core-image.yt-core-image--fill-parent-height.yt-core-image--fill-parent-width',
+        'a#thumbnail img.yt-core-image.yt-core-image--fill-parent-height',
     );
 
     // 썸네일 스타일 조정 및 오버레이 추가
@@ -78,43 +78,6 @@ function createOverlay() {
         // 오버레이 추가
         thumbnail.parentElement.appendChild(overlay);
     });
-
-    // const memoContainer = document.createElement('div');
-    // memoContainer.className = 'vemo-container';
-    // memoContainer.style.cssText = `
-    //     position: relative;
-    //     background-color: white;
-    //     padding: 20px;
-    //     border-radius: 8px;
-    //     width: 80%;
-    //     max-width: 600px;
-    //     max-height: 80vh;
-    //     overflow-y: auto;
-    // `;
-
-    // // 메모 컨텐츠 추가
-    // const content = document.createElement('div');
-    // content.innerHTML = `
-    //     <h2 style="margin-bottom: 20px;">영상 메모</h2>
-    //     <textarea style="width: 100%; height: 200px; margin-bottom: 20px; padding: 10px;"></textarea>
-    //     <button style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">저장</button>
-    // `;
-    // memoContainer.appendChild(content);
-
-    // // 오버레이 닫기 버튼
-    // const closeButton = document.createElement('button');
-    // closeButton.textContent = '✕';
-    // closeButton.style.cssText = `
-    //     position: absolute;
-    //     top: 10px;
-    //     right: 10px;
-    //     padding: 5px 10px;
-    //     background: none;
-    //     border: none;
-    //     font-size: 20px;
-    //     cursor: pointer;
-    //     color: #666;
-    // `;
 
     closeButton.addEventListener('click', () => {
         overlay.remove();
@@ -143,12 +106,14 @@ function createOverlay() {
 }
 
 // 메모 바로가기 버튼 생성 함수
+let isOverlayActive = false; // 오버레이 상태 추적
+
 function createMemoButton() {
     console.log('Creating memo button'); // 디버깅 로그
     if (memoButton) return;
 
     memoButton = document.createElement('button');
-    memoButton.textContent = '영상 메모 바로가기';
+    memoButton.textContent = isOverlayActive ? '바로가기 끄기' : '영상 메모 바로가기';
     memoButton.style.cssText = `
         position: fixed;
         right: 20px;
@@ -173,10 +138,92 @@ function createMemoButton() {
     });
 
     memoButton.addEventListener('click', function () {
-        createOverlay();
+        if (isOverlayActive) {
+            removeOverlay();
+            memoButton.textContent = '영상 메모 바로가기';
+        } else {
+            createOverlay();
+            memoButton.textContent = '바로가기 끄기';
+        }
+        isOverlayActive = !isOverlayActive;
     });
 
     document.body.appendChild(memoButton);
+}
+
+function createOverlay() {
+    console.log('Creating overlay'); // 디버깅 로그
+    if (overlay) return;
+
+    // 기존 오버레이 제거
+    removeOverlay();
+
+    overlay = document.createElement('div');
+    overlay.className = 'vemo-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 99999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    const thumbnails = document.querySelectorAll(
+        'a#thumbnail img.yt-core-image.yt-core-image--fill-parent-height',
+    );
+
+    thumbnails.forEach(thumbnail => {
+        thumbnail.style.visibility = 'visible';
+        thumbnail.style.position = 'relative';
+
+        const overlayDiv = document.createElement('div');
+        overlayDiv.className = 'thumbnail-overlay';
+        overlayDiv.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color:rgba(33, 148, 243,0.8);
+            z-index: 10;
+            pointer-events: none;
+        `;
+        thumbnail.parentElement.appendChild(overlayDiv);
+    });
+
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+            removeOverlay();
+            memoButton.textContent = '영상 메모 바로가기';
+            isOverlayActive = false;
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay) {
+            removeOverlay();
+            memoButton.textContent = '영상 메모 바로가기';
+            isOverlayActive = false;
+        }
+    });
+}
+
+// 오버레이 제거 함수 추가
+function removeOverlay() {
+    if (overlay) {
+        overlay.remove();
+        overlay = null;
+    }
+    document.querySelectorAll('.thumbnail-overlay').forEach(overlayDiv => {
+        overlayDiv.remove();
+    });
 }
 
 // 메모 바로가기 버튼 제거 함수
