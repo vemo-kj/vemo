@@ -22,4 +22,24 @@ export function MomoItem({
     // 수정 모드인지 여부 : 수정 모드는 더블 클릭시 활성화
     const [isEditing, setIsEditing] = useState(false);
     const [tempContent, setTempContent] = useState(content);
+
+    // 수정 모드로 전환
+    const handleDoubleClick = () => {
+        setIsEditing(true);
+    };
+
+    // 입력 변경 요소
+    const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        setTempContent(e.target.value);
+    };
+
+    //input이 focus를 잃었을 때 -> 저장 & 수정 모드를 해제함
+    const handlefocusOut = (e: FocusEvent<HTMLTextAreaElement>) => {
+        onSave(tempContent);
+        setIsEditing(false);
+    };
+
+    return (
+      
+    )
 }
