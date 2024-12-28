@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { MemosService } from './memos.service';
-import { Memos } from './memos.entity';
 import { CreateMemosDto } from './dto/create-memos.dto';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 
@@ -9,27 +8,32 @@ export class MemosController {
     constructor(private readonly memosService: MemosService) {}
 
     @Post()
-    async createMemo(@Body() createMemoDto: CreateMemosDto): Promise<Memos> {
-        return this.memosService.createMemo(createMemoDto);
+    async createMemos(@Body() createMemosDto: CreateMemosDto) {
+        return this.memosService.createMemos(createMemosDto);
     }
 
     @Get()
-    async getAllMemosByVideo(): Promise<Memos[]> {
-        return this.memosService.getAllMemosByVideo();
+    async getAllMemosByUser(@Query('userId') userId: number) {
+        return this.memosService.getAllMemosByUser(userId);
     }
 
-    @Get('/:id')
-    async getMemoById(@Param('id') id: number): Promise<Memos> {
-        return this.memosService.getMemoById(id);
+    @Get('/video/:videoId')
+    async getAllMemosByVideo(@Param('videoId') videoId: string) {
+        return this.memosService.getAllMemosByVideo(videoId);
+    }
+
+    @Get('/:memosId')
+    async getMemosById(@Param('memosId') memosId: number) {
+        return this.memosService.getMemosById(memosId);
     }
 
     @Put('/:id')
-    async updateMemo(@Param('id') id: number, @Body() updateMemoDto: UpdateMemosDto) {
-        return this.memosService.updateMemo(id, updateMemoDto);
+    async updateMemos(@Param('id') id: number, @Body() updateMemosDto: UpdateMemosDto) {
+        return this.memosService.updateMemos(id, updateMemosDto);
     }
 
     @Delete('/:id')
-    async deleteMemo(@Param('id') id: number) {
-        return this.memosService.deleteMemo(id);
+    async deleteMemos(@Param('id') id: number) {
+        return this.memosService.deleteMemos(id);
     }
 }

@@ -1,21 +1,21 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { Channel } from '../channel/channel.entity';
 import { Memos } from '../memos/memos.entity';
 import { PlaylistVideo } from '../playlist/playlist_video.entity';
 
 @Entity()
 export class Video {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryColumn({ type: 'varchar', length: 11 })
     id: string;
 
     @Column({ length: 100 })
     title: string;
 
     @Column({ length: 255 })
-    thumbnail: string;
+    thumbnails: string;
 
     @Column({ type: 'time' })
-    runtime: string;
+    duration: string;
 
     @Column({ length: 50 })
     category: string;
