@@ -39,14 +39,6 @@ export class MemoService {
             throw new Error('Memo not found');
         }
 
-        if (timestamp) {
-            memo.timestamp = timestamp;
-        }
-
-        if (description) {
-            memo.description = description;
-        }
-
         return await this.memoRepository.save(memo);
     }
 

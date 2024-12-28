@@ -6,9 +6,6 @@ export class Memo {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    memosId: string;
-
     @Column('varchar', { length: 100 })
     timestamp: string;
 
