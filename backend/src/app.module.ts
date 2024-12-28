@@ -17,6 +17,7 @@ import { typeOrmConfig } from './config/typeorm.config';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
+
         MemosModule,
     ],
     controllers: [AppController],
