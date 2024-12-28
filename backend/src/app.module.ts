@@ -3,11 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { MemosModule } from './memos/memos.module';
-import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
 import { VideoModule } from './video/video.module';
-import { ChannelModule } from './channel/channel.module';
+import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
+import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { ChannelModule } from './channel/channel.module';
         YoutubeapiModule,
         VideoModule,
         ChannelModule,
+        YoutubeauthModule,
     ],
     controllers: [AppController],
     providers: [AppService],
