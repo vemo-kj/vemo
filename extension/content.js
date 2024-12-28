@@ -245,6 +245,7 @@ chrome.runtime.onMessage.addListener(request => {
         if (isOverlayActive) {
             // 활성화 상태일 때 메모 버튼과 오버레이 생성
             createMemoButton();
+            isOverlayActive = false;
             createOverlay();
         } else {
             // 비활성화 상태일 때 메모 버튼 제거
