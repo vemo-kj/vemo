@@ -238,13 +238,17 @@ addMemoButton();
 chrome.runtime.onMessage.addListener(request => {
     if (request.action === 'toggleButton') {
         isOverlayActive = request.isEnabled;
-        if (!isOverlayActive) {
-            // Remove all existing overlays when disabled
-            document.querySelectorAll('.vemo-processed').forEach(el => {
-                el.classList.remove('vemo-processed');
-                const overlay = el.parentElement.querySelector('.thumbnail-overlay');
-                if (overlay) overlay.remove();
-            });
+
+        // 토글 상태와 관계없이 모든 기존 오버레이와 이벤트 리스너 제거
+        removeOverlay();
+
+        if (isOverlayActive) {
+            // 활성화 상태일 때 메모 버튼과 오버레이 생성
+            createMemoButton();
+            createOverlay();
+        } else {
+            // 비활성화 상태일 때 메모 버튼 제거
+            removeMemoButton();
         }
     }
 });
