@@ -18,21 +18,9 @@ export class MemoService {
         return await this.memoRepository.save(memo);
     }
 
-    // Find All Memo
-    async findAll(): Promise<Memo[]> {
-        return await this.memoRepository.find();
-    }
-
-    // Find Memo By memosId
-    async findByMemosId(memosId: string): Promise<Memo[]> {
-        return await this.memoRepository.find({
-            where: { memosId },
-        });
-    }
-
     // Memo Update
     async update(dto: UpdateMemoDto): Promise<Memo> {
-        const { id, timestamp, description } = dto;
+        const { id } = dto;
         const memo = await this.memoRepository.findOne({ where: { id } });
 
         if (!memo) {
@@ -43,10 +31,12 @@ export class MemoService {
     }
 
     async delete(id: number): Promise<void> {
-        const result = await this.memoRepository.delete(id);
+        const memo = await this.memoRepository.findOne({ where: { id } });
 
-        if (result.affected === 0) {
+        if (!memo) {
             throw new Error('Memo not found');
         }
+
+        await this.memoRepository.delete(id);
     }
 }

@@ -5,7 +5,7 @@ export class UpdateMemoDto {
     id: number; // 수정할 메모의 ID
 
     @IsNotEmpty()
-    timestamp?: string; // 수정할 타임스탬프 (선택)
+    timestamp?: Date; // 수정할 타임스탬프 (선택)
 
     @IsOptional()
     @Length(0, 500)

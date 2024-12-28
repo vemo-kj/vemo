@@ -1,4 +1,3 @@
-
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Memos } from '../memos/memos.entity';
 
@@ -7,13 +6,13 @@ export class Memo {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('varchar', { length: 100 })
-    timestamp: string;
+    @Column('datetime')
+    timestamp: Date;
 
     @Column({ length: 1000, nullable: true })
     description: string;
 
-    @ManyToOne(() => Memos, memos => memos.memos, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Memos, memos => memos.memo, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'memosId' })
     memos: Memos;
 }
