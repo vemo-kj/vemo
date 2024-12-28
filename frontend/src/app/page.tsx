@@ -1,4 +1,5 @@
 'use client';
+
 //style
 import styles from './page.module.css';
 //component
@@ -14,6 +15,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 // Home page
 export default function Home() {
+
     const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
     const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -87,6 +89,7 @@ export default function Home() {
                     ))}
                 </div>
             )}
+
         </main>
     );
 }
