@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { google, youtube_v3 } from 'googleapis';
+import { Video } from 'src/video/video.entity';
 
 @Injectable()
 export class YoutubeapiService implements OnModuleInit {
@@ -57,19 +58,35 @@ export class YoutubeapiService implements OnModuleInit {
         return !!this.oauth2Client?.credentials?.access_token;
     }
 
-    async getVideo(videoId: string): Promise<youtube_v3.Schema$Video> {
+    async getVideo(videoId: string): Promise<Video> {
         const response = await this.youtube.videos.list({
             part: ['snippet', 'contentDetails', 'statistics'],
             id: [videoId],
         });
-        return response.data;
+
+        const videoData = response.data.items?.[0];
+        if (!videoData) {
+            throw new Error('Video not found');
+        }
+
+        const snippet = videoData.snippet || {};
+        const contentDetails = videoData.contentDetails || {};
+
+        return {
+            id: videoData.id,
+            title: snippet.title || '',
+            thumbnails: snippet.thumbnails?.high?.url || '',
+            duration: this.parseDuration(contentDetails.duration),
+            category: snippet.categoryId || '',
+            channel,
+        };
     }
 
-    async getChannel(channelId: string): Promise<youtube_v3.Schema$Channel> {
-        const response = await this.youtube.channels.list({
-            part: ['snippet', 'contentDetails', 'statistics'],
-            id: [channelId],
-        });
-        return response.data;
+    private parseDuration(duration: string): string {
+        const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+        const hours = match?.[1] ? parseInt(match[1]) : 0;
+        const minutes = match?.[2] ? parseInt(match[2]) : 0;
+        const seconds = match?.[3] ? parseInt(match[3]) : 0;
+        return [hours, minutes, seconds].map(unit => unit.toString().padStart(2, '0')).join(':');
     }
 }
