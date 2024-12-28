@@ -1,137 +1,108 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { Editor, EditorState, RichUtils } from 'draft-js';
+import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 
 interface DraftEditorProps {
-    // 부모로부터
     getTimestamp: () => string;
     onTimestampClick?: (timestamp: string) => void;
 }
 
-export default function DraftEditor({ getTimestamp, onTimestampClick }: DraftEditorProps) {
-    const [sections, setSections] = useState<{ timestamp: string; content: string }[]>([]);
-    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-    const editorRef = useRef<Editor | null>(null);
+// SectionItem에 'image' 타입 추가
+type SectionItem = {
+    timestamp: string;
+    content: string;
+    type: 'text' | 'image';
+};
 
-    // 메모 타이핑 후 저장
-    const handleSave = () => {
-        const text = editorState.getCurrentContent().getPlainText();
-        if (text.trim().length > 0) {
-            setSections([
-                {
-                    timestamp: getTimestamp(), // 부모의 현재 재생 시간
-                    content: text,
-                },
-                ...sections,
-            ]);
-            setEditorState(EditorState.createEmpty());
-        }
+function DraftEditor({ getTimestamp, onTimestampClick }: DraftEditorProps, ref: React.Ref<any>) {
+    const [sections, setSections] = useState<SectionItem[]>([]);
+    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+
+    // (1) 텍스트 저장
+    const handleSaveText = () => {
+        const text = editorState.getCurrentContent().getPlainText().trim();
+        if (!text) return;
+        setSections(prev => [
+            {
+                timestamp: getTimestamp(),
+                content: text,
+                type: 'text',
+            },
+            ...prev,
+        ]);
+        setEditorState(EditorState.createEmpty());
     };
 
-    // 에디터 상태 업데이트
+    // (2) 이미지 저장
+    const handleSaveImage = (dataUrl: string) => {
+        // timestamp와 함께 'image' 섹션을 추가
+        setSections(prev => [
+            {
+                timestamp: getTimestamp(),
+                content: dataUrl,
+                type: 'image',
+            },
+            ...prev,
+        ]);
+    };
+
+    // Draft.js 편집기 변경 핸들러
     const handleEditorChange = (newState: EditorState) => {
         setEditorState(newState);
     };
 
-    // Draft.js 인라인 스타일 활성화 체크
-    const isStyleActive = (style: string) => {
-        return editorState.getCurrentInlineStyle().has(style);
-    };
-
-    // 인라인 스타일 토글
-    const toggleInlineStyle = (style: string) => {
-        setEditorState(prevState => RichUtils.toggleInlineStyle(prevState, style));
-    };
-
-    // Enter 키로 저장
-    const handleKeyCommand = (command: string) => {
-        if (command === 'submit') {
-            handleSave();
-            return 'handled';
-        }
-        return 'not-handled';
-    };
+    // (3) 부모에서 호출할 수 있도록 ref에 함수 등록
+    // useImperativeHandle(부모에서 넘겨준 ref, () => 노출할 메서드)
+    useImperativeHandle(ref, () => ({
+        addImageSection: (dataUrl: string) => {
+            handleSaveImage(dataUrl);
+        },
+    }));
 
     return (
         <div className={styles.container}>
-            {/* 저장된 메모 목록 */}
+            {/* 저장된 섹션(텍스트 + 이미지) 리스트 */}
             <div className={styles.displayArea}>
                 {sections.map((section, idx) => (
                     <div key={idx} className={styles.displayItem}>
-                        {/* 타임스탬프 버튼 (클릭 시 부모의 onTimestampClick 호출) */}
+                        {/* 타임스탬프 버튼: 클릭 시 영상 이동 */}
                         <button
                             className={styles.timestampBtn}
                             onClick={() => onTimestampClick?.(section.timestamp)}
                         >
                             {section.timestamp}
                         </button>
-                        {/* // 타임스탬프 이동 */}
-                        <span className={styles.timestamp}>{section.content}</span>
+
+                        {section.type === 'text' && (
+                            <span className={styles.content}>{section.content}</span>
+                        )}
+
+                        {section.type === 'image' && (
+                            <img
+                                src={section.content}
+                                alt="캡처 이미지"
+                                style={{ width: '100%', maxWidth: '300px' }}
+                            />
+                        )}
                     </div>
                 ))}
             </div>
 
-            {/* Draft.js 에디터 */}
+            {/* Draft.js 에디터 영역 */}
             <div className={styles.editorArea}>
                 <Editor
-                    ref={editorRef}
                     editorState={editorState}
                     onChange={handleEditorChange}
                     placeholder="내용을 입력하세요..."
-                    keyBindingFn={e => {
-                        if (e.key === 'Enter') {
-                            return 'submit'; // 커스텀 명령어 "submit" 반환
-                        }
-                        return null; // 반환 값이 없으면 null 반환
-                    }}
-                    handleKeyCommand={handleKeyCommand}
                 />
                 <div className={styles.toolbar}>
-                    <button
-                        className={isStyleActive('BOLD') ? styles.activeButton : ''}
-                        onMouseDown={e => {
-                            e.preventDefault();
-                            toggleInlineStyle('BOLD');
-                            editorRef.current?.focus(); // 포커스 복원
-                        }}
-                    >
-                        B
-                    </button>
-                    <button
-                        className={isStyleActive('ITALIC') ? styles.activeButton : ''}
-                        onMouseDown={e => {
-                            e.preventDefault();
-                            toggleInlineStyle('ITALIC');
-                            // editorRef.current?.focus(); // 포커스 복원
-                        }}
-                    >
-                        I
-                    </button>
-                    <button
-                        className={isStyleActive('UNDERLINE') ? styles.activeButton : ''}
-                        onMouseDown={e => {
-                            e.preventDefault();
-                            toggleInlineStyle('UNDERLINE');
-                        }}
-                    >
-                        U
-                    </button>
-                    <button
-                        className={isStyleActive('CODE') ? styles.activeButton : ''}
-                        onMouseDown={e => {
-                            e.preventDefault();
-                            toggleInlineStyle('CODE');
-                        }}
-                    >
-                        {'<>'}
-                    </button>
-                    <div>
-                        <button className={styles.addButton} onClick={handleSave}>
-                            +
-                        </button>
-                    </div>
+                    <button onClick={handleSaveText}>텍스트 저장</button>
                 </div>
             </div>
         </div>
     );
 }
+
+// forwardRef를 사용해, 부모에서 ref로 내부 메서드를 호출 가능
+export default forwardRef(DraftEditor);
