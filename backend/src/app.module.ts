@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MemoModule } from './memo/memo.module';
-import { Memo } from './memo/entity/memo.entity';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { MemosModule } from './memos/memos.module';
 import { typeOrmConfig } from './config/typeorm.config';
 
 @Module({
@@ -16,7 +17,10 @@ import { typeOrmConfig } from './config/typeorm.config';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-        MemoModule,
+
+        MemosModule,
     ],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}

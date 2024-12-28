@@ -1,3 +1,4 @@
+
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Memos } from '../memos/memos.entity';
 
