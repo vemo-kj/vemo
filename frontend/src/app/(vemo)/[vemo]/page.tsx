@@ -6,6 +6,11 @@ import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
 import DropdownMenu from './components/DropdownMenu';
 
+import SummaryButton from './components/summaryButton/SummaryButton';
+import ExportButton from './components/exportButton/ExportButton';
+
+import { SummaryProvider } from '../[vemo]/context/SummaryContext'
+
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor'), { ssr: false });
 
@@ -22,6 +27,8 @@ export default function VemoPage() {
 
     // **캡처 대상**: 유튜브 영상 포함 전체 섹션
     const captureRef = useRef<HTMLDivElement | null>(null);
+
+
 
     // ================== 유튜브 로직 ================== //
     useEffect(() => {
@@ -69,12 +76,15 @@ export default function VemoPage() {
         setSelectedOption(option);
     };
 
+
     return (
         <div className={styles.container}>
+
             {/* (1) 유튜브 영상 섹션. captureRef를 여기에 달면 전체가 캡처 대상 */}
             <div
                 className={styles.section1}
                 ref={captureRef}
+
                 style={{ position: 'relative' }} // selection box를 absolute로 띄우려면 relative 부모가 필요
             >
                 {/* 드래그 시 표시되는 "선택 영역 박스" */}
@@ -123,14 +133,19 @@ export default function VemoPage() {
 
                 <div className={styles.footerButtons}>
                     {/* 전체 캡처 */}
+
                     <button>캡처하기</button>
                     {/* <button onClick={}>캡처하기</button> */}
 
                     {/* 부분 캡처: 버튼 토글로 on/off */}
                     <button> 부분 캡처 </button>
 
-                    <button>요약하기</button>
-                    <button>내보내기</button>
+
+
+                
+
+                    <SummaryButton />
+
                 </div>
             </div>
 
@@ -141,5 +156,8 @@ export default function VemoPage() {
                 <button className={styles.sidebarButton}>재생목록</button>
             </div>
         </div>
+
+        </SummaryProvider>
+
     );
 }

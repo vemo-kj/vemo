@@ -1,99 +1,137 @@
-import styles from './SignUp.module.css'
-import Link from 'next/link'
+"use client";
 
-export default function SingUpPage() {
-  return(
-    <div>
-      <h1>회원가입</h1>
-      <form>
-        <div>
-          <label htmlFor="name">이름</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-            />
+// component
+import InputBox from './components/InputBox/InputBox';
+import SignUpButton from './components/SignUpButton/SignUpButton';
+import ProfileImage from './components/ProfileImage/ProfileImage';
+// style
+import styles from './SignUp.module.css';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SignUpPage() {
+  const router = useRouter();
+  
+  // 상태 관리
+  const [formData, setFormData] = useState({
+    name: '',
+    date: '',
+    nickname: '',
+    email: '',
+    password: '',
+    passwordCheck: '',
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  // 입력값 변경 핸들러
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // 폼 제출 핸들러
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+
+    // 간단한 유효성 검사
+    if (formData.password !== formData.passwordCheck) {
+      setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '회원가입 실패');
+      }
+
+      const data = await response.json();
+      console.log('회원가입 성공:', data);
+
+      // 회원가입 성공 후 로그인 페이지로 이동
+      router.push('/login');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '회원가입 중 오류가 발생했습니다.');
+    }
+  };
+
+  return (
+    <div className={styles.signUpBox}>
+      <h1 className={styles.signUpTitle}>회원정보 입력</h1>
+      <form onSubmit={handleSubmit}>
+        <ProfileImage id="" />
+        <InputBox
+          label="이름"
+          type="text"
+          id="name"
+          name="name"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="생년월일"
+          type="date"
+          id="date"
+          name="date"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="닉네임"
+          type="text"
+          id="nickname"
+          name="nickname"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="이메일(아이디)"
+          type="email"
+          id="email"
+          name="email"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="비밀번호"
+          type="password"
+          id="password"
+          name="password"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="비밀번호 확인"
+          type="password"
+          id="passwordCheck"
+          name="passwordCheck"
+          required
+          onChange={handleInputChange}
+        />
+        <SignUpButton />
+      </form>
+
+      {error && <p className={styles.error}>{error}</p>} {/* 오류 메시지 표시 */}
+
+      <p className={styles.sign}>
+        이미 계정이 있으신가요?{' '}
+        <Link className={styles.signUpLoginLink} href="/login">
+          로그인
+        </Link>
+      </p>
     </div>
-    <div>
-      <label htmlFor="birthdate">생년월일</label>
-      <input
-        type="date"
-        id="birthdate"
-        name="birthdate"
-        required
-      />
-    </div>
-    <div>
-      <label htmlFor="gender">성별</label>
-      <select
-        id="gender"
-        name="gender"
-        required
-      >
-        <option value="">선택하세요</option>
-        <option value="male">남성</option>
-        <option value="female">여성</option>
-        <option value="other">기타</option>
-      </select>
-    </div>
-    <div>
-      <label htmlFor="nickname">닉네임</label>
-      <input
-        type="text"
-        id="nickname"
-        name="nickname"
-        required
-      />
-    </div>
-    <div>
-      <label htmlFor="email">이메일 (아이디)</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        required
-      />
-    </div>
-    <div>
-      <label htmlFor="password">비밀번호</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        required
-      />
-    </div>
-    <div>
-      <label htmlFor="confirmPassword">비밀번호 확인</label>
-      <input
-        type="password"
-        id="confirmPassword"
-        name="confirmPassword"
-        required
-      />
-    </div>
-    <div>
-      <label htmlFor="bio">자기소개</label>
-      <textarea
-        id="bio"
-        name="bio"
-      />
-    </div>
-    <div>
-      <label htmlFor="profilePicture">프로필 사진</label>
-      <input
-        type="file"
-        id="profilePicture"
-        name="profilePicture"
-        accept="image/*"
-      />
-    </div>
-    <button type="submit">회원가입</button>
-  </form>
-  <p>
-    이미 계정이 있으신가요? <Link href="/login">로그인</Link>
-  </p>
-</div>
-  )
+  );
 }
