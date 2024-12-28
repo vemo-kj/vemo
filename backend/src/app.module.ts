@@ -7,6 +7,7 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { MemosModule } from './memos/memos.module';
 import { YoutubeapiModule } from './youtubeapi/youtubeapi.module';
 import { VideoModule } from './video/video.module';
+import { ChannelModule } from './channel/channel.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { VideoModule } from './video/video.module';
         MemosModule,
         YoutubeapiModule,
         VideoModule,
+        ChannelModule,
     ],
     controllers: [AppController],
     providers: [AppService],
