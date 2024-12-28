@@ -56,8 +56,8 @@ const createOverlay = () => {
             // 중앙 재생 버튼 생성
             const playButton = document.createElement('div');
             playButton.style.cssText = `
-                width: 100px;
-                height: 100px;
+                width: 70px;
+                height: 70px;
                 background: rgba(255, 255, 255, 0.7);
                 border-radius: 50%;
                 display: flex;
@@ -85,7 +85,7 @@ const createOverlay = () => {
 
             triangleImg.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg"
-                    width="60" height="60" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+                    width="50" height="50" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
                     <defs>
                         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="#64B5F6" />
@@ -99,34 +99,31 @@ const createOverlay = () => {
                 </svg>
             `;
 
-            // 중복된 appendChild 제거 (한 번만 실행)
-            playButton.appendChild(triangleImg);
-
-            // 마우스 호버 시 재생 버튼 확대
-            playButton.addEventListener('mouseenter', () => {
-                playButton.style.transform = 'scale(1.1)';
-            });
-            playButton.addEventListener('mouseleave', () => {
-                playButton.style.transform = 'scale(1)';
-            });
-
-            // 클릭 이벤트 (예시: 재생)
-            playButton.addEventListener('click', () => {
-                alert('재생 버튼 클릭!');
-            });
-
-            // overlayDiv에 재생 버튼 추가
-            overlayDiv.appendChild(playButton);
-            thumbnail.parentElement.appendChild(overlayDiv);
-
             // 마우스 오버 시 썸네일 확대 및 오버레이 효과
             thumbnail.addEventListener('mouseenter', () => {
+                // 중복 방지: 이미 추가된 경우 다시 추가하지 않음
+                if (!overlayDiv.contains(playButton)) {
+                    playButton.appendChild(triangleImg);
+                    overlayDiv.appendChild(playButton);
+                    thumbnail.parentElement.appendChild(overlayDiv);
+                }
+
                 thumbnail.style.transform = 'scale(1.3)';
                 overlayDiv.style.backgroundColor = 'rgba(33, 148, 243, 0.3)';
             });
 
             // 마우스가 벗어나면 원래대로 복구
             thumbnail.addEventListener('mouseleave', () => {
+                // 🔹 overlayDiv에서 재생 버튼 제거
+                if (overlayDiv.contains(playButton)) {
+                    playButton.remove();
+                }
+
+                // 🔹 오버레이 전체 제거
+                if (thumbnail.parentElement.contains(overlayDiv)) {
+                    overlayDiv.remove();
+                }
+
                 thumbnail.style.transform = 'scale(1)';
                 overlayDiv.style.backgroundColor = 'transparent';
             });
@@ -158,8 +155,10 @@ const createMemoButton = () => {
     if (memoButton) return;
 
     memoButton = document.createElement('button');
-    memoButton.textContent = '영상 메모 바로가기';
+    memoButton.textContent = '📃영상 메모 바로가기';
     memoButton.style.cssText = `
+        font-size: 15px;
+        font-weight: bold;
         position: fixed;
         right: 20px;
         bottom: 54px;
@@ -177,7 +176,7 @@ const createMemoButton = () => {
 
     memoButton.addEventListener('click', () => {
         isOverlayActive ? removeOverlay() : createOverlay();
-        memoButton.textContent = isOverlayActive ? '영상 메모 바로가기' : '바로가기 끄기';
+        memoButton.textContent = isOverlayActive ? '📃영상 메모 바로가기' : ' 닫기 ❌';
         isOverlayActive = !isOverlayActive;
         console.log('isOverlayActive:', isOverlayActive);
     });
