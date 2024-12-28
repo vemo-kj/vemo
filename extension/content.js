@@ -1,5 +1,104 @@
 console.log('Vemo 익스텐션 작동 중...');
 
+const observeThumbnails = () => {
+    const observer = new MutationObserver(() => {
+        document
+            .querySelectorAll('a#thumbnail img.yt-core-image.yt-core-image--fill-parent-height')
+            .forEach(thumbnail => {
+                if (!thumbnail.classList.contains('vemo-processed')) {
+                    thumbnail.classList.add('vemo-processed');
+                    addOverlayToThumbnail(thumbnail);
+                }
+            });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+};
+
+const addOverlayToThumbnail = thumbnail => {
+    thumbnail.style.visibility = 'visible';
+    thumbnail.style.position = 'relative';
+    thumbnail.style.transition = 'transform 0.3s ease, filter 0.3s ease';
+
+    const overlayDiv = document.createElement('div');
+    overlayDiv.className = 'thumbnail-overlay';
+    overlayDiv.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        pointer-events: none;
+        background-color: rgba(255, 255, 255, 0.4);
+        transition: background-color 0.3s ease;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+
+    const playButton = document.createElement('div');
+    playButton.style.cssText = `
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        position: relative;
+    `;
+
+    const triangleImg = document.createElement('div');
+    triangleImg.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+            width="50" height="50" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#64B5F6" />
+                    <stop offset="100%" stop-color="#2196F3" />
+                </linearGradient>
+            </defs>
+            <g transform="translate(50, 330) scale(0.8, -0.8)">
+                <path d="M44 295 c-15 -24 -14 -28 56 -150 66 -115 74 -125 100 -125 31 0 50 23 50 60 0 34 -119 220 -147 231 -35 13 -41 12 -59 -16z" fill="url(#gradient)"/>
+                <path d="M252 304 c-44 -30 -19 -114 34 -114 29 0 60 25 74 61 13 29 12 33 -9 50 -28 23 -69 24 -99 3z" fill="url(#gradient)"/>
+            </g>
+        </svg>
+    `;
+
+    thumbnail.addEventListener('mouseenter', () => {
+        if (!overlayDiv.contains(playButton)) {
+            playButton.appendChild(triangleImg);
+            overlayDiv.appendChild(playButton);
+            thumbnail.parentElement.appendChild(overlayDiv);
+        }
+        thumbnail.style.transform = 'scale(1.3)';
+        overlayDiv.style.backgroundColor = 'rgba(33, 148, 243, 0.2)';
+    });
+
+    thumbnail.addEventListener('mouseleave', () => {
+        if (overlayDiv.contains(playButton)) playButton.remove();
+        if (thumbnail.parentElement.contains(overlayDiv)) overlayDiv.remove();
+        thumbnail.style.transform = 'scale(1)';
+        overlayDiv.style.backgroundColor = 'transparent';
+    });
+
+    thumbnail.addEventListener('click', e => {
+        e.preventDefault();
+        window.location.href = 'http://52.78.136.69';
+    });
+};
+
 let memoButton = null;
 let overlay = null;
 let isOverlayActive = false;
@@ -45,7 +144,7 @@ const createOverlay = () => {
                 background-color: rgba(255, 255, 255, 0.4);  /* 투명 배경 */
                 transition: background-color 0.3s ease;
                 border-radius: 10px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(10px);
                 border: none;
                 display: flex;
@@ -109,7 +208,7 @@ const createOverlay = () => {
                 }
 
                 thumbnail.style.transform = 'scale(1.3)';
-                overlayDiv.style.backgroundColor = 'rgba(33, 148, 243, 0.3)';
+                overlayDiv.style.backgroundColor = 'rgba(33, 148, 243, 0.2)';
             });
 
             // 마우스가 벗어나면 원래대로 복구
@@ -208,3 +307,7 @@ chrome.runtime.onMessage.addListener(request => {
 chrome.storage.sync.get(['isEnabled'], result => {
     if (result.isEnabled) createMemoButton();
 });
+
+// 초기 썸네일에 오버레이 적용
+createOverlay();
+observeThumbnails();
