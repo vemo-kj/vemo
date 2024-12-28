@@ -1,3 +1,5 @@
+// signup(회원가입)page -> inputBox컴포넌트 관련 props type정의
+
 export type InputBoxProps = {
   label: string;
   type: string;

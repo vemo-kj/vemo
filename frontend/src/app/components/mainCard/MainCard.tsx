@@ -17,7 +17,7 @@ export default function MainCard({
 
   return(
     // 썸네일, 유튜버로고 {}형태 추가
-    <Link href='/vemo'>
+    <Link href='/vemo/[youtubeLink]' as={`/vemo/${youtubeLink}`}>
       <div className={styles.mainCard}>
         <div>
           <img src="/images/example.svg" className={styles.youtubeImage} />

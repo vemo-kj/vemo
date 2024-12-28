@@ -1,47 +1,20 @@
-// import styles from './MyCard.module.css'
-
-// type myCardProps = {
-//   thumbnail: string;
-//   mainCardTitle: string;
-//   cardMemoCount: number;
-// }
-
-// export default function MyCard({
-//   thumbnail,
-//   mainCardTitle,
-//   cardMemoCount
-// }: myCardProps) {
-
-//   return(
-//     <div className={styles.myCard}>
-//       <div>
-//         <img src="/images/example.svg" className={styles.myCardYoutubeImage} />
-//       </div>
-//       <div>
-//         <span className={styles.myCardtitle}>썸네일이 들어옵니다.</span>
-//       </div>
-//       <span className={styles.myCardMemoCount}>vemo의 수</span>
-//     </div>
-//   )
-// }
-
-import Link from 'next/link';
-import styles from './MyCard.module.css'
+// next
 import Image from 'next/image'
+import Link from 'next/link';
+// components
+import styles from './MyCard.module.css'
+//types
+import { MyCardProps } from '../../../../types/MyCardProps';
 
-type MyCardProps = {
-  thumbnail: string;
-  mainCardTitle: string;
-  cardMemoCount: number;
-  youtubeLink: string;
-}
+ 
 
 export default function MyCard({
 
   thumbnail,
-  mainCardTitle,
+  myCardTitle,
+  // myCardTitle -> playListTitle 이 더 괜찮을듯
   cardMemoCount,
-  youtubeLink
+  youtubeLink,
 
 }: MyCardProps) {
   return(
@@ -51,7 +24,7 @@ export default function MyCard({
         <div className={styles.thumbnailContainer}>
           <Image 
             src={thumbnail} 
-            alt={mainCardTitle} 
+            alt={myCardTitle} 
             width={280} 
             height={157} 
             className={styles.thumbnail}
@@ -59,7 +32,7 @@ export default function MyCard({
         </div>
 
         <div className={styles.cardContent}>
-          <h3 className={styles.title}>{mainCardTitle}</h3>
+          <h3 className={styles.title}>{myCardTitle}</h3>
 
           <div className={styles.progressBar}>
             <div className={styles.progress} style={{ width: '75%' }}></div>
