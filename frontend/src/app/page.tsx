@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 
+// Home page
 export default function Home() {
     const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -20,17 +21,25 @@ export default function Home() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const search = searchParams.get('q') || '';
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
 
     const fetchMainCards = async () => {
         try {
-        const response = await fetch('/api/mainCards');
-        if (!response.ok) {
-            throw new Error('Failed to fetch main cards');
-        }
-        const data: MainCardProps[] = await response.json();
-        setMainCards(data);
+            setIsLoading(true);
+            const response = await fetch('/api/mainCards', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (!response.ok) throw new Error('Failed to fetch main cards');
+            const data = await response.json();
+            setMainCards(data);
         } catch (error) {
-        console.error('Error fetching main cards:', error);
+            setError('데이터를 불러오는데 실패했습니다.');
+            console.error('Error fetching main cards:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -65,13 +74,19 @@ export default function Home() {
 
     return (
         <main>
-        <Header />
-        <Category categories={categories} onCategorySelect={handleCategoryClick} />
-        <div className={styles.mainCardContainer}>
-            {filteredCards.map((mainCard, index) => (
-            <MainCard key={index} {...mainCard} />
-            ))}
-        </div>
+            <Header />
+            <Category categories={categories} onCategorySelect={handleCategoryClick} />
+            {error ? (
+                <div>{error}</div>
+            ) : isLoading ? (
+                <div>로딩 중</div>
+            ) : (
+                <div className={styles.mainCardContainer}>
+                    {filteredCards.map((mainCard, index) => (
+                        <MainCard key={index} {...mainCard} />
+                    ))}
+                </div>
+            )}
         </main>
     );
-    }
+}
