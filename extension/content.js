@@ -2,6 +2,8 @@ console.log('Vemo 익스텐션 작동 중...');
 
 const observeThumbnails = () => {
     const observer = new MutationObserver(() => {
+        if (!isOverlayActive) return; // 오버레이가 비활성화 상태일 때만 실행
+
         document
             .querySelectorAll('a#thumbnail img.yt-core-image.yt-core-image--fill-parent-height')
             .forEach(thumbnail => {
