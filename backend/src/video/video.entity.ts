@@ -24,8 +24,8 @@ export class Video {
     channel: Channel;
 
     @OneToMany(() => Memos, memos => memos.video)
-    memos: Memos[];
+    memos?: Memos[];
 
     @OneToMany(() => PlaylistVideo, playlistVideo => playlistVideo.video)
-    playlistVideos: PlaylistVideo[];
+    playlistVideos?: PlaylistVideo[];
 }

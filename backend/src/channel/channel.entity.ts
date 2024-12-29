@@ -1,17 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Video } from '../video/video.entity';
 
 @Entity()
 export class Channel {
-    @PrimaryGeneratedColumn('uuid')
-    channelId: string;
+    @PrimaryColumn({ type: 'varchar', length: 24 })
+    id: string;
 
     @Column({ length: 255 })
-    channelThumbnail: string;
+    thumbnails: string;
 
     @Column({ length: 100 })
-    channelTitle: string;
+    title: string;
 
-    @OneToMany(() => Video, video => video.channel)
-    videos: Video[];
+    @OneToMany(() => Video, video => video.channel, { lazy: true })
+    videos?: Video[];
 }
