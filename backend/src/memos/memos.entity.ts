@@ -20,12 +20,12 @@ export class Memos {
     @Column({ type: 'datetime', nullable: true })
     updatedAt: Date;
 
-    @ManyToOne(() => User, user => user.memos)
+    @ManyToOne(() => User, user => user.memos, { eager: true })
     user: User;
 
     @ManyToOne(() => Video, video => video.memos)
     video: Video;
 
-    @OneToMany(() => Memo, memo => memo.memos)
+    @OneToMany(() => Memo, memo => memo.memos, { cascade: true })
     memo: Memo[];
 }

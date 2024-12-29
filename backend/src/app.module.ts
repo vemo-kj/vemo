@@ -20,6 +20,7 @@ import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
+
         MemosModule,
         VideoModule,
         ChannelModule,
