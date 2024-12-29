@@ -104,9 +104,25 @@ const addOverlayToThumbnail = thumbnail => {
     };
 
     const clickHandler = e => {
-        if (!isOverlayActive) return; // 비활성화 상태면 실행하지 않음
-        e.preventDefault();
-        window.location.href = 'http://52.78.136.69';
+        if (!isOverlayActive) return;
+        e.preventDefault(); // YouTube 페이지로의 이동을 막음
+        e.stopPropagation(); // 이벤트 전파 중지
+        const target = e.target;
+
+        // 클릭된 요소가 이미지이고 yt-core-image 클래스를 포함하는지 확인
+        if (target.tagName === 'IMG' && target.classList.contains('yt-core-image')) {
+            const src = target.getAttribute('src');
+
+            // 정규식으로 비디오 ID 추출
+            const match = src.match(/\/vi\/([^\/]+)\//);
+
+            if (match && match[1]) {
+                console.log('📌Video ID:', match[1]); // video ID 출력
+                window.location.href = `http://52.78.136.69`;
+            } else {
+                console.log('Video ID not found.');
+            }
+        }
     };
 
     // 이벤트 리스너 추가
@@ -264,9 +280,3 @@ chrome.storage.sync.get(['isEnabled'], result => {
         createMemoButton();
     }
 });
-
-// 초기 썸네일에 오버레이 적용
-// if (isOverlayActive) {
-//     createOverlay();
-//     observeThumbnails();
-// }
