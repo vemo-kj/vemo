@@ -16,6 +16,7 @@ export default function RootLayout({
         <html lang="en">
             <body>
                 {/* <Header /> */}
+                {/* 베모페이지에서는 안나오게 해야함 */}
                 {children}
             </body>
         </html>
