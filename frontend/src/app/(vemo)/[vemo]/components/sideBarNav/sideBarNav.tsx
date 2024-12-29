@@ -5,6 +5,7 @@ import styles from './sideBarNav.module.css'
 import SummaryButton from '../summaryButton/SummaryButton'
 import ExportButton from '../exportButton/ExportButton';
 import { useSummary } from '../../context/SummaryContext';
+import Community from '../community/Community';
 
 interface SidebarNavProps {
     selectedOption: string;
@@ -70,10 +71,7 @@ export default function SidebarNav({ selectedOption, onOptionSelect, renderSecti
                     </>
                 )}
                 {activeTab === 'community' && (
-                    <div className={styles.communityContent}>
-                        <h2 className={styles.notesHeader}>커뮤니티</h2>
-                        {/* 커뮤니티 내용을 여기에 추가하세요 */}
-                    </div>
+                    <Community />
                 )}
                 {activeTab === 'playlist' && (
                     <div className={styles.playlistContent}>
