@@ -4,6 +4,7 @@ let isOverlayActive = false; // 초기 상태는 비활성화
 
 const observeThumbnails = () => {
     if (!isOverlayActive) return; // 비활성화 상태면 실행하지 않음
+    console.log('observeThumbnails 실행 중');
     const observer = new MutationObserver(() => {
         document
             .querySelectorAll('a#thumbnail img.yt-core-image.yt-core-image--fill-parent-height')
@@ -20,6 +21,8 @@ const observeThumbnails = () => {
         subtree: true,
     });
 };
+
+observeThumbnails();
 
 const addOverlayToThumbnail = thumbnail => {
     if (!isOverlayActive) return; // 여기서 리턴해도 이벤트 리스너는 이미 추가되어 있음
@@ -210,6 +213,7 @@ const createMemoButton = () => {
         console.log('isOverlayActive:', isOverlayActive);
 
         if (isOverlayActive) {
+            observeThumbnails(); // MutationObserver 시작
             createOverlay(); // 활성화 시에만 오버레이 생성
         } else {
             removeOverlay(); // 비활성화 시 오버레이 제거
@@ -260,3 +264,9 @@ chrome.storage.sync.get(['isEnabled'], result => {
         createMemoButton();
     }
 });
+
+// 초기 썸네일에 오버레이 적용
+// if (isOverlayActive) {
+//     createOverlay();
+//     observeThumbnails();
+// }
