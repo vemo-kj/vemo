@@ -7,7 +7,7 @@ import { google, youtube_v3 } from 'googleapis';
 export class YoutubeauthService implements OnModuleInit {
     private readonly logger = new Logger(YoutubeauthService.name);
     private oauth2Client: OAuth2Client;
-    private youtube: youtube_v3.Youtube;
+    public youtube: youtube_v3.Youtube;
 
     constructor(private configService: ConfigService) {}
 
