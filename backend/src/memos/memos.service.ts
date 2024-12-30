@@ -15,15 +15,15 @@ export class MemosService {
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) {}
 
-    async createMemos(createMemosDto: CreateMemosDto & { videoId: string }): Promise<Memos> {
+    async createMemos(createMemosDto: CreateMemosDto, videoId: string): Promise<Memos> {
         const user = await this.userRepository.findOne({ where: { id: createMemosDto.userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${createMemosDto.userId} not found`);
         }
 
-        const video = await this.videoRepository.findOne({ where: { id: createMemosDto.videoId } });
+        const video = await this.videoRepository.findOne({ where: { id: videoId } });
         if (!video) {
-            throw new NotFoundException(`Video with ID ${createMemosDto.videoId} not found`);
+            throw new NotFoundException(`Video with ID ${videoId} not found`);
         }
 
         const memos = this.memosRepository.create({
