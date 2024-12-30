@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"name": "vemo",
+		"path": "."
+	},
+	{
+		"name": "backend",
+		"path": "../vemo_Refactor/backend"
+	},
+	{
+		"name": "frontend",
+		"path": "../vemo_Refactor/frontend"
+	}
+],
+  "settings": {}
+}
