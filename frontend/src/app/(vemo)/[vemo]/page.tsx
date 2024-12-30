@@ -8,6 +8,7 @@ import DropdownMenu from './components/DropdownMenu';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
+
 export default function VemoPage() {
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
