@@ -9,5 +9,6 @@ import { ChannelController } from './channel.controller';
     imports: [TypeOrmModule.forFeature([Channel]), YoutubeauthModule],
     providers: [ChannelService],
     controllers: [ChannelController],
+    exports: [ChannelService],
 })
 export class ChannelModule {}
