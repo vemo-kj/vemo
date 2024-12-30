@@ -1,0 +1,117 @@
+/* 전체 컨테이너 스타일 */
+.container {
+    display: flex;
+    height: 100%;
+    background-color: #ffffff;
+    overflow: hidden;
+    position: relative; /* 탭을 오른쪽에 고정하기 위해 필요 */
+}
+
+/* 탭 버튼 영역 (오른쪽 배치) */
+.tabs {
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 120px; /* 오른쪽 탭 너비 */
+    background-color: #f9f9f9;
+    padding: 16px;
+    border-left: 1px solid #e0e0e0; /* 경계선 */
+    position: absolute; /* 오른쪽 고정 */
+    right: 0;
+    top: 0;
+    height: 100%; /* 화면 전체 높이 */
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1); /* 약간의 그림자 추가 */
+}
+
+/* 탭 버튼 스타일 */
+.tab {
+    width: 100%; /* 버튼 너비를 부모에 맞춤 */
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left; /* 텍스트 왼쪽 정렬 */
+    background-color: #eaeaea;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.tab:hover {
+    background-color: #d4d4d4; /* 마우스 오버 효과 */
+}
+
+.activeTab {
+    background-color: #007bff; /* 활성화된 탭 색상 */
+    color: #fff; /* 텍스트 색상 */
+}
+
+/* 콘텐츠 영역 */
+.tabContent {
+    flex: 1; /* 나머지 공간을 차지 */
+    padding: 16px;
+    overflow-y: auto;
+    margin-right: 120px; /* 오른쪽 탭과 콘텐츠 간의 여백 확보 */
+}
+
+/* 노트 제목 */
+.notesHeader {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* 노트 부제목 */
+.notesSubHeader {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* 노트 콘텐츠 */
+.notesContent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 콘텐츠 카드 효과 */
+}
+
+/* 드롭다운 스타일 */
+.dropdownSelect {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* 하단 버튼 영역 */
+.footerButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.footerButtons button {
+    flex: 1; /* 버튼 너비를 균등하게 분배 */
+    margin: 0 4px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.footerButtons button:hover {
+    background-color: #0056b3; /* 마우스 오버 시 색상 */
+}

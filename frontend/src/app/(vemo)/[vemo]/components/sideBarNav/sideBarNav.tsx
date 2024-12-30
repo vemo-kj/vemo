@@ -27,10 +27,11 @@ export default function SidebarNav({
     handleCaptureArea,
     editorRef,
 }: SidebarNavProps) {
-    const [activeTab, setActiveTab] = useState('write');
+    const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
 
     return (
-        <div className={styles.section2}>
+        <div className={styles.container}>
+            {/* 왼쪽 탭 버튼 영역 */}
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
@@ -51,11 +52,12 @@ export default function SidebarNav({
                     재생목록
                 </button>
             </div>
+
+            {/* 탭 내용 표시 영역 */}
             <div className={styles.tabContent}>
                 {activeTab === 'write' && (
                     <>
                         <h1 className={styles.notesHeader}>나만의 노트</h1>
-                        {/* 재생목록 이름이 들어감 */}
                         <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                         <div className={styles.notesContent}>
                             <div className={styles.noteActions}>
