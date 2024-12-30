@@ -45,6 +45,7 @@
         "react-dom": "^18.3.1",
         "react-quill": "^0.0.2",
         "react-signature-canvas": "^1.0.6",
+        "react-sketch-canvas": "^6.2.0",
         "react-youtube": "^10.1.0"
     }
 }

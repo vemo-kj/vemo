@@ -42,10 +42,18 @@ export default function DrawingCanvas({ onClose }: DrawingCanvasProps) {
                 className={styles.canvasBox}
             />
             <div className={styles.drawToolbar}>
-                <button onClick={handleUndo}>되돌리기</button>
-                <button onClick={handleClear}>지우기</button>
-                <button onClick={handleSave}>저장하기</button>
-                <button onClick={onClose}>닫기</button>
+                <button onClick={handleUndo} className={styles.button}>
+                    되돌리기
+                </button>
+                <button onClick={handleClear} className={styles.button}>
+                    지우기
+                </button>
+                <button onClick={handleSave} className={styles.button}>
+                    저장하기
+                </button>
+                <button onClick={onClose} className={styles.button}>
+                    닫기
+                </button>
             </div>
         </div>
     );

@@ -94,6 +94,7 @@ export default function VemoPage() {
     const handleCaptureTab = () => {
         window.postMessage({ type: 'CAPTURE_TAB' }, '*');
     };
+    // 부분 캡처
     const handleCaptureArea = () => {
         window.postMessage({ type: 'CAPTURE_AREA' }, '*');
     };

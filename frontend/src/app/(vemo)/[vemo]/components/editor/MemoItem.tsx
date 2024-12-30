@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
-// import styles from './editor.module.css';
 import styles from '/Users/gangsu/Desktop/VEMO/make/vemo/frontend/src/app/(vemo)/[vemo]/components/editor/editor.module.css';
+import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 
 interface MomoItemProps {
     id: string;
@@ -26,42 +25,32 @@ export default function MomoItem({
 }: MomoItemProps) {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
-    const sigCanvasRef = useRef<SignatureCanvas | null>(null);
+    const [drawingDataUrl, setDrawingDataUrl] = useState<string | null>(null);
+
     // 그리기 영역 열기
     const handleOpenDrawing = () => {
         onPauseVideo?.();
         setIsDrawingOpen(true);
     };
-    useEffect(() => {
-        if (isDrawingOpen && sigCanvasRef.current && screenshot) {
-            sigCanvasRef.current.clear();
-            sigCanvasRef.current.fromDataURL(screenshot);
-        }
-    }, [isDrawingOpen, screenshot]);
+
     // 그리기 영역 닫기
     const handleCloseDrawing = () => {
         setIsDrawingOpen(false);
     };
-    // 그리기 저장
-    const handleSaveDrawing = () => {
-        if (!sigCanvasRef.current) {
-            console.error('SignatureCanvas가 초기화되지 않았습니다.');
-            return;
-        }
-        // 최종 데이터
-        const dataUrl = sigCanvasRef.current.getTrimmedCanvas().toDataURL('image/png');
-        // “이미지 위에 그린 것” → 새로운 screenshot로 업데이트
-        // 혹은 “onChangeHTML”로 htmlContent에 <img>?
-        // 여기서는 단순히 screenshot를 대체 (inline approach)
+
+    // 그리기 저장 핸들러
+    const handleSaveDrawing = (dataUrl: string) => {
         const imgElem = document.getElementById(`capture-${id}`) as HTMLImageElement;
         if (imgElem) {
             imgElem.src = dataUrl;
+            imgElem.style.width = '100%';
+            imgElem.style.height = '100%';
+            imgElem.style.objectFit = 'cover';
         }
-        // 모달 닫기
         setIsDrawingOpen(false);
     };
-    // ====== (2) 텍스트 편집 ======
 
+    // ====== (2) 텍스트 편집 ======
     const contentRef = useRef<HTMLDivElement>(null);
 
     // contentEditable에서 수정된 내용 감지 → onBlur 시 저장
@@ -121,37 +110,18 @@ export default function MomoItem({
                         그리기
                     </button>
                 )}
+                <button className="style export">추출하기</button>
                 <button className={styles.deleteBtn} onClick={onDelete}>
                     삭제
                 </button>
             </div>
 
-            {/* 4) 그리기 모달 (이미지를 배경에 깔기) */}
+            {/* 4) 그리기 모달 (DrawingCanvas로 교체) */}
             {isDrawingOpen && screenshot && (
                 <div className={styles.drawOverlay}>
                     <div className={styles.drawPopup}>
                         <h3>그리기</h3>
-                        <SignatureCanvas
-                            ref={sigCanvasRef}
-                            canvasProps={{ width: 800, height: 450, className: styles.sigCanvas }}
-                            penColor="red"
-                            onBegin={() => {
-                                // “배경이미지” 설정
-                                // signatureCanvas에서 backgroundImage를 지정하려면,
-                                // fromDataURL()로 호출
-                                if (sigCanvasRef.current) {
-                                    sigCanvasRef.current.clear();
-                                    sigCanvasRef.current.fromDataURL(screenshot, {
-                                        // eraseBg: false
-                                    });
-                                }
-                            }}
-                        />
-                        <div className={styles.drawButtons}>
-                            <button onClick={() => sigCanvasRef.current?.clear()}>지우기</button>
-                            <button onClick={handleSaveDrawing}>저장하기</button>
-                            <button onClick={handleCloseDrawing}>닫기</button>
-                        </div>
+                        <DrawingCanvas onSave={handleSaveDrawing} onClose={handleCloseDrawing} />
                     </div>
                 </div>
             )}

@@ -9,9 +9,8 @@
 .displayArea {
     display: flex;
     flex-direction: column;
-    border: 1px solid #ddd;
+    border: 1px solid #f70000;
     border-radius: 8px;
-    padding: 10px;
     background-color: #f9f9f9;
 }
 
