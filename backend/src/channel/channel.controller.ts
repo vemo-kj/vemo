@@ -10,10 +10,6 @@ export class ChannelController {
     ) {}
     @Get()
     async getChannel(@Query('channelId') channelId: string) {
-        if (!this.youtubeauthService.isAuthenticated()) {
-            return { error: 'Not authenticated' };
-        }
-
         try {
             const channel = await this.channelService.getChannel(channelId);
             return { channel };
