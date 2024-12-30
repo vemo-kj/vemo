@@ -1,26 +1,25 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as session from 'express-session';
 import { AppModule } from './app.module';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.enableCors();
-
-    app.use(
-        session({
-            secret: process.env.SESSION_SECRET,
-            resave: false,
-            saveUninitialized: false,
-            cookie: { secure: false },
-        }),
-    );
+    app.enableCors({
+        origin: ['http://localhost:3000', 'http://192.168.1.122:3000', 'http://192.168.1.158:3000'],
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        // exposedHeaders: ['Content-Range', 'X-Total-Count'],
+    });
 
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,
             forbidNonWhitelisted: true,
             transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
         }),
     );
 
