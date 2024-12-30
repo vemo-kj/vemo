@@ -121,7 +121,11 @@ export default function MomoItem({
                 <div className={styles.drawOverlay}>
                     <div className={styles.drawPopup}>
                         <h3>그리기</h3>
-                        <DrawingCanvas onSave={handleSaveDrawing} onClose={handleCloseDrawing} />
+                        <DrawingCanvas
+                            onSave={handleSaveDrawing}
+                            onClose={handleCloseDrawing}
+                            backgroundImage={screenshot} // 배경 이미지 전달
+                        />
                     </div>
                 </div>
             )}
