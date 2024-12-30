@@ -25,6 +25,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^8.1.0",
     "@nestjs/typeorm": "^10.0.2",
+    "log-symbols": "^4.1.0",
     "mysql2": "^3.11.5",
     "openai": "^4.77.0",
     "redis": "^4.7.0",
