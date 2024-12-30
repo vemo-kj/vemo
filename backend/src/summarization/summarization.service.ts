@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { Subtitle } from 'src/subtitles/subtitle.interface';
+import { SubtitleDto } from './dto/subtitle.dto';
+import { SummaryResultDto } from './dto/summary-result.dto';
 
 @Injectable()
 export class SummarizationService {
@@ -13,13 +14,9 @@ export class SummarizationService {
         });
     }
 
-    async extractSummary(subtitles: Subtitle[]): Promise<[string, string][]> {
-        // 타임라인과 함께 자막 텍스트 결합
-        const formattedText = subtitles
-            .map(sub => `[${sub.startTime} ~ ${sub.endTime}] ${sub.text}`)
-            .join('\n');
+    async extractSummary(subtitles: SubtitleDto[]): Promise<SummaryResultDto[]> {
+        const formattedText = this.formatSubtitles(subtitles);
 
-        // 주요 요약 내용 추출
         const response = await this.openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [
@@ -45,12 +42,15 @@ export class SummarizationService {
 
         // 타임스탬프와 텍스트 추출 후 Subtitle[]으로 변환
         const result = this.parseTimestampedText(response.choices[0]?.message?.content);
-
-        return result.length > 0 ? result : []; // Subtitle[] 배열 반환
+        return result.map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
     }
     catch(error) {
-        console.error('요약 생성 오류:', error);
-        throw new Error(`요약 생성 실패: ${error.message}`);
+        throw new BadRequestException(`요약 생성 실패: ${error.message}`);
+    }
+
+    // 타임라인과 함께 자막 텍스트 결합
+    private formatSubtitles(subtitles: SubtitleDto[]): string {
+        return subtitles.map(sub => `[${sub.startTime} ~ ${sub.endTime}] ${sub.text}`).join('\n');
     }
 
     // 자막 텍스트에서 타임스탬프와 내용을 추출하는 함수
