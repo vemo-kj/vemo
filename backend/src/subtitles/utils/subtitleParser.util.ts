@@ -1,12 +1,15 @@
 import * as fs from 'fs';
-import { Subtitle } from '../interfaces/subtitle.interface';
+import { Subtitle } from '../subtitle.interface';
 
+//  다운로드 받은 자막 전처리하여 service 로직에서 사용
 export class SubtitleParser {
+    // 다운로드 받은 작업 읽기
     static parseFromFile(filePath: string): Subtitle[] {
         const content = fs.readFileSync(filePath, 'utf-8');
         return this.parseContent(content);
     }
 
+    // 읽은 자막 전처리 작업
     static parseContent(content: string): Subtitle[] {
         const lines = content.split('\n');
         const subtitles: Subtitle[] = [];
