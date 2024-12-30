@@ -1,4 +1,4 @@
-import React, { useRef, useState, ChangeEvent, FocusEvent } from 'react';
+import React, { useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import styles from './editor.module.css';
 
@@ -31,13 +31,22 @@ export default function MomoItem({
         onPauseVideo?.();
         setIsDrawingOpen(true);
     };
+    useEffect(() => {
+        if (isDrawingOpen && sigCanvasRef.current && screenshot) {
+            sigCanvasRef.current.clear();
+            sigCanvasRef.current.fromDataURL(screenshot);
+        }
+    }, [isDrawingOpen, screenshot]);
     // 그리기 영역 닫기
     const handleCloseDrawing = () => {
         setIsDrawingOpen(false);
     };
     // 그리기 저장
     const handleSaveDrawing = () => {
-        if (!sigCanvasRef.current) return;
+        if (!sigCanvasRef.current) {
+            console.error('SignatureCanvas가 초기화되지 않았습니다.');
+            return;
+        }
         // 최종 데이터
         const dataUrl = sigCanvasRef.current.getTrimmedCanvas().toDataURL('image/png');
         // “이미지 위에 그린 것” → 새로운 screenshot로 업데이트
@@ -71,23 +80,6 @@ export default function MomoItem({
     const handleTimestampClick = () => {
         onTimestampClick?.(timestamp);
     };
-
-    // const [isEditing, setIsEditing] = useState(false);
-    // const [tempContent, setTempContent] = useState(htmlContent);
-
-    // // 더블 클릭 → 수정 모드
-    // const handleDoubleClick = () => {
-    //     setIsEditing(true);
-    // };
-    // // 텍스트 변경 처리
-    // const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    //     setTempContent(e.target.value);
-    // };
-    // // textarea가 blur(포커스 해제)될 때 → 저장 & 수정모드 해제
-    // const handleFocusOut = (e: FocusEvent<HTMLTextAreaElement>) => {
-    //     onChangeHTML(tempContent);
-    //     setIsEditing(false);
-    // };
 
     return (
         <div className={styles.memoItemContainer}>
