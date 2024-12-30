@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Memos } from '../memos/memos.entity';
-import { Playlist } from '../playlist/playlist.entity';
+import { Playlist } from '../playlist/entities/playlist.entity';
 
 @Entity()
 export class User {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { YoutubeauthService } from 'src/youtubeauth/youtubeauth.service';
 import { Repository } from 'typeorm';
 import { Channel } from './channel.entity';
+import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
 
 @Injectable()
 export class ChannelService {
