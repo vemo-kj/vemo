@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Memos } from '../memos/memos.entity';
 import { Playlist } from '../playlist/playlist.entity';
@@ -10,6 +11,7 @@ export class User {
     @Column({ length: 100 })
     email: string;
 
+    @Exclude()
     @Column({ length: 60 })
     password: string;
 
@@ -23,10 +25,10 @@ export class User {
     nickname: string;
 
     @Column({ length: 255, nullable: true })
-    profileImage: string;
+    profileImage?: string;
 
     @Column({ length: 255, nullable: true })
-    introduction: string;
+    introduction?: string;
 
     @OneToMany(() => Memos, memos => memos.user)
     memos: Memos[];
