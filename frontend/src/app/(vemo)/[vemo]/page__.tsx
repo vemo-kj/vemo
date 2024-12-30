@@ -1,25 +1,26 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import Link from 'next/link';
+// [중요] page1에 있던 Link
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
-import DraftEditor from './components/editor/editor';
-// DraftEditor를 동적 로드
-const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
-    ssr: false,
-});
+import DropdownMenu from './components/DropdownMenu';
+
+// 동적 로드된 DraftEditor
+const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
 
 export default function VemoPage() {
+    const playerRef = useRef<any>(null);
+    const editorRef = useRef<any>(null);
+
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
 
-    const playerRef = useRef<any>(null);
-    // 유튜브 현재 시각
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-    // 캡처된 이미지
-    const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
     useEffect(() => {
-        // 예: 유튜브 API 로드
+        // YouTube Iframe API 로드
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         document.body.appendChild(tag);
@@ -34,7 +35,7 @@ export default function VemoPage() {
         };
     }, []);
 
-    // 1초마다 timestamp 갱신
+    // 1초마다 현재 재생 시간 갱신
     useEffect(() => {
         const interval = setInterval(() => {
             if (playerRef.current?.getCurrentTime) {
@@ -49,35 +50,12 @@ export default function VemoPage() {
         return () => clearInterval(interval);
     }, []);
 
-    // (1) “전체화면 캡처” 클릭
-    const handleCaptureTab = () => {
-        window.postMessage({ type: 'CAPTURE_TAB' }, '*');
-    };
-
-    // (2) “부분 캡처” 클릭
-    const handleCaptureArea = () => {
-        window.postMessage({ type: 'CAPTURE_AREA' }, '*');
-    };
-
-    // 드롭다운 핸들
+    // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
     };
 
-    // (3) 메시지 수신 → capturedImage에 저장
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data.type === 'CAPTURE_TAB_RESPONSE') {
-                setCapturedImage(event.data.dataUrl);
-            } else if (event.data.type === 'CAPTURE_AREA_RESPONSE') {
-                setCapturedImage(event.data.dataUrl);
-            }
-        };
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, []);
-
-    // 노트 클릭 → 해당 시간으로 이동
+    // 노트 아이템에서 timestamp 버튼 클릭 → 해당 시각으로 이동
     const handleSeekToTime = (timestamp: string) => {
         const [m, s] = timestamp.split(':').map(Number);
         const total = (m || 0) * 60 + (s || 0);
@@ -86,10 +64,45 @@ export default function VemoPage() {
         }
     };
 
+    // 영상 일시정지 (그리기 등에서 사용)
+    const pauseVideo = () => {
+        playerRef.current?.pauseVideo();
+    };
+
+    // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
+    useEffect(() => {
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
+                editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
+            } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
+                editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, [currentTimestamp]);
+
+    // 전체/부분 캡처
+    const handleCaptureTab = () => {
+        window.postMessage({ type: 'CAPTURE_TAB' }, '*');
+    };
+    const handleCaptureArea = () => {
+        window.postMessage({ type: 'CAPTURE_AREA' }, '*');
+    };
+
     return (
         <div className={styles.container}>
-            {/* 유튜브 영역 */}
-            <div className={styles.videoSection}>
+            {/* (1) 유튜브 영상 섹션 */}
+            <div className={styles.section1} style={{ position: 'relative' }}>
+                <Link href="/" passHref>
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
+                </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
@@ -99,19 +112,46 @@ export default function VemoPage() {
                         allowFullScreen
                     />
                 </div>
-                <div style={{ marginTop: '10px' }}>
-                    <button onClick={handleCaptureTab}>전체화면 캡처</button>
+            </div>
+
+            {/* (2) 노트 / 에디터 영역 */}
+            <div className={styles.section2}>
+                <h1 className={styles.notesHeader}>나만의 노트</h1>
+                <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
+
+                <div className={styles.notesContent}>
+                    <p className={styles.noteTitle}>자바 스크립트 스터디</p>
+                    <div className={styles.noteActions}>
+                        <div className={styles.dropdown}>
+                            <DropdownMenu
+                                options={['내 메모 보기', 'AI 요약 보기', '옵션 3']}
+                                defaultOption={selectedOption}
+                                onSelect={handleOptionSelect}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <EditorNoSSR
+                    ref={editorRef}
+                    getTimestamp={() => currentTimestamp}
+                    onTimestampClick={handleSeekToTime}
+                    onPauseVideo={pauseVideo}
+                />
+
+                <div className={styles.footerButtons}>
+                    <button onClick={handleCaptureTab}>캡처하기</button>
                     <button onClick={handleCaptureArea}>부분 캡처</button>
+                    <button>요약하기</button>
+                    <button>내보내기</button>
                 </div>
             </div>
 
-            {/* 에디터 (노트) 영역 */}
-            <div className={styles.editorSection}>
-                <EditorNoSSR
-                    getTimestamp={() => currentTimestamp}
-                    onTimestampClick={handleSeekToTime}
-                    capturedImage={capturedImage}
-                />
+            {/* (3) Sidebar */}
+            <div className={styles.section3}>
+                <button className={styles.sidebarButton}>작성하기</button>
+                <button className={styles.sidebarButton}>커뮤니티</button>
+                <button className={styles.sidebarButton}>재생목록</button>
             </div>
         </div>
     );

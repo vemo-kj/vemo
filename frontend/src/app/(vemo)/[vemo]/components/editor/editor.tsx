@@ -1,6 +1,5 @@
 import React, { useImperativeHandle, forwardRef, useState, useRef } from 'react';
 import { Editor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
-
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';

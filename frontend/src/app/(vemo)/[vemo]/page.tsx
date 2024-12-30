@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import Link from 'next/link';
-// [중요] page1에 있던 Link
+import Link from 'next/link'; // [중요] page1에 있던 Link
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
 import DropdownMenu from './components/DropdownMenu';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
-
 export default function VemoPage() {
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);

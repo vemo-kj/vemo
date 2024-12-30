@@ -3,14 +3,11 @@ import SignatureCanvas from 'react-signature-canvas';
 import styles from './editor.module.css';
 
 interface MomoItemProps {
-    //타입 형식
-    id: string; // 각 메모 고유 ID (timestamp + 랜덤 등)
-    timestamp: string; // 타임스탬프
+    id: string;
+    timestamp: string;
     htmlContent: string; // HTML 형식
-    screenshot?: string; // 이미지 형식
-
-    // 이벤트 영역
-    onTimestampClick?: (timestamp: string) => void; // 시간으로 이동
+    screenshot?: string;
+    onTimestampClick?: (timestamp: string) => void;
     onChangeHTML: (newHTML: string) => void;
     onDelete: () => void;
     onPauseVideo?: () => void;
@@ -26,28 +23,10 @@ export default function MomoItem({
     onDelete,
     onPauseVideo,
 }: MomoItemProps) {
-    const contentRef = useRef<HTMLDivElement>(null);
-
-    // contentEditable에서 수정된 내용 감지 → onBlur 시 저장
-    const handleBlur = () => {
-        if (!contentRef.current) return;
-        const newValue = contentRef.current.textContent?.trim() || '';
-
-        // 새 값이 공백이면 => 삭제
-        if (newValue.length === 0) {
-            onDelete();
-        } else {
-            // 공백이 아니면 onChange로 업데이트
-            onChangeHTML(newValue);
-        }
-    };
-
-    // ============= (1) 그리기 =============
-    // 그리기 관련 값 받아오기
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
     const sigCanvasRef = useRef<SignatureCanvas | null>(null);
 
-    // 그리기 모달 열기/닫기
+    // ============= (4) 그리기 열기 =============
     const handleOpenDrawing = () => {
         onPauseVideo?.();
         setIsDrawingOpen(true);
@@ -83,7 +62,6 @@ export default function MomoItem({
         <div className={styles.memoItemContainer}>
             {/* 1) 상단에 타임스탬프 */}
             <div className={styles.memoHeader}>
-                {/* // 타임스템프 버튼 클릭 시 해당 시간으로 이동 */}
                 <button
                     className={styles.timestampBtn}
                     onClick={() => onTimestampClick?.(timestamp)}
@@ -102,12 +80,7 @@ export default function MomoItem({
                 />
             ) : (
                 <div
-                    className={styles.itemContent}
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}
-                    onBlur={handleBlur}
-                    ref={contentRef}
-                    // 처음 마운트 시 초기값 설정
+                    className={styles.memoHTML}
                     dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
             )}
