@@ -6,6 +6,7 @@ import SummaryButton from '../summaryButton/SummaryButton'
 import ExportButton from '../exportButton/ExportButton';
 import { useSummary } from '../../context/SummaryContext';
 import Community from '../community/Community';
+import PlayList from '../playList/PlayList';
 
 interface SidebarNavProps {
     selectedOption: string;
@@ -43,6 +44,7 @@ export default function SidebarNav({ selectedOption, onOptionSelect, renderSecti
                 {activeTab === 'write' && (
                     <>
                         <h1 className={styles.notesHeader}>나만의 노트</h1>
+                        {/* 재생목록 이름이 들어감 */}
                         <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                         <div className={styles.notesContent}>
                             <div className={styles.noteActions}>
@@ -74,13 +76,12 @@ export default function SidebarNav({ selectedOption, onOptionSelect, renderSecti
                     <Community />
                 )}
                 {activeTab === 'playlist' && (
-                    <div className={styles.playlistContent}>
-                        <h2 className={styles.notesHeader}>재생목록</h2>
-                        {/* 재생목록 내용을 여기에 추가하세요 */}
-                    </div>
+                    <PlayList />
                 )}
             </div>
         </div>
     );
 }
+
+
 

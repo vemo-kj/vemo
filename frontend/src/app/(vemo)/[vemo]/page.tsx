@@ -66,6 +66,7 @@ export default function VemoPage() {
                         />
                     </>
                 );
+            // 후에 내용별 반영 예정
             case 'AI 요약 보기':
                 return <p className={styles.noteTitle}>AI 요약 내용을 여기에 표시</p>;
             case '옵션 3':
@@ -102,3 +103,4 @@ export default function VemoPage() {
         </div>
     );
 }
+

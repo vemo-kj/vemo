@@ -12,40 +12,6 @@ interface Memo {
   vemoCount: number;
 }
 
-const DUMMY_MEMOS: Memo[] = [
-  {
-    id: "1",
-    title: "자바스크립트 기초",
-    description: "자바스크립트 변수와 함수에 대한 간단한 설명",
-    author: "user1",
-    date: "2024-12-29",
-    vemoCount: 10,
-  },
-  {
-    id: "2",
-    title: "리액트 훅 사용법",
-    description: "useState와 useEffect의 기본 사용법을 다룹니다.",
-    author: "user2",
-    date: "2024-12-28",
-    vemoCount: 7,
-  },
-  {
-    id: "3",
-    title: "비동기 처리의 이해",
-    description: "Promise와 async/await에 대해 알아봅니다.",
-    author: "user1",
-    date: "2024-12-27",
-    vemoCount: 15,
-  },
-  {
-    id: "4",
-    title: "CSS Flexbox 정리",
-    description: "Flexbox 레이아웃의 핵심 개념을 설명합니다.",
-    author: "user3",
-    date: "2024-12-26",
-    vemoCount: 5,
-  },
-];
 
 export default function Community() {
   const [memos, setMemos] = useState<Memo[]>([]); // 모든 메모 저장
@@ -53,11 +19,7 @@ export default function Community() {
   const [viewMode, setViewMode] = useState<"all" | "mine">("all"); // 보기 모드
   const [selectedCard, setSelectedCard] = useState<Memo | null>(null); // 선택된 카드 상태
 
-  // 더미 데이터를 로드
-  useEffect(() => {
-    setMemos(DUMMY_MEMOS); // 더미 데이터를 상태로 설정
-    setFilteredMemos(DUMMY_MEMOS); // 초기에는 모든 메모를 표시
-  }, []);
+
 
   // 보기 모드에 따른 필터링
   useEffect(() => {
@@ -122,3 +84,4 @@ export default function Community() {
     </div>
   );
 }
+

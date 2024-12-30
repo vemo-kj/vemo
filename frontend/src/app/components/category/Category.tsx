@@ -24,3 +24,4 @@ export default function Category({ categories, onCategorySelect }: CategoryProps
     </div>
   );
 }
+

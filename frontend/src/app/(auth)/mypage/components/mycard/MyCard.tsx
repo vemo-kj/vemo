@@ -6,7 +6,6 @@ import styles from './MyCard.module.css'
 //types
 import { MyCardProps } from '../../../../types/MyCardProps';
 
- 
 
 export default function MyCard({
 

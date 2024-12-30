@@ -6,3 +6,4 @@ export type ProfileImageProps = {
   id: string;
   accept?: typeof Image; 
 }
+

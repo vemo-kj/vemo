@@ -15,8 +15,8 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
+                {/* 베모페이지에서는 안나오게 해야함 -> 우선 주석 처리*/}
                 {/* <Header /> */}
-                {/* 베모페이지에서는 안나오게 해야함 */}
                 {children}
             </body>
         </html>

@@ -9,3 +9,4 @@ export type InputBoxProps = {
   className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
+
