@@ -1,227 +1,149 @@
-import React, { useState, useRef } from 'react';
-import { Editor, EditorState, RichUtils } from 'draft-js';
-import 'draft-js/dist/Draft.css'; // Draft.js 기본 스타일 불러오기
+import React, { useImperativeHandle, forwardRef, useState, useRef } from 'react';
+import { Editor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
+
+import { convertToHTML } from 'draft-convert';
+import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
+import MomoItem from './MemoItem';
 
 interface Section {
+    id: string;
     timestamp: string;
-    content: string;
-    // [추가] 캡처 이미지를 저장할 수 있는 필드
+    htmlContent: string; // Draft.js 인라인 스타일을 포함한 HTML
     screenshot?: string;
 }
 
 interface DraftEditorProps {
     getTimestamp: () => string;
     onTimestampClick?: (timestamp: string) => void;
-    // [추가] page.tsx에서 캡처한 이미지를 받을 수 있도록 props 추가
-    capturedImage?: string | null;
+    onPauseVideo?: () => void; // 영상 정지 (그리기 시)
 }
 
+// parseTimeToSeconds는 동일
 function parseTimeToSeconds(timestamp: string): number {
     const [mm, ss] = timestamp.split(':').map(Number);
-    const min = mm || 0;
-    const sec = ss || 0;
-    return min * 60 + sec;
+    return (mm || 0) * 60 + (ss || 0);
 }
 
-export default function DraftEditor({
-    getTimestamp,
-    onTimestampClick,
-    capturedImage,
-}: DraftEditorProps) {
+// forwardRef로 부모가 addCaptureItem을 호출 가능
+const DraftEditor = forwardRef(function DraftEditorRef(
+    { getTimestamp, onTimestampClick, onPauseVideo }: DraftEditorProps,
+    ref,
+) {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-    const [lastSavedContent, setLastSavedContent] = useState<string | null>(null);
 
-    // 첫 번째 입력 여부
     const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
-    // 첫 입력 시점을 저장할 State
     const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
+    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
 
-    const editorRef = useRef<Editor | null>(null);
+    // ============ 1) 메모 역순 or 정순 =============
+    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
+    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
+    // (아래 handleSave에서 prev => [...prev, newItem])
 
-    // ====================== 메모 저장 로직 ===================== //
+    // ============ 2) addCaptureItem =============
+    useImperativeHandle(ref, () => ({
+        addCaptureItem: (timestamp: string, imageUrl: string) => {
+            const newItem: Section = {
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp,
+                htmlContent: '', // text 없이
+                screenshot: imageUrl, // 이미지만
+            };
+            setSections(prev => [...prev, newItem]); // 아래로 붙이기
+        },
+    }));
+
+    // ============ 3) handleSave (Draft -> HTML)
     const handleSave = () => {
-        const text = editorState.getCurrentContent().getPlainText().trim();
-        if (text.length === 0) return; // 내용이 비어있으면 저장하지 않음
+        const contentState = editorState.getCurrentContent();
+        if (!contentState.hasText()) return; // 비어있으면 무시
 
-        const timestamp =
+        // Draft -> HTML
+        const html = convertToHTML(editorState.getCurrentContent());
+
+        const stamp =
             isFirstInputRecorded && firstInputTimestamp ? firstInputTimestamp : getTimestamp();
 
-        setSections(prev => {
-            const newSections = [
-                ...prev,
-                {
-                    timestamp,
-                    content: text,
-                    // [중요] 캡처된 이미지를 메모에 저장하고 싶으면 여기에 추가 가능
-                    // screenshot: capturedImage,
-                },
-            ];
-            // 타임스탬프 기준 정렬
-            return newSections.sort(
-                (a, b) => parseTimeToSeconds(a.timestamp) - parseTimeToSeconds(b.timestamp),
-            );
-        });
+        const newItem: Section = {
+            id: Math.random().toString(36).substr(2, 9),
+            timestamp: stamp,
+            htmlContent: html,
+        };
 
-        // 에디터 초기화
+        setSections(prev => [...prev, newItem]); // 아래로 추가
         setEditorState(EditorState.createEmpty());
-        setLastSavedContent(text);
-
-        // 첫 입력 관련 상태 초기화
+        setLastSavedHTML(html);
         setIsFirstInputRecorded(false);
         setFirstInputTimestamp(null);
     };
 
-    // [추가] "캡처 이미지를 바로 메모에 저장" 기능 (버튼을 누르거나 page.tsx에서 호출 가능)
-    const handleSaveCapture = () => {
-        if (!capturedImage) return;
-        // 이때도 타임스탬프 필요
-        const timestamp = getTimestamp();
-        setSections(prev => {
-            const newSections = [
-                ...prev,
-                {
-                    timestamp,
-                    content: '[캡처 화면]',
-                    screenshot: capturedImage,
-                },
-            ];
-            return newSections.sort(
-                (a, b) => parseTimeToSeconds(a.timestamp) - parseTimeToSeconds(b.timestamp),
-            );
-        });
-    };
-
-    // 엔터 키 동작 처리
+    // ============ 4) handleKeyCommand (엔터 => 저장)
     const handleKeyCommand = (command: string) => {
         if (command === 'submit') {
-            const currentContent = editorState.getCurrentContent().getPlainText().trim();
-            if (currentContent !== lastSavedContent) {
-                handleSave();
-            } else if (lastSavedContent) {
-                // 동일 내용 중복 저장 로직(옵션)
-                setSections(prev => {
-                    const newSections = [
-                        ...prev,
-                        {
-                            timestamp: getTimestamp(),
-                            content: lastSavedContent,
-                        },
-                    ];
-                    return newSections.sort(
-                        (a, b) => parseTimeToSeconds(a.timestamp) - parseTimeToSeconds(b.timestamp),
-                    );
-                });
-            }
+            handleSave();
             return 'handled';
         }
         return 'not-handled';
     };
 
-    // 에디터 상태 업데이트
+    // Draft onChange
     const handleEditorChange = (newState: EditorState) => {
         setEditorState(newState);
-        const currentText = newState.getCurrentContent().getPlainText().trim();
-
-        if (currentText.length > 0 && !isFirstInputRecorded) {
+        const t = newState.getCurrentContent().getPlainText().trim();
+        if (t.length > 0 && !isFirstInputRecorded) {
             setIsFirstInputRecorded(true);
             setFirstInputTimestamp(getTimestamp());
         }
     };
 
-    // 스타일 활성화 상태 확인
-    const isStyleActive = (style: string) => {
-        return editorState.getCurrentInlineStyle().has(style);
-    };
+    // 인라인 스타일
+    const isStyleActive = (style: string) => editorState.getCurrentInlineStyle().has(style);
 
-    // 스타일 토글
     const toggleInlineStyle = (style: string) => {
-        setEditorState(prevState => RichUtils.toggleInlineStyle(prevState, style));
+        setEditorState(prev => RichUtils.toggleInlineStyle(prev, style));
     };
 
-    // ====================== 메모 삭제/수정 ===================== //
-    const handleDelete = (index: number) => {
-        setSections(prev => {
-            const newSections = [...prev];
-            newSections.splice(index, 1);
-            return newSections;
-        });
+    // 메모 수정(HTML), 삭제
+    const handleChangeItem = (id: string, newHTML: string) => {
+        setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
     };
-
-    const handleEdit = (index: number) => {
-        // 간단하게 prompt 예시
-        const newContent = prompt('수정할 내용을 입력하세요', sections[index].content);
-        if (newContent == null) return; // 취소 시 아무 것도 안 함
-
-        setSections(prev => {
-            const newSections = [...prev];
-            newSections[index].content = newContent;
-            return newSections;
-        });
+    const handleDeleteItem = (id: string) => {
+        setSections(prev => prev.filter(s => s.id !== id));
     };
 
     return (
         <div className={styles.container}>
-            {/* [추가] 캡처 이미지 저장 버튼 (옵션)
-                만약 "캡처 후 자동 저장"을 원하면, page.tsx에서 capturedImage가 갱신될 때 자동으로 handleSaveCapture() 호출해도 됨
-             */}
-            {capturedImage && (
-                <button
-                    onClick={handleSaveCapture}
-                    style={{ marginBottom: '10px', cursor: 'pointer' }}
-                >
-                    이 캡처 이미지를 메모로 저장하기
-                </button>
-            )}
-
-            {/* 메모 목록 */}
+            {/* 메모 목록 (빨간 영역) */}
             <div className={styles.displayArea}>
-                {sections.map((section, idx) => (
-                    <div key={idx} className={styles.displayItem}>
-                        <button
-                            className={styles.timestampBtn}
-                            onClick={() => onTimestampClick?.(section.timestamp)}
-                        >
-                            {section.timestamp}
-                        </button>
-                        <span className={styles.timestamp}>{section.content}</span>
-
-                        {/* [추가] 만약 section에 screenshot이 있다면 표시 */}
-                        {section.screenshot && (
-                            <img
-                                src={section.screenshot}
-                                alt="screenshot"
-                                style={{
-                                    maxWidth: '100%',
-                                    marginTop: '5px',
-                                    border: '1px solid #ddd',
-                                }}
-                            />
-                        )}
-
-                        {/* [추가] 수정/삭제 버튼 */}
-                        <button onClick={() => handleEdit(idx)}>수정</button>
-                        <button onClick={() => handleDelete(idx)}>삭제</button>
-                    </div>
+                {/* 1) 위→아래 생성이므로, 그냥 map (인덱스 순) */}
+                {sections.map(item => (
+                    <MomoItem
+                        key={item.id}
+                        id={item.id}
+                        timestamp={item.timestamp}
+                        htmlContent={item.htmlContent}
+                        screenshot={item.screenshot}
+                        onTimestampClick={onTimestampClick}
+                        onDelete={() => handleDeleteItem(item.id)}
+                        onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
+                        onPauseVideo={onPauseVideo}
+                    />
                 ))}
             </div>
 
-            {/* Draft.js 에디터 */}
+            {/* Draft Editor */}
             <div className={styles.editorArea}>
                 <Editor
-                    ref={editorRef}
                     editorState={editorState}
                     onChange={handleEditorChange}
                     placeholder="내용을 입력하세요..."
-                    keyBindingFn={e => {
-                        if (e.key === 'Enter') return 'submit'; // 커스텀 명령어 "submit"
-                        return null;
-                    }}
+                    keyBindingFn={e => (e.key === 'Enter' ? 'submit' : null)}
                     handleKeyCommand={handleKeyCommand}
                 />
                 <div className={styles.toolbar}>
-                    {/* 인라인 스타일 버튼 */}
+                    {/* B I U 버튼 */}
                     <button
                         className={isStyleActive('BOLD') ? styles.activeButton : ''}
                         onMouseDown={e => {
@@ -249,16 +171,7 @@ export default function DraftEditor({
                     >
                         U
                     </button>
-                    <button
-                        className={isStyleActive('CODE') ? styles.activeButton : ''}
-                        onMouseDown={e => {
-                            e.preventDefault();
-                            toggleInlineStyle('CODE');
-                        }}
-                    >
-                        {'<>'}
-                    </button>
-                    {/* 저장 버튼 */}
+                    {/* 더 필요하면 추가 */}
                     <button className={styles.addButton} onClick={handleSave}>
                         +
                     </button>
@@ -266,4 +179,6 @@ export default function DraftEditor({
             </div>
         </div>
     );
-}
+});
+
+export default DraftEditor;
