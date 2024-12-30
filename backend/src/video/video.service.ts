@@ -15,6 +15,8 @@ export class VideoService {
     ) {}
 
     async getVideoById(videoId: string): Promise<Video> {
+        await this.youtubeauthService.ensureAuthenticated();
+
         const existingVideo = await this.videoRepository.findOne({
             where: { id: videoId },
             relations: ['channel'],
