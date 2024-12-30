@@ -8,6 +8,6 @@ export class SubtitleDto {
     endTime: string;
 
     @IsString()
-    @IsNotEmpty({ message: 'Text must not be empty' })
+    @IsNotEmpty()
     text: string;
 }

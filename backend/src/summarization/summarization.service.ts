@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { SubtitleDto } from './dto/subtitle.dto';
-import { SummaryResultDto } from './dto/summary-result';
+import { SummaryResultDto } from './dto/summary-result.dto';
 import { Summary } from './entity/summarization.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +27,7 @@ export class SummarizationService {
         });
     }
 
-    async extractSummary(subtitles: SubtitleDto[]): Promise<SummaryResultDto[]> {
+    async extractSummary(subtitles: SubtitleDto[], videoid: string): Promise<SummaryResultDto[]> {
         const formattedText = this.formatSubtitles(subtitles);
 
         const response = await this.openai.chat.completions.create({
@@ -54,8 +54,13 @@ export class SummarizationService {
         });
 
         // 타임스탬프와 텍스트 추출 후 Subtitle[]으로 변환
-        const result = this.parseTimestampedText(response.choices[0]?.message?.content);
-        return result.map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
+        const result: SummaryResultDto[] = this.parseTimestampedText(
+            response.choices[0]?.message?.content,
+        ).map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
+
+        await this.createSummaries(videoid, result);
+
+        return result;
     }
     catch(error) {
         throw new BadRequestException(`요약 생성 실패: ${error.message}`);
@@ -78,5 +83,23 @@ export class SummarizationService {
         }
 
         return result;
+    }
+
+    // 요약본 DB에 저장 (Summaries & Summary)
+    // 반환값 없음
+    private async createSummaries(
+        videoid: string,
+        result: { timestamp: string; summary: string }[],
+    ): Promise<void> {
+        const newSummaries = this.summariesRepository.create({
+            videoid,
+            summaries: result.map(data =>
+                this.summaryRepository.create({
+                    timestamp: data.timestamp,
+                    summary: data.summary,
+                }),
+            ),
+        });
+        await this.summariesRepository.save(newSummaries);
     }
 }
