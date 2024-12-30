@@ -3,18 +3,29 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
-import { SubtitlesModule } from './subtitles/subtitles.module';
+import { MemosModule } from './memos/memos.module';
+import { VideoModule } from './video/video.module';
+import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            envFilePath: `${__dirname}/../../.env`,
+            envFilePath: '.env',
         }),
-        SubtitlesModule,
-    ],
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => typeOrmConfig(configService),
+            inject: [ConfigService],
+        }),
 
+        MemosModule,
+        VideoModule,
+        ChannelModule,
+        YoutubeauthModule,
+    ],
     controllers: [AppController],
     providers: [AppService],
 })
