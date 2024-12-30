@@ -1,11 +1,20 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as session from 'express-session';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors();
+
+    app.use(
+        session({
+            secret: process.env.SESSION_SECRET,
+            resave: false,
+            saveUninitialized: false,
+            cookie: { secure: false },
+        }),
+    );
 
     app.useGlobalPipes(
         new ValidationPipe({
