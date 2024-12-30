@@ -2,15 +2,28 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { SubtitleDto } from './dto/subtitle.dto';
-import { SummaryResultDto } from './dto/summary-result.dto';
+import { SummaryResultDto } from './dto/summary-result';
+import { Summary } from './entity/summarization.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Summaries } from './entity/summaries.entity';
 
 @Injectable()
 export class SummarizationService {
     private readonly openai: OpenAI;
 
-    constructor(private configService: ConfigService) {
+    // memoRepository는 여기에서 @InjectRepository를 사용해 주입
+    constructor(
+        @InjectRepository(Summaries)
+        private summariesRepository: Repository<Summaries>,
+
+        @InjectRepository(Summary)
+        private summaryRepository: Repository<Summary>,
+
+        private configService: ConfigService,
+    ) {
         this.openai = new OpenAI({
-            apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+            apiKey: this.configService.get<string>('OPENAI_API_KEY'), // 여기 수정
         });
     }
 
