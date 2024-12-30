@@ -15,6 +15,15 @@ export class VideoService {
     ) {}
 
     async getVideoById(videoId: string): Promise<Video> {
+        const existingVideo = await this.videoRepository.findOne({
+            where: { id: videoId },
+            relations: ['channel'],
+        });
+
+        if (existingVideo) {
+            return existingVideo;
+        }
+
         const response = await this.youtubeauthService.youtube.videos.list({
             part: ['snippet', 'contentDetails', 'statistics'],
             id: [videoId],
@@ -44,7 +53,7 @@ export class VideoService {
             channel,
         });
 
-        return video;
+        return await this.videoRepository.save(video);
     }
 
     private parseDuration(duration: string): string {
