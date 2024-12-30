@@ -8,6 +8,7 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { MemosModule } from './memos/memos.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
+import { VemoModule } from './vemo/vemo.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
         VideoModule,
         ChannelModule,
         YoutubeauthModule,
+        VemoModule,
     ],
     controllers: [AppController],
     providers: [AppService],

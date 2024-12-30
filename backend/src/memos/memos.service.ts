@@ -15,7 +15,7 @@ export class MemosService {
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) {}
 
-    async createMemos(createMemosDto: CreateMemosDto): Promise<Memos> {
+    async createMemos(createMemosDto: CreateMemosDto & { videoId: string }): Promise<Memos> {
         const user = await this.userRepository.findOne({ where: { id: createMemosDto.userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${createMemosDto.userId} not found`);
