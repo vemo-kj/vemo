@@ -2,6 +2,11 @@ import { Type } from 'class-transformer';
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class SignupRequestsDto {
+    @IsString()
+    @Length(1, 100)
+    @IsNotEmpty()
+    name: string;
+
     @IsEmail()
     @IsNotEmpty()
     email: string;
