@@ -1,8 +1,16 @@
-import { Controller, Get, InternalServerErrorException, Query } from '@nestjs/common';
+import {
+    BadRequestException,
+    Controller,
+    Get,
+    InternalServerErrorException,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+import { YoutubeAuthGuard } from 'src/youtubeauth/youtubeauth.guard';
 import { YoutubeauthService } from 'src/youtubeauth/youtubeauth.service';
 import { VideoService } from './video.service';
-
 @Controller('video')
+@UseGuards(YoutubeAuthGuard)
 export class VideoController {
     constructor(
         private readonly videoservice: VideoService,
@@ -11,6 +19,10 @@ export class VideoController {
 
     @Get('getVideo')
     async getVideo(@Query('videoId') videoId: string) {
+        if (!videoId) {
+            throw new BadRequestException('videoId is required');
+        }
+
         if (!this.youtubeauthService.isAuthenticated()) {
             return { error: 'Not authenticated' };
         }
