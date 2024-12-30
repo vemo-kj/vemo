@@ -1,24 +1,26 @@
 'use client';
-// style
-import styles from './DropDownMenu.module.css';
-// next
+
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import styles from './DropDownMenu.module.css';
 
 export default function DropDownMenu() {
   const [drop, setDrop] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const loggedIn = !!localStorage.getItem('token');
-    setIsLoggedIn(loggedIn);
+    if (typeof window !== 'undefined') {
+      const loggedIn = !!localStorage.getItem('token');
+      setIsLoggedIn(loggedIn);
+    }
   }, []);
 
   const toggleDropdown = () => {
     if (isLoggedIn) {
-      setDrop(!drop);
+      setDrop((prev) => !prev);
     } else {
       router.push('/login');
     }
@@ -30,31 +32,43 @@ export default function DropDownMenu() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    alert('로그아웃 되었습니다.');
-    setIsLoggedIn(false); 
+    setIsLoggedIn(false);
     closeDropdown();
     router.push('/login');
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        closeDropdown();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className={styles.dropdown}>
-      <button onClick={toggleDropdown} className={styles.dropbtn}>
+    <div ref={dropdownRef} className={styles.dropdown}>
+      <button
+        onClick={toggleDropdown}
+        className={styles.dropbtn}
+        aria-haspopup="true"
+        aria-expanded={drop}
+      >
         <img src="/icons/user.svg" alt="User Icon" />
       </button>
-
       {isLoggedIn && drop && (
         <div className={styles.dropdownContent}>
-          <Link
-            href="/mypage"
-            className={styles.dropdownItem}
-            onClick={closeDropdown}
-          >
+          <Link href="/mypage" className={styles.dropdownItem}>
             My Page
           </Link>
-          <button
-            className={styles.dropdownItem}
-            onClick={handleLogout}
-          >
+          <button className={styles.dropdownItem} onClick={handleLogout}>
             Logout
           </button>
         </div>

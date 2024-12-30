@@ -12,16 +12,20 @@ import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
   const router = useRouter();
-  
+
   // 상태 관리
   const [formData, setFormData] = useState({
     name: '',
-    date: '',
+    birth: '',
     nickname: '',
     email: '',
     password: '',
-    passwordCheck: '',
+    // passwordCheck: '',
+    introduction:'',
+    gender:'',
   });
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null); // 이미지 상태 관리
   const [error, setError] = useState<string | null>(null);
 
   // 입력값 변경 핸들러
@@ -39,20 +43,31 @@ export default function SignUpPage() {
     setError(null);
 
     // 간단한 유효성 검사
-    if (formData.password !== formData.passwordCheck) {
-      setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+    // if (formData.password !== formData.passwordCheck) {
+    //   setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+    //   return;
+    // }
+
+    if (!selectedImage) {
+      setError('프로필 이미지를 선택하세요.');
       return;
     }
 
     try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      // FormData로 데이터 생성
+      const formDataObj = new FormData();
+      formDataObj.append('profileImage', selectedImage);
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataObj.append(key, value);
       });
 
+      const response = await fetch("http://192.168.1.122:5050/users/signup", {
+        method: 'POST',
+        credentials: 'include',
+        body: formDataObj,
+      });
+
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || '회원가입 실패');
@@ -72,7 +87,7 @@ export default function SignUpPage() {
     <div className={styles.signUpBox}>
       <h1 className={styles.signUpTitle}>회원정보 입력</h1>
       <form onSubmit={handleSubmit}>
-        <ProfileImage id="" />
+        <ProfileImage onImageSelect={(image) => setSelectedImage(image)} />
         <InputBox
           label="이름"
           type="text"
@@ -84,11 +99,19 @@ export default function SignUpPage() {
         <InputBox
           label="생년월일"
           type="date"
-          id="date"
-          name="date"
+          id="birth"
+          name="birth"
           required
           onChange={handleInputChange}
         />
+        <InputBox
+          label="성별"
+          type="text"
+          id="gender"
+          name="gender"
+          required
+          onChange={handleInputChange}
+          />
         <InputBox
           label="닉네임"
           type="text"
@@ -118,6 +141,14 @@ export default function SignUpPage() {
           type="password"
           id="passwordCheck"
           name="passwordCheck"
+          required
+          onChange={handleInputChange}
+        />
+        <InputBox
+          label="자기소개"
+          type="text"
+          id="introduction"
+          name="introduction"
           required
           onChange={handleInputChange}
         />

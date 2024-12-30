@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 export default function SignUpButton() {
   return (
-    <Link href="/login">
+    // <Link href="/login">
       <button className={styles.signUpButton}>회원가입</button>
-    </Link>
+    // </Link>
   );
 }

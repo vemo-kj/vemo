@@ -8,5 +8,6 @@ export type InputBoxProps = {
   required?: boolean;
   className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  children?: React.ReactNode; // children prop 추가
 };
 

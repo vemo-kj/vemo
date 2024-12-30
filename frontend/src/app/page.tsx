@@ -15,21 +15,25 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 // Home page
 export default function Home() {
-
+    // 카테고리 사용 키워드 선정 필요
     const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
+
     const [selectedCategory, setSelectedCategory] = useState('All');
 
     const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const search = searchParams.get('q') || '';
+
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-
+    // API
     const fetchMainCards = async () => {
         try {
             setIsLoading(true);
+            // 주소 작성 필요
             const response = await fetch('/api/mainCards', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
@@ -49,6 +53,17 @@ export default function Home() {
         fetchMainCards();
     }, []);
 
+
+    const handleCategoryClick = (category: string) => {
+        setSelectedCategory(category);
+
+        if (category === 'All') {
+        router.push('/');
+        } else {
+        router.push(`/?category=${encodeURIComponent(category)}`);
+        }
+    };
+
     const filteredCards = mainCards.filter((card) => {
         const matchesCategory =
         selectedCategory === 'All' || card.category === selectedCategory;
@@ -62,16 +77,6 @@ export default function Home() {
         return matchesCategory;
         }
     });
-
-    const handleCategoryClick = (category: string) => {
-        setSelectedCategory(category);
-
-        if (category === 'All') {
-        router.push('/');
-        } else {
-        router.push(`/?category=${encodeURIComponent(category)}`);
-        }
-    };
 
 
     return (
