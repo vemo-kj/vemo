@@ -8,6 +8,7 @@ export class YoutubeauthService implements OnModuleInit {
     private readonly logger = new Logger(YoutubeauthService.name);
     private oauth2Client: OAuth2Client;
     public youtube: youtube_v3.Youtube;
+    private tokenStorage: Map<string, any> = new Map();
 
     constructor(private configService: ConfigService) {}
 
@@ -55,5 +56,19 @@ export class YoutubeauthService implements OnModuleInit {
 
     isAuthenticated(): boolean {
         return !!this.oauth2Client?.credentials?.access_token;
+    }
+
+    async setTokenForSession(sessionId: string, tokens: any) {
+        this.tokenStorage.set(sessionId, tokens);
+        this.oauth2Client.setCredentials(tokens);
+        this.initializeYouTubeClient();
+    }
+
+    isAuthenticatedForSession(sessionId: string): boolean {
+        return this.tokenStorage.has(sessionId);
+    }
+
+    clearTokenForSession(sessionId: string) {
+        this.tokenStorage.delete(sessionId);
     }
 }

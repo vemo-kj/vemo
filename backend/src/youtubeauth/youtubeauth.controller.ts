@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Redirect } from '@nestjs/common';
+import { Controller, Get, Query, Redirect, Session } from '@nestjs/common';
 import { YoutubeauthService } from './youtubeauth.service';
 
 @Controller('youtubeauth')
@@ -11,8 +11,14 @@ export class YoutubeauthController {
     }
 
     @Get('OAuth2Callback')
-    async oauth2Callback(@Query('code') code: string) {
+    @Redirect()
+    async oauth2Callback(@Query('code') code: string, @Session() session: Record<string, any>) {
         const tokens = await this.youtubeauthService.getAccessToken(code);
-        return { tokens };
+        await this.youtubeauthService.setTokenForSession(session.id, tokens);
+
+        const returnUrl = session.returnTo || '/';
+        delete session.returnTo;
+
+        return { url: returnUrl };
     }
 }
