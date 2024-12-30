@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { SubtitlesController } from './subtitles.controller';
 import { SubtitlesService } from './subtitles.service';
+import { SubtitlesController } from './subtitles.controller';
 
 @Module({
-    controllers: [SubtitlesController],
     providers: [SubtitlesService],
+    controllers: [SubtitlesController],
 })
 export class SubtitlesModule {}
