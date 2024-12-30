@@ -1,6 +1,6 @@
 // /components/DrawingCanvas.tsx
 import React, { useRef } from 'react';
-// import CanvasDraw from 'react-canvas-draw'; // [추가] 라이브러리 설치 필요: npm install react-canvas-draw
+import CanvasDraw from 'react-canvas-draw'; // [추가] 라이브러리 설치 필요: npm install react-canvas-draw
 import styles from './DrawingCanvas.module.css'; // 스타일은 적절히 작성
 
 interface DrawingCanvasProps {

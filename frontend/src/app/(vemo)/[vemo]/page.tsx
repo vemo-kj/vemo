@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import Link from 'next/link'; // [중요] page1에 있던 Link
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
 import DropdownMenu from './components/DropdownMenu';
@@ -13,7 +13,6 @@ export default function VemoPage() {
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
 
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
 
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
