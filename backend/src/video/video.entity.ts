@@ -1,7 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { Channel } from '../channel/channel.entity';
 import { Memos } from '../memos/memos.entity';
-import { PlaylistVideo } from '../playlist/playlist_video.entity';
+import { Playlist } from '../playlist/entities/playlist.entity';
 
 @Entity()
 export class Video {
@@ -26,6 +26,6 @@ export class Video {
     @OneToMany(() => Memos, memos => memos.video)
     memos?: Memos[];
 
-    @OneToMany(() => PlaylistVideo, playlistVideo => playlistVideo.video)
-    playlistVideos?: PlaylistVideo[];
+    @ManyToMany(() => Playlist, playlist => playlist.videos)
+    playlists: Playlist[];
 }
