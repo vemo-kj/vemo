@@ -2,7 +2,7 @@
 
 .container {
     display: grid;
-    grid-template-columns: 6fr 2fr 0.5fr;
+    grid-template-columns: 6fr 4fr;
     height: 100vh;
     width: 100vw;
     gap: 0;
@@ -43,109 +43,12 @@
     border: none;
 }
 
-.videoTitle {
-    margin-top: 10px;
-    font-size: 16px;
-    color: #555;
-}
-
-/* Section 2: 노트 영역 */
-.section2 {
-    background-color: #ffffff;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.notesHeader {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.notesSubHeader {
-    font-size: 14px;
-    color: #888;
-    margin: 0px;
-}
-
-.notesContent {
-    flex: 1;
-}
-
-.noteTitle {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    width: 50%;
-    display: block;
-}
-
-.noteActions {
-    margin-bottom: 20px;
-}
-
-.noteDropdown {
-    background-color: #f1f3f5;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-/* 드롭다운 메뉴 */
-.dropdown {
-    position: relative;
-    display: block;
-    float: right;
-}
-
-.dropdownMenu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    list-style: none;
-    padding: 0;
-    margin: 4px 0;
-    width: 150px;
-}
-
-.dropdownMenu li {
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.dropdownMenu li:hover {
-    background-color: #f1f3f5;
-}
-
 /* 텍스트 입력 */
 .textInput {
     display: flex;
     width: 100%;
     flex-direction: column;
     margin-bottom: 80px;
-}
-
-.textToolbar button {
-    background-color: #f1f3f5;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.textToolbar button:hover {
-    background-color: #d1d5db;
 }
 
 /* Footer Buttons */
@@ -172,28 +75,10 @@
 /* Section 3: 사이드바 */
 .section3 {
     background-color: #f8f9fa;
-    padding: 20px;
+    /* padding: 20px; */
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.sidebarButton {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.sidebarButton:hover {
-    background-color: #005bb5;
 }
 
 .videoWrapper {

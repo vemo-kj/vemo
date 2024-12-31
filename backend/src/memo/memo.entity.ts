@@ -13,7 +13,6 @@ export class Memo {
     @Column({ length: 1000, nullable: true })
     description: string;
 
-    @ManyToOne(() => Memos, memos => memos.memos, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'memosId' })
     memos: Memos;
 }
