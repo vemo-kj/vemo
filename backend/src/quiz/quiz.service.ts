@@ -67,7 +67,7 @@ export class QuizService {
         const text = response.choices[0]?.message?.content;
 
         const parsedQuiz = this.parseQuizToArray(text);
-        console.log(parsedQuiz);
+        console.log('✨', this.findQuiz(videoid));
 
         return parsedQuiz;
         // }
@@ -121,7 +121,15 @@ export class QuizService {
         });
 
         newQuizzes.quizzes = quizzes;
-
         await this.quizzesRepository.save(newQuizzes);
+    }
+
+    // Quizzes 테이블에서 videoid 찾기기
+    private async findQuiz(videoid: string): Promise<boolean> {
+        const existingQuiz = this.quizzesRepository.findOne({
+            where: { videoid },
+        });
+
+        return existingQuiz ? true : false;
     }
 }
