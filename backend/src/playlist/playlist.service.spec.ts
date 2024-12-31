@@ -45,7 +45,7 @@ describe('PlaylistService', () => {
                 {
                     provide: VideoService,
                     useValue: {
-                        getVideosByIds: jest.fn(), // 메서드 이름 변경 반영
+                        getVideosByIds: jest.fn(),
                     },
                 },
             ],
@@ -71,7 +71,6 @@ describe('PlaylistService', () => {
 
             const mockUser: User = {
                 id: createPlaylistDto.userId,
-                // 필요한 다른 속성들...
             } as User;
 
             const mockVideos: Video[] = [
@@ -84,7 +83,6 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 1',
                         thumbnails: 'http://example.com/channel1.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
                 {
@@ -96,7 +94,6 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 2',
                         thumbnails: 'http://example.com/channel2.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
             ];
@@ -104,7 +101,7 @@ describe('PlaylistService', () => {
             // UsersService.findById 모킹
             (usersService.findById as jest.Mock).mockResolvedValue(mockUser);
 
-            // VideoService.getVideosByIds 모킹 (메서드 이름 변경 반영)
+            // VideoService.getVideosByIds 모킹
             (videoService.getVideosByIds as jest.Mock).mockResolvedValue(mockVideos);
 
             // PlaylistRepository.create 모킹
@@ -182,7 +179,6 @@ describe('PlaylistService', () => {
 
             const mockUser: User = {
                 id: createPlaylistDto.userId,
-                // 필요한 다른 속성들...
             } as User;
 
             const mockVideos: Video[] = [
@@ -195,7 +191,6 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 1',
                         thumbnails: 'http://example.com/channel1.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
                 {
@@ -207,10 +202,8 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 2',
                         thumbnails: 'http://example.com/channel2.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
-                // video3는 존재하지 않음
             ];
 
             // UsersService.findById 모킹
@@ -238,7 +231,6 @@ describe('PlaylistService', () => {
             const userId = 1;
             const mockUser: User = {
                 id: userId,
-                // 필요한 다른 속성들...
             } as User;
 
             const mockVideos: Video[] = [
@@ -251,7 +243,6 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 1',
                         thumbnails: 'http://example.com/channel1.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
                 {
@@ -263,7 +254,6 @@ describe('PlaylistService', () => {
                     channel: {
                         title: '채널 2',
                         thumbnails: 'http://example.com/channel2.jpg',
-                        // 필요한 다른 속성들...
                     } as Channel,
                 } as Video,
             ];
