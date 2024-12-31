@@ -2,12 +2,25 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { SubtitleDto } from './dto/subtitle.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Quizzes } from './entity/quizzes.entity';
+import { Quiz } from './entity/quiz.entity';
+import { Repository } from 'typeorm';
+import { QuizResultDto } from './dto/quizResult.dto';
 
 @Injectable()
 export class QuizService {
     private readonly openai: OpenAI;
 
-    constructor(private configService: ConfigService) {
+    constructor(
+        @InjectRepository(Quizzes)
+        private quizzesRepository: Repository<Quizzes>,
+
+        @InjectRepository(Quiz)
+        private quizRepository: Repository<Quiz>,
+
+        private configService: ConfigService,
+    ) {
         this.openai = new OpenAI({
             apiKey: this.configService.get<string>('OPENAI_API_KEY'),
         });
@@ -44,11 +57,12 @@ export class QuizService {
             top_p: 0.8,
         });
 
-        // response을 타임스탬프와 텍스트 추출 후 요약본 return
-        // const result: SummaryResultDto[] = this.parseTimestampedText(
-        //     response.choices[0]?.message?.content,
-        // ).map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
-        // await this.createSummaries(videoid, result);
+        const result: QuizResultDto[] = this.parseQuizToArray(
+            response.choices[0]?.message?.content,
+        ).map(([timestamp, question, answer]) => new QuizResultDto(timestamp, question, answer));
+
+        // DB에 저장
+        await this.createQuizzes(videoid, result);
 
         const text = response.choices[0]?.message?.content;
 
@@ -58,9 +72,9 @@ export class QuizService {
         return parsedQuiz;
         // }
     }
-    catch(error) {
-        throw new BadRequestException(`퀴즈 생성 실패: ${error.message}`);
-    }
+    // catch(error) {
+    //     throw new BadRequestException(`퀴즈 생성 실패: ${error.message}`);
+    // }
 
     // 타임라인과 함께 자막 텍스트 결합
     private formatSubtitles(subtitles: SubtitleDto[]): string {
@@ -77,7 +91,37 @@ export class QuizService {
             const [, timestamp, question, answer] = match;
             result.push([timestamp, question, answer]);
         }
-
         return result;
+    }
+
+    // string 형태의 timestamp를 Date형태로 변환
+    private convertToTime(timestamp: string): Date {
+        const [minutes, seconds] = timestamp.split(':').map(Number);
+        const date = new Date();
+        date.setHours(0, minutes, seconds, 0);
+        return date;
+    }
+
+    // 요약본을 DB에 저장 (Quizzes & Quiz 테이블)
+    // 퀴즈 데이터 생성 및 저장 메서드
+    private async createQuizzes(
+        videoid: string,
+        result: { timestamp: string; question: string; answer: string }[],
+    ): Promise<void> {
+        const newQuizzes = this.quizzesRepository.create({ videoid });
+
+        const quizzes = result.map(data => {
+            const quiz = this.quizRepository.create({
+                timestamp: this.convertToTime(data.timestamp),
+                question: data.question,
+                answer: data.answer,
+            });
+            quiz.quizzes = newQuizzes;
+            return quiz;
+        });
+
+        newQuizzes.quizzes = quizzes;
+
+        await this.quizzesRepository.save(newQuizzes);
     }
 }
