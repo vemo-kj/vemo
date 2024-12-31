@@ -9,5 +9,6 @@ import { VideoService } from './video.service';
     imports: [TypeOrmModule.forFeature([Video]), YoutubeauthModule, ChannelModule],
     providers: [VideoService],
     controllers: [VideoController],
+    exports: [VideoService],
 })
 export class VideoModule {}
