@@ -1,77 +1,101 @@
-import Image from 'next/image';
+'use client';
+
+//style
 import styles from './page.module.css';
+//component
+import Category from './components/category/Category';
+import Header from './components/Layout/Header';
+import MainCard from './components/mainCard/MainCard';
+//type
+import { MainCardProps } from './types/MainCardProps';
+//next
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
+
+// Home page
 export default function Home() {
-    return (
-        <div className={styles.page}>
-            <main className={styles.main}>
-                <Image
-                    className={styles.logo}
-                    src="/next.svg"
-                    alt="Next.js logo"
-                    width={180}
-                    height={38}
-                    priority
-                />
-                <ol>
-                    <li>
-                        Get started by editing <code>src/app/page.tsx</code>.
-                    </li>
-                    <li>Save and see your changes instantly.</li>
-                </ol>
+    // 카테고리 사용 키워드 선정 필요
+    const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
 
-                <div className={styles.ctas}>
-                    <a
-                        className={styles.primary}
-                        href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <Image
-                            className={styles.logo}
-                            src="/vercel.svg"
-                            alt="Vercel logomark"
-                            width={20}
-                            height={20}
-                        />
-                        Deploy now
-                    </a>
-                    <a
-                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.secondary}
-                    >
-                        Read our docs
-                    </a>
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
+    const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const search = searchParams.get('q') || '';
+
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // API
+    const fetchMainCards = async () => {
+        try {
+            setIsLoading(true);
+            // 주소 작성 필요
+            const response = await fetch('/api/mainCards', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (!response.ok) throw new Error('Failed to fetch main cards');
+            const data = await response.json();
+            setMainCards(data);
+        } catch (error) {
+            setError('데이터를 불러오는데 실패했습니다.');
+            console.error('Error fetching main cards:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMainCards();
+    }, []);
+
+
+    const handleCategoryClick = (category: string) => {
+        setSelectedCategory(category);
+
+        if (category === 'All') {
+        router.push('/');
+        } else {
+        router.push(`/?category=${encodeURIComponent(category)}`);
+        }
+    };
+
+    const filteredCards = mainCards.filter((card) => {
+        const matchesCategory =
+        selectedCategory === 'All' || card.category === selectedCategory;
+
+        const matchesSearch =
+        search !== '' ? card.mainCardTitle.includes(search) : true;
+
+        if (search !== '') {
+        return matchesSearch;
+        } else {
+        return matchesCategory;
+        }
+    });
+
+
+    return (
+        <main>
+            <Header />
+            <Category categories={categories} onCategorySelect={handleCategoryClick} />
+            {error ? (
+                <div>{error}</div>
+            ) : isLoading ? (
+                <div>로딩 중</div>
+            ) : (
+                <div className={styles.mainCardContainer}>
+                    {filteredCards.map((mainCard, index) => (
+                        <MainCard key={index} {...mainCard} />
+                    ))}
                 </div>
-            </main>
-            <footer className={styles.footer}>
-                <a
-                    href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
-                    Learn
-                </a>
-                <a
-                    href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
-                    Examples
-                </a>
-                <a
-                    href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
-                    Go to nextjs.org →
-                </a>
-            </footer>
-        </div>
+            )}
+
+        </main>
     );
 }
+
