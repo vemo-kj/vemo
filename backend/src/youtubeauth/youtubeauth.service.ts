@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    OnModuleInit,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { google, youtube_v3 } from 'googleapis';
@@ -70,5 +76,17 @@ export class YoutubeauthService implements OnModuleInit {
 
     private isAuthenticated(): boolean {
         return !!this.oauth2Client?.credentials?.access_token;
+    }
+
+    async clearCredentials() {
+        try {
+            if (this.oauth2Client) {
+                this.oauth2Client.credentials = null;
+                this.youtube = null;
+            }
+        } catch (error) {
+            this.logger.error('YouTube 인증 정보 제거 실패:', error);
+            throw new InternalServerErrorException('YouTube 인증 정보 제거에 실패했습니다');
+        }
     }
 }

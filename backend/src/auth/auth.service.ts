@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -36,6 +36,26 @@ export class AuthService {
     }
 
     async signOut(userId: number) {
-        return { message: '로그아웃되었습니다.' };
+        try {
+            const user = await this.userRepository.findOne({
+                where: { id: userId },
+                select: ['id', 'email'],
+            });
+
+            if (!user) {
+                throw new UnauthorizedException('존재하지 않는 사용자입니다.');
+            }
+
+            // 2. YouTube OAuth 인증 정보 제거
+            await this.youtubeauthService.clearCredentials();
+
+            return {
+                success: true,
+                message: '로그아웃되었습니다.',
+                email: user.email,
+            };
+        } catch (error) {
+            throw new InternalServerErrorException('로그아웃 처리 중 오류가 발생했습니다.');
+        }
     }
 }
