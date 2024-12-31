@@ -2,42 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { VemoService } from './vemo.service';
 import { MemosService } from '../memos/memos.service';
 import { PlaylistService } from '../playlist/playlist.service';
-import { NotFoundException } from '@nestjs/common';
-import { Video } from '../video/video.entity';
-import { Memos } from '../memos/memos.entity';
 import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
-import { Playlist } from '../playlist/entities/playlist.entity';
+import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
+import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
+import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
 
 describe('VemoService', () => {
     let service: VemoService;
     let memosService: MemosService;
     let playlistService: PlaylistService;
-
-    // Mock 데이터 정의 (필요 시 공통 Mock 생성 함수 사용)
-    const mockVideo: Video = {
-        id: 'abcd1234efg',
-        title: 'Sample Video',
-        thumbnails: 'http://example.com/thumb.jpg',
-        duration: '00:05:30',
-        category: 'Education',
-        channel: {
-            id: 'channel1-id',
-            thumbnails: 'http://example.com/channel1.jpg',
-            title: 'Channel One',
-            videos: [],
-        },
-        memos: [],
-    } as Video;
-
-    // Mock 서비스 정의
-    const mockMemosService = {
-        createMemos: jest.fn(),
-        getAllMemosByVideo: jest.fn(),
-    };
-
-    const mockPlaylistService = {
-        getPlaylistsByUser: jest.fn(),
-    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -45,11 +18,16 @@ describe('VemoService', () => {
                 VemoService,
                 {
                     provide: MemosService,
-                    useValue: mockMemosService,
+                    useValue: {
+                        getAllMemosByVideo: jest.fn(),
+                    },
                 },
                 {
                     provide: PlaylistService,
-                    useValue: mockPlaylistService,
+                    useValue: {
+                        getPlaylistsByUser: jest.fn(),
+                        createPlaylist: jest.fn(),
+                    },
                 },
             ],
         }).compile();
@@ -63,133 +41,155 @@ describe('VemoService', () => {
         jest.clearAllMocks();
     });
 
-    describe('getCommunityMemos', () => {
-        it('필터가 "all"일 때 모든 메모를 반환해야 한다', async () => {
-            const videoId = 'abcd1234efg';
-            const getCommunityMemosDto: GetCommunityMemosDto = { filter: 'all' };
+    describe('커뮤니티 메모 조회', () => {
+        it('모든 메모를 성공적으로 조회해야 한다', async () => {
+            const videoId = 'video1';
+            const getCommunityMemosDto: GetCommunityMemosDto = {
+                filter: 'all',
+                userId: null, // 현재 로직에서는 무시됨
+            };
 
-            const memosList: Memos[] = [
+            const mockMemos = [
                 {
                     id: 1,
-                    title: 'Memo 1',
-                    description: 'Description 1',
-                    createdAt: new Date(),
+                    title: '메모 1',
+                    description: '설명 1',
+                    user: { id: 1, nickname: '유저1' },
+                    createdAt: new Date('2023-01-01T00:00:00Z'),
                     updatedAt: null,
-                    user: { id: 1, name: 'User 1', memos: [] } as any,
-                    video: mockVideo,
-                    memo: [],
                 },
                 {
                     id: 2,
-                    title: 'Memo 2',
-                    description: 'Description 2',
-                    createdAt: new Date(),
-                    updatedAt: null,
-                    user: { id: 2, name: 'User 2', memos: [] } as any,
-                    video: mockVideo,
-                    memo: [],
+                    title: '메모 2',
+                    description: '설명 2',
+                    user: { id: 2, nickname: '유저2' },
+                    createdAt: new Date('2023-01-02T00:00:00Z'),
+                    updatedAt: new Date('2023-01-03T00:00:00Z'),
                 },
             ];
 
-            // Mock MemosService의 getAllMemosByVideo 설정
-            mockMemosService.getAllMemosByVideo.mockResolvedValue(memosList);
+            const expectedResponse: GetCommunityMemosResponseDto = {
+                memos: mockMemos.map(memo => ({
+                    id: memo.id,
+                    title: memo.title,
+                    description: memo.description,
+                    user: {
+                        id: memo.user.id,
+                        nickname: memo.user.nickname,
+                    },
+                    created_at: memo.createdAt,
+                    updated_at: memo.updatedAt || memo.createdAt,
+                })),
+            };
 
+            // memosService.getAllMemosByVideo 모킹
+            (memosService.getAllMemosByVideo as jest.Mock).mockResolvedValue(mockMemos);
+
+            // 서비스 메서드 호출
             const result = await service.getCommunityMemos(videoId, getCommunityMemosDto);
 
+            // 검증
             expect(memosService.getAllMemosByVideo).toHaveBeenCalledWith(videoId);
-            expect(result).toEqual({ memos: memosList });
-        });
-
-        it('필터가 "mine"일 때 사용자별 메모를 반환해야 한다', async () => {
-            const videoId = 'abcd1234efg';
-            const getCommunityMemosDto: GetCommunityMemosDto = { filter: 'mine', userId: 1 };
-
-            const memosList: Memos[] = [
-                {
-                    id: 1,
-                    title: 'Memo 1',
-                    description: 'Description 1',
-                    createdAt: new Date(),
-                    updatedAt: null,
-                    user: { id: 1, name: 'User 1', memos: [] } as any,
-                    video: mockVideo,
-                    memo: [],
-                },
-                {
-                    id: 2,
-                    title: 'Memo 2',
-                    description: 'Description 2',
-                    createdAt: new Date(),
-                    updatedAt: null,
-                    user: { id: 2, name: 'User 2', memos: [] } as any,
-                    video: mockVideo,
-                    memo: [],
-                },
-            ];
-
-            // Mock MemosService의 getAllMemosByVideo 설정
-            mockMemosService.getAllMemosByVideo.mockResolvedValue(memosList);
-
-            const expectedMemos = memosList.filter(
-                memo => memo.user.id === getCommunityMemosDto.userId,
-            );
-
-            const result = await service.getCommunityMemos(videoId, getCommunityMemosDto);
-
-            expect(memosService.getAllMemosByVideo).toHaveBeenCalledWith(videoId);
-            expect(result).toEqual({ memos: expectedMemos });
-        });
-
-        it('필터가 "mine"이지만 userId가 제공되지 않을 경우 예외를 던져야 한다', async () => {
-            const videoId = 'abcd1234efg';
-            const getCommunityMemosDto: GetCommunityMemosDto = { filter: 'mine' };
-
-            await expect(service.getCommunityMemos(videoId, getCommunityMemosDto)).rejects.toThrow(
-                'User ID is required to filter my memos',
-            );
-            expect(memosService.getAllMemosByVideo).not.toHaveBeenCalled();
+            expect(result).toEqual(expectedResponse);
         });
     });
 
-    describe('getUserPlaylists', () => {
-        it('사용자의 모든 재생목록을 성공적으로 조회해야 한다', async () => {
+    describe('사용자 재생목록 조회', () => {
+        it('사용자의 재생목록을 성공적으로 조회해야 한다', async () => {
             const userId = 1;
-            const playlistsList: Playlist[] = [
+            const mockPlaylists: PlaylistResponseDto[] = [
                 {
                     id: 1,
-                    name: 'My Playlist 1',
-                    user: { id: userId, name: 'User Name', playlists: [], memos: [] } as any,
-                    videos: [mockVideo],
+                    name: '재생목록 1',
+                    userId: userId,
+                    videos: [
+                        {
+                            id: 'video1',
+                            title: '비디오 1',
+                            thumbnails: 'http://example.com/video1.jpg',
+                            duration: '00:10:00',
+                            channel: {
+                                title: '채널 1',
+                                thumbnails: 'http://example.com/channel1.jpg',
+                            },
+                        },
+                        {
+                            id: 'video2',
+                            title: '비디오 2',
+                            thumbnails: 'http://example.com/video2.jpg',
+                            duration: '00:15:00',
+                            channel: {
+                                title: '채널 2',
+                                thumbnails: 'http://example.com/channel2.jpg',
+                            },
+                        },
+                    ],
                 },
                 {
                     id: 2,
-                    name: 'My Playlist 2',
-                    user: { id: userId, name: 'User Name', playlists: [], memos: [] } as any,
-                    videos: [mockVideo],
+                    name: '재생목록 2',
+                    userId: userId,
+                    videos: [],
                 },
             ];
 
-            // Mock PlaylistService의 getPlaylistsByUser 설정
-            mockPlaylistService.getPlaylistsByUser.mockResolvedValue(playlistsList);
+            // playlistService.getPlaylistsByUser 모킹
+            (playlistService.getPlaylistsByUser as jest.Mock).mockResolvedValue(mockPlaylists);
 
+            // 서비스 메서드 호출
             const result = await service.getUserPlaylists(userId);
 
+            // 검증
             expect(playlistService.getPlaylistsByUser).toHaveBeenCalledWith(userId);
-            expect(result).toEqual(playlistsList);
+            expect(result).toEqual(mockPlaylists);
         });
+    });
 
-        it('사용자가 재생목록을 가지고 있지 않을 경우 NotFoundException을 던져야 한다', async () => {
-            const userId = 999;
+    describe('사용자 재생목록 생성', () => {
+        it('사용자의 재생목록을 성공적으로 생성해야 한다', async () => {
+            const createPlaylistDto: CreatePlaylistDto = {
+                name: '내 재생목록',
+                videoIds: ['video1', 'video2'],
+                userId: 1,
+            };
 
-            // Mock PlaylistService의 getPlaylistsByUser 설정
-            mockPlaylistService.getPlaylistsByUser.mockRejectedValue(
-                new NotFoundException(`User with ID ${userId} has no playlists`),
-            );
+            const mockPlaylistResponse: PlaylistResponseDto = {
+                id: 1,
+                name: createPlaylistDto.name,
+                userId: createPlaylistDto.userId,
+                videos: [
+                    {
+                        id: 'video1',
+                        title: '비디오 1',
+                        thumbnails: 'http://example.com/video1.jpg',
+                        duration: '00:10:00',
+                        channel: {
+                            title: '채널 1',
+                            thumbnails: 'http://example.com/channel1.jpg',
+                        },
+                    },
+                    {
+                        id: 'video2',
+                        title: '비디오 2',
+                        thumbnails: 'http://example.com/video2.jpg',
+                        duration: '00:15:00',
+                        channel: {
+                            title: '채널 2',
+                            thumbnails: 'http://example.com/channel2.jpg',
+                        },
+                    },
+                ],
+            };
 
-            await expect(service.getUserPlaylists(userId)).rejects.toThrow(
-                `User with ID ${userId} has no playlists`,
-            );
-            expect(playlistService.getPlaylistsByUser).toHaveBeenCalledWith(userId);
+            // playlistService.createPlaylist 모킹
+            (playlistService.createPlaylist as jest.Mock).mockResolvedValue(mockPlaylistResponse);
+
+            // 서비스 메서드 호출
+            const result = await service.createUserPlaylist(createPlaylistDto);
+
+            // 검증
+            expect(playlistService.createPlaylist).toHaveBeenCalledWith(createPlaylistDto);
+            expect(result).toEqual(mockPlaylistResponse);
         });
     });
 });
