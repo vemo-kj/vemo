@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
@@ -42,5 +42,13 @@ export class UsersService {
 
         const savedUser = await this.userRepository.save(user);
         return plainToInstance(User, savedUser);
+    }
+
+    async findById(userId: number): Promise<User> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+        return user;
     }
 }

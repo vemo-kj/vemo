@@ -19,6 +19,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { SummarizationModule } from './summarization/summarization.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
+import { PlaylistModule } from './playlist/playlist.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { HomeModule } from './home/home.module';
         UsersModule,
         AuthModule,
         SubtitlesModule,
+        PlaylistModule,
         QuizModule,
         CapturesModule,
         SummarizationModule,

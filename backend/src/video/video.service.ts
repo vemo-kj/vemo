@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Video } from './video.entity';
 import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
 import { ChannelService } from '../channel/channel.service';
@@ -71,6 +71,19 @@ export class VideoService {
             skip: (page - 1) * limit,
             take: limit,
         });
+    }
+
+    async getVideosByIds(videoIds: string[]): Promise<Video[]> {
+        const videos = await this.videoRepository.find({
+            where: { id: In(videoIds) },
+            relations: ['channel'],
+        });
+        if (videos.length !== videoIds.length) {
+            const foundVideoIds = videos.map(video => video.id);
+            const notFoundVideoIds = videoIds.filter(id => !foundVideoIds.includes(id));
+            throw new NotFoundException(`Videos with IDs ${notFoundVideoIds.join(', ')} not found`);
+        }
+        return videos;
     }
 
     private parseDuration(duration: string): string {
