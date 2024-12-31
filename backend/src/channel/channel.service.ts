@@ -13,6 +13,13 @@ export class ChannelService {
     ) {}
 
     async getChannel(channelId: string): Promise<Channel> {
+        await this.youtubeauthService.ensureAuthenticated();
+
+        const existingChannel = await this.channelRepository.findOne({ where: { id: channelId } });
+        if (existingChannel) {
+            return existingChannel;
+        }
+
         const response = await this.youtubeauthService.youtube.channels.list({
             part: ['snippet', 'contentDetails', 'statistics'],
             id: [channelId],

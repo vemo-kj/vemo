@@ -36,6 +36,16 @@ export class MemosService {
         return await this.memosRepository.save(memos);
     }
 
+    /**
+     * 특정 비디오에 대한 메모 개수를 반환.
+     * @param videoId 비디오 ID
+     * @returns 메모 개수
+     */
+    async getVemoCountByVideo(videoId: string): Promise<number> {
+        const count = await this.memosRepository.count({ where: { video: { id: videoId } } });
+        return count;
+    }
+
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { user: { id: userId } },
