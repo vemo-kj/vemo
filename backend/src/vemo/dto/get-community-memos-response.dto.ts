@@ -1,5 +1,10 @@
-import { Memos } from '../../memos/memos.entity';
+import { IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { MemosDto } from './memos.dto';
 
 export class GetCommunityMemosResponseDto {
-    memos: Memos[];
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => MemosDto)
+    memos: MemosDto[];
 }
