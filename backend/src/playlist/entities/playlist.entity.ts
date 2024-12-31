@@ -1,5 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '../../users/users.entity';
+import { Users } from '../../users/users.entity';
 import { Video } from '../../video/video.entity';
 
 @Entity()
@@ -10,8 +10,8 @@ export class Playlist {
     @Column({ length: 100 })
     name: string;
 
-    @ManyToOne(() => User, user => user.playlists, { onDelete: 'CASCADE' })
-    user: User;
+    @ManyToOne(() => Users, user => user.playlists, { onDelete: 'CASCADE' })
+    user: Users;
 
     @ManyToMany(() => Video, video => video.playlists)
     @JoinTable({
