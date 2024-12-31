@@ -1,16 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
 import { MemosService } from './memos.service';
-import { CreateMemosDto } from './dto/create-memos.dto';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 
 @Controller('memos')
 export class MemosController {
     constructor(private readonly memosService: MemosService) {}
-
-    @Post()
-    async createMemos(@Body() createMemosDto: CreateMemosDto) {
-        return this.memosService.createMemos(createMemosDto);
-    }
 
     @Get()
     async getAllMemosByUser(@Query('userId') userId: number) {
