@@ -9,6 +9,7 @@ import { MemosModule } from './memos/memos.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { SubtitlesModule } from './subtitles/subtitles.module';
         ChannelModule,
         YoutubeauthModule,
         SubtitlesModule,
+        QuizModule,
     ],
     controllers: [AppController],
     providers: [AppService],
