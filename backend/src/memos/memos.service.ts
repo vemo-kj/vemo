@@ -15,15 +15,15 @@ export class MemosService {
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) {}
 
-    async createMemos(createMemosDto: CreateMemosDto): Promise<Memos> {
+    async createMemos(createMemosDto: CreateMemosDto, videoId: string): Promise<Memos> {
         const user = await this.userRepository.findOne({ where: { id: createMemosDto.userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${createMemosDto.userId} not found`);
         }
 
-        const video = await this.videoRepository.findOne({ where: { id: createMemosDto.videoId } });
+        const video = await this.videoRepository.findOne({ where: { id: videoId } });
         if (!video) {
-            throw new NotFoundException(`Video with ID ${createMemosDto.videoId} not found`);
+            throw new NotFoundException(`Video with ID ${videoId} not found`);
         }
 
         const memos = this.memosRepository.create({
@@ -34,6 +34,16 @@ export class MemosService {
         });
 
         return await this.memosRepository.save(memos);
+    }
+
+    /**
+     * 특정 비디오에 대한 메모 개수를 반환.
+     * @param videoId 비디오 ID
+     * @returns 메모 개수
+     */
+    async getVemoCountByVideo(videoId: string): Promise<number> {
+        const count = await this.memosRepository.count({ where: { video: { id: videoId } } });
+        return count;
     }
 
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
