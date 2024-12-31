@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
-import styles from '/Users/gangsu/Desktop/VEMO/make/vemo/frontend/src/app/(vemo)/[vemo]/components/editor/editor.module.css';
+import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 
 interface MomoItemProps {

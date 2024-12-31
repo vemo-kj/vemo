@@ -9,18 +9,24 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@ckeditor/ckeditor5-build-classic": "^44.1.0",
+        "@ckeditor/ckeditor5-react": "^9.4.0",
+        "@types/draft-js": "^0.11.18",
+        "draft-convert": "^2.1.13",
         "draft-js": "^0.11.7",
         "next": "15.1.2",
         "next-svgr": "^0.0.2",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-sketch-canvas": "^6.2.0"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
         "@svgr/webpack": "^8.1.0",
+        "@types/draft-convert": "^2.1.8",
         "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
+        "@types/react": "^16.8.0",
+        "@types/react-dom": "^16.8.0",
         "@types/webpack": "^5.28.5",
         "@typescript-eslint/eslint-plugin": "^8.18.1",
         "@typescript-eslint/parser": "^8.18.1",
