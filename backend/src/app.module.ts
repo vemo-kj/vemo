@@ -14,6 +14,8 @@ import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 import { CapturesModule } from './captures/captures.module';
+import { VemoModule } from './vemo/vemo.module';
+import { HomeModule } from './home/home.module';
 
 @Module({
     imports: [
@@ -31,6 +33,8 @@ import { CapturesModule } from './captures/captures.module';
         VideoModule,
         ChannelModule,
         YoutubeauthModule,
+        VemoModule,
+        HomeModule,
         UsersModule,
         AuthModule,
         SubtitlesModule,
