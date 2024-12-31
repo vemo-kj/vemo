@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { YoutubeauthService } from 'src/youtubeauth/youtubeauth.service';
 import { Repository } from 'typeorm';
 import { Channel } from './channel.entity';
+import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
 
 @Injectable()
 export class ChannelService {
@@ -13,6 +13,13 @@ export class ChannelService {
     ) {}
 
     async getChannel(channelId: string): Promise<Channel> {
+        await this.youtubeauthService.ensureAuthenticated();
+
+        const existingChannel = await this.channelRepository.findOne({ where: { id: channelId } });
+        if (existingChannel) {
+            return existingChannel;
+        }
+
         const response = await this.youtubeauthService.youtube.channels.list({
             part: ['snippet', 'contentDetails', 'statistics'],
             id: [channelId],

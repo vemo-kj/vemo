@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { YoutubeauthService } from './youtubeauth.service';
+import { ConfigModule } from '@nestjs/config';
 import { YoutubeauthController } from './youtubeauth.controller';
+import { YoutubeauthService } from './youtubeauth.service';
 
 @Module({
+    imports: [ConfigModule],
     providers: [YoutubeauthService],
     exports: [YoutubeauthService],
     controllers: [YoutubeauthController],

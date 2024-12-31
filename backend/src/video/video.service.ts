@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChannelService } from 'src/channel/channel.service';
-import { YoutubeauthService } from 'src/youtubeauth/youtubeauth.service';
 import { Repository } from 'typeorm';
 import { Video } from './video.entity';
+import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
+import { ChannelService } from '../channel/channel.service';
 
 @Injectable()
 export class VideoService {
@@ -15,6 +15,17 @@ export class VideoService {
     ) {}
 
     async getVideoById(videoId: string): Promise<Video> {
+        await this.youtubeauthService.ensureAuthenticated();
+
+        const existingVideo = await this.videoRepository.findOne({
+            where: { id: videoId },
+            relations: ['channel'],
+        });
+
+        if (existingVideo) {
+            return existingVideo;
+        }
+
         const response = await this.youtubeauthService.youtube.videos.list({
             part: ['snippet', 'contentDetails', 'statistics'],
             id: [videoId],
@@ -22,7 +33,7 @@ export class VideoService {
 
         const videoData = response.data.items?.[0];
         if (!videoData) {
-            throw new Error('Video not found');
+            throw new NotFoundException('Video not found');
         }
 
         const snippet = videoData.snippet || {};
@@ -30,7 +41,7 @@ export class VideoService {
 
         const channelId = snippet.channelId;
         if (!channelId) {
-            throw new Error('Channel ID not found');
+            throw new NotFoundException('Channel ID not found');
         }
 
         const channel = await this.channelService.getChannel(channelId);
@@ -44,7 +55,22 @@ export class VideoService {
             channel,
         });
 
-        return video;
+        return await this.videoRepository.save(video);
+    }
+
+    /**
+     * 모든 비디오 데이터를 조회합니다.
+     * @param page 페이지 번호 (기본값: 1)
+     * @param limit 페이지당 비디오 수 (기본값: 10)
+     * @returns Video[]
+     */
+    async getAllVideos(page: number = 1, limit: number = 10): Promise<Video[]> {
+        return this.videoRepository.find({
+            relations: ['channel'],
+            order: { id: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
     }
 
     private parseDuration(duration: string): string {

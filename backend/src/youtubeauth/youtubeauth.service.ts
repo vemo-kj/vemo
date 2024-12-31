@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    OnModuleInit,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { google, youtube_v3 } from 'googleapis';
@@ -16,7 +22,6 @@ export class YoutubeauthService implements OnModuleInit {
         const clientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET');
         const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
 
-        this.logger.log(`Initializing OAuth2 client with redirect URI: ${redirectUri}`);
         this.oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
     }
 
@@ -24,7 +29,6 @@ export class YoutubeauthService implements OnModuleInit {
         const scopes = [
             'https://www.googleapis.com/auth/youtube.readonly',
             'https://www.googleapis.com/auth/youtube.force-ssl',
-            'https://www.googleapis.com/auth/youtubepartner',
         ];
 
         return this.oauth2Client.generateAuthUrl({
@@ -34,26 +38,55 @@ export class YoutubeauthService implements OnModuleInit {
         });
     }
 
-    async getAccessToken(code: string) {
+    async authenticateWithCode(code: string) {
         try {
             const { tokens } = await this.oauth2Client.getToken(code);
             this.oauth2Client.setCredentials(tokens);
-            this.initializeYouTubeClient();
-            return tokens;
+            this.youtube = google.youtube({ version: 'v3', auth: this.oauth2Client });
         } catch (error) {
-            this.logger.error('Failed to get access token:', error);
-            throw error;
+            this.logger.error('OAuth2.0 인증 실패:', error);
+            throw new UnauthorizedException('YouTube OAuth2.0 인증에 실패했습니다');
         }
     }
 
-    private initializeYouTubeClient() {
-        this.youtube = google.youtube({
-            version: 'v3',
-            auth: this.oauth2Client,
-        }) as youtube_v3.Youtube;
+    async ensureAuthenticated() {
+        if (!this.isAuthenticated()) {
+            throw new UnauthorizedException({
+                code: 'YOUTUBE_AUTH_REQUIRED',
+                message: 'YouTube OAuth2.0 인증이 필요합니다',
+                redirectUrl: this.getAuthUrl(),
+            });
+        }
     }
 
-    isAuthenticated(): boolean {
+    async handleOAuthCallback(code: string): Promise<string> {
+        try {
+            await this.authenticateWithCode(code);
+
+            if (!this.isAuthenticated()) {
+                throw new UnauthorizedException('YouTube 인증에 실패했습니다');
+            }
+
+            return 'http://localhost:3000'; // 성공 시 리다이렉트 URL
+        } catch (error) {
+            this.logger.error('OAuth 인증 에러:', error);
+            return 'http://localhost:3000/error'; // 실패 시 리다이렉트 URL
+        }
+    }
+
+    private isAuthenticated(): boolean {
         return !!this.oauth2Client?.credentials?.access_token;
+    }
+
+    async clearCredentials() {
+        try {
+            if (this.oauth2Client) {
+                this.oauth2Client.credentials = null;
+                this.youtube = null;
+            }
+        } catch (error) {
+            this.logger.error('YouTube 인증 정보 제거 실패:', error);
+            throw new InternalServerErrorException('YouTube 인증 정보 제거에 실패했습니다');
+        }
     }
 }
