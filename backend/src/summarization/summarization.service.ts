@@ -12,7 +12,6 @@ import { Summaries } from './entity/summaries.entity';
 export class SummarizationService {
     private readonly openai: OpenAI;
 
-    // memoRepository는 여기에서 @InjectRepository를 사용해 주입
     constructor(
         @InjectRepository(Summaries)
         private summariesRepository: Repository<Summaries>,
@@ -23,10 +22,13 @@ export class SummarizationService {
         private configService: ConfigService,
     ) {
         this.openai = new OpenAI({
-            apiKey: this.configService.get<string>('OPENAI_API_KEY'), // 여기 수정
+            apiKey: this.configService.get<string>('OPENAI_API_KEY'),
         });
     }
 
+    // 요약본 추출 함수
+    // videoid가 존재하면, DB에서 추출
+    // videoid가 존재하지 않으면, DB에 저장
     async extractSummary(subtitles: SubtitleDto[], videoid: string): Promise<SummaryResultDto[]> {
         if (await this.findSummary(videoid)) {
             return this.getSummary(videoid);
@@ -55,11 +57,12 @@ export class SummarizationService {
                 top_p: 0.8,
             });
 
-            // 타임스탬프와 텍스트 추출 후 Subtitle[]으로 변환
+            // response을 타임스탬프와 텍스트 추출 후 요약본 return
             const result: SummaryResultDto[] = this.parseTimestampedText(
                 response.choices[0]?.message?.content,
             ).map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
             await this.createSummaries(videoid, result);
+
             return result;
         }
     }
@@ -72,7 +75,7 @@ export class SummarizationService {
         return subtitles.map(sub => `[${sub.startTime} ~ ${sub.endTime}] ${sub.text}`).join('\n');
     }
 
-    // 자막 텍스트에서 타임스탬프와 내용을 추출하는 함수
+    // 자막 텍스트에서 타임스탬프와 내용을 추출
     private parseTimestampedText(text: string): [string, string][] {
         const regex = /\[(\d{1,2}:\d{2})\](.*?)\s*(?=\[\d{1,2}:\d{2}\]|$)/g;
         let matches;
@@ -84,7 +87,15 @@ export class SummarizationService {
         return result;
     }
 
-    // 요약본 DB에 저장 (Summaries & Summary)
+    // string 형태의 timestamp를 Date형태로 변환
+    private convertToTime(timestamp: string): Date {
+        const [minutes, seconds] = timestamp.split(':').map(Number);
+        const date = new Date();
+        date.setHours(0, minutes, seconds, 0);
+        return date;
+    }
+
+    // 요약본을 DB에 저장 (Summaries & Summary 테이블)
     private async createSummaries(
         videoid: string,
         result: { timestamp: string; summary: string }[],
@@ -102,6 +113,7 @@ export class SummarizationService {
         await this.summariesRepository.save(newSummaries);
     }
 
+    // summaries 테이블에서 videoid 찾기기
     private async findSummary(videoid: string): Promise<boolean> {
         const existingSummary = await this.summariesRepository.findOne({
             where: { videoid },
@@ -110,6 +122,7 @@ export class SummarizationService {
         return existingSummary ? true : false;
     }
 
+    // summaries 테이블에서 videoid 가져오기
     private async getSummary(videoid: string): Promise<any[]> {
         const existingSummaries = await this.summariesRepository.findOne({
             where: { videoid },
@@ -125,15 +138,8 @@ export class SummarizationService {
 
             return {
                 ...summary,
-                timestamp: `${minutes}:${seconds}`, // timestamp를 mm:ss로 변환
+                timestamp: `${minutes}:${seconds}`,
             };
         });
-    }
-
-    private convertToTime(timestamp: string): Date {
-        const [minutes, seconds] = timestamp.split(':').map(Number);
-        const date = new Date();
-        date.setHours(0, minutes, seconds, 0);
-        return date;
     }
 }
