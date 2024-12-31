@@ -8,12 +8,8 @@ export class ChannelController {
         private readonly channelService: ChannelService,
         private readonly youtubeauthService: YoutubeauthService,
     ) {}
-    @Get('getChannel')
+    @Get()
     async getChannel(@Query('channelId') channelId: string) {
-        if (!this.youtubeauthService.isAuthenticated()) {
-            return { error: 'Not authenticated' };
-        }
-
         try {
             const channel = await this.channelService.getChannel(channelId);
             return { channel };
