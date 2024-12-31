@@ -13,8 +13,11 @@ import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
+import { SubtitlesModule } from './subtitles/subtitles.module';
+import { SummarizationModule } from './summarization/summarization.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
+
 
 @Module({
     imports: [
@@ -37,6 +40,7 @@ import { HomeModule } from './home/home.module';
         UsersModule,
         AuthModule,
         SubtitlesModule,
+        SummarizationModule,
     ],
     controllers: [AppController],
     providers: [
