@@ -5,7 +5,9 @@ import styles from "./Login.module.css";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+// components
 import LoginInputBox from "./components/LoginInputBox";
+import Header from "@/app/components/Layout/Header";
 
 
 export default function LoginPage() {
@@ -46,33 +48,36 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className={styles.loginBox}>
-      <h1>로그인</h1>
-      <form onSubmit={handleSubmit}>
-        <LoginInputBox 
-          label="이메일"
-          type="email"
-          id='email'
-          name='name'
-          required={true} 
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}/>
-        <div>
-          <label htmlFor="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">로그인</button>
-      </form>
-      {error && <p className={styles.error}>{error}</p>}
-      <p>
-        계정이 없으신가요? <Link href="/signup">회원가입</Link>
-      </p>
+    <div>
+      <Header />
+      <div className={styles.loginBox}>
+        <h1>로그인</h1>
+        <form onSubmit={handleSubmit}>
+          <LoginInputBox 
+            label="이메일"
+            type="email"
+            id='email'
+            name='name'
+            required={true} 
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}/>
+          <div>
+            <label htmlFor="password">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">로그인</button>
+        </form>
+        {error && <p className={styles.error}>{error}</p>}
+        <p>
+          계정이 없으신가요? <Link href="/signup">회원가입</Link>
+        </p>
+      </div>
     </div>
   );
 }

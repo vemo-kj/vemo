@@ -4,8 +4,10 @@
 import InputBox from './components/InputBox/InputBox';
 import SignUpButton from './components/SignUpButton/SignUpButton';
 import ProfileImage from './components/ProfileImage/ProfileImage';
+import Header from '../.././components/Layout/Header'
 // style
 import styles from './SignUp.module.css';
+// next
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -84,7 +86,9 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className={styles.signUpBox}>
+    <>
+      <Header />
+      <div className={styles.signUpBox}>
       <h1 className={styles.signUpTitle}>회원정보 입력</h1>
       <form onSubmit={handleSubmit}>
         <ProfileImage onImageSelect={(image) => setSelectedImage(image)} />
@@ -164,6 +168,7 @@ export default function SignUpPage() {
         </Link>
       </p>
     </div>
+  </>
   );
 }
 

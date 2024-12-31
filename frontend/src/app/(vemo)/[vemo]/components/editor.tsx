@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Editor, EditorState, RichUtils } from 'draft-js';
 import 'draft-js/dist/Draft.css'; // Draft.js 기본 스타일 불러오기
-import styles from './editor.module.css';
+import styles from './editor/editor.module.css'
 
 interface Section {
     timestamp: string;

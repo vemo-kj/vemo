@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 // style
 import styles from "./Community.module.scss";
+import ExtractButton from '../ExtractButton/ExtractButton'
 
 interface Memo {
   id: string; // 메모 ID
@@ -41,6 +42,7 @@ export default function Community() {
       {!selectedCard ? (
         <>
           <div>
+            <ExtractButton />
             <button onClick={() => setViewMode("all")}>전체보기</button>
             <button onClick={() => setViewMode("mine")}>내글보기</button>
           </div>
