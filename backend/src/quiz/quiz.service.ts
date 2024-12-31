@@ -26,9 +26,10 @@ export class QuizService {
         });
     }
 
+    // 퀴즈 추출하는 함수
+    // 형태 : [타임스탬프, 문제, 정답]
     async extractQuiz(subtitles: SubtitleDto[], videoid: string): Promise<any> {
         if (await this.findQuiz(videoid)) {
-            console.log('📌퀴즈 있음 ! 그래서 db에 꺼내옴옴');
             return this.getQuiz(videoid);
         } else {
             const formattedText = this.formatSubtitles(subtitles);
@@ -61,21 +62,16 @@ export class QuizService {
                 top_p: 0.8,
             });
 
+            // respense 값 전처리하여 DB에 데이터 create
             const result: QuizResultDto[] = this.parseQuizToArray(
                 response.choices[0]?.message?.content,
             ).map(
                 ([timestamp, question, answer]) => new QuizResultDto(timestamp, question, answer),
             );
-
-            // DB에 저장
             await this.createQuizzes(videoid, result);
 
             const text = response.choices[0]?.message?.content;
-
             const parsedQuiz = this.parseQuizToArray(text);
-            console.log('✨', this.findQuiz(videoid));
-
-            console.log('📌퀴즈 없음 ! 그래서 db에 넣음');
 
             return parsedQuiz;
         }
@@ -110,8 +106,8 @@ export class QuizService {
         return date;
     }
 
-    // 요약본을 DB에 저장 (Quizzes & Quiz 테이블)
-    // 퀴즈 데이터 생성 및 저장 메서드
+    // 퀴즈를 DB에 저장 (Quizzes & Quiz 테이블)
+    // 퀴즈 데이터 생성 및 저장
     private async createQuizzes(
         videoid: string,
         result: { timestamp: string; question: string; answer: string }[],
@@ -149,12 +145,10 @@ export class QuizService {
         });
 
         if (!existingQuiz) return [];
-
         return existingQuiz.quizzes.map(quiz => {
             const date = new Date(quiz.timestamp);
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
-
             return {
                 ...quiz,
                 timestamp: `${minutes}:${seconds}`,
