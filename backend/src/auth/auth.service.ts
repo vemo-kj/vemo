@@ -55,7 +55,7 @@ export class AuthService {
                 email: user.email,
             };
         } catch (error) {
-            throw new InternalServerErrorException('로그아웃 처리 중 오류가 발생했습니다.');
+            throw new InternalServerErrorException('로그아웃 처리 중 오류가 발생했습니다.', error);
         }
     }
 }
