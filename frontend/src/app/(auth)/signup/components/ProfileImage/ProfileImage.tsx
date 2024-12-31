@@ -5,58 +5,40 @@ import Image from 'next/image';
 // style
 import styles from './ProfileImage.module.css';
 // type
-import { ProfileImageProps } from '../../../../types/ProfileImageProps';
 
 
+interface ProfileImageProps {
+  onImageSelect: (image: File | null) => void;
+}
 
-export default function ProfileImage({
-  id = 'profileImage',
-  // 오류해결해야함
-  // accept = 'image/*',
-}: ProfileImageProps ): React.JSX.Element {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+export default function ProfileImage({ onImageSelect }: ProfileImageProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setSelectedImage(file);
-
+      onImageSelect(file); // 선택한 이미지를 상위 컴포넌트로 전달
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
     }
   };
 
   const handleRemoveImage = () => {
-    setSelectedImage(null);
+    onImageSelect(null); // 상위 컴포넌트에서 이미지 제거
     setPreviewUrl(null);
   };
 
   return (
-    <div className={styles.ProfileImageContainer}>
-      <div className={styles.previewContainer}>
+    <div>
+      <div>
         {previewUrl ? (
-          <img src={previewUrl} alt="미리보기" className={styles.previewImage} />
+          <img src={previewUrl} alt="미리보기" />
         ) : (
-          <div className={styles.emptyBox}>이미지를 선택하세요</div>
+          <div>이미지를 선택하세요</div>
         )}
-        {previewUrl && (
-          
-          <button
-            className={styles.removeButton} 
-            onClick={handleRemoveImage}>
-            삭제
-          </button>
-        )}
-        <label htmlFor={id}>{}</label>
+        {previewUrl && <button onClick={handleRemoveImage}>삭제</button>}
       </div>
-      
-      <input
-        type="file"
-        id={id}
-        accept='image/*'
-        onChange={handleFileChange}
-        className={styles.fileInput} />
+      <input type="file" accept="image/*" onChange={handleFileChange} />
     </div>
   );
 }

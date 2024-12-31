@@ -16,3 +16,4 @@ export default function InputBox({ label, type, id, name, required, className, o
     </div>
   );
 }
+

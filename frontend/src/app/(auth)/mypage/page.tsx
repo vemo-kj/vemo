@@ -6,12 +6,12 @@ import styles from './MyPage.module.css'
 import Image from "next/image";
 
 export default function MyPage() {
-  // 예시
+  
   const myCardProps = {
-    thumbnail: "/placeholder.svg?height=150&width=200",
-    myCardTitle: "React 입문자들의 알아야 할 Redux 참개념명 (8분정)",
+    thumbnail: "썸네일",
+    myCardTitle: "제목",
     cardMemoCount: 1,
-    youtubeLink: "https://www.youtube.com/watch?v=CVpUuw9",
+    youtubeLink: "유튜브링크",
 
 
   };

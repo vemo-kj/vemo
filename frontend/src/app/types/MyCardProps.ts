@@ -4,3 +4,4 @@ export type MyCardProps = {
   cardMemoCount: number;
   youtubeLink: string;
 }
+

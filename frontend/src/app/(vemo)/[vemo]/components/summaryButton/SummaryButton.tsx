@@ -12,11 +12,12 @@ export default function SummaryButton() {
     setIsSubmitting(true);
     setError(null);
 
+
     const data = {
-      timeStamp: '00:01:23',
-      description: '이 부분은 중요한 개념 설명입니다.',
-      quizTimeStamp: '00:01:45',
-      quiz: '이 개념과 관련된 문제를 설명하세요.',
+      timeStamp: '타임스탬프',
+      description: '디스크립션',
+      quizTimeStamp: '퀴즈타임스탬프',
+      quiz: '퀴즈',
     };
 
     try {
@@ -51,3 +52,4 @@ export default function SummaryButton() {
     </div>
   );
 }
+

@@ -7,3 +7,4 @@ export type MainCardProps = {
   category: string;
   youtubeLink: string;
 };
+

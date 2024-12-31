@@ -1,36 +1,25 @@
 'use client';
-
-import React, { useState, useRef, useEffect, MouseEvent } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
 import DropdownMenu from './components/DropdownMenu';
-
 import SummaryButton from './components/summaryButton/SummaryButton';
 import ExportButton from './components/exportButton/ExportButton';
+import { SummaryProvider } from '../[vemo]/context/SummaryContext';
+import SideBarNav from './components/sideBarNav/sideBarNav';
 
-import { SummaryProvider } from '../[vemo]/context/SummaryContext'
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor'), { ssr: false });
 
 export default function VemoPage() {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-
-    // 현재 재생 시간
-    const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-    const playerRef = useRef<any>(null); // 유튜브 플레이어 참조
-
-    // 에디터 참조
+    const [currentTimestamp, setCurrentTimestamp] = useState('00:00'); // 현재 재생 시간
+    const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
-
-    // **캡처 대상**: 유튜브 영상 포함 전체 섹션
     const captureRef = useRef<HTMLDivElement | null>(null);
 
-
-
-    // ================== 유튜브 로직 ================== //
     useEffect(() => {
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -39,11 +28,7 @@ export default function VemoPage() {
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
                 videoId: 'pEt89CrE-6A',
-                events: {
-                    onReady: () => {
-                        console.log('Player ready');
-                    },
-                },
+                events: { onReady: () => console.log('Player ready') },
             });
         };
     }, []);
@@ -54,47 +39,48 @@ export default function VemoPage() {
                 const sec = playerRef.current.getCurrentTime();
                 const mm = Math.floor(sec / 60);
                 const ss = Math.floor(sec % 60);
-                setCurrentTimestamp(
-                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
-                );
+                setCurrentTimestamp(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
             }
         }, 1000);
         return () => clearInterval(interval);
     }, []);
 
-    const handleSeekToTime = (timestamp: string) => {
-        const [m, s] = timestamp.split(':').map(Number);
-        const total = (m || 0) * 60 + (s || 0);
-
-        if (playerRef.current?.seekTo) {
-            playerRef.current.seekTo(total, true);
-        }
-    };
-
-    // 드롭다운 핸들
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
     };
 
+    const renderSectionContent = () => {
+        switch (selectedOption) {
+            case '내 메모 보기':
+                return (
+                    <>
+                        <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                        <EditorNoSSR
+                            ref={editorRef}
+                            getTimestamp={() => currentTimestamp}
+                            onTimestampClick={(timestamp) => {
+                                const [m, s] = timestamp.split(':').map(Number);
+                                const total = (m || 0) * 60 + (s || 0);
+                                playerRef.current?.seekTo(total, true);
+                            }}
+                        />
+                    </>
+                );
+            // 후에 내용별 반영 예정
+            case 'AI 요약 보기':
+                return <p className={styles.noteTitle}>AI 요약 내용을 여기에 표시</p>;
+            case '옵션 3':
+                return <p className={styles.noteTitle}>옵션 3의 내용을 여기에 표시</p>;
+            default:
+                return <p className={styles.noteTitle}>기본 내용을 여기에 표시</p>;
+        }
+    };
 
     return (
         <div className={styles.container}>
-
-            {/* (1) 유튜브 영상 섹션. captureRef를 여기에 달면 전체가 캡처 대상 */}
-            <div
-                className={styles.section1}
-                ref={captureRef}
-
-                style={{ position: 'relative' }} // selection box를 absolute로 띄우려면 relative 부모가 필요
-            >
-                {/* 드래그 시 표시되는 "선택 영역 박스" */}
-
+            <div className={styles.section1} ref={captureRef} style={{ position: 'relative' }}>
                 <Link href="/" passHref>
-                    <img
-                        src="/icons/Button_home.svg"
-                        alt="VEMO logo"
-                        className={styles.logoButton}
-                    />
+                    <img src="/icons/Button_home.svg" alt="VEMO logo" className={styles.logoButton} />
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
@@ -106,58 +92,15 @@ export default function VemoPage() {
                     />
                 </div>
             </div>
-
-            {/* (2) 노트 / 에디터 영역 */}
-            <div className={styles.section2}>
-                <h1 className={styles.notesHeader}>나만의 노트</h1>
-                <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
-
-                <div className={styles.notesContent}>
-                    <p className={styles.noteTitle}>자바 스크립트 스터디1111</p>
-                    <div className={styles.noteActions}>
-                        <div className={styles.dropdown}>
-                            <DropdownMenu
-                                options={['내 메모 보기', 'AI 요약 보기', '옵션 3']}
-                                defaultOption={selectedOption}
-                                onSelect={handleOptionSelect}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <EditorNoSSR
-                    ref={editorRef}
-                    getTimestamp={() => currentTimestamp}
-                    onTimestampClick={handleSeekToTime}
+            <SummaryProvider>
+                <SideBarNav
+                    selectedOption={selectedOption}
+                    onOptionSelect={handleOptionSelect}
+                    renderSectionContent={renderSectionContent}
+                    currentTimestamp={currentTimestamp}
                 />
-
-                <div className={styles.footerButtons}>
-                    {/* 전체 캡처 */}
-
-                    <button>캡처하기</button>
-                    {/* <button onClick={}>캡처하기</button> */}
-
-                    {/* 부분 캡처: 버튼 토글로 on/off */}
-                    <button> 부분 캡처 </button>
-
-
-
-                
-
-                    <SummaryButton />
-
-                </div>
-            </div>
-
-            {/* (3) Sidebar */}
-            <div className={styles.section3}>
-                <button className={styles.sidebarButton}>작성하기</button>
-                <button className={styles.sidebarButton}>커뮤니티</button>
-                <button className={styles.sidebarButton}>재생목록</button>
-            </div>
+            </SummaryProvider>
         </div>
-
-        </SummaryProvider>
-
     );
 }
+

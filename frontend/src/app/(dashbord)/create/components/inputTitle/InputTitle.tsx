@@ -13,3 +13,4 @@ const InputTitle: React.FC<InputTitleProps> = ({ onChange }) => {
 };
 
 export default InputTitle;
+

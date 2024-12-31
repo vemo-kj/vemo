@@ -13,3 +13,4 @@ export async function fetchUserMemoCount(): Promise<number> {
 }
 
 // 이 파일 마이페이지 api 폴더 생성 후 이동할 것
+
