@@ -1,4 +1,3 @@
-// src/memos/memos.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { MemosService } from './memos.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -56,11 +55,12 @@ describe('MemosService', () => {
                 title: '테스트 메모',
                 description: '메모 설명',
                 userId: 1,
-                videoId: 'video-uuid',
             };
 
+            const videoId = 'video_id'; // 별도로 전달할 videoId
+
             const user: User = { id: 1 } as User;
-            const video: Video = { id: 'video-uuid' } as Video;
+            const video: Video = { id: videoId } as Video;
 
             const createdMemos: Memos = {
                 id: 1,
@@ -79,15 +79,15 @@ describe('MemosService', () => {
             memosRepository.create.mockReturnValue(createdMemos);
             memosRepository.save.mockResolvedValue(createdMemos);
 
-            // 서비스 메서드 호출
-            const result = await service.createMemos(createMemosDto);
+            // 서비스 메서드 호출 시, CreateMemosDto와 videoId를 함께 전달
+            const result = await service.createMemos({ ...createMemosDto, videoId });
 
             // 호출된 메서드 검증
             expect(userRepository.findOne).toHaveBeenCalledWith({
                 where: { id: createMemosDto.userId },
             });
             expect(videoRepository.findOne).toHaveBeenCalledWith({
-                where: { id: createMemosDto.videoId },
+                where: { id: videoId },
             });
             expect(memosRepository.create).toHaveBeenCalledWith({
                 title: createMemosDto.title,
@@ -106,12 +106,13 @@ describe('MemosService', () => {
                 title: '테스트 메모',
                 description: '메모 설명',
                 userId: 999,
-                videoId: 'video-uuid',
             };
+
+            const videoId = 'video_id';
 
             userRepository.findOne.mockResolvedValue(undefined);
 
-            await expect(service.createMemos(createMemosDto)).rejects.toThrow(
+            await expect(service.createMemos({ ...createMemosDto, videoId })).rejects.toThrow(
                 `User with ID ${createMemosDto.userId} not found`,
             );
             expect(userRepository.findOne).toHaveBeenCalledWith({
@@ -124,21 +125,22 @@ describe('MemosService', () => {
                 title: '테스트 메모',
                 description: '메모 설명',
                 userId: 1,
-                videoId: 'non-existent-video-id',
             };
+
+            const videoId = 'non-existent-video-id';
 
             const user: User = { id: 1 } as User;
             userRepository.findOne.mockResolvedValue(user);
             videoRepository.findOne.mockResolvedValue(undefined);
 
-            await expect(service.createMemos(createMemosDto)).rejects.toThrow(
-                `Video with ID ${createMemosDto.videoId} not found`,
+            await expect(service.createMemos({ ...createMemosDto, videoId })).rejects.toThrow(
+                `Video with ID ${videoId} not found`,
             );
             expect(userRepository.findOne).toHaveBeenCalledWith({
                 where: { id: createMemosDto.userId },
             });
             expect(videoRepository.findOne).toHaveBeenCalledWith({
-                where: { id: createMemosDto.videoId },
+                where: { id: videoId },
             });
         });
     });

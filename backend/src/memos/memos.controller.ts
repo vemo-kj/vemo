@@ -6,12 +6,6 @@ import { UpdateMemosDto } from './dto/update-memos.dto';
 export class MemosController {
     constructor(private readonly memosService: MemosService) {}
 
-    //
-    // @Post()
-    // async createMemos(@Body() createMemosDto: CreateMemosDto) {
-    //     return this.memosService.createMemos(createMemosDto);
-    // }
-    //
     @Get()
     async getAllMemosByUser(@Query('userId') userId: number) {
         return this.memosService.getAllMemosByUser(userId);

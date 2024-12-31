@@ -16,8 +16,3 @@ export class CreateMemosDto {
     @IsNotEmpty()
     @IsNumber()
     userId: number;
-
-    @IsNotEmpty()
-    @IsString()
-    videoId: string;
-}

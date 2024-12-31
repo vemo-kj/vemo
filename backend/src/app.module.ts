@@ -13,6 +13,7 @@ import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
+import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { HomeModule } from './home/home.module';
         VideoModule,
         ChannelModule,
         YoutubeauthModule,
+        VemoModule,
         HomeModule,
         UsersModule,
         AuthModule,
