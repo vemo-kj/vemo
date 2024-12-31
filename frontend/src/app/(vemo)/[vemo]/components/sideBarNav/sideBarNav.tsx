@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,6 +14,7 @@ interface SidebarNavProps {
     onOptionSelect: (option: string) => void;
     renderSectionContent: () => React.ReactNode;
     currentTimestamp: string;
+
     handleCaptureTab: () => void; // 캡처하기 함수 추가
     handleCaptureArea: () => void; // 부분 캡처하기 함수 추가
     editorRef: React.RefObject<any>; // 에디터 참조 추가
@@ -39,13 +41,17 @@ export default function SidebarNav({
                 >
                     작성하기
                 </button>
+
                 <button
+
                     className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
                     커뮤니티
                 </button>
+
                 <button
+
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
@@ -58,6 +64,8 @@ export default function SidebarNav({
                 {activeTab === 'write' && (
                     <>
                         <h1 className={styles.notesHeader}>나만의 노트</h1>
+
+                        {/* 재생목록 이름이 들어감 */}
                         <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                         <div className={styles.notesContent}>
                             <div className={styles.noteActions}>
@@ -65,6 +73,7 @@ export default function SidebarNav({
                                     <select
                                         value={selectedOption}
                                         onChange={e => onOptionSelect(e.target.value)}
+
                                         className={styles.dropdownSelect}
                                     >
                                         <option value="내 메모 보기">내 메모 보기</option>
@@ -79,14 +88,17 @@ export default function SidebarNav({
                             <div className={styles.footerButtons}>
                                 <button onClick={handleCaptureTab}>캡처하기</button>
                                 <button onClick={handleCaptureArea}>부분 캡처</button>
+
                                 <SummaryButton />
                                 <ExportButton />
                             </div>
                         )}
                     </>
                 )}
+
                 {activeTab === 'community' && <Community />}
                 {activeTab === 'playlist' && <PlayList />}
+
             </div>
         </div>
     );

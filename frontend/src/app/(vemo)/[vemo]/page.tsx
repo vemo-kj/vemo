@@ -1,5 +1,6 @@
 'use client';
 
+
 import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -8,10 +9,12 @@ import SideBarNav from './components/sideBarNav/sideBarNav';
 
 import { SummaryProvider } from '../[vemo]/context/SummaryContext';
 
+
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
 
 export default function VemoPage() {
+
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
 
@@ -20,7 +23,7 @@ export default function VemoPage() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
 
-    const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
+
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -31,9 +34,11 @@ export default function VemoPage() {
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
                 videoId: 'pEt89CrE-6A',
+
                 events: {
                     onReady: () => console.log('Player ready'),
                 },
+
             });
         };
     }, []);
@@ -45,13 +50,12 @@ export default function VemoPage() {
                 const sec = playerRef.current.getCurrentTime();
                 const mm = Math.floor(sec / 60);
                 const ss = Math.floor(sec % 60);
-                setCurrentTimestamp(
-                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
-                );
+                setCurrentTimestamp(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
             }
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
 
     // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
@@ -125,18 +129,44 @@ export default function VemoPage() {
             default:
                 return <p className={styles.noteTitle}>기본 내용을 여기에 표시</p>;
         }
+
+    };
+
+    const renderSectionContent = () => {
+        switch (selectedOption) {
+            case '내 메모 보기':
+                return (
+                    <>
+                        <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                        <EditorNoSSR
+                            ref={editorRef}
+                            getTimestamp={() => currentTimestamp}
+                            onTimestampClick={(timestamp) => {
+                                const [m, s] = timestamp.split(':').map(Number);
+                                const total = (m || 0) * 60 + (s || 0);
+                                playerRef.current?.seekTo(total, true);
+                            }}
+                        />
+                    </>
+                );
+            // 후에 내용별 반영 예정
+            case 'AI 요약 보기':
+                return <p className={styles.noteTitle}>AI 요약 내용을 여기에 표시</p>;
+            case '옵션 3':
+                return <p className={styles.noteTitle}>옵션 3의 내용을 여기에 표시</p>;
+            default:
+                return <p className={styles.noteTitle}>기본 내용을 여기에 표시</p>;
+        }
     };
 
     return (
         <div className={styles.container}>
+
             {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
+
                 <Link href="/" passHref>
-                    <img
-                        src="/icons/Button_home.svg"
-                        alt="VEMO logo"
-                        className={styles.logoButton}
-                    />
+                    <img src="/icons/Button_home.svg" alt="VEMO logo" className={styles.logoButton} />
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
@@ -163,6 +193,8 @@ export default function VemoPage() {
                     />
                 </SummaryProvider>
             </div>
+
         </div>
     );
 }
+
