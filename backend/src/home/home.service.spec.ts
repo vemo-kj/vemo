@@ -1,54 +1,95 @@
-// src/home/home.service.spec.ts
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { HomeService } from './home.service';
-import { Repository } from 'typeorm';
+import { MemosService } from '../memos/memos.service';
+import { VideoService } from '../video/video.service';
+import { CreateMemosDto } from '../memos/dto/create-memos.dto';
+import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-response.dto';
 import { Video } from '../video/video.entity';
 import { Channel } from '../channel/channel.entity';
+import { HomeResponseDto } from './dto/home-response.dto';
+import { User } from '../users/users.entity';
 import { Memos } from '../memos/memos.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+
+// 공통 Mock 데이터 생성 함수
+const createMockUser = (overrides?: Partial<User>): User => ({
+    id: 1,
+    name: 'User Name',
+    email: 'user@example.com',
+    password: 'hashedpassword',
+    birth: new Date('1990-01-01'),
+    gender: 'Male',
+    nickname: 'Nickname', // 필수 속성 추가
+    profileImage: 'http://example.com/profile.jpg', // 필수 속성 추가
+    introduction: 'This is a user introduction.', // 필수 속성 추가
+    memos: [],
+    playlists: [],
+    ...overrides,
+});
+
+const createMockChannel = (overrides?: Partial<Channel>): Channel => ({
+    id: 'channel1-id',
+    thumbnails: 'http://example.com/channel1.jpg',
+    title: 'Channel One',
+    videos: [],
+    ...overrides,
+});
+
+const createMockVideo = (overrides?: Partial<Video>): Video => ({
+    id: 'abcd1234efg',
+    title: 'Sample Video',
+    thumbnails: 'http://example.com/thumb.jpg',
+    duration: '00:05:30',
+    category: 'Education',
+    channel: createMockChannel(),
+    memos: [],
+    ...overrides,
+});
+
+const createMockMemos = (overrides?: Partial<Memos>): Memos => ({
+    id: 1,
+    title: 'Sample Memo',
+    description: 'This is a sample memo.',
+    createdAt: new Date(),
+    updatedAt: null,
+    user: createMockUser(),
+    video: createMockVideo(),
+    memo: [],
+    ...overrides,
+});
 
 describe('HomeService', () => {
     let service: HomeService;
-    let videoRepository: Repository<Video>;
-    let memosRepository: Repository<Memos>;
+    let memosService: MemosService;
+    let videoService: VideoService;
 
     // Mock 데이터 정의
-    const mockChannel: Channel = {
-        id: 'channel1-id',
-        thumbnails: 'http://example.com/channel1.jpg',
-        title: 'Channel One',
-        videos: [],
+    const mockVideo: Video = createMockVideo();
+
+    const mockCreateMemoForVideoResponseDto: CreateMemosForVideoResponseDto = {
+        video: {
+            id: mockVideo.id,
+            title: mockVideo.title,
+            thumbnails: mockVideo.thumbnails,
+            channel: {
+                id: mockVideo.channel.id, // string 타입
+                thumbnails: mockVideo.channel.thumbnails,
+                title: mockVideo.channel.title,
+            },
+            duration: mockVideo.duration,
+            category: mockVideo.category,
+        },
+        vemoCount: 5,
     };
 
-    const mockVideos: Video[] = [
-        {
-            id: 'video1ABCDE1',
-            title: 'Sample Video 1',
-            thumbnails: 'http://example.com/thumb1.jpg',
-            duration: '00:05:30',
-            category: 'Education',
-            channel: mockChannel,
-            memos: [],
-        },
-        {
-            id: 'video2ABCDE2',
-            title: 'Sample Video 2',
-            thumbnails: 'http://example.com/thumb2.jpg',
-            duration: '00:03:45',
-            category: 'Entertainment',
-            channel: mockChannel,
-            memos: [],
-        },
-    ];
-
-    const mockVideoRepository = {
-        find: jest.fn(),
+    // Mock 서비스 정의
+    const mockMemosService = {
+        createMemos: jest.fn(),
+        getVemoCountByVideo: jest.fn(),
     };
 
-    const mockMemosRepository = {
-        count: jest.fn(),
+    const mockVideoService = {
+        getVideoById: jest.fn(),
+        getAllVideos: jest.fn(),
     };
 
     beforeEach(async () => {
@@ -56,211 +97,182 @@ describe('HomeService', () => {
             providers: [
                 HomeService,
                 {
-                    provide: getRepositoryToken(Video),
-                    useValue: mockVideoRepository,
+                    provide: MemosService,
+                    useValue: mockMemosService,
                 },
                 {
-                    provide: getRepositoryToken(Memos),
-                    useValue: mockMemosRepository,
+                    provide: VideoService,
+                    useValue: mockVideoService,
                 },
             ],
         }).compile();
 
         service = module.get<HomeService>(HomeService);
-        videoRepository = module.get<Repository<Video>>(getRepositoryToken(Video));
-        memosRepository = module.get<Repository<Memos>>(getRepositoryToken(Memos));
+        memosService = module.get<MemosService>(MemosService);
+        videoService = module.get<VideoService>(VideoService);
     });
 
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    // 모든 비디오를 정상적으로 반환하는 경우
-    it('모든 비디오를 정상적으로 반환해야 한다', async () => {
-        // Mock Repository의 find 메서드 설정
-        mockVideoRepository.find.mockResolvedValue(mockVideos);
+    describe('createMemosForVideo', () => {
+        it('비디오가 존재하고, 메모가 성공적으로 생성되어야 한다', async () => {
+            const videoId = 'abcd1234efg';
+            const createMemosDto: CreateMemosDto = {
+                title: 'New Memo',
+                description: 'This is a new memo.',
+                userId: 1,
+                videoId: videoId, // string 타입
+            };
 
-        // Mock memosRepository.count 설정
-        mockMemosRepository.count.mockImplementation(
-            ({
-                where: {
-                    video: { id },
-                },
-            }) => {
-                if (id === 'video1ABCDE1') {
-                    return Promise.resolve(2); // video1에 2개의 메모가 있음
-                }
-                return Promise.resolve(0); // 나머지 비디오에는 메모가 없음
-            },
-        );
+            // Mock VideoService의 getVideoById 설정
+            mockVideoService.getVideoById.mockResolvedValue(mockVideo);
 
-        const result = await service.getAllVideos(1, 10);
+            // Mock MemosService의 createMemos 설정
+            const createdMemo: Memos = createMockMemos({
+                id: 1,
+                title: createMemosDto.title,
+                description: createMemosDto.description,
+                user: createMockUser({
+                    id: createMemosDto.userId,
+                    name: 'User Name',
+                    email: 'user@example.com',
+                    password: 'hashedpassword',
+                    birth: new Date('1990-01-01'),
+                    gender: 'Male',
+                    nickname: 'Nickname',
+                    profileImage: 'http://example.com/profile.jpg',
+                    introduction: 'This is a user introduction.',
+                }),
+                video: mockVideo,
+            });
 
-        expect(videoRepository.find).toHaveBeenCalledWith({
-            relations: ['channel'],
-            order: { id: 'DESC' },
-            skip: 0,
-            take: 10,
+            mockMemosService.createMemos.mockResolvedValue(createdMemo);
+
+            // Mock MemosService의 getVemoCountByVideo 설정
+            mockMemosService.getVemoCountByVideo.mockResolvedValue(5);
+
+            const result = await service.createMemosForVideo(videoId, createMemosDto);
+
+            expect(videoService.getVideoById).toHaveBeenCalledWith(videoId);
+            expect(memosService.createMemos).toHaveBeenCalledWith(createMemosDto, videoId);
+            expect(memosService.getVemoCountByVideo).toHaveBeenCalledWith(videoId);
+            expect(result).toEqual(mockCreateMemoForVideoResponseDto);
         });
 
-        expect(memosRepository.count).toHaveBeenCalledTimes(2);
-        expect(memosRepository.count).toHaveBeenCalledWith({
-            where: { video: { id: 'video1ABCDE1' } },
-        });
-        expect(memosRepository.count).toHaveBeenCalledWith({
-            where: { video: { id: 'video2ABCDE2' } },
-        });
+        it('비디오가 존재하지 않을 경우 NotFoundException을 던져야 한다', async () => {
+            const videoId = 'nonexistent-video-id';
+            const createMemosDto: CreateMemosDto = {
+                title: 'New Memo',
+                description: 'This is a new memo.',
+                userId: 1,
+                videoId: videoId, // string 타입
+            };
 
-        expect(result).toEqual({
-            videos: [
-                {
-                    id: 'video1ABCDE1',
-                    title: 'Sample Video 1',
-                    thumbnails: 'http://example.com/thumb1.jpg',
-                    duration: '00:05:30',
+            // Mock VideoService의 getVideoById 설정
+            mockVideoService.getVideoById.mockResolvedValue(null);
+
+            await expect(service.createMemosForVideo(videoId, createMemosDto)).rejects.toThrow(
+                `Video with ID ${videoId} not found`,
+            );
+
+            expect(videoService.getVideoById).toHaveBeenCalledWith(videoId);
+            expect(memosService.createMemos).not.toHaveBeenCalled();
+            expect(memosService.getVemoCountByVideo).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('getAllVideos', () => {
+        it('비디오가 존재하고, 메모 수와 함께 비디오 리스트를 반환해야 한다', async () => {
+            const page = 1;
+            const limit = 10;
+            const videos: Video[] = [
+                createMockVideo({
+                    id: 'video1',
+                    title: 'Video 1',
+                    thumbnails: 'http://example.com/video1.jpg',
+                    duration: '00:10:00',
                     category: 'Education',
-                    channel: {
+                    channel: createMockChannel({
                         id: 'channel1-id',
                         thumbnails: 'http://example.com/channel1.jpg',
                         title: 'Channel One',
-                    },
-                    vemoCount: 2, // 메모 수
-                },
-                {
-                    id: 'video2ABCDE2',
-                    title: 'Sample Video 2',
-                    thumbnails: 'http://example.com/thumb2.jpg',
-                    duration: '00:03:45',
+                    }),
+                }),
+                createMockVideo({
+                    id: 'video2',
+                    title: 'Video 2',
+                    thumbnails: 'http://example.com/video2.jpg',
+                    duration: '00:15:00',
                     category: 'Entertainment',
-                    channel: {
-                        id: 'channel1-id',
-                        thumbnails: 'http://example.com/channel1.jpg',
-                        title: 'Channel One',
+                    channel: createMockChannel({
+                        id: 'channel2-id',
+                        thumbnails: 'http://example.com/channel2.jpg',
+                        title: 'Channel Two',
+                    }),
+                }),
+            ];
+
+            // Mock VideoService의 getAllVideos 설정
+            mockVideoService.getAllVideos.mockResolvedValue(videos);
+
+            // Mock MemosService의 getVemoCountByVideo 설정
+            mockMemosService.getVemoCountByVideo.mockResolvedValueOnce(3).mockResolvedValueOnce(5);
+
+            const expectedResponse: HomeResponseDto = {
+                videos: [
+                    {
+                        id: 'video1',
+                        title: 'Video 1',
+                        thumbnails: 'http://example.com/video1.jpg',
+                        duration: '00:10:00',
+                        category: 'Education',
+                        channel: {
+                            id: 'channel1-id',
+                            thumbnails: 'http://example.com/channel1.jpg',
+                            title: 'Channel One',
+                        },
+                        vemoCount: 3,
                     },
-                    vemoCount: 0, // 메모 수
-                },
-            ],
-        });
-    });
-
-    // 비디오가 존재하지 않을 때 NotFoundException을 던지는 경우
-    it('비디오가 존재하지 않을 때 NotFoundException을 던져야 한다', async () => {
-        // Mock Repository의 find 메서드 설정
-        mockVideoRepository.find.mockResolvedValue([]);
-
-        await expect(service.getAllVideos(1, 10)).rejects.toThrow(NotFoundException);
-        await expect(service.getAllVideos(1, 10)).rejects.toThrow('비디오가 존재하지 않습니다.');
-    });
-
-    // 특정 카테고리에 속한 비디오를 정상적으로 반환하는 경우
-    it('특정 카테고리에 속한 비디오를 정상적으로 반환해야 한다', async () => {
-        const category = 'Education';
-
-        const filteredVideos = mockVideos.filter(video => video.category === category);
-
-        // Mock Repository의 find 메서드 설정
-        mockVideoRepository.find.mockResolvedValue(filteredVideos);
-
-        // Mock memosRepository.count 설정
-        mockMemosRepository.count.mockImplementation(
-            ({
-                where: {
-                    video: { id },
-                },
-            }) => {
-                if (id === 'video1ABCDE1') {
-                    return Promise.resolve(2); // video1에 2개의 메모가 있음
-                }
-                return Promise.resolve(0);
-            },
-        );
-
-        const result = await service.getVideosByCategory(category, 1, 10);
-
-        expect(videoRepository.find).toHaveBeenCalledWith({
-            where: { category },
-            relations: ['channel'],
-            order: { id: 'DESC' },
-            skip: 0,
-            take: 10,
-        });
-
-        expect(memosRepository.count).toHaveBeenCalledTimes(1);
-        expect(memosRepository.count).toHaveBeenCalledWith({
-            where: { video: { id: 'video1ABCDE1' } },
-        });
-
-        expect(result).toEqual({
-            videos: [
-                {
-                    id: 'video1ABCDE1',
-                    title: 'Sample Video 1',
-                    thumbnails: 'http://example.com/thumb1.jpg',
-                    duration: '00:05:30',
-                    category: 'Education',
-                    channel: {
-                        id: 'channel1-id',
-                        thumbnails: 'http://example.com/channel1.jpg',
-                        title: 'Channel One',
+                    {
+                        id: 'video2',
+                        title: 'Video 2',
+                        thumbnails: 'http://example.com/video2.jpg',
+                        duration: '00:15:00',
+                        category: 'Entertainment',
+                        channel: {
+                            id: 'channel2-id',
+                            thumbnails: 'http://example.com/channel2.jpg',
+                            title: 'Channel Two',
+                        },
+                        vemoCount: 5,
                     },
-                    vemoCount: 2, // 메모 수
-                },
-            ],
-        });
-    });
+                ],
+            };
 
-    // 특정 카테고리에 속한 비디오가 존재하지 않을 때 NotFoundException을 던지는 경우
-    it('특정 카테고리에 속한 비디오가 존재하지 않을 때 NotFoundException을 던져야 한다', async () => {
-        const category = 'NonExistentCategory';
+            const result = await service.getAllVideos(page, limit);
 
-        // Mock Repository의 find 메서드 설정
-        mockVideoRepository.find.mockResolvedValue([]);
-
-        await expect(service.getVideosByCategory(category, 1, 10)).rejects.toThrow(
-            NotFoundException,
-        );
-        await expect(service.getVideosByCategory(category, 1, 10)).rejects.toThrow(
-            `카테고리 '${category}'에 해당하는 비디오가 존재하지 않습니다.`,
-        );
-    });
-
-    // vemoCount를 정확하게 계산해야 한다
-    it('vemoCount를 정확하게 계산해야 한다', async () => {
-        // Mock Repository의 find 메서드 설정
-        mockVideoRepository.find.mockResolvedValue([mockVideos[0]]);
-
-        // Mock memosRepository.count 설정
-        mockMemosRepository.count.mockResolvedValue(3); // video1에 3개의 메모가 있음
-
-        const result = await service.getAllVideos(1, 10);
-
-        expect(videoRepository.find).toHaveBeenCalledWith({
-            relations: ['channel'],
-            order: { id: 'DESC' },
-            skip: 0,
-            take: 10,
+            expect(videoService.getAllVideos).toHaveBeenCalledWith(page, limit);
+            expect(memosService.getVemoCountByVideo).toHaveBeenCalledTimes(videos.length);
+            expect(memosService.getVemoCountByVideo).toHaveBeenNthCalledWith(1, 'video1');
+            expect(memosService.getVemoCountByVideo).toHaveBeenNthCalledWith(2, 'video2');
+            expect(result).toEqual(expectedResponse);
         });
 
-        expect(memosRepository.count).toHaveBeenCalledWith({
-            where: { video: { id: 'video1ABCDE1' } },
-        });
+        it('비디오가 존재하지 않을 경우 NotFoundException을 던져야 한다', async () => {
+            const page = 1;
+            const limit = 10;
 
-        expect(result).toEqual({
-            videos: [
-                {
-                    id: 'video1ABCDE1',
-                    title: 'Sample Video 1',
-                    thumbnails: 'http://example.com/thumb1.jpg',
-                    duration: '00:05:30',
-                    category: 'Education',
-                    channel: {
-                        id: 'channel1-id',
-                        thumbnails: 'http://example.com/channel1.jpg',
-                        title: 'Channel One',
-                    },
-                    vemoCount: 3, // 메모 수
-                },
-            ],
+            // Mock VideoService의 getAllVideos 설정
+            mockVideoService.getAllVideos.mockResolvedValue([]);
+
+            await expect(service.getAllVideos(page, limit)).rejects.toThrow(
+                '비디오가 존재하지 않습니다.',
+            );
+
+            expect(videoService.getAllVideos).toHaveBeenCalledWith(page, limit);
+            expect(memosService.getVemoCountByVideo).not.toHaveBeenCalled();
         });
     });
 });
