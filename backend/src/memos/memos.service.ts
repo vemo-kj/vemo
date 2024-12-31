@@ -5,13 +5,13 @@ import { Memos } from './memos.entity';
 import { CreateMemosDto } from './dto/create-memos.dto';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 import { Video } from '../video/video.entity';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 
 @Injectable()
 export class MemosService {
     constructor(
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
-        @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectRepository(Users) private readonly userRepository: Repository<Users>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) {}
 

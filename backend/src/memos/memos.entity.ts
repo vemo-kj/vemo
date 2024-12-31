@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Video } from '../video/video.entity';
 import { Memo } from '../memo/memo.entity';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 
 @Entity()
 export class Memos {
@@ -20,8 +20,8 @@ export class Memos {
     @Column({ type: 'datetime', nullable: true })
     updatedAt: Date;
 
-    @ManyToOne(() => User, user => user.memos, { eager: true })
-    user: User;
+    @ManyToOne(() => Users, user => user.memos, { eager: true })
+    user: Users;
 
     @ManyToOne(() => Video, video => video.memos)
     video: Video;

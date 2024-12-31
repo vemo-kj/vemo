@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UsersService } from '../users/users.service';
 import { VideoService } from '../video/video.service';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 import { Video } from '../video/video.entity';
 import { Channel } from '../channel/channel.entity';
 import { NotFoundException } from '@nestjs/common';
@@ -69,9 +69,9 @@ describe('PlaylistService', () => {
                 userId: 1,
             };
 
-            const mockUser: User = {
+            const mockUser: Users = {
                 id: createPlaylistDto.userId,
-            } as User;
+            } as Users;
 
             const mockVideos: Video[] = [
                 {
@@ -177,9 +177,9 @@ describe('PlaylistService', () => {
                 userId: 1,
             };
 
-            const mockUser: User = {
+            const mockUser: Users = {
                 id: createPlaylistDto.userId,
-            } as User;
+            } as Users;
 
             const mockVideos: Video[] = [
                 {
@@ -229,9 +229,9 @@ describe('PlaylistService', () => {
     describe('사용자별 재생목록 조회', () => {
         it('사용자의 모든 재생목록을 성공적으로 조회해야 한다', async () => {
             const userId = 1;
-            const mockUser: User = {
+            const mockUser: Users = {
                 id: userId,
-            } as User;
+            } as Users;
 
             const mockVideos: Video[] = [
                 {

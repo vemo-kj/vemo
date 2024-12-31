@@ -7,11 +7,11 @@ import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-res
 import { Video } from '../video/video.entity';
 import { Channel } from '../channel/channel.entity';
 import { HomeResponseDto } from './dto/home-response.dto';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 import { Memos } from '../memos/memos.entity';
 
 // 공통 Mock 데이터 생성 함수
-const createMockUser = (overrides?: Partial<User>): User => ({
+const createMockUser = (overrides?: Partial<Users>): Users => ({
     id: 1,
     name: 'User Name',
     email: 'user@example.com',

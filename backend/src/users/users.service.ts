@@ -4,13 +4,13 @@ import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { SignupRequestsDto } from './dto/signup.requests.dto';
-import { User } from './users.entity';
+import { Users } from './users.entity';
 
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
+        @InjectRepository(Users)
+        private userRepository: Repository<Users>,
     ) {}
 
     async signUp(dto: SignupRequestsDto) {
@@ -41,10 +41,10 @@ export class UsersService {
         });
 
         const savedUser = await this.userRepository.save(user);
-        return plainToInstance(User, savedUser);
+        return plainToInstance(Users, savedUser);
     }
 
-    async findById(userId: number): Promise<User> {
+    async findById(userId: number): Promise<Users> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${userId} not found`);

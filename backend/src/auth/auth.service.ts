@@ -3,18 +3,19 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
 import { LoginRequestDto } from './dto/login.requests.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
+        @InjectRepository(Users)
+        private userRepository: Repository<Users>,
         private jwtService: JwtService,
         private youtubeauthService: YoutubeauthService,
     ) {}
+
     async signIn(dto: LoginRequestDto) {
         const user = await this.userRepository.findOne({ where: { email: dto.email } });
         if (!user) {

@@ -4,10 +4,10 @@ import { Memos } from '../memos/memos.entity';
 import { Playlist } from '../playlist/entities/playlist.entity';
 
 @Entity()
-export class User {
+export class Users {
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     @Column({ length: 100 })
     name: string;
 

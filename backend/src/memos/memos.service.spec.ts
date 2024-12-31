@@ -5,7 +5,7 @@ import { Memos } from './memos.entity';
 import { Repository } from 'typeorm';
 import { CreateMemosDto } from './dto/create-memos.dto';
 import { UpdateMemosDto } from './dto/update-memos.dto';
-import { User } from '../users/users.entity';
+import { Users } from '../users/users.entity';
 import { Video } from '../video/video.entity';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
@@ -21,7 +21,7 @@ const createMockRepository = <T = any>(): MockRepository<T> => ({
 describe('MemosService', () => {
     let service: MemosService;
     let memosRepository: MockRepository<Memos>;
-    let userRepository: MockRepository<User>;
+    let userRepository: MockRepository<Users>;
     let videoRepository: MockRepository<Video>;
 
     beforeEach(async () => {
@@ -33,7 +33,7 @@ describe('MemosService', () => {
                     useValue: createMockRepository(),
                 },
                 {
-                    provide: getRepositoryToken(User),
+                    provide: getRepositoryToken(Users),
                     useValue: createMockRepository(),
                 },
                 {
@@ -45,7 +45,7 @@ describe('MemosService', () => {
 
         service = module.get<MemosService>(MemosService);
         memosRepository = module.get<MockRepository<Memos>>(getRepositoryToken(Memos));
-        userRepository = module.get<MockRepository<User>>(getRepositoryToken(User));
+        userRepository = module.get<MockRepository<Users>>(getRepositoryToken(Users));
         videoRepository = module.get<MockRepository<Video>>(getRepositoryToken(Video));
     });
 
@@ -59,7 +59,7 @@ describe('MemosService', () => {
 
             const videoId = 'video_id'; // 별도로 전달할 videoId
 
-            const user: User = { id: 1 } as User;
+            const user: Users = { id: 1 } as Users;
             const video: Video = { id: videoId } as Video;
 
             const createdMemos: Memos = {
@@ -129,7 +129,7 @@ describe('MemosService', () => {
 
             const videoId = 'non-existent-video-id';
 
-            const user: User = { id: 1 } as User;
+            const user: Users = { id: 1 } as Users;
             userRepository.findOne.mockResolvedValue(user);
             videoRepository.findOne.mockResolvedValue(undefined);
 
@@ -155,7 +155,7 @@ describe('MemosService', () => {
                     description: '설명1',
                     createdAt: new Date(),
                     updatedAt: null,
-                    user: { id: userId } as User,
+                    user: { id: userId } as Users,
                     video: { id: 'video-1' } as Video,
                     memo: [],
                 },
@@ -165,7 +165,7 @@ describe('MemosService', () => {
                     description: '설명2',
                     createdAt: new Date(),
                     updatedAt: null,
-                    user: { id: userId } as User,
+                    user: { id: userId } as Users,
                     video: { id: 'video-2' } as Video,
                     memo: [],
                 },
@@ -192,7 +192,7 @@ describe('MemosService', () => {
                     description: '설명1',
                     createdAt: new Date(),
                     updatedAt: null,
-                    user: { id: 1 } as User,
+                    user: { id: 1 } as Users,
                     video: { id: videoId } as Video,
                     memo: [],
                 },
@@ -218,7 +218,7 @@ describe('MemosService', () => {
                 description: '설명1',
                 createdAt: new Date(),
                 updatedAt: null,
-                user: { id: 1 } as User,
+                user: { id: 1 } as Users,
                 video: { id: 'video-uuid' } as Video,
                 memo: [],
             };
@@ -261,7 +261,7 @@ describe('MemosService', () => {
                 description: '기존 설명',
                 createdAt: new Date(),
                 updatedAt: null,
-                user: { id: 1 } as User,
+                user: { id: 1 } as Users,
                 video: { id: 'video-uuid' } as Video,
                 memo: [],
             };
