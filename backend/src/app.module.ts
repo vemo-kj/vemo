@@ -14,6 +14,8 @@ import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 import { CapturesModule } from './captures/captures.module';
+import { SubtitlesModule } from './subtitles/subtitles.module';
+import { SummarizationModule } from './summarization/summarization.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 
@@ -39,6 +41,7 @@ import { HomeModule } from './home/home.module';
         AuthModule,
         SubtitlesModule,
         CapturesModule,
+        SummarizationModule,
     ],
     controllers: [AppController],
     providers: [
