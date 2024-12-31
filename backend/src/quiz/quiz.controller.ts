@@ -10,7 +10,7 @@ export class QuizController {
     ) {}
 
     @Get()
-    async summarizeVideo(@Query('videoid') videoid: string) {
+    async quizVideo(@Query('videoid') videoid: string) {
         const url = `https://www.youtube.com/watch?v=${videoid}`;
         const subtitles = await this.subtitlesService.getVideoSubtitles(url);
         return this.quizService.extractQuiz(subtitles, videoid);
