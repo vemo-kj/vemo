@@ -12,5 +12,6 @@ import { Memo } from '../memo/memo.entity';
     imports: [TypeOrmModule.forFeature([Memos, Memo, Users, Playlist, Video])],
     controllers: [MemosController],
     providers: [MemosService],
+    exports: [MemosService, TypeOrmModule],
 })
 export class MemosModule {}
