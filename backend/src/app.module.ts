@@ -13,6 +13,7 @@ import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
+import { CapturesModule } from './captures/captures.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
         UsersModule,
         AuthModule,
         SubtitlesModule,
+        CapturesModule,
     ],
     controllers: [AppController],
     providers: [
