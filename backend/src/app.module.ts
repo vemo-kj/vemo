@@ -15,6 +15,7 @@ import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { SummarizationModule } from './summarization/summarization.module';
+import { HomeModule } from './home/home.module';
 
 
 @Module({
@@ -33,6 +34,7 @@ import { SummarizationModule } from './summarization/summarization.module';
         VideoModule,
         ChannelModule,
         YoutubeauthModule,
+        HomeModule,
         UsersModule,
         AuthModule,
         SubtitlesModule,
