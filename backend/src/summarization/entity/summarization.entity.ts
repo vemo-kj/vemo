@@ -6,8 +6,8 @@ export class Summary {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    timestamp: string; // 타임스탬프 (예: "0:18")
+    @Column({ type: 'timestamp' })
+    timestamp: Date; // Date 타입으로 변경
 
     @Column({ type: 'text' })
     summary: string; // 요약 내용
