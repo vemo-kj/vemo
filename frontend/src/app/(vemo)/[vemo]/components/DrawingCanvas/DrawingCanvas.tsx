@@ -65,7 +65,6 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
                 strokeWidth={3}
                 className={styles.canvasBox}
                 backgroundImage={backgroundImage} // 배경 이미지 설정
-                // backgroundImageScale={1} // 필요에 따라 조정
             />
             <div className={styles.drawToolbar}>
                 <button onClick={handleUndo} className={styles.button}>

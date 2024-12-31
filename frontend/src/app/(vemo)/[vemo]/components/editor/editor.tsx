@@ -20,6 +20,7 @@ interface DraftEditorProps {
     getTimestamp: () => string;
     onTimestampClick?: (timestamp: string) => void;
     onPauseVideo?: () => void; // 영상 정지 (그리기 시)
+    isEditable: boolean; // 항상 true로 설정
 }
 
 // parseTimeToSeconds는 동일
@@ -132,6 +133,7 @@ const DraftEditor = forwardRef(function DraftEditorRef(
                         onDelete={() => handleDeleteItem(item.id)}
                         onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
                         onPauseVideo={onPauseVideo}
+                        isEditable={true} // 항상 true로 설정
                     />
                 ))}
             </div>

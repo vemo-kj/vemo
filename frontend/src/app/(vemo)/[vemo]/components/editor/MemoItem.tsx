@@ -11,6 +11,7 @@ interface MomoItemProps {
     onChangeHTML: (newHTML: string) => void;
     onDelete: () => void;
     onPauseVideo?: () => void;
+    isEditable: boolean; // 추가된 부분
 }
 
 export default function MomoItem({
@@ -22,6 +23,7 @@ export default function MomoItem({
     onChangeHTML,
     onDelete,
     onPauseVideo,
+    isEditable, // 추가된 부분
 }: MomoItemProps) {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
@@ -95,7 +97,8 @@ export default function MomoItem({
             ) : (
                 <div
                     className={styles.itemContent}
-                    contentEditable={true}
+                    // contentEditable={true}
+                    contentEditable={isEditable} // 수정된 부분
                     suppressContentEditableWarning={true}
                     onBlur={handleBlur}
                     ref={contentRef}

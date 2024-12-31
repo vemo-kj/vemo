@@ -4,10 +4,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
-import DropdownMenu from './components/DropdownMenu';
-
-import SummaryButton from './components/summaryButton/SummaryButton';
-import ExportButton from './components/exportButton/ExportButton';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 
 import { SummaryProvider } from '../[vemo]/context/SummaryContext';
@@ -18,6 +14,8 @@ const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: f
 export default function VemoPage() {
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
+
+    const [isEditing, setIsEditing] = useState(false); // 편집 상태 추가
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
@@ -115,6 +113,7 @@ export default function VemoPage() {
                                 const total = (m || 0) * 60 + (s || 0);
                                 playerRef.current?.seekTo(total, true);
                             }}
+                            isEditable={true} // 항상 true로 설정
                         />
                     </>
                 );
