@@ -1,15 +1,16 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { VemoService } from './vemo.service';
 import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
-import { GetUserPlaylistsResponseDto } from './dto/get-user-playlists-response.dto';
+import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
+import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
 
 @Controller('vemo')
 export class VemoController {
     constructor(private readonly vemoService: VemoService) {}
 
     /**
-     * 커뮤니티 메모를 조회합니다.
+     * 커뮤니티 메모를 조회
      * @param videoId 비디오 ID
      * @param getCommunityMemosDto 조회 옵션 DTO
      * @returns GetCommunityMemosResponseDto
@@ -23,13 +24,26 @@ export class VemoController {
     }
 
     /**
-     * 사용자 재생목록을 조회합니다.
+     * 사용자 재생목록 조회
      * @param userId 사용자 ID
      * @returns 사용자 재생목록 목록
      */
-    @Get('user/:userId/playlists')
-    async getUserPlaylists(@Param('userId') userId: number): Promise<GetUserPlaylistsResponseDto> {
-        const playlists = await this.vemoService.getUserPlaylists(userId);
-        return { playlists };
+    @Get('playlists/:userId')
+    async getUserPlaylists(
+        @Param('userId', ParseIntPipe) userId: number,
+    ): Promise<PlaylistResponseDto[]> {
+        return await this.vemoService.getUserPlaylists(userId);
+    }
+
+    /**
+     * 사용자 재생목록 생성
+     * @param createPlaylistDto 생성 DTO
+     * @returns 생성된 재생목록 정보
+     */
+    @Post('playlist')
+    async createUserPlaylist(
+        @Body() createPlaylistDto: CreatePlaylistDto,
+    ): Promise<PlaylistResponseDto> {
+        return await this.vemoService.createUserPlaylist(createPlaylistDto);
     }
 }

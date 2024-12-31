@@ -15,6 +15,7 @@ import { VideoModule } from './video/video.module';
 import { YoutubeauthModule } from './youtubeauth/youtubeauth.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
+import { PlaylistModule } from './playlist/playlist.module';
 
 @Module({
     imports: [
@@ -37,6 +38,7 @@ import { HomeModule } from './home/home.module';
         UsersModule,
         AuthModule,
         SubtitlesModule,
+        PlaylistModule,
     ],
     controllers: [AppController],
     providers: [

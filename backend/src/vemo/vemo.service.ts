@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MemosService } from '../memos/memos.service';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
-import { Playlist } from '../playlist/entities/playlist.entity';
 import { PlaylistService } from '../playlist/playlist.service';
 import { MemosDto } from './dto/memos.dto';
+import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
+import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
 
 @Injectable()
 export class VemoService {
@@ -54,7 +55,16 @@ export class VemoService {
      * @param userId 사용자 ID
      * @returns 사용자 재생목록 목록
      */
-    async getUserPlaylists(userId: number): Promise<Playlist[]> {
+    async getUserPlaylists(userId: number): Promise<PlaylistResponseDto[]> {
         return await this.playlistService.getPlaylistsByUser(userId);
+    }
+
+    /**
+     * 사용자 재생목록 생성
+     * @param createPlaylistDto 생성 DTO
+     * @returns 생성된 재생목록 정보
+     */
+    async createUserPlaylist(createPlaylistDto: CreatePlaylistDto): Promise<PlaylistResponseDto> {
+        return await this.playlistService.createPlaylist(createPlaylistDto);
     }
 }
