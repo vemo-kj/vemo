@@ -12,7 +12,7 @@ import { MemosModule } from './memos/memos.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
-import { YoutubeAuthModule } from './youtubeauth/youtubeAuthModule';
+import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
 import { CapturesModule } from './captures/captures.module';
 import { QuizModule } from './quiz/quiz.module';
 import { SummarizationModule } from './summarization/summarization.module';

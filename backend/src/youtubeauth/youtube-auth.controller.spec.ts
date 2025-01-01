@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { YoutubeAuthController } from './youtubeAuthController';
+import { YoutubeAuthController } from './youtube-auth.controller';
 
 describe('YoutubeAuthController', () => {
     let controller: YoutubeAuthController;

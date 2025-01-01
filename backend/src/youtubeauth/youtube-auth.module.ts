@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { YoutubeAuthController } from './youtubeAuthController';
+import { YoutubeAuthController } from './youtube-auth.controller';
 import { YoutubeAuthService } from './youtube-auth.service';
 
 @Module({

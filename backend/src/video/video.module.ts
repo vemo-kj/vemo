@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChannelModule } from 'src/channel/channel.module';
-import { YoutubeAuthModule } from 'src/youtubeauth/youtubeAuthModule';
+import { YoutubeAuthModule } from 'src/youtubeauth/youtube-auth.module';
 import { VideoController } from './video.controller';
 import { Video } from './video.entity';
 import { VideoService } from './video.service';
