@@ -13,7 +13,7 @@ export default function DropDownMenu() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const loggedIn = !!localStorage.getItem('token');
+      const loggedIn = !!sessionStorage.getItem('token');
       setIsLoggedIn(loggedIn);
     }
   }, []);
@@ -31,7 +31,7 @@ export default function DropDownMenu() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     setIsLoggedIn(false);
     closeDropdown();
     router.push('/login');

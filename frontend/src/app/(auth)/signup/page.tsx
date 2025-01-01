@@ -22,7 +22,6 @@ export default function SignUpPage() {
     nickname: '',
     email: '',
     password: '',
-    // passwordCheck: '',
     introduction:'',
     gender:'',
   });
@@ -43,12 +42,6 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-
-    // 간단한 유효성 검사
-    // if (formData.password !== formData.passwordCheck) {
-    //   setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
-    //   return;
-    // }
 
     if (!selectedImage) {
       setError('프로필 이미지를 선택하세요.');
@@ -115,7 +108,8 @@ export default function SignUpPage() {
           name="gender"
           required
           onChange={handleInputChange}
-          />
+          placeholder="Male, Female, Other 중 하나를 입력하세요."
+        />
         <InputBox
           label="닉네임"
           type="text"

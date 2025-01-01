@@ -24,24 +24,33 @@ export default function LoginPage() {
     try {
       const response = await fetch("http://localhost:5050/users/login", {
         method: "POST",
-        // headers: { "Content-Type": "application/json" },
         headers: { 
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
         body: JSON.stringify({ email, password }),
       });
-  
+    
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("서버 에러 데이터:", errorData);
         throw new Error(errorData?.message || "로그인 실패");
       }
-  
+    
       const data = await response.json();
-      console.log("로그인 성공:", data);
-  
-      localStorage.setItem("token", data.token);
-      router.push("/");
+      console.log("로그인 성공 데이터:", data);
+    
+      // 데이터 구조 확인
+      if (!data.access_token) {
+        console.error("토큰 없음: 응답 데이터", data);
+        setError("토큰을 받을 수 없습니다.");
+        return;
+      }
+    
+      sessionStorage.setItem("token", data.access_token);
+    
+      router.push("/"); // 구글링크 작성해야함
+
     } catch (err) {
       console.error("로그인 에러:", err);
       setError(err instanceof Error ? err.message : "네트워크 오류가 발생했습니다.");
@@ -81,4 +90,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

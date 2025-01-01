@@ -1,9 +1,12 @@
 'use client';
-
+// components
+import Header from '@/app/components/Layout/Header';
 import InputLink from './components/inputLink/InputLink';
 import InputTitle from './components/inputTitle/InputTitle';
 import CreateButton from './components/createButton/CreateButton';
+// style
 import style from './Create.module.css';
+// next
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -28,7 +31,7 @@ export default function CreatePage() {
 
   // 페이지 접근 제어: 토큰 확인
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       alert('로그인이 필요합니다.');
       router.push('/login'); // 로그인 페이지로 리다이렉트
@@ -63,7 +66,7 @@ export default function CreatePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
         },
         body: JSON.stringify(data),
       });
@@ -78,7 +81,7 @@ export default function CreatePage() {
         // 인증 실패 처리
         if (response.status === 401) {
           alert('로그인이 만료되었습니다. 다시 로그인하세요.');
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           router.push('/login');
         } else {
           alert(`저장 실패: ${errorData.message}`);
@@ -93,6 +96,8 @@ export default function CreatePage() {
   };
 
   return (
+    <>
+    <Header />
     <div className={style.createPage}>
       <h1>메모 작성하기</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -108,5 +113,6 @@ export default function CreatePage() {
       />
       <CreateButton onSave={handleSave} isLoading={isLoading} />
     </div>
+  </>
   );
 }

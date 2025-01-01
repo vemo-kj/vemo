@@ -1,7 +1,7 @@
 import { InputBoxProps } from "@/app/types/InputBoxProps";
 import Style from './InputBox.module.css';
 
-export default function InputBox({ label, type, id, name, required, className, onChange }: InputBoxProps) {
+export default function InputBox({ label, type, placeholder, id, name, required, className, onChange }: InputBoxProps) {
   return (
     <div className={Style.inputBox}>
       <p>{label}</p>
@@ -12,6 +12,7 @@ export default function InputBox({ label, type, id, name, required, className, o
         name={name}
         required={required}
         onChange={onChange}
+        placeholder={placeholder}
       />
     </div>
   );
