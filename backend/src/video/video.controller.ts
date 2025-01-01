@@ -6,13 +6,14 @@ import {
     Query,
 } from '@nestjs/common';
 
-import { YoutubeauthService } from 'src/youtubeauth/youtubeauth.service';
+import { YoutubeAuthService } from 'src/youtubeauth/youtube-auth.service';
 import { VideoService } from './video.service';
+
 @Controller('video')
 export class VideoController {
     constructor(
-        private readonly videoservice: VideoService,
-        private readonly youtubeauthService: YoutubeauthService,
+        private readonly videoService: VideoService,
+        private readonly youtubeAuthService: YoutubeAuthService,
     ) {}
 
     @Get('getVideo')
@@ -22,7 +23,7 @@ export class VideoController {
         }
 
         try {
-            const video = await this.videoservice.getVideoById(videoId);
+            const video = await this.videoService.getVideoById(videoId);
             return { video };
         } catch (error) {
             console.error(error);

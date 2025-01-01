@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChannelService } from '../channel/channel.service';
-import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { Video } from './video.entity';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class VideoService {
     constructor(
         @InjectRepository(Video)
         private videoRepository: Repository<Video>,
-        private youtubeauthService: YoutubeauthService,
+        private youtubeAuthService: YoutubeAuthService,
         private channelService: ChannelService,
     ) {}
 
@@ -39,8 +39,8 @@ export class VideoService {
 
     private async fetchVideoFromYouTube(videoId: string): Promise<any> {
         try {
-            await this.youtubeauthService.ensureAuthenticated();
-            const response = await this.youtubeauthService.youtube.videos.list({
+            await this.youtubeAuthService.ensureAuthenticated();
+            const response = await this.youtubeAuthService.youtube.videos.list({
                 part: ['snippet', 'contentDetails', 'statistics'],
                 id: [videoId],
             });

@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { Users } from '../users/users.entity';
-import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { LoginRequestDto } from './dto/login.requests.dto';
 
 @Injectable()
@@ -13,8 +13,9 @@ export class AuthService {
         @InjectRepository(Users)
         private userRepository: Repository<Users>,
         private jwtService: JwtService,
-        private youtubeauthService: YoutubeauthService,
-    ) {}
+        private youtubeAuthService: YoutubeAuthService,
+    ) {
+    }
 
     async signIn(dto: LoginRequestDto) {
         const user = await this.userRepository.findOne({ where: { email: dto.email } });
@@ -32,7 +33,7 @@ export class AuthService {
 
         return {
             access_token,
-            redirectUrl: this.youtubeauthService.getAuthUrl(),
+            redirectUrl: this.youtubeAuthService.getAuthUrl(),
         };
     }
 
@@ -48,7 +49,7 @@ export class AuthService {
             }
 
             // 2. YouTube OAuth 인증 정보 제거
-            await this.youtubeauthService.clearCredentials();
+            await this.youtubeAuthService.clearCredentials();
 
             return {
                 success: true,

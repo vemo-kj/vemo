@@ -4,7 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { VideoService } from './video.service';
 import { ChannelService } from '../channel/channel.service';
-import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { Video } from './video.entity';
 import { Channel } from '../channel/channel.entity';
 
@@ -39,14 +39,14 @@ describe('VideoService', () => {
             providers: [
                 VideoService,
                 { provide: getRepositoryToken(Video), useValue: mockVideoRepository },
-                { provide: YoutubeauthService, useValue: mockYoutubeauthService },
+                { provide: YoutubeAuthService, useValue: mockYoutubeauthService },
                 { provide: ChannelService, useValue: mockChannelService },
             ],
         }).compile();
 
         service = module.get<VideoService>(VideoService);
         videoRepository = module.get(getRepositoryToken(Video));
-        youtubeauthService = module.get(YoutubeauthService);
+        youtubeauthService = module.get(YoutubeAuthService);
         channelService = module.get(ChannelService);
     });
 

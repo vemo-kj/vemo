@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { YoutubeauthController } from './youtubeauth.controller';
+import { YoutubeAuthController } from './youtubeAuthController';
 
-describe('YoutubeauthController', () => {
-  let controller: YoutubeauthController;
+describe('YoutubeAuthController', () => {
+    let controller: YoutubeAuthController;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [YoutubeauthController],
-    }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [YoutubeAuthController],
+        }).compile();
 
-    controller = module.get<YoutubeauthController>(YoutubeauthController);
-  });
+        controller = module.get<YoutubeAuthController>(YoutubeAuthController);
+    });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
 });
