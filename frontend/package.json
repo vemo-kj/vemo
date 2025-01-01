@@ -14,6 +14,7 @@
         "@types/draft-js": "^0.11.18",
         "draft-convert": "^2.1.13",
         "draft-js": "^0.11.7",
+        "html-to-image": "^1.11.11",
         "next": "15.1.2",
         "next-svgr": "^0.0.2",
         "react": "^18.2.0",
