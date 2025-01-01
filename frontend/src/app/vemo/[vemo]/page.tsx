@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
@@ -30,9 +30,10 @@ interface PageProps {
   };
 }
 
-export default function VemoPage({ params }: PageProps) {
+export default function VemoPage() {
     const router = useRouter();
-    const videoId = params.vemo;
+    const params = useParams();
+    const videoId = params.vemo as string;
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
@@ -42,26 +43,36 @@ export default function VemoPage({ params }: PageProps) {
     // const [videoId, setVideoId] = useState('pEt89CrE-6A');
 
     useEffect(() => {
+        if (!videoId) return;
+
+        // 기존 player가 있다면 제거
+        if (playerRef.current) {
+            playerRef.current.destroy();
+        }
+
         // YouTube Iframe API 로드
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
-        document.body.appendChild(tag);
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
+        // YouTube Player 초기화
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
                 videoId: videoId,
                 events: {
-                    onReady: () => console.log('Player ready'),
+                    onReady: () => {
+                        console.log('Player ready');
+                        // Player 준비되면 timestamp 업데이트 시작
+                        startTimestampUpdate();
+                    },
                 },
             });
         };
     }, [videoId]);
 
-    // 1초마다 현재 재생 시간 갱신
-    useEffect(() => {
-        // 편집 중인 아이템이 있으면 타임스탬프 업데이트를 중단
-        if (editingItemId !== null) return;
-
+    // timestamp 업데이트 함수를 별도로 분리
+    const startTimestampUpdate = () => {
         const interval = setInterval(() => {
             if (playerRef.current?.getCurrentTime) {
                 const sec = playerRef.current.getCurrentTime();
@@ -71,8 +82,13 @@ export default function VemoPage({ params }: PageProps) {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [editingItemId]);
+    };
 
+    // timestamp 업데이트 useEffect 수정
+    useEffect(() => {
+        if (editingItemId !== null) return;
+        return startTimestampUpdate();
+    }, [editingItemId]);
 
     // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
