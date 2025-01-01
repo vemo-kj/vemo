@@ -12,9 +12,14 @@ import {
 } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { HomeResponseDto } from './dto/home-response.dto';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { CreateMemosDto } from '../memos/dto/create-memos.dto';
+import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-response.dto';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
 import { CreatePlaylistWithMemosResponseDto } from './dto/create-playlist-with-memos-response.dto';
+import { HomeResponseDto } from './dto/home-response.dto';
+import { HomeService } from './home.service';
 
 @Controller('home')
 export class HomeController {

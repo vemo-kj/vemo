@@ -1,0 +1,14 @@
+.mainCategory {
+  /* 글로벌css설정시 margin-top수정 필요 */
+  margin-top: 80px;
+  margin-bottom: 30px;
+
+  border: 2px solid;
+}
+.mainCategoryButtonContainer {
+  border: 2px solid;
+}
+.mainCategoryButton {
+  margin-right: 20px;
+}
+
