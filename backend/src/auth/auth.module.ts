@@ -5,7 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../users/users.entity';
 import { UsersModule } from '../users/users.module';
-import { YoutubeauthModule } from '../youtubeauth/youtubeauth.module';
+import { YoutubeAuthModule } from '../youtubeauth/youtube-auth.module';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
 
@@ -21,7 +21,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
             }),
             inject: [ConfigService],
         }),
-        YoutubeauthModule,
+        YoutubeAuthModule,
         forwardRef(() => UsersModule),
     ],
     providers: [AuthService, JwtStrategy],

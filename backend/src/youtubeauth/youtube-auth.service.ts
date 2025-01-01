@@ -10,8 +10,8 @@ import { OAuth2Client } from 'google-auth-library';
 import { google, youtube_v3 } from 'googleapis';
 
 @Injectable()
-export class YoutubeauthService implements OnModuleInit {
-    private readonly logger = new Logger(YoutubeauthService.name);
+export class YoutubeAuthService implements OnModuleInit {
+    private readonly logger = new Logger(YoutubeAuthService.name);
     private oauth2Client: OAuth2Client;
     public youtube: youtube_v3.Youtube;
 
