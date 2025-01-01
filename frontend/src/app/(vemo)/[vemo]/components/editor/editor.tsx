@@ -1,5 +1,5 @@
 import React, { useImperativeHandle, forwardRef, useState, useRef } from 'react';
-import { Editor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
+import { Editor as DraftEditor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 // import { convertToHTML } from 'draft-js-export-html';
 
@@ -16,11 +16,14 @@ interface Section {
     screenshot?: string;
 }
 
-interface DraftEditorProps {
+interface CustomEditorProps {
+    ref: React.RefObject<any>;
     getTimestamp: () => string;
-    onTimestampClick?: (timestamp: string) => void;
-    onPauseVideo?: () => void; // 영상 정지 (그리기 시)
-    isEditable: boolean; // 항상 true로 설정
+    onTimestampClick: (timestamp: string) => void;
+    isEditable?: boolean;
+    editingItemId?: string | null;
+    onEditStart?: (itemId: string) => void;
+    onEditEnd?: () => void;
 }
 
 // parseTimeToSeconds는 동일
@@ -30,10 +33,7 @@ function parseTimeToSeconds(timestamp: string): number {
 }
 
 // forwardRef로 부모가 addCaptureItem을 호출 가능
-const DraftEditor = forwardRef(function DraftEditorRef(
-    { getTimestamp, onTimestampClick, onPauseVideo }: DraftEditorProps,
-    ref,
-) {
+const CustomEditor: React.ForwardRefRenderFunction<unknown, CustomEditorProps> = (props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
@@ -68,7 +68,7 @@ const DraftEditor = forwardRef(function DraftEditorRef(
         const html = convertToHTML(editorState.getCurrentContent());
 
         const stamp =
-            isFirstInputRecorded && firstInputTimestamp ? firstInputTimestamp : getTimestamp();
+            isFirstInputRecorded && firstInputTimestamp ? firstInputTimestamp : props.getTimestamp();
 
         const newItem: Section = {
             id: Math.random().toString(36).substr(2, 9),
@@ -98,7 +98,7 @@ const DraftEditor = forwardRef(function DraftEditorRef(
         const t = newState.getCurrentContent().getPlainText().trim();
         if (t.length > 0 && !isFirstInputRecorded) {
             setIsFirstInputRecorded(true);
-            setFirstInputTimestamp(getTimestamp());
+            setFirstInputTimestamp(props.getTimestamp());
         }
     };
 
@@ -129,18 +129,18 @@ const DraftEditor = forwardRef(function DraftEditorRef(
                         timestamp={item.timestamp}
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
-                        onTimestampClick={onTimestampClick}
+                        onTimestampClick={props.onTimestampClick}
                         onDelete={() => handleDeleteItem(item.id)}
                         onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
-                        onPauseVideo={onPauseVideo}
-                        isEditable={true} // 항상 true로 설정
+                        onPauseVideo={props.onPauseVideo}
+                        isEditable={props.isEditable}
                     />
                 ))}
             </div>
 
             {/* Draft Editor */}
             <div className={styles.editorArea}>
-                <Editor
+                <DraftEditor
                     editorState={editorState}
                     onChange={handleEditorChange}
                     placeholder="내용을 입력하세요..."
@@ -184,6 +184,6 @@ const DraftEditor = forwardRef(function DraftEditorRef(
             </div>
         </div>
     );
-});
+};
 
-export default DraftEditor;
+export default React.forwardRef(CustomEditor);

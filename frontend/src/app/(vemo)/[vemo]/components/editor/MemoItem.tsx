@@ -15,17 +15,7 @@ interface MomoItemProps {
     isEditable: boolean; // 추가된 부분
 }
 
-const MemoItem = memo(({
-    id,
-    timestamp,
-    htmlContent,
-    screenshot,
-    onTimestampClick,
-    onChangeHTML,
-    onDelete,
-    onPauseVideo,
-    isEditable, // 추가된 부분
-}: MomoItemProps) => {
+const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MomoItemProps) => {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
@@ -55,20 +45,27 @@ const MemoItem = memo(({
     // ====== (2) 텍스트 편집 ======
     const contentRef = useRef<HTMLDivElement>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isComposing, setIsComposing] = useState(false);
 
-    // 로컬 상태로 편집 중인 내용 관리
-    const [localContent, setLocalContent] = useState(htmlContent);
-
-    // htmlContent prop이 변경될 때만 localContent 업데이트
+    // 초기 내용 설정
     useEffect(() => {
-        if (!isEditing) {
-            setLocalContent(htmlContent);
+        if (contentRef.current && !isEditing) {
+            contentRef.current.innerHTML = htmlContent;
         }
     }, [htmlContent, isEditing]);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-        const newContent = e.currentTarget.innerHTML;
-        setLocalContent(newContent);
+        if (!isComposing) {
+            const newContent = e.currentTarget.innerHTML;
+        }
+    };
+
+    const handleCompositionStart = () => {
+        setIsComposing(true);
+    };
+
+    const handleCompositionEnd = (e: React.CompositionEvent<HTMLDivElement>) => {
+        setIsComposing(false);
     };
 
     // 편집 완료할 때
@@ -124,9 +121,10 @@ const MemoItem = memo(({
                     suppressContentEditableWarning={true}
                     onFocus={() => setIsEditing(true)}
                     onInput={handleInput}
+                    onCompositionStart={handleCompositionStart}
+                    onCompositionEnd={handleCompositionEnd}
                     onBlur={handleBlur}
                     ref={contentRef}
-                    dangerouslySetInnerHTML={{ __html: localContent }}
                 />
             )}
 

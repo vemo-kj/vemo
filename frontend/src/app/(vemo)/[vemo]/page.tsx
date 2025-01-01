@@ -19,6 +19,7 @@ export default function VemoPage() {
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
     const [isEditing, setIsEditing] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
+    const [videoId, setVideoId] = useState('pEt89CrE-6A');
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -103,14 +104,14 @@ export default function VemoPage() {
                         <EditorNoSSR
                             ref={editorRef}
                             getTimestamp={() => currentTimestamp}
-                            onTimestampClick={timestamp => {
+                            onTimestampClick={(timestamp: string) => {
                                 const [m, s] = timestamp.split(':').map(Number);
                                 const total = (m || 0) * 60 + (s || 0);
                                 playerRef.current?.seekTo(total, true);
                             }}
                             isEditable={true}
                             editingItemId={editingItemId}
-                            onEditStart={(itemId) => setEditingItemId(itemId)}
+                            onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
                         />
                     </>
@@ -125,6 +126,13 @@ export default function VemoPage() {
         }
     };
 
+    const changeVideo = (newVideoId: string) => {
+        setVideoId(newVideoId);
+        if (playerRef.current) {
+            playerRef.current.loadVideoById(newVideoId);
+        }
+    };
+
     return (
         <div className={styles.container}>
 
@@ -136,12 +144,15 @@ export default function VemoPage() {
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src="https://www.youtube.com/embed/pEt89CrE-6A?enablejsapi=1"
+                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
                     />
                 </div>
+                <button onClick={() => changeVideo('새로운_비디오_ID')}>
+                    다른 영상으로 변경
+                </button>
             </div>
 
             {/* (3) Sidebar */}
