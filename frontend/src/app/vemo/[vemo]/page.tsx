@@ -1,17 +1,18 @@
-"use client";
+'use client';
 
-import React, { useRef, useEffect, useState, use } from 'react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
-import { useParams, useRouter } from 'next/navigation';
 
 import { SummaryProvider } from './context/SummaryContext';
 
-
 // 동적 로드된 DraftEditor
-const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), { ssr: false });
+const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+    ssr: false,
+});
 
 interface CustomEditorProps {
     ref?: React.Ref<unknown>;
@@ -25,9 +26,9 @@ interface CustomEditorProps {
 
 // 페이지 컴포넌트의 props 타입 정의 추가
 interface PageProps {
-  params: {
-    vemo: string;
-  };
+    params: {
+        vemo: string;
+    };
 }
 
 export default function VemoPage() {
@@ -78,7 +79,9 @@ export default function VemoPage() {
                 const sec = playerRef.current.getCurrentTime();
                 const mm = Math.floor(sec / 60);
                 const ss = Math.floor(sec % 60);
-                setCurrentTimestamp(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
+                setCurrentTimestamp(
+                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
+                );
             }
         }, 1000);
         return () => clearInterval(interval);
@@ -167,11 +170,14 @@ export default function VemoPage() {
 
     return (
         <div className={styles.container}>
-
             {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
                 <Link href="/" passHref>
-                    <img src="/icons/Button_home.svg" alt="VEMO logo" className={styles.logoButton} />
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
@@ -201,8 +207,6 @@ export default function VemoPage() {
                     />
                 </SummaryProvider>
             </div>
-
         </div>
     );
 }
-
