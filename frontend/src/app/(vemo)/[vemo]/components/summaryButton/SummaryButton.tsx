@@ -87,9 +87,6 @@ export default function SummaryButton() {
 
       const timestampData = await timestampResponse.json();
 
-      console.log('Requesting timestamp:', { videoId });
-      console.log('Timestamp response:', timestampData);
-
 
       // 두 번째 요청: 퀴즈와 퀴즈타임스탬프 및 정답
       const quizResponse = await fetch('http://localhost:5050/quiz', {
