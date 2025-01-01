@@ -13,24 +13,17 @@ export class HomeService {
         private readonly memosService: MemosService,
     ) {}
 
-    /**
-     * 특정 비디오에 메모를 작성하고, 비디오와 생성된 메모를 반환.
-     * @param videoId 비디오 ID
-     * @param createMemosDto 메모 작성 DTO
-     * @returns CreateMemoForVideoResponseDto
-     */
     async createMemosForVideo(
         videoId: string,
         createMemosDto: CreateMemosDto,
+        userId: number, // userId 추가
     ): Promise<CreateMemosForVideoResponseDto> {
         const video = await this.videoService.getVideoById(videoId);
         if (!video) {
             throw new NotFoundException(`Video with ID ${videoId} not found`);
         }
 
-        const memos = await this.memosService.createMemos(createMemosDto, videoId);
-
-        const vemoCount = await this.memosService.getVemoCountByVideo(videoId);
+        const memos = await this.memosService.createMemos(createMemosDto, videoId, userId);
 
         return {
             video: {
@@ -45,7 +38,11 @@ export class HomeService {
                 duration: video.duration,
                 category: video.category,
             },
-            vemoCount,
+            memos: {
+                id: memos.id,
+                title: memos.title,
+                description: memos.description,
+            },
         };
     }
 
