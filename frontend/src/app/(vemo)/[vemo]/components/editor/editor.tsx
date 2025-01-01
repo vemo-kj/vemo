@@ -176,7 +176,6 @@ const DraftEditor = forwardRef(function DraftEditorRef(
                     >
                         U
                     </button>
-                    {/* 더 필요하면 추가 */}
                     <button className={styles.addButton} onClick={handleSave}>
                         +
                     </button>

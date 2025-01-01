@@ -1,6 +1,5 @@
 'use client';
 
-
 import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -19,13 +18,7 @@ export default function VemoPage() {
     const editorRef = useRef<any>(null);
 
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-
-    const [isEditing, setIsEditing] = useState(false); // 편집 상태 추가
-
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-
-
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -71,12 +64,6 @@ export default function VemoPage() {
         if (playerRef.current?.seekTo) {
             playerRef.current.seekTo(total, true);
         }
-    };
-
-    // 캡처 기능 영역
-    // 영상 일시정지 (그리기 등에서 사용)
-    const pauseVideo = () => {
-        playerRef.current?.pauseVideo();
     };
 
     // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
@@ -157,12 +144,12 @@ export default function VemoPage() {
             <div className={styles.section3}>
                 <SummaryProvider>
                     <SideBarNav
-                        selectedOption={selectedOption}
-                        onOptionSelect={handleOptionSelect}
-                        renderSectionContent={renderSectionContent}
-                        currentTimestamp={currentTimestamp}
-                        handleCaptureTab={handleCaptureTab} // 추가
-                        handleCaptureArea={handleCaptureArea} // 추가
+                        selectedOption={selectedOption} // 선택된 옵션
+                        onOptionSelect={handleOptionSelect} // 옵션 선택 함수
+                        renderSectionContent={renderSectionContent} // 섹션 내용 렌더링
+                        currentTimestamp={currentTimestamp} // 현재 재생 시간
+                        handleCaptureTab={handleCaptureTab} // 캡처 기능
+                        handleCaptureArea={handleCaptureArea} // 캡처 기능
                         editorRef={editorRef} // 추가
                     />
                 </SummaryProvider>

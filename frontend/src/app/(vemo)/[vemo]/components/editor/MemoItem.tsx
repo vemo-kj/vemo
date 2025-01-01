@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
+import React, { memo, useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 
@@ -14,7 +14,7 @@ interface MomoItemProps {
     isEditable: boolean; // 추가된 부분
 }
 
-export default function MomoItem({
+const MemoItem = memo(({
     id,
     timestamp,
     htmlContent,
@@ -24,10 +24,9 @@ export default function MomoItem({
     onDelete,
     onPauseVideo,
     isEditable, // 추가된 부분
-}: MomoItemProps) {
+}: MomoItemProps) => {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
-    const [drawingDataUrl, setDrawingDataUrl] = useState<string | null>(null);
 
     // 그리기 영역 열기
     const handleOpenDrawing = () => {
@@ -54,17 +53,22 @@ export default function MomoItem({
 
     // ====== (2) 텍스트 편집 ======
     const contentRef = useRef<HTMLDivElement>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
-    // contentEditable에서 수정된 내용 감지 → onBlur 시 저장
+    // 편집 시작할 때
+    const handleFocus = () => {
+        setIsEditing(true);
+    };
+
+    // 편집 완료할 때
     const handleBlur = () => {
         if (!contentRef.current) return;
+        setIsEditing(false);
         const newValue = contentRef.current.textContent?.trim() || '';
 
-        // 새 값이 공백이면 => 삭제
         if (newValue.length === 0) {
             onDelete();
         } else {
-            // 공백이 아니면 onChange로 업데이트
             onChangeHTML(newValue);
         }
     };
@@ -134,4 +138,8 @@ export default function MomoItem({
             )}
         </div>
     );
-}
+});
+
+MemoItem.displayName = 'MemoItem';
+
+export default MemoItem;

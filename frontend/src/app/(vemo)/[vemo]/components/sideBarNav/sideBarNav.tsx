@@ -87,7 +87,7 @@ export default function SidebarNav({
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtons}>
                                 <button onClick={handleCaptureTab}>캡처하기</button>
-                                <button onClick={handleCaptureArea}>부분 캡처</button>
+                                <button onClick={handleCaptureArea}>부분캡처</button>
 
                                 <SummaryButton />
                                 <ExportButton />

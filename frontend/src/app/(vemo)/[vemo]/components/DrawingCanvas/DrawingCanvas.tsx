@@ -10,7 +10,7 @@ interface DrawingCanvasProps {
 }
 
 export default function DrawingCanvas({ onSave, onClose, backgroundImage }: DrawingCanvasProps) {
-    const canvasRef = useRef<ReactSketchCanvasRef>(null);
+    const canvasRef = useRef<ReactSketchCanvasRef | null>(null);
     const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number }>({
         width: 800,
         height: 500,
@@ -44,11 +44,19 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     };
 
     const handleClear = () => {
-        canvasRef.current?.clearCanvas();
+        if (!canvasRef.current) {
+            console.error('Canvas reference is not available');
+            return;
+        }
+        canvasRef.current.clearCanvas();
     };
 
     const handleUndo = () => {
-        canvasRef.current?.undo();
+        if (!canvasRef.current) {
+            console.error('Canvas reference is not available');
+            return;
+        }
+        canvasRef.current.undo();
     };
 
     return (
