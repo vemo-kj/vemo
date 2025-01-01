@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Playlist } from './entities/playlist.entity';
 import { Repository } from 'typeorm';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { PlaylistResponseDto } from './dto/playlist-response.dto';
 import { UsersService } from '../users/users.service';
 import { VideoService } from '../video/video.service';
 import { Video } from '../video/video.entity';
+import { CreatePlaylistWithMemosDto } from '../home/dto/create-playlist-with-memos.dto';
 
 @Injectable()
 export class PlaylistService {
@@ -19,11 +19,15 @@ export class PlaylistService {
 
     /**
      * 재생목록 생성
-     * @param createPlaylistDto 생성 DTO
      * @returns 생성된 재생목록 정보
+     * @param createPlaylistWithMemosDto
+     * @param userId
      */
-    async createPlaylist(createPlaylistDto: CreatePlaylistDto): Promise<PlaylistResponseDto> {
-        const { name, videoIds, userId } = createPlaylistDto;
+    async createPlaylist(
+        createPlaylistWithMemosDto: CreatePlaylistWithMemosDto,
+        userId: number,
+    ): Promise<PlaylistResponseDto> {
+        const { name, videoIds } = createPlaylistWithMemosDto;
 
         // 사용자 존재 확인
         const user = await this.usersService.findById(userId);
@@ -51,9 +55,11 @@ export class PlaylistService {
                 thumbnails: video.thumbnails,
                 duration: video.duration,
                 channel: {
+                    id: video.channel.id,
                     title: video.channel.title,
                     thumbnails: video.channel.thumbnails,
                 },
+                category: video.category,
             })),
         };
     }
@@ -84,9 +90,11 @@ export class PlaylistService {
                 thumbnails: video.thumbnails,
                 duration: video.duration,
                 channel: {
+                    id: video.channel.id,
                     title: video.channel.title,
                     thumbnails: video.channel.thumbnails,
                 },
+                category: video.category,
             })),
         }));
     }
