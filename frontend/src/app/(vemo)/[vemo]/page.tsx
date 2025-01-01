@@ -13,12 +13,12 @@ import { SummaryProvider } from '../[vemo]/context/SummaryContext';
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
 
 export default function VemoPage() {
-
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
-
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -29,7 +29,6 @@ export default function VemoPage() {
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
                 videoId: 'pEt89CrE-6A',
-
                 events: {
                     onReady: () => console.log('Player ready'),
                 },
@@ -40,6 +39,9 @@ export default function VemoPage() {
 
     // 1초마다 현재 재생 시간 갱신
     useEffect(() => {
+        // 편집 중인 아이템이 있으면 타임스탬프 업데이트를 중단
+        if (editingItemId !== null) return;
+
         const interval = setInterval(() => {
             if (playerRef.current?.getCurrentTime) {
                 const sec = playerRef.current.getCurrentTime();
@@ -49,7 +51,7 @@ export default function VemoPage() {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [editingItemId]);
 
 
     // 드롭다운 선택
@@ -106,7 +108,10 @@ export default function VemoPage() {
                                 const total = (m || 0) * 60 + (s || 0);
                                 playerRef.current?.seekTo(total, true);
                             }}
-                            isEditable={true} // 항상 true로 설정
+                            isEditable={true}
+                            editingItemId={editingItemId}
+                            onEditStart={(itemId) => setEditingItemId(itemId)}
+                            onEditEnd={() => setEditingItemId(null)}
                         />
                     </>
                 );
@@ -125,7 +130,6 @@ export default function VemoPage() {
 
             {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
-
                 <Link href="/" passHref>
                     <img src="/icons/Button_home.svg" alt="VEMO logo" className={styles.logoButton} />
                 </Link>

@@ -1,6 +1,7 @@
-import React, { memo, useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
+import React, { memo, useRef, useState, useEffect, ChangeEvent, FocusEvent, useCallback } from 'react';
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
+import { debounce } from 'lodash';
 
 interface MomoItemProps {
     id: string;
@@ -55,18 +56,28 @@ const MemoItem = memo(({
     const contentRef = useRef<HTMLDivElement>(null);
     const [isEditing, setIsEditing] = useState(false);
 
-    // 편집 시작할 때
-    const handleFocus = () => {
-        setIsEditing(true);
+    // 로컬 상태로 편집 중인 내용 관리
+    const [localContent, setLocalContent] = useState(htmlContent);
+
+    // htmlContent prop이 변경될 때만 localContent 업데이트
+    useEffect(() => {
+        if (!isEditing) {
+            setLocalContent(htmlContent);
+        }
+    }, [htmlContent, isEditing]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        const newContent = e.currentTarget.innerHTML;
+        setLocalContent(newContent);
     };
 
     // 편집 완료할 때
     const handleBlur = () => {
-        if (!contentRef.current) return;
         setIsEditing(false);
-        const newValue = contentRef.current.textContent?.trim() || '';
-
-        if (newValue.length === 0) {
+        if (!contentRef.current) return;
+        
+        const newValue = contentRef.current.innerHTML;
+        if (newValue.trim().length === 0) {
             onDelete();
         } else {
             onChangeHTML(newValue);
@@ -76,6 +87,14 @@ const MemoItem = memo(({
     const handleTimestampClick = () => {
         onTimestampClick?.(timestamp);
     };
+
+    // debounce를 적용하여 잦은 상태 업데이트 방지
+    const debouncedOnChangeHTML = useCallback(
+        debounce((newValue: string) => {
+            onChangeHTML(newValue);
+        }, 300),
+        [onChangeHTML]
+    );
 
     return (
         <div className={styles.memoItemContainer}>
@@ -101,12 +120,13 @@ const MemoItem = memo(({
             ) : (
                 <div
                     className={styles.itemContent}
-                    // contentEditable={true}
-                    contentEditable={isEditable} // 수정된 부분
+                    contentEditable={isEditable}
                     suppressContentEditableWarning={true}
+                    onFocus={() => setIsEditing(true)}
+                    onInput={handleInput}
                     onBlur={handleBlur}
                     ref={contentRef}
-                    dangerouslySetInnerHTML={{ __html: htmlContent }}
+                    dangerouslySetInnerHTML={{ __html: localContent }}
                 />
             )}
 
