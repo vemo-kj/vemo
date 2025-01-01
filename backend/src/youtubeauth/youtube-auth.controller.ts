@@ -1,5 +1,5 @@
 import { Controller, Get, Query, Redirect } from '@nestjs/common';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { Public } from '../public.decorator';
 import { YoutubeAuthService } from './youtube-auth.service';
 
 @Controller('youtubeauth')

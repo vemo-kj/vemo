@@ -1,7 +1,7 @@
-import { Body, Controller, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { SubtitlesService } from 'src/subtitles/subtitles.service';
+import { Public } from '../public.decorator';
 import { QuizService } from './quiz.service';
-import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('quiz')
 export class QuizController {

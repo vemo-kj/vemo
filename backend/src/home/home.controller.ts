@@ -10,8 +10,8 @@ import {
     Query,
     Req,
 } from '@nestjs/common';
-import { Public } from 'src/auth/decorators/public.decorator';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
+import { Public } from '../public.decorator';
 import { CreatePlaylistWithMemosResponseDto } from './dto/create-playlist-with-memos-response.dto';
 import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
 import { HomeResponseDto } from './dto/home-response.dto';
