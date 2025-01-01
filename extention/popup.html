@@ -2,48 +2,48 @@
 <html lang="ko">
     <head>
         <meta charset="UTF-8" />
-        <title>YouTube Helper</title>
-        <style>
-            body {
-                width: 400px;
-                height: 300px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                font-family: 'Arial', sans-serif;
-                text-align: center;
-            }
-            h1 {
-                font-size: 22px;
-                margin-bottom: 30px;
-            }
-            .signup-btn {
-                background-color: #638fff;
-                color: white;
-                padding: 15px 80px;
-                font-size: 18px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                margin-bottom: 15px;
-            }
-            .signup-btn:hover {
-                background-color: #5076d1;
-            }
-            .footer {
-                font-size: 14px;
-                color: #888;
-            }
-            .footer a {
-                color: #638fff;
-                text-decoration: none;
-            }
-        </style>
+        <title>VEMO</title>
+        <link rel="stylesheet" href="popup.css" />
     </head>
     <body>
-        <h1>영상 속 지식을<br />캡처하러 가볼까요?</h1>
-        <button class="signup-btn">슬리드 회원 가입</button>
-        <div class="footer">이미 가입하셨나요? <a href="#">로그인</a></div>
+        <div class="logo">
+            <img src="icons/logo.png" alt="VEMO Logo" width="140" />
+        </div>
+
+        <!-- 로그인 전 화면 -->
+        <div id="before-login">
+            <div class="content">
+                설치해주셔서 감사합니다. 👍<br /><br />
+                계정을 연결하시면<br />
+                유튜브에서 요약 및 메모 기능을<br />
+                더욱 편리하게 사용할 수 있습니다.
+            </div>
+            <button class="login-btn" id="login-btn">로그인</button>
+        </div>
+
+        <!-- 로그인 후 화면 -->
+        <div id="after-login" class="hidden">
+            <div class="version">v 1.0.0</div>
+            <div class="menu-item">📄 동영상 필기 노트 열기</div>
+            <div class="menu-item">🗂️ 내 노트함 열기</div>
+            <div class="toggle-section">
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <img src="icons/youtube.png" alt="YouTube" width="20" />
+                        유튜브 동영상
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked />
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            <a href="#">VEMO 서비스 열기</a>
+        </div>
+
+        <script src="popup.js"></script>
     </body>
 </html>
