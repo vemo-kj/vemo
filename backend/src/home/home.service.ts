@@ -1,31 +1,46 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { VideoService } from '../video/video.service';
 import { MemosService } from '../memos/memos.service';
-import { CreateMemosDto } from '../memos/dto/create-memos.dto';
 import { HomeResponseDto } from './dto/home-response.dto';
 import { VideoResponseDto } from '../video/dto/video-response.dto';
-import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-response.dto';
+import { CreatePlaylistWithMemosResponseDto } from './dto/create-playlist-with-memos-response.dto';
+import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
+import { PlaylistService } from '../playlist/playlist.service';
+import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
+
+const NO_CONTENTS = '제목없음';
 
 @Injectable()
 export class HomeService {
     constructor(
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
+        private readonly playlistService: PlaylistService,
     ) {}
 
-    async createMemosForVideo(
-        videoId: string,
-        createMemosDto: CreateMemosDto,
-        userId: number, // userId 추가
-    ): Promise<CreateMemosForVideoResponseDto> {
-        const video = await this.videoService.getVideoById(videoId);
-        if (!video) {
-            throw new NotFoundException(`Video with ID ${videoId} not found`);
-        }
+    async createPlaylistWithMemos(
+        userId: number,
+        createPlaylistWithMemosDto: CreatePlaylistWithMemosDto,
+    ): Promise<CreatePlaylistWithMemosResponseDto> {
+        const playlist: PlaylistResponseDto = await this.playlistService.createPlaylist(
+            createPlaylistWithMemosDto,
+            userId,
+        );
 
-        const memos = await this.memosService.createMemos(createMemosDto, videoId, userId);
+        //TODO: 데이터 확인 필요
+        const video = playlist.videos[0];
+        const memos = await this.memosService.createMemos(
+            NO_CONTENTS,
+            NO_CONTENTS,
+            video.id,
+            userId,
+        );
 
         return {
+            playlist: {
+                id: playlist.id,
+                name: playlist.name,
+            },
             video: {
                 id: video.id,
                 title: video.title,

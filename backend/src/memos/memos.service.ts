@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Memos } from './memos.entity';
-import { CreateMemosDto } from './dto/create-memos.dto';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 import { Video } from '../video/video.entity';
 import { Users } from '../users/users.entity';
@@ -16,13 +15,14 @@ export class MemosService {
     ) {}
 
     async createMemos(
-        createMemosDto: CreateMemosDto,
+        memosTitle: string,
+        memosDescription: string,
         videoId: string,
         userId: number,
     ): Promise<Memos> {
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!user) {
-            throw new NotFoundException(`User with ID ${createMemosDto.userId} not found`);
+            throw new NotFoundException(`User with ID ${userId} not found`);
         }
 
         const video = await this.videoRepository.findOne({ where: { id: videoId } });
@@ -31,8 +31,8 @@ export class MemosService {
         }
 
         const memos = this.memosRepository.create({
-            title: createMemosDto.title,
-            description: createMemosDto.description,
+            title: memosTitle,
+            description: memosDescription,
             user: user,
             video: video,
         });
