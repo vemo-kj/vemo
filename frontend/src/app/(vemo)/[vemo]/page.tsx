@@ -30,7 +30,7 @@ export default function VemoPage() {
 
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
-                videoId: 'pEt89CrE-6A',
+                videoId: 'iNvYsGKelYs',
 
                 events: {
                     onReady: () => console.log('Player ready'),
@@ -142,7 +142,7 @@ export default function VemoPage() {
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src="https://www.youtube.com/embed/63miHKtooo4?enablejsapi=1"
+                        src="https://www.youtube.com/embed/iNvYsGKelYs?enablejsapi=1"
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen

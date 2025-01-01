@@ -1,57 +1,3 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { useSummary } from '../../context/SummaryContext'
-
-// export default function SummaryButton() {
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const [error, setError] = useState<string | null>(null);
-//   const { setSummaryData } = useSummary(); // Context에서 데이터 저장 함수 가져오기
-
-//   const handleClick = async () => {
-//     setIsSubmitting(true);
-//     setError(null);
-
-//     const data = {
-//       timeStamp: '타임스탬프',
-//       description: '디스크립션',
-//       quizTimeStamp: '퀴즈타임스탬프',
-//       quiz: '퀴즈',
-//     };
-
-//     try {
-//       const response = await fetch('/api/summary', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(data),
-//       });
-
-//       if (!response.ok) {
-//         const errorData = await response.json();
-//         throw new Error(errorData.message || '요청 실패');
-//       }
-
-//       const result = await response.json();
-//       setSummaryData(result); // 서버 응답 데이터를 Context에 저장
-//       alert('요약 데이터가 저장되었습니다.');
-//     } catch (err) {
-//       console.error('요청 오류:', err);
-//       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <button onClick={handleClick} disabled={isSubmitting}>
-//         {isSubmitting ? '전송 중...' : '요약하기'}
-//       </button>
-//       {error && <p style={{ color: 'red' }}>{error}</p>}
-//     </div>
-//   );
-// }
-
 'use client';
 
 import { useState } from 'react';
@@ -60,14 +6,13 @@ import { useSummary } from '../../context/SummaryContext';
 export default function SummaryButton() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { setSummaryData, setQuizData } = useSummary(); // Context에서 데이터 저장 함수 가져오기
+    const { setSummaryData, setQuizData } = useSummary();
 
     const handleClick = async () => {
         setIsSubmitting(true);
         setError(null);
 
-        const videoId = 'Qe83Ss3zh74'; // 이 부분을 실제 비디오 ID로 대체해야 함
-
+        const videoId = 'iNvYsGKelYs';
         try {
             // 첫 번째 요청: 타임스탬프와 디스크립션
             const timestampResponse = await fetch('http://localhost:5050/summarization', {
@@ -76,14 +21,13 @@ export default function SummaryButton() {
                 body: JSON.stringify({ videoId }),
             });
 
-            console.log(JSON.stringify({ videoId }));
-
             if (!timestampResponse.ok) {
                 const errorData = await timestampResponse.json();
                 throw new Error(errorData.message || '타임스탬프 요청 실패');
             }
 
-            const timestampData = await timestampResponse.json();
+            const summaryList = await timestampResponse.json();
+            console.log('타임스탬프 응답 데이터:', summaryList);
 
             // 두 번째 요청: 퀴즈와 퀴즈타임스탬프 및 정답
             const quizResponse = await fetch('http://localhost:5050/quiz', {
@@ -97,19 +41,28 @@ export default function SummaryButton() {
                 throw new Error(errorData.message || '퀴즈 요청 실패');
             }
 
-            const quizData = await quizResponse.json();
+            const rawQuizData = await quizResponse.json();
+            console.log('퀴즈 응답 데이터:', rawQuizData);
 
             // Context에 데이터 저장
             setSummaryData({
-                timeStamp: timestampData.timeStamp,
-                description: timestampData.description,
+                summaryList: summaryList.map((item: any) => ({
+                    id: item.id,
+                    timestamp: item.timestamp,
+                    description: item.summary,
+                })),
             });
 
-            setQuizData({
-                quizTimeStamp: quizData.quizTimeStamp,
-                quiz: quizData.quiz,
-                answer: quizData.answer,
-            });
+            // 퀴즈 데이터 매핑 수정
+            const mappedQuizData = {
+                quizList: rawQuizData.map((quiz: any) => ({
+                    timestamp: quiz.timestamp,
+                    question: quiz.question,
+                    answer: quiz.answer,
+                })),
+            };
+            console.log('매핑된 퀴즈 데이터:', mappedQuizData);
+            setQuizData(mappedQuizData);
 
             alert('요약 및 퀴즈 데이터가 저장되었습니다.');
         } catch (err) {
@@ -122,10 +75,14 @@ export default function SummaryButton() {
 
     return (
         <div>
-            <button onClick={handleClick} disabled={isSubmitting}>
+            <button
+                onClick={handleClick}
+                disabled={isSubmitting}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+            >
                 {isSubmitting ? '전송 중...' : '요약하기'}
             </button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
     );
 }

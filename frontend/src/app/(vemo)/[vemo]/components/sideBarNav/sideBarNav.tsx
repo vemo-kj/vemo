@@ -7,6 +7,8 @@ import ExportButton from '../exportButton/ExportButton';
 import { useSummary } from '../../context/SummaryContext';
 import Community from '../community/Community';
 import PlayList from '../playList/PlayList';
+import SummaryView from '../summaryView/SummaryView';
+import QuizView from '../quizView/QuizView';
 
 interface SidebarNavProps {
     selectedOption: string;
@@ -78,17 +80,24 @@ export default function SidebarNav({
                                     </select>
                                 </div>
                             </div>
-                            {renderSectionContent()}
+                            {selectedOption === 'AI 요약 보기' ? (
+                                <SummaryView />
+                            ) : selectedOption === '퀴즈 보기' ? (
+                                <QuizView />
+                            ) : (
+                                renderSectionContent()
+                            )}
                         </div>
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtons}>
                                 <button onClick={handleCaptureTab}>캡처하기</button>
                                 <button onClick={handleCaptureArea}>부분 캡처</button>
-
-                                <SummaryButton />
-                                <ExportButton />
                             </div>
                         )}
+                        <div className={styles.footerButtons}>
+                            <SummaryButton />
+                            <ExportButton />
+                        </div>
                     </>
                 )}
 
