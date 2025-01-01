@@ -10,13 +10,17 @@ export default function MainCard({
   thumbnails,
   duration,
   category,
-  channel,
+  channel:{
+    id: channelId,
+    thumbnails: channelThumbnails,
+    title: channelTitle,
+  },
   vemoCount,
 }: MainCardProps) {
 
   return(
     // 썸네일, 유튜버로고 {}형태 추가
-    <Link href={`/vemo/${id}`}>
+    <Link href='/vemo/[youtubeLink]' as={`/vemo/${pEt89CrE-6A}`}>
       <div className={styles.mainCard}>
         <div>
           <img src={thumbnails} className={styles.youtubeImage} />
@@ -24,8 +28,8 @@ export default function MainCard({
         <div>
           <span className={styles.thumbnail}>TITLE:{title}</span>
           <div>
-            <img src={channel.thumbnails} className={styles.youtuberLogo} />
-            <span className={styles.youtuberProfile}>유튜브채널명{channel.title}</span>
+            <img src={channelThumbnails} className={styles.youtuberLogo} />
+            <span className={styles.youtuberProfile}>유튜브채널명{channelTitle}</span>
           </div>
           <span className={styles.cardMemoCount}>vemo의 수{vemoCount}</span>
         </div>

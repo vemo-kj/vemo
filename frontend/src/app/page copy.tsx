@@ -43,7 +43,7 @@ export default function Home() {
 
             // 데이터 매핑
             const formattedData: MainCardProps[] = data.videos.map((video: any) => ({
-                id: video.id,
+                id: video.pEt89CrE-6A,
                 title: video.title,
                 thumbnails: video.thumbnails,
                 duration: video.duration,
@@ -55,6 +55,19 @@ export default function Home() {
                 },
                 vemoCount: video.vemoCount,
             }));
+            // const formattedData: MainCardProps[] = data.videos.map((video: any) => ({
+            //     id: video.id,
+            //     title: video.title,
+            //     thumbnails: video.thumbnails,
+            //     duration: video.duration,
+            //     category: video.category,
+            //     channel: {
+            //         id: video.channel.id,
+            //         thumbnails: video.channel.thumbnails,
+            //         title: video.channel.title,
+            //     },
+            //     vemoCount: video.vemoCount,
+            // }));
             setMainCards(formattedData);
         } catch (error) {
             setError('데이터를 불러오는데 실패했습니다.');

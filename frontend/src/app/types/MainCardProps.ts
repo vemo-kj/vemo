@@ -1,4 +1,4 @@
-export type MainCardProps = {
+export interface MainCardProps {
   id: string;
   title: string;
   thumbnails: string;
@@ -10,5 +10,5 @@ export type MainCardProps = {
     title: string;
   }
   vemoCount: number;
-};
+}
 

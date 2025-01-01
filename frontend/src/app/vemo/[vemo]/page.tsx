@@ -1,25 +1,45 @@
-'use client';
+"use client";
 
 import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
+import { useParams, useRouter } from 'next/navigation';
 
-import { SummaryProvider } from '../[vemo]/context/SummaryContext';
+import { SummaryProvider } from './context/SummaryContext';
 
 
 // 동적 로드된 DraftEditor
-const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
+const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), { ssr: false });
 
-export default function VemoPage() {
+interface CustomEditorProps {
+    ref?: React.Ref<unknown>;
+    getTimestamp: () => string;
+    onTimestampClick: (timestamp: string) => void;
+    isEditable?: boolean;
+    editingItemId?: string | null;
+    onEditStart?: (itemId: string) => void;
+    onEditEnd?: () => void;
+}
+
+// 페이지 컴포넌트의 props 타입 정의 추가
+interface PageProps {
+  params: {
+    vemo: string;
+  };
+}
+
+export default function VemoPage({ params }: PageProps) {
+    const router = useRouter();
+    const videoId = params.vemo;
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
     const [isEditing, setIsEditing] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
-    const [videoId, setVideoId] = useState('pEt89CrE-6A');
+    // const [videoId, setVideoId] = useState('pEt89CrE-6A');
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -29,14 +49,13 @@ export default function VemoPage() {
 
         (window as any).onYouTubeIframeAPIReady = () => {
             playerRef.current = new (window as any).YT.Player('youtube-player', {
-                videoId: 'pEt89CrE-6A',
+                videoId: videoId,
                 events: {
                     onReady: () => console.log('Player ready'),
                 },
-
             });
         };
-    }, []);
+    }, [videoId]);
 
     // 1초마다 현재 재생 시간 갱신
     useEffect(() => {
@@ -127,10 +146,7 @@ export default function VemoPage() {
     };
 
     const changeVideo = (newVideoId: string) => {
-        setVideoId(newVideoId);
-        if (playerRef.current) {
-            playerRef.current.loadVideoById(newVideoId);
-        }
+        router.push(`/vemo/${newVideoId}`);
     };
 
     return (
@@ -151,7 +167,7 @@ export default function VemoPage() {
                     />
                 </div>
                 <button onClick={() => changeVideo('새로운_비디오_ID')}>
-                    다른 영상으로 변경
+                    {/* 다른 영상으로 변경 */}
                 </button>
             </div>
 

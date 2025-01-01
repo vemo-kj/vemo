@@ -3,7 +3,7 @@ import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import { debounce } from 'lodash';
 
-interface MomoItemProps {
+interface MemoItemProps {
     id: string;
     timestamp: string;
     htmlContent: string; // HTML 형식
@@ -12,10 +12,10 @@ interface MomoItemProps {
     onChangeHTML: (newHTML: string) => void;
     onDelete: () => void;
     onPauseVideo?: () => void;
-    isEditable: boolean; // 추가된 부분
+    isEditable?: boolean; // 추가된 부분
 }
 
-const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MomoItemProps) => {
+const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MemoItemProps) => {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
