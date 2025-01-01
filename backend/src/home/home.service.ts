@@ -22,11 +22,11 @@ export class HomeService {
         userId: number,
         createPlaylistWithMemosDto: CreatePlaylistWithMemosDto,
     ): Promise<CreatePlaylistWithMemosResponseDto> {
-        const playlist: PlaylistResponseDto = await this.playlistService.createPlaylist(
+        const playlist: PlaylistResponseDto = await this.playlistService.
+        createPlaylist(
             createPlaylistWithMemosDto,
             userId,
         );
-
         //TODO: 데이터 확인 필요
         const video = playlist.videos[0];
         const memos = await this.memosService.createMemos(
@@ -35,7 +35,6 @@ export class HomeService {
             video.id,
             userId,
         );
-
         return {
             playlist: {
                 id: playlist.id,

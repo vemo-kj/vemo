@@ -47,6 +47,7 @@ export class HomeController {
      * @param limit 페이지당 비디오 수
      * @returns HomeResponseDto
      */
+    @Public()
     @Get()
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
