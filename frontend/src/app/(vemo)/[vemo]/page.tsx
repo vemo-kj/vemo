@@ -142,7 +142,7 @@ export default function VemoPage() {
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src="https://www.youtube.com/embed/7DwxuWyCNHA?enablejsapi=1"
+                        src="https://www.youtube.com/embed/63miHKtooo4?enablejsapi=1"
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen

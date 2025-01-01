@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -43,7 +42,6 @@ export default function SidebarNav({
                 </button>
 
                 <button
-
                     className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
@@ -51,7 +49,6 @@ export default function SidebarNav({
                 </button>
 
                 <button
-
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
@@ -73,12 +70,11 @@ export default function SidebarNav({
                                     <select
                                         value={selectedOption}
                                         onChange={e => onOptionSelect(e.target.value)}
-
                                         className={styles.dropdownSelect}
                                     >
                                         <option value="내 메모 보기">내 메모 보기</option>
                                         <option value="AI 요약 보기">AI 요약 보기</option>
-                                        <option value="옵션 3">옵션 3</option>
+                                        <option value="퀴즈 보기">퀴즈 보기</option>
                                     </select>
                                 </div>
                             </div>
@@ -98,7 +94,6 @@ export default function SidebarNav({
 
                 {activeTab === 'community' && <Community />}
                 {activeTab === 'playlist' && <PlayList />}
-
             </div>
         </div>
     );
