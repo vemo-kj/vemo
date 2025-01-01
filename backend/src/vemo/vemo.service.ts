@@ -62,9 +62,13 @@ export class VemoService {
     /**
      * 사용자 재생목록 생성
      * @param createPlaylistDto 생성 DTO
+     * @param userId
      * @returns 생성된 재생목록 정보
      */
-    async createUserPlaylist(createPlaylistDto: CreatePlaylistDto): Promise<PlaylistResponseDto> {
-        return await this.playlistService.createPlaylist(createPlaylistDto);
+    async createUserPlaylist(
+        createPlaylistDto: CreatePlaylistDto,
+        userId: number,
+    ): Promise<PlaylistResponseDto> {
+        return await this.playlistService.createPlaylist(createPlaylistDto, userId);
     }
 }

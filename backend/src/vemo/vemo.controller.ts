@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
 import { VemoService } from './vemo.service';
 import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
+import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 
 @Controller('vemo')
 export class VemoController {
@@ -38,12 +39,14 @@ export class VemoController {
     /**
      * 사용자 재생목록 생성
      * @param createPlaylistDto 생성 DTO
+     * @param req
      * @returns 생성된 재생목록 정보
      */
     @Post('playlist')
     async createUserPlaylist(
         @Body() createPlaylistDto: CreatePlaylistDto,
+        @Req() req: RequestWithUserInterface,
     ): Promise<PlaylistResponseDto> {
-        return await this.vemoService.createUserPlaylist(createPlaylistDto);
+        return await this.vemoService.createUserPlaylist(createPlaylistDto, req.user.id);
     }
 }
