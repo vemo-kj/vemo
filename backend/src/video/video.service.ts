@@ -1,41 +1,61 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChannelService } from '../channel/channel.service';
-import { YoutubeauthService } from '../youtubeauth/youtubeauth.service';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { Video } from './video.entity';
 
 @Injectable()
 export class VideoService {
+    private readonly logger = new Logger(VideoService.name);
+
     constructor(
         @InjectRepository(Video)
         private videoRepository: Repository<Video>,
-        private youtubeauthService: YoutubeauthService,
+        private youtubeAuthService: YoutubeAuthService,
         private channelService: ChannelService,
     ) {}
 
     async getVideoById(videoId: string): Promise<Video> {
-        await this.youtubeauthService.ensureAuthenticated();
-
-        const existingVideo = await this.videoRepository.findOne({
-            where: { id: videoId },
-            relations: ['channel'],
-        });
-
+        const existingVideo = await this.findVideoInDatabase(videoId);
         if (existingVideo) {
             return existingVideo;
         }
 
-        const response = await this.youtubeauthService.youtube.videos.list({
-            part: ['snippet', 'contentDetails', 'statistics'],
-            id: [videoId],
-        });
-
-        const videoData = response.data.items?.[0];
+        const videoData = await this.fetchVideoFromYouTube(videoId);
         if (!videoData) {
             throw new NotFoundException('Video not found');
         }
 
+        return await this.createAndSaveVideo(videoData);
+    }
+
+    async findVideoInDatabase(videoId: string): Promise<Video | null> {
+        return await this.videoRepository.findOne({
+            where: { id: videoId },
+            relations: ['channel'],
+        });
+    }
+
+    private async fetchVideoFromYouTube(videoId: string): Promise<any> {
+        try {
+            await this.youtubeAuthService.ensureAuthenticated();
+            const response = await this.youtubeAuthService.youtube.videos.list({
+                part: ['snippet', 'contentDetails', 'statistics'],
+                id: [videoId],
+            });
+
+            return response.data.items?.[0] || null;
+        } catch (error) {
+            this.logger.error(
+                `Failed to fetch video from YouTube for videoId: ${videoId}`,
+                error.stack,
+            );
+            throw new NotFoundException('Failed to fetch video data from YouTube');
+        }
+    }
+
+    private async createAndSaveVideo(videoData: any): Promise<Video> {
         const snippet = videoData.snippet || {};
         const contentDetails = videoData.contentDetails || {};
 
@@ -74,11 +94,6 @@ export class VideoService {
     }
 
     async getVideosByIds(videoIds: string[]): Promise<Video[]> {
-        // const videos = await this.videoRepository.find({
-        //     where: { id: In(videoIds) },
-        //     relations: ['channel'],
-        // });
-
         const videos = await Promise.all(videoIds.map(videoId => this.getVideoById(videoId)));
 
         if (videos.length !== videoIds.length) {

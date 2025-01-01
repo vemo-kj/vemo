@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { YoutubeauthService } from './youtubeauth.service';
+import { YoutubeAuthService } from './youtube-auth.service';
 
-describe('YoutubeauthService', () => {
-  let service: YoutubeauthService;
+describe('YoutubeAuthService', () => {
+    let service: YoutubeAuthService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [YoutubeauthService],
-    }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [YoutubeAuthService],
+        }).compile();
 
-    service = module.get<YoutubeauthService>(YoutubeauthService);
-  });
+        service = module.get<YoutubeAuthService>(YoutubeAuthService);
+    });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
 });
