@@ -124,7 +124,7 @@ const thumbnailHandlers = {
             const match = src.match(/\/vi\/([^\/]+)\//);
             if (match && match[1]) {
                 console.log('📌Video ID:', match[1]);
-                window.location.href = `http://52.78.136.69`;
+                window.location.href = `http://localhost:3000/vemo/${match[1]}`;
             }
         }
     },
