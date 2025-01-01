@@ -1,6 +1,5 @@
 'use client';
 
-
 import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -9,12 +8,10 @@ import SideBarNav from './components/sideBarNav/sideBarNav';
 
 import { SummaryProvider } from '../[vemo]/context/SummaryContext';
 
-
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), { ssr: false });
 
 export default function VemoPage() {
-
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
 
@@ -24,8 +21,6 @@ export default function VemoPage() {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-
-
 
     useEffect(() => {
         // YouTube Iframe API 로드
@@ -40,7 +35,6 @@ export default function VemoPage() {
                 events: {
                     onReady: () => console.log('Player ready'),
                 },
-
             });
         };
     }, []);
@@ -52,12 +46,13 @@ export default function VemoPage() {
                 const sec = playerRef.current.getCurrentTime();
                 const mm = Math.floor(sec / 60);
                 const ss = Math.floor(sec % 60);
-                setCurrentTimestamp(`${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`);
+                setCurrentTimestamp(
+                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
+                );
             }
         }, 1000);
         return () => clearInterval(interval);
     }, []);
-
 
     // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
@@ -135,17 +130,19 @@ export default function VemoPage() {
 
     return (
         <div className={styles.container}>
-
             {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
-
                 <Link href="/" passHref>
-                    <img src="/icons/Button_home.svg" alt="VEMO logo" className={styles.logoButton} />
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
                 </Link>
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src="https://www.youtube.com/embed/pEt89CrE-6A?enablejsapi=1"
+                        src="https://www.youtube.com/embed/7DwxuWyCNHA?enablejsapi=1"
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
@@ -167,8 +164,6 @@ export default function VemoPage() {
                     />
                 </SummaryProvider>
             </div>
-
         </div>
     );
 }
-
