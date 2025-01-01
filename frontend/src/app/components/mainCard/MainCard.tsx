@@ -23,15 +23,15 @@ export default function MainCard({
     <Link href='/vemo/[youtubeLink]' as={`/vemo/${id}`}>
       <div className={styles.mainCard}>
         <div>
-          <img src={thumbnails} className={styles.youtubeImage} />
+          <img src={thumbnails} className={styles.thumbnails} />
         </div>
         <div>
-          <span className={styles.thumbnail}>TITLE:{title}</span>
+          <span className={styles.title}>{title}</span>
           <div>
-            <img src={channelThumbnails} className={styles.youtuberLogo} />
-            <span className={styles.youtuberProfile}>유튜브채널명{channelTitle}</span>
+            <img src={channelThumbnails} className={styles.channelThumbnails} />
+            <span className={styles.channelTitle}>{channelTitle}</span>
           </div>
-          <span className={styles.cardMemoCount}>vemo의 수{vemoCount}</span>
+          <span className={styles.vemoCount}>vemoCount: {vemoCount}</span>
         </div>
       </div>
     </Link>
