@@ -1,21 +1,26 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import styles from './MainCard.module.css';
+import Link from "next/link"
+import Image from "next/image";
+import styles from './MainCard.module.css'
 import { MainCardProps } from '../../types/MainCardProps';
 
+
 export default function MainCard({
-    id,
-    title,
-    thumbnails,
-    duration,
-    category,
-    channel: { id: channelId, thumbnails: channelThumbnails, title: channelTitle },
-    vemoCount,
+  id,
+  title,
+  thumbnails,
+  duration,
+  category,
+  channel:{
+    id: channelId,
+    thumbnails: channelThumbnails,
+    title: channelTitle,
+  },
+  vemoCount,
 }: MainCardProps) {
 
   return(
     // 썸네일, 유튜버로고 {}형태 추가
-    <Link href={`/vemo/${id}`}>
+    <Link href='/vemo/[youtubeLink]' as={`/vemo/${pEt89CrE-6A}`}>
       <div className={styles.mainCard}>
         <div>
           <img src={thumbnails} className={styles.youtubeImage} />
@@ -32,3 +37,4 @@ export default function MainCard({
     </Link>
   )
 }
+

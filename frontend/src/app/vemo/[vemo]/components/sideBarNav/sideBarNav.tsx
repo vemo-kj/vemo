@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,8 +8,6 @@ import ExportButton from '../exportButton/ExportButton';
 import { useSummary } from '../../context/SummaryContext';
 import Community from '../community/Community';
 import PlayList from '../playList/PlayList';
-import SummaryView from '../summaryView/SummaryView';
-import QuizView from '../quizView/QuizView';
 
 interface SidebarNavProps {
     selectedOption: string;
@@ -44,6 +43,7 @@ export default function SidebarNav({
                 </button>
 
                 <button
+
                     className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
@@ -51,6 +51,7 @@ export default function SidebarNav({
                 </button>
 
                 <button
+
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
@@ -72,37 +73,32 @@ export default function SidebarNav({
                                     <select
                                         value={selectedOption}
                                         onChange={e => onOptionSelect(e.target.value)}
+
                                         className={styles.dropdownSelect}
                                     >
                                         <option value="내 메모 보기">내 메모 보기</option>
                                         <option value="AI 요약 보기">AI 요약 보기</option>
-                                        <option value="퀴즈 보기">퀴즈 보기</option>
+                                        <option value="옵션 3">옵션 3</option>
                                     </select>
                                 </div>
                             </div>
-                            {selectedOption === 'AI 요약 보기' ? (
-                                <SummaryView />
-                            ) : selectedOption === '퀴즈 보기' ? (
-                                <QuizView />
-                            ) : (
-                                renderSectionContent()
-                            )}
+                            {renderSectionContent()}
                         </div>
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtons}>
                                 <button onClick={handleCaptureTab}>캡처하기</button>
-                                <button onClick={handleCaptureArea}>부분 캡처</button>
+                                <button onClick={handleCaptureArea}>부분캡처</button>
+
+                                <SummaryButton />
+                                <ExportButton />
                             </div>
                         )}
-                        <div className={styles.footerButtons}>
-                            <SummaryButton />
-                            <ExportButton />
-                        </div>
                     </>
                 )}
 
                 {activeTab === 'community' && <Community />}
                 {activeTab === 'playlist' && <PlayList />}
+
             </div>
         </div>
     );

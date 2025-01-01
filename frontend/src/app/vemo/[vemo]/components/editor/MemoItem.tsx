@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect, ChangeEvent, FocusEvent } from 'react';
+import React, { memo, useRef, useState, useEffect, ChangeEvent, FocusEvent, useCallback } from 'react';
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
+import { debounce } from 'lodash';
 
-interface MomoItemProps {
+interface MemoItemProps {
     id: string;
     timestamp: string;
     htmlContent: string; // HTML 형식
@@ -11,23 +12,12 @@ interface MomoItemProps {
     onChangeHTML: (newHTML: string) => void;
     onDelete: () => void;
     onPauseVideo?: () => void;
-    isEditable: boolean; // 추가된 부분
+    isEditable?: boolean; // 추가된 부분
 }
 
-export default function MomoItem({
-    id,
-    timestamp,
-    htmlContent,
-    screenshot,
-    onTimestampClick,
-    onChangeHTML,
-    onDelete,
-    onPauseVideo,
-    isEditable, // 추가된 부분
-}: MomoItemProps) {
+const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MemoItemProps) => {
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
-    const [drawingDataUrl, setDrawingDataUrl] = useState<string | null>(null);
 
     // 그리기 영역 열기
     const handleOpenDrawing = () => {
@@ -54,17 +44,39 @@ export default function MomoItem({
 
     // ====== (2) 텍스트 편집 ======
     const contentRef = useRef<HTMLDivElement>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isComposing, setIsComposing] = useState(false);
 
-    // contentEditable에서 수정된 내용 감지 → onBlur 시 저장
+    // 초기 내용 설정
+    useEffect(() => {
+        if (contentRef.current && !isEditing) {
+            contentRef.current.innerHTML = htmlContent;
+        }
+    }, [htmlContent, isEditing]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        if (!isComposing) {
+            const newContent = e.currentTarget.innerHTML;
+        }
+    };
+
+    const handleCompositionStart = () => {
+        setIsComposing(true);
+    };
+
+    const handleCompositionEnd = (e: React.CompositionEvent<HTMLDivElement>) => {
+        setIsComposing(false);
+    };
+
+    // 편집 완료할 때
     const handleBlur = () => {
+        setIsEditing(false);
         if (!contentRef.current) return;
-        const newValue = contentRef.current.textContent?.trim() || '';
-
-        // 새 값이 공백이면 => 삭제
-        if (newValue.length === 0) {
+        
+        const newValue = contentRef.current.innerHTML;
+        if (newValue.trim().length === 0) {
             onDelete();
         } else {
-            // 공백이 아니면 onChange로 업데이트
             onChangeHTML(newValue);
         }
     };
@@ -72,6 +84,14 @@ export default function MomoItem({
     const handleTimestampClick = () => {
         onTimestampClick?.(timestamp);
     };
+
+    // debounce를 적용하여 잦은 상태 업데이트 방지
+    const debouncedOnChangeHTML = useCallback(
+        debounce((newValue: string) => {
+            onChangeHTML(newValue);
+        }, 300),
+        [onChangeHTML]
+    );
 
     return (
         <div className={styles.memoItemContainer}>
@@ -97,12 +117,14 @@ export default function MomoItem({
             ) : (
                 <div
                     className={styles.itemContent}
-                    // contentEditable={true}
-                    contentEditable={isEditable} // 수정된 부분
+                    contentEditable={isEditable}
                     suppressContentEditableWarning={true}
+                    onFocus={() => setIsEditing(true)}
+                    onInput={handleInput}
+                    onCompositionStart={handleCompositionStart}
+                    onCompositionEnd={handleCompositionEnd}
                     onBlur={handleBlur}
                     ref={contentRef}
-                    dangerouslySetInnerHTML={{ __html: htmlContent }}
                 />
             )}
 
@@ -134,4 +156,8 @@ export default function MomoItem({
             )}
         </div>
     );
-}
+});
+
+MemoItem.displayName = 'MemoItem';
+
+export default MemoItem;
