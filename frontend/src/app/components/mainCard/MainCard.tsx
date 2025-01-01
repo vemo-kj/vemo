@@ -27,7 +27,7 @@ export default function MainCard({
         </div>
         <div>
           <span className={styles.title}>{title}</span>
-          <div>
+          <div className={styles.channel}>
             <img src={channelThumbnails} className={styles.channelThumbnails} />
             <span className={styles.channelTitle}>{channelTitle}</span>
           </div>
@@ -37,4 +37,3 @@ export default function MainCard({
     </Link>
   )
 }
-
