@@ -1,6 +1,7 @@
 'use client';
 
-import { useSummary } from '../../context/SummaryContext';
+import { useSummary } from "@/app/vemo/[vemo]/context/SummaryContext";
+
 
 export default function SummaryView() {
     const { summaryData } = useSummary();
