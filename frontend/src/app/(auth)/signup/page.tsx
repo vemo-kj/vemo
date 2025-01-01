@@ -141,14 +141,6 @@ export default function SignUpPage() {
           onChange={handleInputChange}
         />
         <InputBox
-          label="비밀번호 확인"
-          type="password"
-          id="passwordCheck"
-          name="passwordCheck"
-          required
-          onChange={handleInputChange}
-        />
-        <InputBox
           label="자기소개"
           type="text"
           id="introduction"

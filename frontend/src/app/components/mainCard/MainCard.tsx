@@ -5,30 +5,33 @@ import { MainCardProps } from '../../types/MainCardProps';
 
 
 export default function MainCard({
-  thumbnail,
-  mainCardTitle,
-  youtuberLogo,
-  youtuberProfile,
-  cardMemoCount,
+  id,
+  title,
+  thumbnails,
+  duration,
   category,
-  youtubeLink,
-
+  channel:{
+    id: channelId,
+    thumbnails: channelThumbnails,
+    title: channelTitle,
+  },
+  vemoCount,
 }: MainCardProps) {
 
   return(
     // 썸네일, 유튜버로고 {}형태 추가
-    <Link href='/vemo/[youtubeLink]' as={`/vemo/${youtubeLink}`}>
+    <Link href='/vemo/[youtubeLink]' as={`/vemo/${id}`}>
       <div className={styles.mainCard}>
         <div>
-          <img src="/images/example.svg" className={styles.youtubeImage} />
+          <img src={thumbnails} className={styles.youtubeImage} />
         </div>
         <div>
-          <span className={styles.thumbnail}>TITLE:{mainCardTitle}</span>
+          <span className={styles.thumbnail}>TITLE:{title}</span>
           <div>
-            <img src="/images/example2.svg" className={styles.youtuberLogo} />
-            <span className={styles.youtuberProfile}>유튜브채널명{youtuberProfile}</span>
+            <img src={channelThumbnails} className={styles.youtuberLogo} />
+            <span className={styles.youtuberProfile}>유튜브채널명{channelTitle}</span>
           </div>
-          <span className={styles.cardMemoCount}>vemo의 수{cardMemoCount}</span>
+          <span className={styles.cardMemoCount}>vemo의 수{vemoCount}</span>
         </div>
       </div>
     </Link>

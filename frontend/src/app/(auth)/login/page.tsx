@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError(null);
   
     try {
-      const response = await fetch("http://192.168.1.122:5050/users/login", {
+      const response = await fetch("http://localhost:5050/users/login", {
         method: "POST",
         // headers: { "Content-Type": "application/json" },
         headers: { 

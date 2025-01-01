@@ -15,6 +15,7 @@ import { HomeService } from './home.service';
 import { HomeResponseDto } from './dto/home-response.dto';
 import { CreateMemosDto } from '../memos/dto/create-memos.dto';
 import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-response.dto';
+import { Public } from 'src/public.decorator';
 
 @Controller('home')
 export class HomeController {
@@ -48,6 +49,7 @@ export class HomeController {
      * @param limit 페이지당 비디오 수
      * @returns HomeResponseDto
      */
+    @Public()
     @Get()
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

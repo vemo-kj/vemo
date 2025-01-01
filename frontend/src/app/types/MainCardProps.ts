@@ -1,10 +1,14 @@
 export type MainCardProps = {
-  thumbnail: string;
-  mainCardTitle: string;
-  youtuberLogo: string;
-  youtuberProfile: string;
-  cardMemoCount: number;
+  id: string;
+  title: string;
+  thumbnails: string;
+  duration: string;
   category: string;
-  youtubeLink: string;
+  channel: {
+    id: string;
+    thumbnails: string;
+    title: string;
+  }
+  vemoCount: number;
 };
 
