@@ -8,7 +8,7 @@ type CreateButtonProps = {
 
 const CreateButton: React.FC<CreateButtonProps> = ({ onSave, isLoading }) => {
   return (
-    <Link href="/mypage">
+    <Link href="/">
       <button
         onClick={onSave}
         disabled={isLoading}
