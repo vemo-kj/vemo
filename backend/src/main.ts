@@ -1,7 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { JwtAuthGuard } from './auth/jwt/jwt.guard';
+
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors({
@@ -9,7 +11,6 @@ async function bootstrap() {
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
-        // exposedHeaders: ['Content-Range', 'X-Total-Count'],
     });
 
     app.useGlobalPipes(
@@ -29,6 +30,8 @@ async function bootstrap() {
         .setVersion('1.0')
         .addTag('vemo')
         .build();
+
+    app.useGlobalGuards(new JwtAuthGuard(new Reflector()));
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
