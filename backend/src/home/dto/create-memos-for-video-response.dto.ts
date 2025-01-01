@@ -1,15 +1,21 @@
-import { IsNumber, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsObject, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ChannelDto {
     @IsString()
     id: string;
-    
+
     @IsString()
     thumbnails: string;
 
     @IsString()
     title: string;
+}
+
+class MemosDto {
+    id: number;
+    title: string;
+    description: string;
 }
 
 class VideoDto {
@@ -38,7 +44,5 @@ export class CreateMemosForVideoResponseDto {
     @ValidateNested()
     @Type(() => VideoDto)
     video: VideoDto;
-
-    @IsNumber()
-    vemoCount: number;
+    memos: MemosDto;
 }
