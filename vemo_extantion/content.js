@@ -24,34 +24,86 @@ window.addEventListener("message", (event) => {
 // 1) 전체 캡처 대신 "YouTube 플레이어만 크롭" 예시
 // -----------------------------------------------------------
 function captureYouTubePlayer() {
-  // 1) 먼저 background에 탭 캡처 요청
-  chrome.runtime.sendMessage({ action: "captureTab" }, (response) => {
-    if (response && response.dataUrl) {
-      // 2) YouTube iframe의 bounding rect 얻기
-      //    (content script가 접근 가능: 부모 DOM 기준)
-      const iframe = document.getElementById("youtube-player");
-      if (!iframe) {
-        // 없으면 그냥 전체 이미지 반환
-        postMessageToPage("CAPTURE_TAB_RESPONSE", response.dataUrl);
-        return;
-      }
+  const iframe = document.getElementById("youtube-player");
+  if (!iframe) return;
 
-      // iframe의 위치 & 크기
-      const rect = iframe.getBoundingClientRect();
+  // 정확한 위치와 크기 계산
+  const rect = iframe.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
 
-      const x = Math.floor(rect.left + window.scrollX);
-      const y = Math.floor(rect.top + window.scrollY);
-      const w = Math.floor(rect.width);
-      const h = Math.floor(rect.height);
+  const absoluteRect = {
+    left: Math.round(rect.left * scale),
+    top: Math.round(rect.top * scale),
+    width: Math.round(rect.width * scale),
+    height: Math.round(rect.height * scale)
+  };
 
-      // 3) Canvas로 잘라내기
-      cropImage(response.dataUrl, x, y, w, h, (croppedUrl) => {
-        postMessageToPage("CAPTURE_TAB_RESPONSE", croppedUrl);
-      });
-    } else if (response && response.error) {
-      console.error("[content.js] 캡처 오류:", response.error);
-    }
+  // 스크롤 위치는 scale과 별개로 처리
+  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+  // 최종 캡처 위치 계산
+  absoluteRect.left += Math.round(scrollLeft * scale);
+  absoluteRect.top += Math.round(scrollTop * scale);
+  
+  // 캡처 영역 표시를 위한 오버레이
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position: fixed;
+    border: 2px solid #ff0000;
+    background: rgba(255, 0, 0, 0.2);
+    pointer-events: none;
+    z-index: 999999;
+    transition: opacity 0.3s ease;
+    left: ${rect.left}px;
+    top: ${rect.top}px;
+    width: ${rect.width}px;
+    height: ${rect.height}px;
+  `;
+  document.body.appendChild(overlay);
+
+  // 캡처 전에 스크롤 위치 저장
+  const originalScroll = {
+    x: window.scrollX,
+    y: window.scrollY
+  };
+
+  // 캡처할 요소가 뷰포트 내에 완전히 보이도록 스크롤
+  iframe.scrollIntoView({
+    behavior: 'instant',
+    block: 'center'
   });
+
+  // 요소가 뷰포트에 자리잡을 때까지 잠시 대기
+  setTimeout(() => {
+    chrome.runtime.sendMessage({ action: "captureTab" }, (response) => {
+      if (response && response.dataUrl) {
+        // 캡처 후 원래 스크롤 위치로 복원
+        window.scrollTo(originalScroll.x, originalScroll.y);
+
+        cropImage(
+          response.dataUrl, 
+          absoluteRect.left,
+          absoluteRect.top,
+          absoluteRect.width,
+          absoluteRect.height,
+          (croppedUrl) => {
+            console.log('Capture dimensions:', {
+              left: absoluteRect.left,
+              top: absoluteRect.top,
+              width: absoluteRect.width,
+              height: absoluteRect.height
+            });
+            postMessageToPage("CAPTURE_TAB_RESPONSE", croppedUrl);
+            
+            // 오버레이 제거
+            overlay.style.opacity = "0";
+            setTimeout(() => overlay.remove(), 300);
+          }
+        );
+      }
+    });
+  }, 100);
 }
 
 // -----------------------------------------------------------
@@ -175,11 +227,24 @@ function cropImage(dataUrl, cropX, cropY, cropW, cropH, callback) {
   const img = new Image();
   img.onload = () => {
     const canvas = document.createElement("canvas");
+    // 원본 이미지의 비율을 유지하면서 캡처
     canvas.width = cropW;
     canvas.height = cropH;
+    
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-    const croppedUrl = canvas.toDataURL("image/png");
+    // 이미지 스무딩 비활성화로 선명도 유지
+    ctx.imageSmoothingEnabled = false;
+    
+    // 정확한 위치에서 크롭
+    ctx.drawImage(
+      img,
+      cropX, cropY,    // 소스 이미지의 시작점
+      cropW, cropH,    // 소스 이미지에서 잘라낼 영역
+      0, 0,           // 캔버스에 그릴 위치
+      cropW, cropH    // 캔버스에 그릴 크기
+    );
+    
+    const croppedUrl = canvas.toDataURL("image/png", 1.0); // 최대 품질로 저장
     callback(croppedUrl);
   };
   img.src = dataUrl;
