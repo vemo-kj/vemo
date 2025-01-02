@@ -141,8 +141,10 @@
 
 /* 캡처 이미지 */
 .captureImage {
-    max-width: 300px; /* 4) 영역 제한 */
-    height: auto;
+    max-width: 400px;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     border: 1px solid #ccc;
 }
 
