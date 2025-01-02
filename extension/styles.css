@@ -1,0 +1,54 @@
+.vemo-bookmark-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.vemo-bookmark-button:hover {
+    opacity: 1;
+}
+
+.vemo-button-container {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.vemo-button-content {
+    display: flex;
+    align-items: center;
+    background-color: #4593fc;
+    padding: 8px 20px 8px 12px;
+    border-radius: 8px;
+}
+
+.vemo-button-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+.vemo-text-style {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.vemo-button-close {
+    display: none;
+    background-color: #4593fc;
+    padding: 8px;
+    border-radius: 0 8px 8px 0;
+}

@@ -1,0 +1,75 @@
+.mainCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin: 15px;
+    max-width: 300px;
+    width: 100%;
+    background-color: #fff;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.mainCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.thumbnails {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.channelThumbnails {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.channelTitle {
+    font-size: 14px;
+    color: #666;
+    margin-left: 10px;
+}
+
+.vemoCount {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.channelInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.channel {
+    display: flex;
+    align-items: center; /* 수직 정렬 */
+    gap: 10px; /* 요소 간 간격 */
+    margin-top: 10px;
+}
