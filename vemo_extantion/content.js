@@ -45,22 +45,6 @@ function captureYouTubePlayer() {
   // 최종 캡처 위치 계산
   absoluteRect.left += Math.round(scrollLeft * scale);
   absoluteRect.top += Math.round(scrollTop * scale);
-  
-  // 캡처 영역 표시를 위한 오버레이
-  const overlay = document.createElement("div");
-  overlay.style.cssText = `
-    position: fixed;
-    border: 2px solid #ff0000;
-    background: rgba(255, 0, 0, 0.2);
-    pointer-events: none;
-    z-index: 999999;
-    transition: opacity 0.3s ease;
-    left: ${rect.left}px;
-    top: ${rect.top}px;
-    width: ${rect.width}px;
-    height: ${rect.height}px;
-  `;
-  document.body.appendChild(overlay);
 
   // 캡처 전에 스크롤 위치 저장
   const originalScroll = {
@@ -78,9 +62,7 @@ function captureYouTubePlayer() {
   setTimeout(() => {
     chrome.runtime.sendMessage({ action: "captureTab" }, (response) => {
       if (response && response.dataUrl) {
-        // 캡처 후 원래 스크롤 위치로 복원
-        window.scrollTo(originalScroll.x, originalScroll.y);
-
+        // 먼저 이미지를 크롭
         cropImage(
           response.dataUrl, 
           absoluteRect.left,
@@ -88,19 +70,35 @@ function captureYouTubePlayer() {
           absoluteRect.width,
           absoluteRect.height,
           (croppedUrl) => {
-            console.log('Capture dimensions:', {
-              left: absoluteRect.left,
-              top: absoluteRect.top,
-              width: absoluteRect.width,
-              height: absoluteRect.height
-            });
+            // 크롭된 이미지를 전송
             postMessageToPage("CAPTURE_TAB_RESPONSE", croppedUrl);
             
-            // 오버레이 제거
-            overlay.style.opacity = "0";
-            setTimeout(() => overlay.remove(), 300);
+            // 이미지 전송 후에 시각적 피드백을 위한 오버레이 표시
+            const overlay = document.createElement("div");
+            overlay.style.cssText = `
+              position: fixed;
+              background: rgba(255, 255, 255, 0.2);
+              border: 2px solid #ffffff;
+              pointer-events: none;
+              z-index: 999999;
+              transition: opacity 0.3s ease;
+              left: ${rect.left}px;
+              top: ${rect.top}px;
+              width: ${rect.width}px;
+              height: ${rect.height}px;
+            `;
+            document.body.appendChild(overlay);
+
+            // 오버레이 페이드 아웃
+            setTimeout(() => {
+              overlay.style.opacity = "0";
+              setTimeout(() => overlay.remove(), 300);
+            }, 100);
           }
         );
+
+        // 원래 스크롤 위치로 복원
+        window.scrollTo(originalScroll.x, originalScroll.y);
       }
     });
   }, 100);
@@ -185,23 +183,48 @@ function onMouseUp(e) {
   const height = Math.abs(endY - startY);
 
   if (width > 5 && height > 5) {
-    // 선택된 영역을 (pageXOffset, pageYOffset)까지 고려해 크롭
-    const realX = Math.min(startX, endX) + window.scrollX;
-    const realY = Math.min(startY, endY) + window.scrollY;
+    const scale = window.devicePixelRatio || 1;
+    
+    // 선택 영역의 정확한 위치 계산
+    const left = Math.min(startX, endX);
+    const top = Math.min(startY, endY);
+    
+    // 스크롤 위치 고려
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-    // 1) 전체 탭 캡처
+    // 최종 캡처 영역 계산 (스케일링 적용)
+    const captureArea = {
+      x: Math.round((left + scrollLeft) * scale),
+      y: Math.round((top + scrollTop) * scale),
+      width: Math.round(width * scale),
+      height: Math.round(height * scale)
+    };
+
+    // 캡처 전에 선택 오버레이 제거
+    removeSelectionOverlay();
+
+    // 전체 탭 캡처 후 크롭
     chrome.runtime.sendMessage({ action: "captureTab" }, (resp) => {
       if (resp && resp.dataUrl) {
-        // 2) (realX, realY, width, height)만 크롭
-        cropImage(resp.dataUrl, realX, realY, width, height, (croppedUrl) => {
-          postMessageToPage("CAPTURE_TAB_RESPONSE", croppedUrl);
-        });
+        cropImage(
+          resp.dataUrl, 
+          captureArea.x,
+          captureArea.y,
+          captureArea.width,
+          captureArea.height,
+          (croppedUrl) => {
+            // 캡처 완료 후에만 하이라이트 표시
+            showCaptureHighlight(left, top, width, height);
+            postMessageToPage("CAPTURE_TAB_RESPONSE", croppedUrl);
+          }
+        );
       }
     });
+  } else {
+    removeSelectionOverlay();
   }
 
-  // 선택 모드 종료
-  removeSelectionOverlay();
   e.preventDefault();
   e.stopPropagation();
 }
@@ -252,4 +275,24 @@ function cropImage(dataUrl, cropX, cropY, cropW, cropH, callback) {
 
 function postMessageToPage(type, dataUrl) {
   window.postMessage({ type, dataUrl }, "*");
+}
+
+// 캡처 완료 후 하이라이트 표시 함수
+function showCaptureHighlight(left, top, width, height) {
+  const highlight = document.createElement("div");
+  highlight.className = "capture-highlight";
+  highlight.style.cssText = `
+    left: ${left}px;
+    top: ${top}px;
+    width: ${width}px;
+    height: ${height}px;
+  `;
+  
+  document.body.appendChild(highlight);
+
+  // 1초 후 페이드 아웃
+  setTimeout(() => {
+    highlight.style.opacity = "0";
+    setTimeout(() => highlight.remove(), 300);
+  }, 300);
 }
