@@ -7,10 +7,11 @@ WORKDIR /usr/src/app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
-# 필수 패키지 전역 설치 후 의존성 설치
+# 필수 패키지만 설치하고 캐시 삭제
 RUN npm install -g @nestjs/cli && \
-    npm install && \
-    npm install @nestjs/config @nestjs/typeorm typeorm @nestjs/jwt @nestjs/passport passport-jwt bcrypt openai google-auth-library googleapis
+    npm install --production && \
+    npm install @nestjs/config @nestjs/typeorm typeorm @nestjs/jwt @nestjs/passport passport-jwt bcrypt openai google-auth-library googleapis && \
+    npm cache clean --force
 
 # Bundle app source
 COPY . .
