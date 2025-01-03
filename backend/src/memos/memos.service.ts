@@ -12,7 +12,7 @@ export class MemosService {
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
         @InjectRepository(Users) private readonly userRepository: Repository<Users>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-    ) {}
+    ) { }
 
     async createMemos(
         memosTitle: string,
@@ -60,7 +60,7 @@ export class MemosService {
     async getAllMemosByVideo(videoId: string): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { video: { id: videoId } },
-            relations: ['user', 'video', 'memos'],
+            relations: ['user', 'video'],
         });
     }
 
