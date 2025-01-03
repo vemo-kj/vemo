@@ -1,67 +1,9 @@
-.mainContainer {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  padding-top: 70px;
-}
-
-.content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
 .mainCardContainer {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  padding: 20px 0;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.error {
-  text-align: center;
-  color: #dc3545;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 20px 0;
-}
-
-.loading {
-  text-align: center;
-  color: #666;
-  padding: 40px 0;
-  font-size: 16px;
-}
-
-.noResults {
-  text-align: center;
-  color: #666;
-  padding: 40px 0;
-  font-size: 16px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 1200px) {
-  .content {
-    padding: 20px;
-  }
-
-  .mainCardContainer {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .mainCardContainer {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .mainCardContainer {
-    grid-template-columns: 1fr;
-  }
-}
