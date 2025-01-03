@@ -73,17 +73,10 @@ export default function MyProfile() {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.header}>
-        <h1>{profile.nickname}</h1>
+        <h1>닉네임{profile.nickname}</h1>
+        <button>Edit Profile</button>
       </div>
-      <div className={styles.info}>
-        <p className={styles.email}>이메일: {profile.email}</p>
-        <p className={styles.nickname}>닉네임: {profile.name}</p>
-        <p className={styles.gender}>성별: {profile.gender}</p>
-        <p className={styles.birth}>생년월일: {new Date(profile.birth).toLocaleDateString()}</p>
-      </div>
-      <p className={styles.description}>
-        자기소개:{profile.introduction || '자기소개가 없습니다.'}
-      </p>
+      <p>자기소개{profile.description}</p>
     </div>
   );
 }

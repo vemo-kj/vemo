@@ -9,19 +9,11 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  height: 300px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 100%; /* 컨테이너의 전체 너비 사용 */
+  height: 100%; /* 높이를 일정하게 유지 */
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-.myCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .thumbnailContainer {
@@ -37,7 +29,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  padding-top: 56.25%; /* 16:9 비율 유지 */
 }
 
 .thumbnail {
@@ -75,8 +67,8 @@
 }
 
 .cardContent {
-  padding: 12px;
-  height: 140px;
+  padding: 16px;
+  flex-grow: 1; /* 남은 공간을 채움 */
   display: flex;
   flex-direction: column;
 }
@@ -87,56 +79,48 @@
   color: #333;
   height: 28px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2; /* 제목 2줄로 제한 */
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.3;
   margin-bottom: 4px;
 }
 
-.statsContainer {
-  margin: 4px 0;
+.progressBar {
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  margin-bottom: 8px;
+  margin-top: auto; /* 하단에 배치 */
 }
 
-.stat {
-  display: flex;
-  align-items: center;
-  background-color: #f8f9fa;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-bottom: 4px;
+.progress {
+  height: 100%;
+  background-color: #1a73e8;
+  border-radius: 2px;
 }
 
-.statLabel {
+.progressText {
+  font-size: 14px;
   color: #666;
   font-size: 11px;
 }
 
-.statValue {
-  color: #007AFF;
-  font-weight: 500;
-  font-size: 11px;
-  margin-left: auto;
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, 1fr); /* 화면이 작아지면 3개씩 */
+  }
 }
 
-.previewVideos {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: hidden;
-  margin-top: 4px;
+@media (max-width: 900px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr); /* 더 작아지면 2개씩 */
+  }
 }
 
-.previewVideo {
-  font-size: 11px;
-  color: #666;
-  padding: 4px 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  height: 24px;
-  line-height: 16px;
+@media (max-width: 600px) {
+  .cardGrid {
+    grid-template-columns: 1fr; /* 모바일에서는 1개씩 */
+  }
 }

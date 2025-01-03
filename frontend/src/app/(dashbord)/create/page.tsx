@@ -53,12 +53,17 @@ export default function CreatePage() {
             alert('유효한 YouTube Video ID를 입력해주세요.');
             return;
         }
+        if (videoIds.length !== links.length) {
+            alert('유효한 YouTube Video ID를 입력해주세요.');
+            return;
+        }
 
+        // 백엔드에서 'name'과 'videoIds'로 받으므로 데이터 형식 변경
         const data = { name, videoIds };
 
         try {
             setIsLoading(true);
-            console.log('전송하는 데이터:', data);
+            console.log('전송하는 데이터:', data); // 전송 데이터 확인
 
       const response = await fetch('http://localhost:5050/home/memos', {
         method: 'POST',

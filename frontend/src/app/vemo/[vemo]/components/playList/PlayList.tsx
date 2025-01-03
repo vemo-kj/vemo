@@ -32,7 +32,7 @@ export default function Playlist() {
   useEffect(() => {
     async function fetchPlaylists() {
       try {
-        const response = await fetch('http://localhost:5050/playlists'); // 서버 API 엔드포인트
+        const response = await fetch(`http://localhost:5050/playlists/${id}`); // 서버 API 엔드포인트
         if (!response.ok) {
           throw new Error('Failed to fetch');
         }
