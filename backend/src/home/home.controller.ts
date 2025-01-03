@@ -65,7 +65,7 @@ export class HomeController {
     @Get('/cards')
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-        @Query('limit', new DefaultValuePipe(8), ParseIntPipe) limit: number,
+        @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
     ): Promise<HomeResponseDto> {
         return this.homeService.getAllVideos(page, limit);
     }
