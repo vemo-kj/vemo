@@ -4,10 +4,8 @@ FROM node:18-alpine
 # 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
-# 패키지 파일 복사
-COPY package*.json ./
-COPY tsconfig*.json ./
-COPY nest-cli.json ./
+# package.json과 설정 파일들을 한 번에 복사
+COPY package*.json tsconfig*.json ./
 
 # 개발 의존성을 포함한 모든 패키지 설치
 RUN npm install
