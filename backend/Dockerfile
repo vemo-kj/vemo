@@ -22,5 +22,5 @@ RUN npm run build
 ENV NODE_ENV=production
 EXPOSE 5050
 
-# 제발 실행 제발
+# 제발 실행 제발 진짜 제발요
 CMD ["npm", "run", "start:prod"]
