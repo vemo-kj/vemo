@@ -21,8 +21,6 @@ interface playlists {
   }
 }
 
-
-
 export default function Playlist() {
   const [videos, setVideos] = useState<playlists[]>([]);
   const [totalDuration, setTotalDuration] = useState<string>('00:00:00');
@@ -32,22 +30,32 @@ export default function Playlist() {
     async function fetchPlaylists() {
       try {
         const response = await fetch('http://localhost:5050/playlists'); // 서버 API 엔드포인트
-        const data: playlists[] = await response.json();
-        setVideos(data);
+        if (!response.ok) {
+          throw new Error('Failed to fetch');
+        }
 
-        // 총 재생시간 계산
-        const totalSeconds = data.reduce((acc, video) => {
-          const [hours, minutes, seconds] = video.videos.duration.split(':').map(Number);
-          return acc + hours * 3600 + minutes * 60 + seconds;
-        }, 0);
+        const data = await response.json();
 
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        // 데이터가 배열인지 확인
+        if (Array.isArray(data)) {
+          setVideos(data);
 
-        setTotalDuration(
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-        );
+          // 총 재생시간 계산
+          const totalSeconds = data.reduce((acc, playlist) => {
+            const [hours, minutes, seconds] = playlist.videos.duration.split(':').map(Number);
+            return acc + hours * 3600 + minutes * 60 + seconds;
+          }, 0);
+
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+
+          setTotalDuration(
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          );
+        } else {
+          console.error('Fetched data is not an array:', data);
+        }
       } catch (error) {
         console.error('Failed to fetch playlist data:', error);
       }
@@ -81,4 +89,3 @@ export default function Playlist() {
     </div>
   );
 }
-

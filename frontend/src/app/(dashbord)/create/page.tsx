@@ -87,10 +87,6 @@ export default function CreatePage() {
         body: JSON.stringify(data),
       });
 
-      console.log(response);
-      console.log('여기를봐',name);
-      console.log('여기를봐',videoIds);
-      console.log(JSON.stringify(data));
 
       if (response.ok) {
         alert('저장 성공!');
