@@ -12,7 +12,7 @@ async function bootstrap() {
         DB_HOST: process.env.DB_HOST,
     });
     app.enableCors({
-        origin: ['http://localhost:3000', 'http://192.168.1.122:3000', 'http://192.168.1.158:3000'],
+        origin: '*',
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
