@@ -30,7 +30,7 @@
 // src/app/(dashbord)/create/components/createButton/CreateButton.tsx
 
 import React from 'react';
-//style
+import { VideoResponse } from '@/app/types/VideoResponse';
 import styles from './CreateButton.module.css';
 
 type CreateButtonProps = {
@@ -48,10 +48,10 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onSave, isLoading }) => {
   };
 
   return (
-    <Link href="/" className={styles.createButtonContainer}>
+    <div className={styles.createButtonContainer}>
       <button
         className={styles.createButton}
-        onClick={onSave}
+        onClick={handleClick}
         disabled={isLoading}
       >
         {isLoading ? "저장 중..." : "저장"}
