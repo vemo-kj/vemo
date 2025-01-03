@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
 import PlayList from '../playList/PlayList';
@@ -42,6 +42,26 @@ export default function SidebarNav({
     playlistData,
 }: SidebarNavProps) {
     const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
+    const [memos, setMemos] = useState([]);
+
+    // 메모 목록 불러오기
+    useEffect(() => {
+        const fetchMemos = async () => {
+            try {
+                const response = await fetch('/api/memo');
+                if (response.ok) {
+                    const data = await response.json();
+                    setMemos(data);
+                }
+            } catch (error) {
+                console.error('메모 목록 불러오기 실패:', error);
+            }
+        };
+
+        if (activeTab === 'write' && selectedOption === '내 메모 보기') {
+            fetchMemos();
+        }
+    }, [activeTab, selectedOption]);
 
     return (
         <div className={styles.container}>
