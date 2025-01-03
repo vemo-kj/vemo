@@ -43,10 +43,10 @@ export default function MyProfile() {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.header}>
-        <h1>{profile.nickname}</h1>
+        <h1>닉네임{profile.nickname}</h1>
         <button>Edit Profile</button>
       </div>
-      <p>{profile.description}</p>
+      <p>자기소개{profile.description}</p>
     </div>
   );
 }
