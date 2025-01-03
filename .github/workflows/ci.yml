@@ -34,7 +34,7 @@ jobs:
                     mkdir -p /home/${{ secrets.AWS_EC2_USER }}/app &&
                     cd /home/${{ secrets.AWS_EC2_USER }}/app &&
                     git pull &&
-                    docker build --no-cache -t backend-vemo-1 -f ./backend/Dockerfile . &&  # 캐시 무시하고 Docker 이미지 빌드
-                    docker-compose up
+                    cd /backend &&
+                    docker-compose up -d --build
                     docker ps -a
                   "
