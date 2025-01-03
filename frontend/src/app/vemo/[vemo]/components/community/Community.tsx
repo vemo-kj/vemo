@@ -21,10 +21,26 @@ export default function Community() {
   const [viewMode, setViewMode] = useState<'all' | 'mine'>('all'); // 보기 모드
   const [selectedCard, setSelectedCard] = useState<Memos | null>(null); // 선택된 카드 상태
 
+  // const getVideoIdFromURL = () => {
+  //   const path = window.location.pathname; // 현재 경로 가져오기
+  //   const segments = path.split('/'); // 경로를 '/'로 분할
+  //   return segments[segments.indexOf('vemo') + 1] || null; // 'vemo' 다음 경로 값 추출
+  // };
   const getVideoIdFromURL = () => {
-    const path = window.location.pathname; // 현재 경로 가져오기
-    const segments = path.split('/'); // 경로를 '/'로 분할
-    return segments[segments.indexOf('vemo') + 1] || null; // 'vemo' 다음 경로 값 추출
+    try {
+      // 현재 전체 URL을 가져옴
+      const currentUrl = window.location.href;
+      const url = new URL(currentUrl);
+      
+      // pathname에서 videoId 추출 (/vemo/videoId)
+      const pathSegments = url.pathname.split('/');
+      const videoId = pathSegments[pathSegments.length - 1];
+      
+      return videoId || null;
+    } catch (error) {
+      console.error('URL 파싱 에러:', error);
+      return null;
+    }
   };
 
   const fetchMemos = async (filter: 'all' | 'mine' = 'all') => {
