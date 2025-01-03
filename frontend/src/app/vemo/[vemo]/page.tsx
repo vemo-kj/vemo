@@ -188,9 +188,6 @@ export default function VemoPage() {
                         allowFullScreen
                     />
                 </div>
-                <button onClick={() => changeVideo('새로운_비디오_ID')}>
-                    {/* 다른 영상으로 변경 */}
-                </button>
             </div>
 
             {/* (3) Sidebar */}
