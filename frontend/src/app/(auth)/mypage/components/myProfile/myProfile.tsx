@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import styles from './myProfile.module.css';
+import Image from 'next/image';
 
 type UserProfile = {
   nickname: string;
@@ -10,6 +11,7 @@ type UserProfile = {
 export default function MyProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     async function fetchProfile() {

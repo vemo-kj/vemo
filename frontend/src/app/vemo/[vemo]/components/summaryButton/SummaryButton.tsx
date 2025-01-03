@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useSummary } from '../../context/SummaryContext';
+import Image from 'next/image';
+import styles from './summaryButton.module.css';
 
 export default function SummaryButton() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,15 +76,23 @@ export default function SummaryButton() {
     };
 
     return (
-        <div>
-            <button
-                onClick={handleClick}
-                disabled={isSubmitting}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-            >
+        <button
+            onClick={handleClick}
+            disabled={isSubmitting}
+            className={styles.iconButton}
+        >
+            <div className={styles.iconContainer}>
+                <Image
+                    className={styles.defaultIcon}
+                    src="/icons/bt_edit_nav_AiSummery.svg"
+                    alt="요약"
+                    width={20}
+                    height={20}
+                />
+            </div>
+            <span className={styles.iconButtonText}>
                 {isSubmitting ? '전송 중...' : '요약하기'}
-            </button>
-            {error && <p className="text-red-500 mt-2">{error}</p>}
-        </div>
+            </span>
+        </button>
     );
 }
