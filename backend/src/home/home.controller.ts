@@ -27,7 +27,7 @@ export class HomeController {
      * @param req
      * @returns CreateMemoForVideoResponseDto
      */
-    @Post('playlist')
+    @Post('/memos')
     @HttpCode(HttpStatus.CREATED)
     async createPlaylistWithMemos(
         @Body() createMemosDto: CreatePlaylistWithMemosDto,
@@ -46,10 +46,10 @@ export class HomeController {
      * @returns HomeResponseDto
      */
     @Public()
-    @Get()
+    @Get('/cards')
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+        @Query('limit', new DefaultValuePipe(8), ParseIntPipe) limit: number,
     ): Promise<HomeResponseDto> {
         return this.homeService.getAllVideos(page, limit);
     }
