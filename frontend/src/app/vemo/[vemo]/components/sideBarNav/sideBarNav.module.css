@@ -62,7 +62,7 @@
 /* 콘텐츠 영역 */
 .tabContent {
     flex: 1;
-    padding: 16px;
+    padding: 24px;
     overflow-y: auto;
     margin-right: 120px;
     display: flex;
@@ -73,16 +73,31 @@
 
 /* 노트 제목 */
 .notesHeader {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: bold;
-    margin-bottom: 8px;
-    color: #333;
+    color: #286BE8;
+    margin-bottom: 16px;
 }
 
 /* 노트 부제목 */
 .notesSubHeader {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+/* 재생목록 제목 */
+.playlistTitle {
     font-size: 14px;
     color: #666;
+    margin-bottom: 4px;
+}
+
+/* 비디오 제목 */
+.videoTitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: #333;
     margin-bottom: 16px;
 }
 
