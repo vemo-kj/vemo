@@ -1,3 +1,5 @@
+'use client'
+
 type MyCardHeaderButtonProps = {
   text: string;
   className?: string;
@@ -5,13 +7,12 @@ type MyCardHeaderButtonProps = {
 };
 
 export default function MyCardHeaderButton({ text, className, onClick }: MyCardHeaderButtonProps) {
-
-
   return (
-    <div>
-      <button
-        className={className}
-        onClick={onClick}>{text}</button>
-    </div>
+    <button
+      className={className}
+      onClick={onClick}
+    >
+      {text}
+    </button>
   );
 }

@@ -1,18 +1,14 @@
 'use client'
-//next
+
 import { useEffect, useState } from 'react';
-//styles
 import styles from './MyCardHeader.module.css';
-//utils
 import { fetchUserMemoCount } from '@/app/api/fetchUserMemoCount';
-//components
 import MyCardHeaderButton from '../myCardHeaderButton.tsx/MyCardHeaderButton';
 
 export default function MyCardHeader() {
   const [userMemoCount, setUserMemoCount] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 메모 개수 API 호출
   useEffect(() => {
     async function loadMemoCount() {
       const count = await fetchUserMemoCount();
@@ -31,9 +27,9 @@ export default function MyCardHeader() {
   };
 
   return (
-    <div>
-      <div>
-        <h2>나의 VEMO 모아보기</h2>
+    <div className={styles.headerContainer}>
+      <div className={styles.titleSection}>
+        <h2 className={styles.title}>나의 VEMO 모아보기</h2>
         {loading ? (
           <span className={styles.userMemoCount}>로딩 중...</span>
         ) : (
@@ -43,15 +39,17 @@ export default function MyCardHeader() {
         )}
       </div>
 
-      <div>
+      <div className={styles.buttonGroup}>
         <MyCardHeaderButton
           className={styles.AllButton}
           text="All" 
-          onClick={handleAllClick}/>
+          onClick={handleAllClick}
+        />
         <MyCardHeaderButton
           className={styles.studyingButton}
           text="Studying"
-          onClick={handleStudyingClick}/>
+          onClick={handleStudyingClick}
+        />
       </div>
     </div>
   );
