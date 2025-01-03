@@ -1,8 +1,13 @@
 .mainCardContainer {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+<<<<<<< HEAD
   gap: 24px;
   padding: 24px;
+=======
+  gap: 20px;
+  padding: 20px;
+>>>>>>> 0d41da7 (feat: 커뮤니티 api통신 구현 및 홈페이지css수정)
   max-width: 1200px;
   margin: 0 auto;
 }
