@@ -16,7 +16,8 @@ interface playlists {
       id: string;
       title: string;
       thumbnail: string;
-    }
+    },
+    category: string;
   }
 }
 
@@ -30,13 +31,13 @@ export default function Playlist() {
   useEffect(() => {
     async function fetchPlaylists() {
       try {
-        const response = await fetch('/api/playlist'); // 서버 API 엔드포인트
+        const response = await fetch('http://localhost:5050/playlists'); // 서버 API 엔드포인트
         const data: playlists[] = await response.json();
         setVideos(data);
 
         // 총 재생시간 계산
         const totalSeconds = data.reduce((acc, video) => {
-          const [hours, minutes, seconds] = video.duration.split(':').map(Number);
+          const [hours, minutes, seconds] = video.videos.duration.split(':').map(Number);
           return acc + hours * 3600 + minutes * 60 + seconds;
         }, 0);
 
@@ -76,9 +77,6 @@ export default function Playlist() {
             </div>
           </div>
         ))}
-      </div>
-      <div className={styles.addButtonContainer}>
-        <button className={styles.addButton}>추가하기</button>
       </div>
     </div>
   );
