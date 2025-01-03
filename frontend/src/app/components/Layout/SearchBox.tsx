@@ -35,25 +35,15 @@ export default function SearchBox() {
         className={styles.searchIcon}
         alt="검색"
       />
-      <input
-        id="search-input"
-        name="q"
+      <input 
         className={styles.searchbar}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         type="text"
         value={q}
         placeholder='검색어를 입력 해주세요...'
-        aria-label="검색어 입력"
       />
-      <button
-        className={styles.searchButton}
-        onClick={handleSearch}
-        type="button"
-        aria-label="검색하기"
-      >
-        검색
-      </button>
+      <button className={styles.searchButton} onClick={handleSearch}>검색</button>
     </div>
   )
 }

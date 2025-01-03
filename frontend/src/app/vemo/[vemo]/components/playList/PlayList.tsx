@@ -5,71 +5,41 @@ import { useSearchParams } from 'next/navigation';
 import styles from './PlayList.module.css';
 import Link from 'next/link';
 
-interface Playlist {
+interface playlists {
   id: number;
   name: string;
   userId: number;
-  videos: Array<{
+  videos: {
     id: string;
     title: string;
-    thumbnails: string;
+    thumbnail: string;
     duration: string;
-    category: string;
-  }>;
+    channel: {
+      id: string;
+      title: string;
+      thumbnail: string;
+    }
+  }
 }
 
 export default function Playlist() {
-  const searchParams = useSearchParams();
-  const playlistId = searchParams.get('playlistId');
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [videos, setVideos] = useState<playlists[]>([]);
   const [totalDuration, setTotalDuration] = useState<string>('00:00:00');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchPlaylist() {
-      if (!playlistId) {
-        setError('playlistId가 없습니다.');
-        setIsLoading(false);
-        return;
-      }
-
-      const accessToken = sessionStorage.getItem('token');
-      if (!accessToken) {
-        setError('로그인이 필요합니다.');
-        setIsLoading(false);
-        return;
-      }
-
+    async function fetchPlaylists() {
       try {
-        const response = await fetch(`http://localhost:5050/vemo/playlists/${playlistId}`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await fetch('/api/playlist'); // 서버 API 엔드포인트
+        const data: playlists[] = await response.json();
+        setVideos(data);
 
-        if (!response.ok) {
-          throw new Error('플레이리스트를 불러올 수 없습니다.');
-        }
-
-        const data = await response.json();
-        console.log('받은 데이터:', data);
-
-        if (data && Array.isArray(data.videos)) {
-          setPlaylist(data);
-
-          const totalSeconds = data.videos.reduce((acc: number, video: { duration: string }) => {
-            if (!video.duration) return acc;
-
-            try {
-              const [hours, minutes, seconds] = video.duration.split(':').map(Number);
-              return acc + (hours * 3600 + minutes * 60 + seconds);
-            } catch (error) {
-              console.error('재생시간 계산 중 오류:', error);
-              return acc;
-            }
-          }, 0);
+        // 총 재생시간 계산
+        const totalSeconds = data.reduce((acc, video) => {
+          const [hours, minutes, seconds] = video.duration.split(':').map(Number);
+          return acc + hours * 3600 + minutes * 60 + seconds;
+        }, 0);
 
           const displayHours = Math.floor(totalSeconds / 3600);
           const displayMinutes = Math.floor((totalSeconds % 3600) / 60);
@@ -82,26 +52,12 @@ export default function Playlist() {
           setError('올바른 데이터 형식이 아닙니다.');
         }
       } catch (error) {
-        setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to fetch playlist data:', error);
       }
     }
 
-    fetchPlaylist();
-  }, [playlistId]);
-
-  if (isLoading) {
-    return <div>로딩 중...</div>;
-  }
-
-  if (error) {
-    return <div className={styles.error}>{error}</div>;
-  }
-
-  if (!playlist || !playlist.videos) {
-    return <div>플레이리스트를 찾을 수 없습니다.</div>;
-  }
+    fetchPlaylists();
+  }, []);
 
   return (
     <div className={styles.playlistContainer}>
@@ -112,34 +68,22 @@ export default function Playlist() {
         <p>총 재생시간: {totalDuration}</p>
       </div>
       <div className={styles.videoList}>
-        {playlist.videos.map((video, index) => {
-          const isPlaying = video.id === searchParams.get('vemo');
-
-          return (
-            <Link
-              key={video.id}
-              href={`/vemo/${video.id}?playlistId=${playlistId}`}
-              className={styles.videoLink}
-            >
-              <div className={`${styles.videoCard} ${isPlaying ? styles.playing : ''}`}>
-                {video.thumbnails && (
-                  <img
-                    src={video.thumbnails}
-                    alt={video.title || '비디오 썸네일'}
-                    className={styles.thumbnail}
-                    onError={(e) => {
-                      e.currentTarget.src = '/default-thumbnail.jpg';
-                    }}
-                  />
-                )}
-                <div className={styles.videoInfo}>
-                  <h3 className={styles.title}>{video.title || '제목 없음'}</h3>
-                  <p className={styles.duration}>{video.duration || '00:00'}</p>
-                </div>
+        {videos.map((video) => (
+          <div key={video.id} className={styles.videoCard}>
+            <img src={video.videos.thumbnail} className={styles.thumbnail} />
+            <div className={styles.videoInfo}>
+              <h3 className={styles.title}>{video.videos.title}</h3>
+              <div className={styles.channelInfo}>
+                <img src={video.videos.channel.thumbnail} className={styles.channelIcon} />
+                <p className={styles.channelName}>{video.videos.channel.title}</p>
               </div>
-            </Link>
-          );
-        })}
+              <p className={styles.duration}>{video.videos.duration}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={styles.addButtonContainer}>
+        <button className={styles.addButton}>추가하기</button>
       </div>
     </div>
   );
