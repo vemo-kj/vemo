@@ -8,6 +8,7 @@ import QuizView from '../quizView/QuizView';
 import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
+import Image from 'next/image';
 
 interface SidebarNavProps {
     selectedOption: string;
@@ -39,21 +40,45 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('write')}
                 >
-                    작성하기
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_Edit.svg"
+                            alt="작성하기"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>작성하기</span>
+                    </div>
                 </button>
 
                 <button
                     className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
-                    커뮤니티
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_Community.svg"
+                            alt="커뮤니티"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>커뮤니티</span>
+                    </div>
                 </button>
 
                 <button
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
-                    재생목록
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_playerlist.svg"
+                            alt="재생목록"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>재생목록</span>
+                    </div>
                 </button>
             </div>
 
@@ -88,15 +113,29 @@ export default function SidebarNav({
                             )}
                         </div>
                         {selectedOption === '내 메모 보기' && (
-                            <div className={styles.footerButtons}>
-                                <button onClick={handleCaptureTab}>캡처하기</button>
-                                <button onClick={handleCaptureArea}>부분 캡처</button>
+                            <div className={styles.footerButtonContainer}>
+                                <button onClick={handleCaptureTab} className={styles.iconButton}>
+                                    <Image
+                                        src="/icons/bt_edit_nav_capture.svg"
+                                        alt="캡처"
+                                        width={20}
+                                        height={20}
+                                    />
+                                    <span className={styles.iconButtonText}>캡처하기</span>
+                                </button>
+                                <button onClick={handleCaptureArea} className={styles.iconButton}>
+                                    <Image
+                                        src="/icons/bt_edit_nav_partCapture.svg"
+                                        alt="부분 캡처"
+                                        width={20}
+                                        height={20}
+                                    />
+                                    <span className={styles.iconButtonText}>부분캡처</span>
+                                </button>
+                                    <SummaryButton />
+                                    <ExportButton />
                             </div>
                         )}
-                        <div className={styles.footerButtons}>
-                            <SummaryButton />
-                            <ExportButton />
-                        </div>
                     </>
                 )}
 
