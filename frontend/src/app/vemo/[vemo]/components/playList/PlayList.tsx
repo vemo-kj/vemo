@@ -18,7 +18,8 @@ interface playlists {
       id: string;
       title: string;
       thumbnail: string;
-    }
+    },
+    category: string;
   }
 }
 
@@ -31,31 +32,15 @@ export default function Playlist() {
   useEffect(() => {
     async function fetchPlaylists() {
       try {
-        const response = await fetch('/api/playlist'); // 서버 API 엔드포인트
+        const response = await fetch('http://localhost:5050/playlists'); // 서버 API 엔드포인트
         const data: playlists[] = await response.json();
         setVideos(data);
 
-        if (!response.ok) {
-          throw new Error('플레이리스트를 불러올 수 없습니다.');
-        }
-
-        const data = await response.json();
-        console.log('받은 데이터:', data);
-
-        if (data && Array.isArray(data.videos)) {
-          setPlaylist(data);
-
-          const totalSeconds = data.videos.reduce((acc: number, video: { duration: string }) => {
-            if (!video.duration) return acc;
-
-            try {
-              const [hours, minutes, seconds] = video.duration.split(':').map(Number);
-              return acc + (hours * 3600 + minutes * 60 + seconds);
-            } catch (error) {
-              console.error('재생시간 계산 중 오류:', error);
-              return acc;
-            }
-          }, 0);
+        // 총 재생시간 계산
+        const totalSeconds = data.reduce((acc, video) => {
+          const [hours, minutes, seconds] = video.videos.duration.split(':').map(Number);
+          return acc + hours * 3600 + minutes * 60 + seconds;
+        }, 0);
 
           const displayHours = Math.floor(totalSeconds / 3600);
           const displayMinutes = Math.floor((totalSeconds % 3600) / 60);
@@ -99,9 +84,6 @@ export default function Playlist() {
             </div>
           </div>
         ))}
-      </div>
-      <div className={styles.addButtonContainer}>
-        <button className={styles.addButton}>추가하기</button>
       </div>
     </div>
   );
