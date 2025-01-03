@@ -1,0 +1,17 @@
+services:
+    vemo:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - '5050:5050'
+        env_file:
+            - .env
+        volumes:
+            - ./src:/usr/src/app/src
+        networks:
+            - vemo-network
+
+networks:
+    vemo-network:
+        driver: bridge
