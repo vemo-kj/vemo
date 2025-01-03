@@ -1,19 +1,16 @@
 .mainCard {
-    width: 100%;
+    width: 280px;
     height: 295px;
     padding: 12px;
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
 }
 
 .mainCard:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .thumbnailContainer {
@@ -22,19 +19,12 @@
     overflow: hidden;
     border-radius: 8px;
     margin-bottom: 12px;
-    position: relative;
 }
 
 .thumbnails {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.contentContainer {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
 }
 
 .title {
@@ -60,9 +50,10 @@
 .channelThumbnails {
     width: 24px;
     height: 24px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     margin-right: 8px;
-    object-fit: cover;
 }
 
 .channelTitle {
@@ -71,18 +62,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1;
+    max-width: 200px;
 }
 
 .vemoCount {
     font-size: 12px;
     color: #888;
-    margin-top: auto;
-}
-
-.cardLink {
-    text-decoration: none;
-    color: inherit;
-    width: 100%;
-    display: block;
 }
