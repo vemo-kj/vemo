@@ -19,6 +19,16 @@ interface SidebarNavProps {
     handleCaptureTab: () => void; // 캡처하기 함수 추가
     handleCaptureArea: () => void; // 부분 캡처하기 함수 추가
     editorRef: React.RefObject<any>; // 에디터 참조 추가
+    playlistData?: {
+        playlist: {
+            id: number;
+            name: string;
+        };
+        memos: {
+            title: string;
+            // 필요한 경우 다른 비디오 정보도 추가
+        };
+    };
 }
 
 export default function SidebarNav({
@@ -29,6 +39,7 @@ export default function SidebarNav({
     handleCaptureTab,
     handleCaptureArea,
     editorRef,
+    playlistData,
 }: SidebarNavProps) {
     const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
 
@@ -87,9 +98,14 @@ export default function SidebarNav({
                 {activeTab === 'write' && (
                     <>
                         <h1 className={styles.notesHeader}>나만의 노트</h1>
-
-                        {/* 재생목록 이름이 들어감 */}
-                        <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
+                        <div className={styles.contentWrapper}>
+                            <p className={styles.playlistTitle}>
+                                {playlistData?.playlist.name || '재생목록 이름 없음'}
+                            </p>
+                            <h2 className={styles.videoTitle}>
+                                {playlistData?.memos.title || '비디오 제목 없음'}
+                            </h2>
+                        </div>
                         <div className={styles.notesContent}>
                             <div className={styles.noteActions}>
                                 <div className={styles.dropdown}>
