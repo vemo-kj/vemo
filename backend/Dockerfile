@@ -1,7 +1,7 @@
 # Base image
 FROM node:18-alpine
 
-# Create app directory
+# Create app director
 WORKDIR /usr/src/app/backend
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
