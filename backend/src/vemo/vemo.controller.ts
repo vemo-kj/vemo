@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
 import { VemoService } from './vemo.service';
-import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
@@ -19,9 +18,11 @@ export class VemoController {
     @Get('video/:videoId/community')
     async getCommunityMemos(
         @Param('videoId') videoId: string,
-        @Query() getCommunityMemosDto: GetCommunityMemosDto,
+        @Query('filter') filter: 'all' | 'mine' = 'all',
+        @Req() req: RequestWithUserInterface,
     ): Promise<GetCommunityMemosResponseDto> {
-        return await this.vemoService.getCommunityMemos(videoId, getCommunityMemosDto);
+        const userId = filter === 'mine' ? req.user.id : null;
+        return await this.vemoService.getCommunityMemos(videoId, filter, userId);
     }
 
     /**
