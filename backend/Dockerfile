@@ -1,23 +1,26 @@
 # Base image
 FROM node:18-alpine
 
-# 작업 디렉토리 설정 (backend 한 번만)
+# 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
-# package.json과 함께 TypeScript 설정 파일들도 복사
-COPY package*.json tsconfig*.json nest-cli.json ./
+# 패키지 파일 복사
+COPY package*.json ./
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 
-# 필수 패키지만 설치하고 캐시 삭제
-RUN npm install -g @nestjs/cli && \
-    npm install --production && \
-    npm install @nestjs/config @nestjs/typeorm typeorm @nestjs/jwt @nestjs/passport passport-jwt bcrypt openai google-auth-library googleapis && \
-    npm cache clean --force
+# 개발 의존성을 포함한 모든 패키지 설치
+RUN npm install
 
 # 소스 코드 복사
 COPY . .
 
-# nest build 명령어 직접 실행
-RUN npx nest build
+# 애플리케이션 빌드
+RUN npm run build
+
+# 프로덕션 환경을 위한 설정
+ENV NODE_ENV=production
 
 EXPOSE 5050
-CMD ["node", "dist/main.js"]
+
+CMD ["npm", "run", "start:prod"]
