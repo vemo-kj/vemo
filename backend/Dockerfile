@@ -9,7 +9,7 @@ RUN apk add --no-cache \
     && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp
 
-# 작업 디렉토리 생성
+# 작업 디렉토리 설정
 WORKDIR /usr/src/app
 
 # 패키지 파일 복사 및 의존성 설치
@@ -23,7 +23,7 @@ COPY nest-cli.json ./
 # 소스 코드 복사
 COPY src/ ./src/
 
-# 빌드
+# 백엔드 애플리케이션 빌드 (TypeScript 컴파일 등)
 RUN npm run build
 
 # 프로덕션 환경 설정
