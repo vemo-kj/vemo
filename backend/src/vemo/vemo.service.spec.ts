@@ -81,7 +81,6 @@ describe('VemoService', () => {
                     updated_at: memo.updatedAt || memo.createdAt,
                 })),
             };
-
             // memosService.getAllMemosByVideo 모킹
             (memosService.getAllMemosByVideo as jest.Mock).mockResolvedValue(mockMemos);
 
