@@ -25,7 +25,15 @@
 }
 
 /* 탭 버튼 스타일 수정 */
+/* 탭 버튼 스타일 수정 */
 .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 12px 8px;
+    background: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,6 +45,13 @@
     cursor: pointer;
     color: #666;
     transition: all 0.2s;
+}
+
+/* 탭 텍스트 스타일 */
+.tabText {
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
 }
 
 /* 활성화된 탭 스타일 */
@@ -52,8 +67,18 @@
 .tab img {
     opacity: 0.6;
     transition: opacity 0.2s;
+    color: #286BE8;
 }
 
+/* SVG 아이콘 색상 변경을 위한 스타일 */
+.tab img {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.activeTab img,
+.tab:hover img {
+    opacity: 1;
 .activeTab img,
 .tab:hover img {
     opacity: 1;
@@ -62,8 +87,13 @@
 /* 콘텐츠 영역 */
 .tabContent {
     flex: 1;
-    padding: 24px;
+    padding: 16px;
     overflow-y: auto;
+    margin-right: 120px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 32px);
+    gap: 16px;
     margin-right: 120px;
     display: flex;
     flex-direction: column;
@@ -124,14 +154,18 @@
 /* 기본 아이콘 버튼 스타일 */
 .iconButton {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 8px;
-    width: 80px;    /* 고정 너비 추가 */
-    height: 64px;   /* 고정 높이 추가 */
-    background-color: transparent;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.footerButtons button {
+    flex: 1; /* 버튼 너비를 균등하게 분배 */
+    margin: 0 4px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #ffffff;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -144,6 +178,34 @@
     transition: all 0.2s;
 }
 
+/* 기본 아이콘 버튼 스타일 */
+.iconButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    width: 80px;    /* 고정 너비 추가 */
+    height: 64px;   /* 고정 높이 추가 */
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    color: #333333;
+}
+
+/* SVG 기본 스타일 */
+.iconButton img {
+    opacity: 1;
+    transition: all 0.2s;
+}
+
+.activeTab .iconButton {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* 텍스트 기본 스타일 */
 .iconButtonText {
     margin: 2px;
@@ -154,46 +216,91 @@
 }
 
 /* hover 효과 수정 */
-.iconButton:hover {
+.iconButton:hover,
+.activeTab .iconButton {
     color: #286BE8;
     background-color: rgba(0, 0, 0, 0.04);
+
+}
+
+.iconButton:hover img {
+    opacity: 1;
+}
+
+.footerButtons {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .footerButtonContainer {
     display: flex;
-    justify-content: center;
+    justify-content: center;  /* space-between 대신 center로 변경 */
     align-items: center;
-    gap: 16px;
-    padding: 20px;
+    gap: 8px;               /* 8px에서 4px로 줄임 */
+    padding: 8px;           /* 16px에서 8px로 줄임 */
     width: 100%;
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.mainTab {
-    transition: all 0.3s ease;
+.buttonContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.mainTab:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+.buttonGroup {
+    display: flex;
+    align-items: center;
+    gap: 16px;  /* 버튼 사이의 간격 */
 }
 
-.mainTab.activeTab {
-    background-color: #007bff;
-    color: white;
+.button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    min-width: 64px;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-.mainTab.activeTab .iconButtonText {
-    color: white;
+.iconContainer {
+    position: relative;
+    width: 20px;
+    height: 20px;
 }
 
-.mainTab .iconButton {
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+.defaultIcon,
+.hoverIcon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.2s;
 }
 
-.mainTab:hover .iconButton,
-.mainTab.activeTab .iconButton {
+.defaultIcon {
+    opacity: 1;
+}
+
+.hoverIcon {
+    opacity: 0;
+}
+
+.iconButton:hover .defaultIcon {
+    opacity: 0;
+}
+
+.iconButton:hover .hoverIcon {
     opacity: 1;
 }

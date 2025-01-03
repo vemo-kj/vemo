@@ -10,12 +10,6 @@ import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
 import Image from 'next/image';
 
-/**
- * ----------------------------------------------------------------
- * 📌 SidebarNavProps
- * - 사이드바 탭 전환, 캡처하기, 부분캡처 등 props 정의
- * ----------------------------------------------------------------
- */
 interface SidebarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
@@ -76,6 +70,15 @@ export default function SidebarNav({
                         />
                         <span className={styles.iconButtonText}>작성하기</span>
                     </div>
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_Edit.svg"
+                            alt="작성하기"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>작성하기</span>
+                    </div>
                 </button>
 
                 <button
@@ -93,6 +96,15 @@ export default function SidebarNav({
                         />
                         <span className={styles.iconButtonText}>커뮤니티</span>
                     </div>
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_Community.svg"
+                            alt="커뮤니티"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>커뮤니티</span>
+                    </div>
                 </button>
 
                 <button
@@ -101,6 +113,15 @@ export default function SidebarNav({
                     }`}
                     onClick={() => setActiveTab('playlist')}
                 >
+                    <div className={styles.iconButton}>
+                        <Image
+                            src="/icons/bt_SideNav_playerlist.svg"
+                            alt="재생목록"
+                            width={20}
+                            height={20}
+                        />
+                        <span className={styles.iconButtonText}>재생목록</span>
+                    </div>
                     <div className={styles.iconButton}>
                         <Image
                             src="/icons/bt_SideNav_playerlist.svg"
@@ -174,15 +195,10 @@ export default function SidebarNav({
                                     />
                                     <span className={styles.iconButtonText}>부분캡처</span>
                                 </button>
-                                <SummaryButton />
-                                <ExportButton />
+                                    <SummaryButton />
+                                    <ExportButton />
                             </div>
                         )}
-                        <div className={styles.footerButtons}>
-                            <SummaryButton />
-                            <ExportButton />
-                            <button>저장하기</button>
-                        </div>
                     </>
                 )}
 

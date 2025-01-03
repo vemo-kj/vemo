@@ -1,12 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import styles from './myProfile.module.css';
+import Image from 'next/image';
 
-// src/app/(auth)/mypage/components/myProfile/myProfile.tsx
-interface UserProfile {
-  id: number;
-  name: string;
-  email: string;
+type UserProfile = {
   nickname: string;
   birth: string;
   gender: string;
@@ -17,7 +14,7 @@ interface UserProfile {
 export default function MyProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
