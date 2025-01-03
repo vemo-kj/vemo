@@ -35,6 +35,6 @@ jobs:
                     cd /home/${{ secrets.AWS_EC2_USER }}/app &&
                     git pull &&
                     docker build --no-cache -t backend-vemo-1 -f ./backend/Dockerfile . &&  # 캐시 무시하고 Docker 이미지 빌드
-                    docker run -d -p 5050:5050 --name backend-vemo-1 --env-file .env cddwne/backend-vemo:latest
+                    docker-compose up
                     docker ps -a
                   "
