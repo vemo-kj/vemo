@@ -37,7 +37,7 @@ export default function SidebarNav({
             {/* 왼쪽 탭 버튼 영역 */}
             <div className={styles.tabs}>
                 <button
-                    className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'write' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('write')}
                 >
                     <div className={styles.iconButton}>
@@ -52,7 +52,7 @@ export default function SidebarNav({
                 </button>
 
                 <button
-                    className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
                     <div className={styles.iconButton}>
@@ -67,7 +67,7 @@ export default function SidebarNav({
                 </button>
 
                 <button
-                    className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
                     <div className={styles.iconButton}>
