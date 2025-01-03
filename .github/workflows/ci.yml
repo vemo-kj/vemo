@@ -28,6 +28,7 @@ jobs:
                     cd backend &&
                     docker stop backend-vemo-1 || true &&
                     docker rm backend-vemo-1 || true &&
+                    docker system prune -f &&
                     docker build -t backend-vemo-1 . &&
                     docker run -d \
                       --name backend-vemo-1 \
