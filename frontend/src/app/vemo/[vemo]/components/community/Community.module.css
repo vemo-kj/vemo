@@ -50,14 +50,14 @@
   padding: 16px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .memoCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .memoContent {
@@ -108,7 +108,7 @@
 .detailView {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 24px;
 }
 
@@ -118,7 +118,8 @@
   margin-bottom: 24px;
 }
 
-.backButton, .shareButton {
+.backButton,
+.shareButton {
   padding: 8px 16px;
   border: none;
   border-radius: 20px;
