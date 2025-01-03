@@ -6,6 +6,11 @@ import { JwtAuthGuard } from './auth/jwt/jwt.guard';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    console.log('🚀 애플리케이션이 시작됩니다! 환경변수:', {
+        PORT: process.env.PORT,
+        NODE_ENV: process.env.NODE_ENV,
+        DB_HOST: process.env.DB_HOST,
+    });
     app.enableCors({
         origin: ['http://localhost:3000', 'http://192.168.1.122:3000', 'http://192.168.1.158:3000'],
         credentials: true,
