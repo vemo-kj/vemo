@@ -12,7 +12,7 @@ export default function MainCard({
     vemoCount,
 }: MainCardProps) {
     return (
-        <Link href={`/vemo/${id}`}>
+        <Link href={`/vemo/${id}`} className={styles.cardLink}>
             <div className={styles.mainCard}>
                 <div className={styles.thumbnailContainer}>
                     <img src={thumbnails} className={styles.thumbnails} alt={title} />
