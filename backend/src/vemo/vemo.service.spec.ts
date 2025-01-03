@@ -6,7 +6,19 @@
 // import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 // import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 // import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
+// import { Test, TestingModule } from '@nestjs/testing';
+// import { VemoService } from './vemo.service';
+// import { MemosService } from '../memos/memos.service';
+// import { PlaylistService } from '../playlist/playlist.service';
+// import { GetCommunityMemosDto } from './dto/get-community-memos.dto';
+// import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
+// import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
+// import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
 
+// describe('VemoService', () => {
+//     let service: VemoService;
+//     let memosService: MemosService;
+//     let playlistService: PlaylistService;
 // describe('VemoService', () => {
 //     let service: VemoService;
 //     let memosService: MemosService;
@@ -36,7 +48,14 @@
 //         memosService = module.get<MemosService>(MemosService);
 //         playlistService = module.get<PlaylistService>(PlaylistService);
 //     });
+//         service = module.get<VemoService>(VemoService);
+//         memosService = module.get<MemosService>(MemosService);
+//         playlistService = module.get<PlaylistService>(PlaylistService);
+//     });
 
+//     afterEach(() => {
+//         jest.clearAllMocks();
+//     });
 //     afterEach(() => {
 //         jest.clearAllMocks();
 //     });
@@ -48,7 +67,32 @@
 //                 filter: 'all',
 //                 userId: null, // 현재 로직에서는 무시됨
 //             };
+//     describe('커뮤니티 메모 조회', () => {
+//         it('모든 메모를 성공적으로 조회해야 한다', async () => {
+//             const videoId = 'video1';
+//             const getCommunityMemosDto: GetCommunityMemosDto = {
+//                 filter: 'all',
+//                 userId: null, // 현재 로직에서는 무시됨
+//             };
 
+//             const mockMemos = [
+//                 {
+//                     id: 1,
+//                     title: '메모 1',
+//                     description: '설명 1',
+//                     user: { id: 1, nickname: '유저1' },
+//                     createdAt: new Date('2023-01-01T00:00:00Z'),
+//                     updatedAt: null,
+//                 },
+//                 {
+//                     id: 2,
+//                     title: '메모 2',
+//                     description: '설명 2',
+//                     user: { id: 2, nickname: '유저2' },
+//                     createdAt: new Date('2023-01-02T00:00:00Z'),
+//                     updatedAt: new Date('2023-01-03T00:00:00Z'),
+//                 },
+//             ];
 //             const mockMemos = [
 //                 {
 //                     id: 1,
@@ -82,6 +126,8 @@
 //                 })),
 //             };
 
+//             // memosService.getAllMemosByVideo 모킹
+//             (memosService.getAllMemosByVideo as jest.Mock).mockResolvedValue(mockMemos);
 //             // memosService.getAllMemosByVideo 모킹
 //             (memosService.getAllMemosByVideo as jest.Mock).mockResolvedValue(mockMemos);
 
