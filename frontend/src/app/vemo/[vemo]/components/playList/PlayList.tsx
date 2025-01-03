@@ -3,27 +3,35 @@
 import React, { useEffect, useState } from 'react';
 import styles from './Playlist.module.css';
 
-interface Video {
-  id: string;
-  thumbnail: string;
-  title: string;
-  channelIcon: string;
-  channelName: string;
-  duration: string; // HH:MM:SS 형식
+interface playlists {
+  id: number;
+  name: string;
+  userId: number;
+  videos: {
+    id: string;
+    title: string;
+    thumbnail: string;
+    duration: string;
+    channel: {
+      id: string;
+      title: string;
+      thumbnail: string;
+    }
+  }
 }
 
 
 
 export default function Playlist() {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<playlists[]>([]);
   const [totalDuration, setTotalDuration] = useState<string>('00:00:00');
 
   // 서버에서 데이터 가져오기
   useEffect(() => {
-    async function fetchVideos() {
+    async function fetchPlaylists() {
       try {
         const response = await fetch('/api/playlist'); // 서버 API 엔드포인트
-        const data: Video[] = await response.json();
+        const data: playlists[] = await response.json();
         setVideos(data);
 
         // 총 재생시간 계산
@@ -44,7 +52,7 @@ export default function Playlist() {
       }
     }
 
-    fetchVideos();
+    fetchPlaylists();
   }, []);
 
   return (
@@ -57,14 +65,14 @@ export default function Playlist() {
       <div className={styles.videoList}>
         {videos.map((video) => (
           <div key={video.id} className={styles.videoCard}>
-            <img src={video.thumbnail} alt={video.title} className={styles.thumbnail} />
+            <img src={video.videos.thumbnail} className={styles.thumbnail} />
             <div className={styles.videoInfo}>
-              <h3 className={styles.title}>{video.title}</h3>
+              <h3 className={styles.title}>{video.videos.title}</h3>
               <div className={styles.channelInfo}>
-                <img src={video.channelIcon} alt={video.channelName} className={styles.channelIcon} />
-                <p className={styles.channelName}>{video.channelName}</p>
+                <img src={video.videos.channel.thumbnail} className={styles.channelIcon} />
+                <p className={styles.channelName}>{video.videos.channel.title}</p>
               </div>
-              <p className={styles.duration}>{video.duration}</p>
+              <p className={styles.duration}>{video.videos.duration}</p>
             </div>
           </div>
         ))}
