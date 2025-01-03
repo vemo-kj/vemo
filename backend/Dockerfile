@@ -7,8 +7,10 @@ WORKDIR /usr/src/app
 # package.json 및 package-lock.json 복사
 COPY package*.json ./
 
-# 의존성 설치
-RUN npm install -g @nestjs/cli && npm ci
+# NestJS CLI 및 의존성 설치
+RUN npm install && \
+    npm install --package-lock-only && \
+    npm ci
 
 # 소스 코드 복사
 COPY . .
@@ -26,7 +28,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # 프로덕션 의존성 설치
-RUN npm install --only=production
+RUN npm ci --only=production
 
 # 빌드된 애플리케이션 복사
 COPY --from=builder /usr/src/app/dist ./dist
