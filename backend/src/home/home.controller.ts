@@ -17,8 +17,7 @@ import { CreatePlaylistWithMemosResponseDto } from './dto/create-playlist-with-m
 import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
 import { HomeResponseDto } from './dto/home-response.dto';
 import { HomeService } from './home.service';
-import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
-
+ 
 @Controller('home')
 export class HomeController {
     constructor(private readonly homeService: HomeService) {}
