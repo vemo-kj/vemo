@@ -366,16 +366,18 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                         renderSectionContent={() => (
                             <>
                                 <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
-                                <EditorNoSSR
-                                    ref={null}
-                                    getTimestamp={() => '00:00'}
-                                    onTimestampClick={() => {}}
-                                    isEditable={true}
-                                    editingItemId={null}
-                                    onEditStart={() => {}}
-                                    onEditEnd={() => {}}
-                                    memosId={memosId!}
-                                />
+                                {memosId && ( // memosId가 있을 때만 EditorNoSSR 렌더링
+                                    <EditorNoSSR
+                                        ref={editorRef} // editorRef 전달
+                                        getTimestamp={() => '00:00'}
+                                        onTimestampClick={() => {}}
+                                        isEditable={true}
+                                        editingItemId={null}
+                                        onEditStart={() => {}}
+                                        onEditEnd={() => {}}
+                                        memosId={memosId}
+                                    />
+                                )}
                             </>
                         )}
                         currentTimestamp="00:00"
