@@ -20,6 +20,8 @@ import { SummaryProvider } from './context/SummaryContext';
 
 const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 
+const userId = 1; // Replace with actual user ID from your auth system
+
 const memoService = {
   /**
    * 메모 컨테이너 생성
@@ -50,6 +52,21 @@ const memoService = {
     // 응답이 정상이라면 JSON 형태로 변환해 반환
     return await res.json();
   },
+
+  getMemosByVideoId: async (videoId: string, userId: number) => {
+    const res = await fetch(`${API_URL}/home/memos/video/${videoId}?userId=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to get memos: ${res.statusText}`);
+    }
+
+    return await res.json();
+  }
 };
 
 // ----------------------------------------------------------------
@@ -177,7 +194,7 @@ export default function VemoPage() {
   };
 
   /**
-   * 노트 아이템 내 타임스탬프 클릭 → 해당 시각으로 이동 */
+   * 노트 아이템 내 타임스탬프 클릭 → 해당 시각으로 이동*/
   const handleSeekToTime = (timestamp: string) => {
     const [m, s] = timestamp.split(':').map(Number);
     const total = (m || 0) * 60 + (s || 0);
@@ -256,16 +273,13 @@ export default function VemoPage() {
   useEffect(() => {
     const createOrGetMemos = async () => {
       try {
-        // 새로운 메모 컨테이너 생성
-        const res = await memoService.createMemos({
-          title: `Memo for ${videoId}`,
-          description: '',
-          videoId: videoId,
-          userId: 1, // TODO: 실제 로그인된 사용자 ID 사용
-        });
-        setMemosId(res.id);
+        const response = await memoService.getMemosByVideoId(videoId, userId);
+        if (response.memosId) {
+          setMemosId(response.memosId);
+          console.log("memosId set:", response.memosId); // 디버깅용
+        }
       } catch (error) {
-        console.error('Failed to create memos:', error);
+        console.error("Failed to get/create memos:", error);
       }
     };
 
