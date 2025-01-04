@@ -54,7 +54,7 @@ export class MemosService {
     async getVemoCountByVideo(videoId: string): Promise<number> {
         return await this.memosRepository.count({ where: { video: { id: videoId } } });
     }
-
+    //TODO: 확인 필요
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { user: { id: userId } },
@@ -68,7 +68,7 @@ export class MemosService {
             relations: ['user', 'video', 'memos'],
         });
     }
-
+    //TODO: 확인 필요 
     async getMemosById(memosId: number): Promise<Memos> {
         try {
             const memos = await this.memosRepository.findOne({
@@ -107,21 +107,15 @@ export class MemosService {
     }
 
     async getMemosByVideoAndUser(videoId: string, userId: number): Promise<Memos[]> {
-        try {
-            return await this.memosRepository.find({
-                where: {
-                    video: { id: videoId },
-                    user: { id: userId },
-                },
-                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
-                order: {
-                    createdAt: 'DESC',
-                },
-            });
-        } catch (error) {
-            throw new InternalServerErrorException('Failed to get memos by video and user', {
-                cause: error,
-            });
-        }
+        return await this.memosRepository.find({
+            where: {
+                video: { id: videoId },
+                user: { id: userId },
+            },
+            relations: ['user'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
     }
 }
