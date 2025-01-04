@@ -1,4 +1,3 @@
-// memoService
 'use client';
 
 import { createMemos } from '@/app/api/memoService';
@@ -155,7 +154,6 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
-
             try {
                 console.log('Creating memos for video:', vemo);
                 // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
