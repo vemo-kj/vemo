@@ -5,6 +5,7 @@ import { Captures } from './captures.entity';
 import { CreateCapturesDto } from './dto/create-capture.dto';
 import { UpdateCapturesDto } from './dto/update-capture.dto';
 
+
 @Injectable()
 export class CapturesService {
     constructor(
@@ -12,6 +13,7 @@ export class CapturesService {
         private capturesRepository: Repository<Captures>,
     ) {}
 
+    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
@@ -44,13 +46,21 @@ export class CapturesService {
                 where: { id },
                 relations: ['memos'],
             });
+            const capture = await this.capturesRepository.findOne({
+                where: { id },
+                relations: ['memos'],
+            });
 
             if (!capture) {
+                throw new NotFoundException(`Capture with ID ${id} not found`);
                 throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
             return capture;
         } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -61,31 +71,16 @@ export class CapturesService {
     }
 
     async updateCapture(id: number, updateCapturesDto: UpdateCapturesDto): Promise<Captures> {
-        try {
-            const capture = await this.capturesRepository.findOne({
-                where: { id },
-                relations: ['memos'],
-            });
-
-            if (!capture) {
-                throw new NotFoundException(`Capture with ID ${id} not found`);
-            }
-
-            if (updateCapturesDto.image) {
-                capture.image = updateCapturesDto.image;
-            }
-
-            return await this.capturesRepository.save(capture);
-        } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-            throw new InternalServerErrorException('Failed to update capture', {
-                cause: error,
+        const capture = await this.capturesRepository.findOne({ where: { id } });
+        if (!capture) {
+            throw new NotFoundException('Capture not found', {
+                cause: 'Capture not found',
             });
         }
+        return await this.capturesRepository.save({ ...capture, ...updateCapturesDto });
     }
 
+    async deleteCapture(id: number): Promise<void> {
     async deleteCapture(id: number): Promise<void> {
         const capture = await this.capturesRepository.findOne({ where: { id } });
         if (!capture) {

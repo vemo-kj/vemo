@@ -1,4 +1,4 @@
 export class CreatePlaylistWithMemosResponseDto {
-    playlistId: number;
+    playlist: number;
     videoId: string;
 }

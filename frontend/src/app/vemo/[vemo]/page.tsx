@@ -1,3 +1,4 @@
+// memoService
 'use client';
 
 import { createMemos } from '@/app/api/memoService';
@@ -25,7 +26,7 @@ const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-  ssr: false,
+    ssr: false,
 });
 
 // ----------------------------------------------------------------
@@ -44,9 +45,9 @@ interface CustomEditorProps {
 
 // 페이지 컴포넌트의 props 타입 정의 추가
 interface PageProps {
-  params: {
-    vemo: string;
-  };
+    params: {
+        vemo: string;
+    };
 }
 
 // ----------------------------------------------------------------
