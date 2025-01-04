@@ -32,7 +32,7 @@ export default function Home() {
     const fetchMainCards = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('http://localhost:5050/home/cards', {
+            const response = await fetch('http://localhost:5050/home', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
