@@ -24,45 +24,72 @@ const getAuthHeader = () => {
 // --------------------------------------
 export const createMemos = async (videoId: string) => {
     try {
-        const token = localStorage.getItem('token');
-        console.log('=== Request Details ===');
-        console.log('API URL:', `${API_URL}/home/memos/video/${videoId}`);
-        console.log('Token:', token);
+      // 먼저 videoId로 기존 memos가 있는지 확인
+      const existingMemos = await memoService.getMemosByVideoId(data.videoId, data.userId);
+      
+      if (existingMemos) {
+        return existingMemos; // 이미 존재하는 memos 반환
+      }
 
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json',
-        };
+      // 없으면 새로 생성
+      const res = await fetch(`${API_URL}/home/memos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-        // JWT 토큰이 있다면 Authorization 헤더에 추가
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const response = await fetch(`${API_URL}/home/memos/video/${videoId}`, {
+      if (!res.ok) {
+        // 404 에러인 경우 playlist를 통해 생성 시도
+        if (res.status === 404) {
+          const playlistRes = await fetch(`${API_URL}/home/playlist`, {
             method: 'POST',
-            headers: headers,
-            credentials: 'include', // 쿠키도 함께 전송
-        });
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: "New Playlist",
+              videoIds: [data.videoId]
+            })
+          });
 
-        console.log('=== Response Details ===');
-        console.log('Status:', response.status);
-        console.log('Headers:', Object.fromEntries(response.headers));
+          if (!playlistRes.ok) {
+            throw new Error(`Failed to create playlist: ${playlistRes.statusText}`);
+          }
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.log('Error Response:', errorData);
-
-            if (response.status === 401) {
-                throw new Error('Authentication failed');
-            }
-            throw new Error(errorData.message || 'Failed to create memos');
+          const playlistData = await playlistRes.json();
+          return {
+            id: playlistData.memos.id,
+            ...playlistData.memos
+          };
         }
+        throw new Error(`Failed to create memos: ${res.statusText}`);
+      }
 
-        const data = await response.json();
-        console.log('Success Response:', data);
-        return data;
+      const response = await res.json();
+      return {
+        id: response.id || response.memosId,
+        ...response
+      };
     } catch (error) {
         console.error('Error in createMemos:', error);
         throw error;
     }
+  },
+
+  // 새로운 getMemosByVideoId 함수 추가
+  getMemosByVideoId: async (videoId: string, userId: number) => {
+    const res = await fetch(`${API_URL}/home/memos?videoId=${videoId}&userId=${userId}`);
+    
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null; // 메모가 없는 경우
+      }
+      throw new Error(`Failed to get memos: ${res.statusText}`);
+    }
+
+    return await res.json();
+  }
 };
