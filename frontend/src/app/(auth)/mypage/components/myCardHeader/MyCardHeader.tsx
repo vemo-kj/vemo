@@ -19,15 +19,6 @@ export default function MyCardHeader() {
     loadMemoCount();
   }, []);
 
-  const handleAllClick = () => {
-    console.log('All 버튼 클릭됨');
-  };
-
-  const handleStudyingClick = () => {
-    console.log('Studying 버튼 클릭됨');
-  };
-
-export default function MyCardHeader({ totalPlaylists, totalVideos }: MyCardHeaderProps) {
   return (
     <div className={styles.headerContainer}>
       <div className={styles.titleSection}>
@@ -39,19 +30,6 @@ export default function MyCardHeader({ totalPlaylists, totalVideos }: MyCardHead
             {userMemoCount !== null ? `총 ${userMemoCount}개` : '데이터를 불러오지 못했습니다.'}
           </span>
         )}
-      </div>
-
-      <div className={styles.buttonGroup}>
-        <MyCardHeaderButton
-          className={styles.AllButton}
-          text="All" 
-          onClick={handleAllClick}
-        />
-        <MyCardHeaderButton
-          className={styles.studyingButton}
-          text="Studying"
-          onClick={handleStudyingClick}
-        />
       </div>
     </div>
   );

@@ -9,9 +9,11 @@
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  width: 100%; /* 컨테이너의 전체 너비 사용 */
-  height: 100%; /* 높이를 일정하게 유지 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  /* 컨테이너의 전체 너비 사용 */
+  height: 100%;
+  /* 높이를 일정하게 유지 */
   display: flex;
   flex-direction: column;
 }
@@ -29,7 +31,8 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 비율 유지 */
+  padding-top: 56.25%;
+  /* 16:9 비율 유지 */
 }
 
 .thumbnail {
@@ -68,7 +71,8 @@
 
 .cardContent {
   padding: 16px;
-  flex-grow: 1; /* 남은 공간을 채움 */
+  flex-grow: 1;
+  /* 남은 공간을 채움 */
   display: flex;
   flex-direction: column;
 }
@@ -79,48 +83,53 @@
   color: #333;
   height: 28px;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* 제목 2줄로 제한 */
+  -webkit-line-clamp: 2;
+  /* 제목 2줄로 제한 */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.3;
-  margin-bottom: 4px;
 }
 
-.progressBar {
-  height: 4px;
-  background-color: #e0e0e0;
-  border-radius: 2px;
-  margin-bottom: 8px;
-  margin-top: auto; /* 하단에 배치 */
+.statsContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
 }
 
-.progress {
-  height: 100%;
-  background-color: #1a73e8;
-  border-radius: 2px;
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .progressText {
   font-size: 14px;
   color: #666;
-  font-size: 11px;
+}
+
+.statValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
   .cardGrid {
-    grid-template-columns: repeat(3, 1fr); /* 화면이 작아지면 3개씩 */
+    grid-template-columns: repeat(3, 1fr);
+    /* 화면이 작아지면 3개씩 */
   }
 }
 
 @media (max-width: 900px) {
   .cardGrid {
-    grid-template-columns: repeat(2, 1fr); /* 더 작아지면 2개씩 */
+    grid-template-columns: repeat(2, 1fr);
+    /* 더 작아지면 2개씩 */
   }
 }
 
 @media (max-width: 600px) {
   .cardGrid {
-    grid-template-columns: 1fr; /* 모바일에서는 1개씩 */
+    grid-template-columns: 1fr;
+    /* 모바일에서는 1개씩 */
   }
 }
