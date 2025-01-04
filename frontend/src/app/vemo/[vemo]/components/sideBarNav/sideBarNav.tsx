@@ -51,6 +51,7 @@ export default function SidebarNav({
   handleCaptureArea,
   editorRef,
   playlistData,
+  memosId,
 }: SidebarNavProps) {
   // 탭 상태: 'write' | 'community' | 'playlist'
   const [activeTab, setActiveTab] = useState('write');
