@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { Video } from '../video/video.entity';
 import { Memo } from '../memo/memo.entity';
 import { Users } from '../users/users.entity';
+import { Captures } from '../captures/captures.entity';
 
 @Entity()
 export class Memos {
@@ -11,6 +12,7 @@ export class Memos {
     @Column({ length: 50 })
     title: string;
 
+    //TODO: 제거 필요
     @Column({ length: 255 })
     description: string;
 
@@ -28,4 +30,7 @@ export class Memos {
 
     @OneToMany(() => Memo, memo => memo.memos, { cascade: true })
     memo: Memo[];
+
+    @OneToMany(() => Captures, capture => capture.memos, { cascade: true })
+    capture: Captures[];
 }

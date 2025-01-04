@@ -6,8 +6,8 @@ import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
-// memoService는 내부적으로 fetch를 사용한다고 가정
-import { memoService } from '@/app/api/memoService';
+// 대신 필요한 함수들만 import
+import { createMemos, getMemosByVideoId } from '@/app/api/memoService';
 
 /**
  * ----------------------------------------------------------------
@@ -41,6 +41,19 @@ interface CustomEditorProps {
     memosId?: number;
 }
 
+// memoService 객체를 로컬에서 정의
+const memoService = {
+    createMemo: async (data: { timestamp: string; description: string; memosId: number }) => {
+        // API 호출 로직
+    },
+    updateMemo: async (data: { id: number; timestamp: string; description: string }) => {
+        // API 호출 로직
+    },
+    deleteMemo: async (id: number) => {
+        // API 호출 로직
+    }
+};
+
 /**
  * ----------------------------------------------------------------
  * 📌 CustomEditor 컴포넌트
@@ -72,17 +85,10 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
 
         const loadMemos = async () => {
             try {
-                // memoService를 통해 fetch 요청
-                if (typeof props.memosId !== 'number') return;
-
-                const data = await memoService.getMemos(props.memosId);
-                // 서버로부터 받은 데이터를 Section 형태로 가공
-                const newSections = data.map((item: any) => ({
-                    id: item.id.toString(),
-                    timestamp: item.timestamp,
-                    htmlContent: item.description,
-                }));
-                setSections(newSections);
+                if (props.memosId) {
+                    const memosData = await getMemosByVideoId(props.memosId);
+                    setSections(memosData);
+                }
             } catch (error) {
                 console.error('Failed to fetch memos:', error);
             }
@@ -119,11 +125,6 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
      * ----------------------------------------------------------------
      */
     const handleSave = async () => {
-        if (!props.memosId) {
-            console.error('Cannot save memo: memosId is not initialized');
-            return;
-        }
-        
         const contentState = editorState.getCurrentContent();
 
         // 아무 글자도 없다면 저장하지 않음
@@ -137,6 +138,12 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
             isFirstInputRecorded && firstInputTimestamp
                 ? firstInputTimestamp
                 : props.getTimestamp();
+
+        // memosId가 없으면 서버 저장 불가
+        if (!props.memosId) {
+            console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
+            return;
+        }
 
         try {
             // createMemo API 호출 (fetch)
