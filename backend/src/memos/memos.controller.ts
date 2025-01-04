@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Put, Query, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
-import { CreateMemosDto } from './dto/create-memos.dto';
 
 @Controller('memos')
 export class MemosController {
@@ -30,20 +29,5 @@ export class MemosController {
     @Delete('/:id')
     async deleteMemos(@Param('id') id: number) {
         return this.memosService.deleteMemos(id);
-    }
-    @Post()
-    async createMemos(@Body() createMemosDto: CreateMemosDto) {
-        // createMemosDto 구조: { title, description, videoId, userId } 가정
-        const { title, description, videoId, userId } = createMemosDto;
-
-        // memosService의 createMemos 호출
-        const Memos = await this.memosService.createMemos(
-            title,
-            description,
-            videoId,
-            userId,
-        );
-        // 생성된 memos 엔티티(전체) 반환
-        return Memos;
     }
 }

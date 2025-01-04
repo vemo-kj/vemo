@@ -91,11 +91,16 @@ export default function Home() {
         }
     };
 
-    const filteredCards = mainCards.filter((card) => {
-        const matchesCategory =
-            selectedCategory === 'All' || card.category === selectedCategory;
-        const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
-        return search ? matchesSearch : matchesCategory;
+    const filteredCards = mainCards.filter(card => {
+        const matchesCategory = selectedCategory === 'All' || card.category === selectedCategory;
+
+        const matchesSearch = search !== '' ? card.title.includes(search) : true;
+
+        if (search !== '') {
+            return matchesSearch;
+        } else {
+            return matchesCategory;
+        }
     });
 
     return (

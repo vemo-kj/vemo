@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
 import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
-import { MemoModule } from './memo/memo.module';
 import { MemosModule } from './memos/memos.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
@@ -34,7 +33,7 @@ import { PdfModule } from './pdf/pdf.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-        MemoModule,
+
         MemosModule,
         VideoModule,
         ChannelModule,
