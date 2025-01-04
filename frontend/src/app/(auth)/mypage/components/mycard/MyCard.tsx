@@ -37,6 +37,15 @@ export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos
               <span className={styles.statLabel}>총 영상</span>
               <span className={styles.statValue}>{totalVideos}개</span>
             </div>
+            {previewVideos.length > 0 && (
+              <div className={styles.previewVideos}>
+                {previewVideos.map((video, index) => (
+                  <p key={video.id} className={styles.previewVideo}>
+                    {index + 1}. {video.title}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
