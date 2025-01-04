@@ -18,12 +18,14 @@ export class MemoService {
     }
 
     async updateMemo(dto: UpdateMemoDto): Promise<Memo> {
-        const { id } = dto;
+        const { id, description } = dto;
         const memo = await this.memoRepository.findOne({ where: { id } });
 
         if (!memo) {
             throw new Error('Memo not found');
         }
+
+        memo.description = description;
 
         return await this.memoRepository.save(memo);
     }
