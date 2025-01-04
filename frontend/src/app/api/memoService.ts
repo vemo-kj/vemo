@@ -1,10 +1,10 @@
 // memoService.ts
+'use client';
 
-// (중요) NEXT_PUBLIC_API_URL = e.g. "http://localhost:5050"
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5050';
 console.log('Using API URL:', API_URL);
 
-// 인증 헤더 생성 (토큰 사용 시)
+// 인증 토큰 헤더
 const getAuthHeader = () => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -20,7 +20,7 @@ const getAuthHeader = () => {
 };
 
 // --------------------------------------
-// (기존) 메모 생성 API 호출 예시
+// 1) 비디오별 Momos 생성
 // --------------------------------------
 export const createMemos = async (videoId: string) => {
     try {
