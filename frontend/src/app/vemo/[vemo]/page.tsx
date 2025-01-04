@@ -1,3 +1,4 @@
+// memoService
 'use client';
 
 import { createMemos } from '@/app/api/memoService';
@@ -72,7 +73,7 @@ const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-  ssr: false,
+    ssr: false,
 });
 
 // ----------------------------------------------------------------
@@ -82,13 +83,13 @@ const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor
 // 📌 Editor 컴포넌트에 넘길 Props 인터페이스
 // ----------------------------------------------------------------
 interface CustomEditorProps {
-  ref?: React.Ref<unknown>;
-  getTimestamp: () => string;
-  onTimestampClick: (timestamp: string) => void;
-  isEditable?: boolean;
-  editingItemId?: string | null;
-  onEditStart?: (itemId: string) => void;
-  onEditEnd?: () => void;
+    ref?: React.Ref<unknown>;
+    getTimestamp: () => string;
+    onTimestampClick: (timestamp: string) => void;
+    isEditable?: boolean;
+    editingItemId?: string | null;
+    onEditStart?: (itemId: string) => void;
+    onEditEnd?: () => void;
 
   // [추가됨] memosId를 넘겨주어 Editor에서 getMemos 호출 가능 or 상위에서 setSections 가능
   memosId: number;
@@ -110,9 +111,9 @@ interface CustomEditorProps {
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 interface PageProps {
-  params: {
-    vemo: string;
-  };
+    params: {
+        vemo: string;
+    };
 }
 
 // ----------------------------------------------------------------
@@ -316,35 +317,35 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     }
   }, [videoId]);
 
-  // memosId 상태 변경 추적
-  useEffect(() => {
-    console.log('Current memosId:', memosId);
-  }, [memosId]);
+    // memosId 상태 변경 추적
+    useEffect(() => {
+        console.log('Current memosId:', memosId);
+    }, [memosId]);
 
-  return (
-    <div className={styles.container}>
-      {/* (7) 유튜브 영상 섹션 */}
-      <div className={styles.section1} style={{ position: 'relative' }}>
-        {/* 홈으로 이동하는 버튼 */}
-        <Link href="/" passHref>
-          <img
-            src="/icons/Button_home.svg"
-            alt="VEMO logo"
-            className={styles.logoButton}
-          />
-        </Link>
+    return (
+        <div className={styles.container}>
+            {/* (7) 유튜브 영상 섹션 */}
+            <div className={styles.section1} style={{ position: 'relative' }}>
+                {/* 홈으로 이동하는 버튼 */}
+                <Link href="/" passHref>
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
+                </Link>
 
-        {/* 유튜브 iframe 플레이어 */}
-        <div className={styles.videoWrapper}>
-          <iframe
-            id="youtube-player"
-            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
-            title="YouTube Video Player"
-            frameBorder="0"
-            allowFullScreen
-          />
-        </div>
-      </div>
+                {/* 유튜브 iframe 플레이어 */}
+                <div className={styles.videoWrapper}>
+                    <iframe
+                        id="youtube-player"
+                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+                        title="YouTube Video Player"
+                        frameBorder="0"
+                        allowFullScreen
+                    />
+                </div>
+            </div>
 
             {/* (8) 사이드바 및 노트 영역 */}
             <div className={styles.section3}>
