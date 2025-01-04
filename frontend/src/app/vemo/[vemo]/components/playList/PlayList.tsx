@@ -28,6 +28,9 @@ export default function Playlist() {
   const [videos, setVideos] = useState<playlists[]>([]);
   const [totalDuration, setTotalDuration] = useState<string>('00:00:00');
 
+
+  const id = '삼육구'
+  // 서버에서 데이터 가져오기
   useEffect(() => {
     async function fetchPlaylists() {
       if (!playlistId) {
