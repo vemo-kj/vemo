@@ -32,13 +32,13 @@ export default function Home() {
     const fetchMainCards = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('http://localhost:5050/home', {
+            const response = await fetch('http://localhost:5050/home/cards', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
             console.log(response);
             if (!response.ok) throw new Error('Failed to fetch main cards');
-            
+
             const data = await response.json();
 
             // 데이터 매핑
