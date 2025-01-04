@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { VemoService } from './vemo.service';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
-import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
+import { Playlist } from '../playlist/entities/playlist.entity';
 
 @Controller('vemo')
 export class VemoController {
@@ -27,11 +27,11 @@ export class VemoController {
 
     /**
      * 사용자 재생목록 조회
-     * @param req
      * @returns 사용자 재생목록 목록
+     * @param playlistId
      */
     @Get('playlists/:playlistId')
-    async getUserPlaylists(@Req() req: RequestWithUserInterface): Promise<PlaylistResponseDto[]> {
-        return await this.vemoService.getUserPlaylists(req.user.id);
+    async getPlaylist(@Param('playlistId') playlistId: number): Promise<Playlist> {
+        return await this.vemoService.getPlaylist(playlistId);
     }
 }
