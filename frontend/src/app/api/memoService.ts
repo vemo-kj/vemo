@@ -65,4 +65,41 @@ export const memoService = {
     }
     // 삭제 성공 시 보통 빈 본문이므로 별도의 JSON 파싱 없이 끝
   },
+
+  // 기존 createMemos 함수는 유지
+  createMemos: async (data: {
+    title: string;
+    description: string;
+    videoId: string;
+    userId: number;
+  }) => {
+    const res = await fetch(`${API_URL}/home/memos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to create memos: ${res.statusText}`);
+    }
+
+    return await res.json();
+  },
+
+  // 새로운 getMemosByVideoId 함수 추가
+  getMemosByVideoId: async (videoId: string, userId: number) => {
+    const res = await fetch(`${API_URL}/home/memos?videoId=${videoId}&userId=${userId}`);
+    
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null; // 메모가 없는 경우
+      }
+      throw new Error(`Failed to get memos: ${res.statusText}`);
+    }
+
+    return await res.json();
+  }
 };
