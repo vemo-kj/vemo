@@ -1,4 +1,3 @@
-// memoService
 'use client';
 
 import { createMemos } from '@/app/api/memoService';
@@ -103,8 +102,11 @@ interface CustomEditorProps {
     memosId: number;
 }
 
+// ----------------------------------------------------------------
+// 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
+// ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-  ssr: false,
+    ssr: false,
 });
 
 export default function VemoPage() {
@@ -328,16 +330,14 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     }
   }, [videoId]);
 
-    // memosId 상태 변경 추적
     useEffect(() => {
         console.log('Current memosId:', memosId);
     }, [memosId]);
 
     return (
         <div className={styles.container}>
-            {/* (7) 유튜브 영상 섹션 */}
+            {/* 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
-                {/* 홈으로 이동하는 버튼 */}
                 <Link href="/" passHref>
                     <img
                         src="/icons/Button_home.svg"
@@ -346,17 +346,16 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                     />
                 </Link>
 
-        {/* 유튜브 iframe 플레이어 */}
-        <div className={styles.videoWrapper}>
-          <iframe
-            id="youtube-player"
-            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
-            title="YouTube Video Player"
-            frameBorder="0"
-            allowFullScreen
-          />
-        </div>
-      </div>
+                <div className={styles.videoWrapper}>
+                    <iframe
+                        id="youtube-player"
+                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+                        title="YouTube Video Player"
+                        frameBorder="0"
+                        allowFullScreen
+                    />
+                </div>
+            </div>
 
             {/* (8) 사이드바 및 노트 영역 */}
             <div className={styles.section3}>

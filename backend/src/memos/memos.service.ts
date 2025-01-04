@@ -48,16 +48,18 @@ export class MemosService {
 
     /**
      * 특정 비디오에 대한 메모 개수를 반환.
+     * @param videoId 비디오 ID
+     * @returns 메모 개수
      */
     async getVemoCountByVideo(videoId: string): Promise<number> {
-        return await this.memosRepository.count({ where: { video: { id: videoId } } });
-        return await this.memosRepository.count({ where: { video: { id: videoId } } });
+        const count = await this.memosRepository.count({ where: { video: { id: videoId } } });
+        return count;
     }
-
+    //TODO: 확인 필요
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { user: { id: userId } },
-            relations: ['video', 'user'], // 'memos' 제거
+            relations: ['video', 'memos'],
         });
     }
 
@@ -80,7 +82,7 @@ export class MemosService {
     async getMemosById(memosId: number): Promise<Memos> {
         const memos = await this.memosRepository.findOne({
             where: { id: memosId },
-            relations: ['user', 'video'], // 'memos' 제거
+            relations: ['user', 'video', 'memos'],
         });
         if (!memos) throw new NotFoundException(`Memos with ID ${memosId} not found`);
         return memos;
@@ -99,5 +101,18 @@ export class MemosService {
         if (result.affected === 0) {
             throw new NotFoundException(`Memos with ID ${id} not found`);
         }
+    }
+
+    async getMemosByVideoAndUser(videoId: string, userId: number): Promise<Memos[]> {
+        return await this.memosRepository.find({
+            where: {
+                video: { id: videoId },
+                user: { id: userId },
+            },
+            relations: ['user'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
     }
 }
