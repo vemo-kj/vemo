@@ -6,6 +6,15 @@ import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
+// 대신 필요한 함수들만 import
+import { createMemos} from '@/app/api/memoService';
+
+/**
+ * ----------------------------------------------------------------
+ * 📌 Section 인터페이스
+ * - 하나의 메모(노트) 섹션을 의미
+ * ----------------------------------------------------------------
+ */
 interface Section {
     id: string;
     timestamp: string;

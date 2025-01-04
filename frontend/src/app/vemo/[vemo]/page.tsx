@@ -154,10 +154,12 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                         className={styles.logoButton}
                     />
                 </Link>
+
+                {/* 유튜브 iframe 플레이어 */}
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
@@ -174,21 +176,24 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                         renderSectionContent={() => (
                             <>
                                 <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
-                                <EditorNoSSR
-                                    ref={null}
-                                    getTimestamp={() => '00:00'}
-                                    onTimestampClick={() => {}}
-                                    isEditable={true}
-                                    editingItemId={null}
-                                    onEditStart={() => {}}
-                                    onEditEnd={() => {}}
-                                    memosId={memosId!}
-                                />
+                                {memosId && ( // memosId가 있을 때만 EditorNoSSR 렌더링
+                                    <EditorNoSSR
+                                        ref={editorRef} // editorRef 전달
+                                        getTimestamp={() => '00:00'}
+                                        onTimestampClick={() => {}}
+                                        isEditable={true}
+                                        editingItemId={null}
+                                        onEditStart={() => {}}
+                                        onEditEnd={() => {}}
+                                        memosId={memosId}
+                                    />
+                                )}
                             </>
                         )}
                         currentTimestamp="00:00"
                         handleCaptureTab={() => {}}
-                        editorRef={editorRef}
+                        editorRef={editorRef} // editorRef 전달
+                        handleCaptureArea={() => {}}
                     />
                 </SummaryProvider>
             </div>
