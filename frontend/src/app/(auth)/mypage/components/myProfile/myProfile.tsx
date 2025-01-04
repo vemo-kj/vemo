@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react';
 import styles from './myProfile.module.css';
-import Image from 'next/image';
 
-type UserProfile = {
+// src/app/(auth)/mypage/components/myProfile/myProfile.tsx
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
   nickname: string;
   birth: string;
   gender: string;
@@ -14,7 +17,7 @@ type UserProfile = {
 export default function MyProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -73,10 +76,17 @@ export default function MyProfile() {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.header}>
-        <h1>닉네임{profile.nickname}</h1>
-        <button>Edit Profile</button>
+        <h1>{profile.name}</h1>
       </div>
-      <p>자기소개{profile.description}</p>
+      <div className={styles.info}>
+        <p className={styles.email}>이메일: {profile.email}</p>
+        <p className={styles.nickname}>닉네임: {profile.nickname}</p>
+        <p className={styles.gender}>성별: {profile.gender}</p>
+        <p className={styles.birth}>생년월일: {new Date(profile.birth).toLocaleDateString()}</p>
+      </div>
+      <p className={styles.description}>
+        {profile.introduction || '자기소개가 없습니다.'}
+      </p>
     </div>
   );
 }
