@@ -1,5 +1,6 @@
 services:
     vemo:
+        restart: unless-stopped
         build:
             context: .
             dockerfile: Dockerfile
@@ -7,6 +8,13 @@ services:
             - '5050:5050'
         env_file:
             - .env
+        environment:
+            - NODE_ENV=production
+            - DB_HOST=${DB_HOST}
+            - DB_PORT=${DB_PORT}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_NAME=${DB_NAME}
         volumes:
             - ./src:/usr/src/app/src
         networks:
