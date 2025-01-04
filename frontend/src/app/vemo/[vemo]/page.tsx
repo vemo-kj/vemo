@@ -103,6 +103,17 @@ interface CustomEditorProps {
     memosId: number;
 }
 
+const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+  ssr: false,
+});
+
+export default function VemoPage() {
+  const params = useParams();
+  const vemo = params.vemo as string;
+
+  const editorRef = useRef(null);
+  const [memosId, setMemosId] = useState<number | null>(null);
+  const router = useRouter();
 // ----------------------------------------------------------------
 // 📌 Page 컴포넌트에 전달될 Params
 // (실제 사용 여부에 따라 제거 가능)
@@ -335,17 +346,17 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                     />
                 </Link>
 
-                {/* 유튜브 iframe 플레이어 */}
-                <div className={styles.videoWrapper}>
-                    <iframe
-                        id="youtube-player"
-                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
-                        title="YouTube Video Player"
-                        frameBorder="0"
-                        allowFullScreen
-                    />
-                </div>
-            </div>
+        {/* 유튜브 iframe 플레이어 */}
+        <div className={styles.videoWrapper}>
+          <iframe
+            id="youtube-player"
+            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+            title="YouTube Video Player"
+            frameBorder="0"
+            allowFullScreen
+          />
+        </div>
+      </div>
 
             {/* (8) 사이드바 및 노트 영역 */}
             <div className={styles.section3}>
