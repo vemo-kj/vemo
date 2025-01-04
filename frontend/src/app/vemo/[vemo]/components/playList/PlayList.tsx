@@ -30,6 +30,9 @@ export default function Playlist() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
+  const id = '삼육구'
+  // 서버에서 데이터 가져오기
   useEffect(() => {
     async function fetchPlaylists() {
       if (!playlistId) {
