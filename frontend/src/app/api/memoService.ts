@@ -56,26 +56,3 @@ export const createMemos = async (videoId: string) => {
         throw error;
     }
 };
-
-// ---------------------------------------
-// (기존) 메모 조회 API 호출 예시
-// ---------------------------------------
-export const getMemosByVideoId = async (memosId: number) => {
-    try {
-        const response = await fetch(`${API_URL}/memos/${memosId}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch memos: ${response.statusText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching memos:', error);
-        throw error;
-    }
-};
