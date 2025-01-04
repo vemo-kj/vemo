@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Request, Logger } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginRequestDto } from 'src/auth/dto/login.requests.dto';
 import { Public } from '../public.decorator';
@@ -7,10 +7,11 @@ import { UpdateUserDto } from './dto/updateUser.requests.dto';
 import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
+    private readonly logger = new Logger(UsersController.name);
     constructor(
         private readonly usersService: UsersService,
         private readonly authService: AuthService,
-    ) {}
+    ) { }
 
     @Public()
     @Post('signup')
@@ -31,6 +32,7 @@ export class UsersController {
 
     @Get()
     async getCurrentUser(@Request() req) {
+        this.logger.log(`getUser: ${req.user.sub}`);
         return this.usersService.findById(req.user.sub);
     }
 
