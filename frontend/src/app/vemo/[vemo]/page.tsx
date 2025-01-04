@@ -1,5 +1,6 @@
 'use client';
 
+import { createMemos } from '@/app/api/memoService';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -50,21 +51,6 @@ const memoService = {
     // 응답이 정상이라면 JSON 형태로 변환해 반환
     return await res.json();
   },
-
-  getMemosByVideoId: async (videoId: string, userId: number) => {
-    const res = await fetch(`${API_URL}/home/memos/video/${videoId}?userId=${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to get memos: ${res.statusText}`);
-    }
-
-    return await res.json();
-  }
 };
 
 // ----------------------------------------------------------------
@@ -103,206 +89,54 @@ interface PageProps {
 // ----------------------------------------------------------------
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
-export default function VemoPage() {
-  const router = useRouter();
+export default function VemoPage({ params: pageParams }: PageProps) {
+  // params를 React.use()로 unwrap
+  // params를 useParams로 가져옴
   const params = useParams();
-  const videoId = params.vemo as string; // URL 파라미터로부터 videoId 추출
-  const playerRef = useRef<any>(null);   // YouTube Player 참조
-  const editorRef = useRef<any>(null);   // Editor 참조
-
-  // 현재 동영상 재생 시점
-  const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-
-  // 사이드바에서 선택된 옵션
-  const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-
-  // 에디팅 중인 아이템(메모)의 ID
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-
-  // DB와 연동할 memosId (비디오별 메모 컨테이너 식별자)
+  const vemo = params.vemo as string;
+  const editorRef = useRef(null);
   const [memosId, setMemosId] = useState<number | null>(null);
+  const router = useRouter();
 
-  /**
-   * (1) 유튜브 플레이어 초기화
-   * - videoId가 변경될 때마다 새 Player 로드
-   * - onReady 시점에 `startTimestampUpdate()` 호출
-   */
-  useEffect(() => {
-    if (!videoId) return;
-
-    // 기존에 플레이어가 있다면 제거 후 새로 생성
-    if (playerRef.current) {
-      playerRef.current.destroy();
-    }
-
-    // 유튜브 IFrame API 스크립트 로드
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // 전역에 onYouTubeIframeAPIReady 함수 선언
-    (window as any).onYouTubeIframeAPIReady = () => {
-      playerRef.current = new (window as any).YT.Player('youtube-player', {
-        videoId: videoId,
-        events: {
-          onReady: () => {
-            console.log('Player ready');
-            startTimestampUpdate();
-          },
-        },
-      });
-    };
-  }, [videoId]);
-
-  /**
-   * (2) 타임스탬프 업데이트
-   * - 1초 간격으로 현재 플레이어의 재생 시간을 가져와
-   *   "MM:SS" 형태로 state에 저장
-   */
-  const startTimestampUpdate = () => {
-    const interval = setInterval(() => {
-      if (playerRef.current?.getCurrentTime) {
-        const sec = playerRef.current.getCurrentTime();
-        const mm = Math.floor(sec / 60);
-        const ss = Math.floor(sec % 60);
-        setCurrentTimestamp(
-          `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
-        );
-      }
-    }, 1000);
-
-    // cleanup
-    return () => clearInterval(interval);
-  };
-
-  /**
-   * (2-1) 편집 중이 아닐 경우에만 타임스탬프 업데이트를 계속 수행
-   */
-  useEffect(() => {
-    if (editingItemId !== null) return;
-    return startTimestampUpdate();
-  }, [editingItemId]);
-
-  /**
-   * 드롭다운(사이드바)에서 옵션을 선택했을 때의 핸들러
-   */
-  const handleOptionSelect = (option: string) => {
-    setSelectedOption(option);
-  };
-
-  /**
-   * 노트 아이템 내 타임스탬프 클릭 → 해당 시각으로 이동*/
-  const handleSeekToTime = (timestamp: string) => {
-    const [m, s] = timestamp.split(':').map(Number);
-    const total = (m || 0) * 60 + (s || 0);
-    if (playerRef.current?.seekTo) {
-      playerRef.current.seekTo(total, true);
-    }
-  };
-
-  /**
-   * (3) 캡처 기능 관련: 브라우저로부터 메시지를 받으면
-   *     Editor 컴포넌트의 addCaptureItem을 호출해 이미지 삽입
-   */
-  useEffect(() => {
-    const handleMessage = (e: MessageEvent) => {
-      if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
-        editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
-      } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
-        editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [currentTimestamp]);
-
-  /**
-   * (4) 실제 캡처 요청을 브라우저에 전달
-   * - CAPTURE_TAB or CAPTURE_AREA 메시지를 보내면,
-   *   확장 프로그램 혹은 브라우저 스크립트가 이를 받아 처리
-   */
-  const handleCaptureTab = () => {
-    window.postMessage({ type: 'CAPTURE_TAB' }, '*');
-  };
-  const handleCaptureArea = () => {
-    window.postMessage({ type: 'CAPTURE_AREA' }, '*');
-  };
-
-  /**
-   * (5) 사이드바에서 선택한 옵션에 따라 다른 섹션 내용을 표시
-   */
-  const renderSectionContent = () => {
-    switch (selectedOption) {
-      case '내 메모 보기':
-        return (
-          <>
-            <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
-            <EditorNoSSR
-              ref={editorRef}
-              getTimestamp={() => currentTimestamp}
-              onTimestampClick={handleSeekToTime}
-              isEditable={true}
-              editingItemId={editingItemId}
-              onEditStart={(itemId: string) => setEditingItemId(itemId)}
-              onEditEnd={() => setEditingItemId(null)}
-              memosId={memosId!}
-            />
-          </>
-        );
-      case 'AI 요약 보기':
-        return <p className={styles.noteTitle}>AI 요약 내용을 여기에 표시</p>;
-      case '옵션 3':
-        return <p className={styles.noteTitle}>옵션 3의 내용을 여기에 표시</p>;
-      default:
-        return <p className={styles.noteTitle}>기본 내용을 여기에 표시</p>;
-    }
-  };
-
-  /**
-   * (6) 컴포넌트 마운트 시,
-   *     1) /api/memos 엔드포인트에 POST 요청하여 새 memos 컨테이너를 생성하고
-   *     2) 생성된 memosId를 state에 저장
-   *
-   *     - 이미 memosId가 있다면 재생성하지 않음(= 한 비디오당 하나의 컨테이너)
-   */
   useEffect(() => {
     const initializeMemos = async () => {
-      if (!videoId || !userId) return;
+      if (!vemo) {
+        console.log('No video ID available');
+        return;
+      }
+
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        router.push('/login'); // 로그인 페이지로 리다이렉트
+        return;
+      }
 
       try {
-        // 먼저 기존 memos 조회 시도
-        const existingMemos = await memoService.getMemosByVideoId(videoId, userId);
+        console.log('Creating memos for video:', vemo);
+        const response = await createMemos(vemo);
+        console.log('API Response:', response);
         
-        if (existingMemos) {
-          setMemosId(existingMemos.id);
-          return;
+        if (response) {
+          setMemosId(response);
+          console.log('Successfully set memosId:', response);
         }
-
-        // 없으면 새로 생성
-        const newMemos = await memoService.createMemos({
-          title: "New Memos",
-          description: "Description",
-          videoId,
-          userId,
-        });
-
-        setMemosId(newMemos.id);
       } catch (error) {
         console.error('Failed to initialize memos:', error);
+        if (error.message.includes('401')) {
+          router.push('/login'); // 인증 에러시 로그인 페이지로
+        }
       }
     };
 
     initializeMemos();
-  }, [videoId, userId]);
+  }, [vemo, router]);
 
-  /**
-   * ----------------------------------------------------------------
-   * 📌 최종 리턴 (UI 렌더링)
-   * ----------------------------------------------------------------
-   */
+  // memosId 상태 변경 추적
+  useEffect(() => {
+    console.log('Current memosId:', memosId);
+  }, [memosId]);
+
   return (
     <div className={styles.container}>
       {/* (7) 유튜브 영상 섹션 */}
@@ -320,7 +154,7 @@ export default function VemoPage() {
         <div className={styles.videoWrapper}>
           <iframe
             id="youtube-player"
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
             title="YouTube Video Player"
             frameBorder="0"
             allowFullScreen
@@ -332,12 +166,25 @@ export default function VemoPage() {
       <div className={styles.section3}>
         <SummaryProvider>
           <SideBarNav
-            selectedOption={selectedOption}
-            onOptionSelect={handleOptionSelect}
-            renderSectionContent={renderSectionContent}
-            currentTimestamp={currentTimestamp}
-            handleCaptureTab={handleCaptureTab}
-            handleCaptureArea={handleCaptureArea}
+            selectedOption="내 메모 보기"
+            onOptionSelect={() => {}}
+            renderSectionContent={() => (
+              <>
+                <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                <EditorNoSSR
+                  ref={null}
+                  getTimestamp={() => '00:00'}
+                  onTimestampClick={() => {}}
+                  isEditable={true}
+                  editingItemId={null}
+                  onEditStart={() => {}}
+                  onEditEnd={() => {}}
+                  memosId={memosId!}
+                />
+              </>
+            )}
+            currentTimestamp="00:00"
+            handleCaptureTab={() => {}}
             editorRef={editorRef}
           />
         </SummaryProvider>
