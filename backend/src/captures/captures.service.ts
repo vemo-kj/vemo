@@ -35,16 +35,20 @@ export class CapturesService {
 
     async getCaptureById(id: number): Promise<Captures> {
         try {
-            const capture = await this.capturesRepository.findOne({ where: { id } });
+            const capture = await this.capturesRepository.findOne({
+                where: { id },
+                relations: ['memos'],
+            });
 
             if (!capture) {
-                throw new NotFoundException('Capture not found', {
-                    cause: 'Capture not found',
-                });
+                throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
             return capture;
         } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
             throw new InternalServerErrorException('Failed to get capture', {
                 cause: error,
             });
