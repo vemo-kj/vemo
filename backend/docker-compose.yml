@@ -19,6 +19,8 @@ services:
             - ./src:/usr/src/app/src
         networks:
             - vemo-network
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
 
 networks:
     vemo-network:
