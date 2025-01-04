@@ -20,8 +20,6 @@ import { SummaryProvider } from './context/SummaryContext';
 
 const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 
-const userId = 1; // Replace with actual user ID from your auth system
-
 const memoService = {
   /**
    * 메모 컨테이너 생성
@@ -271,23 +269,34 @@ export default function VemoPage() {
    *     - 이미 memosId가 있다면 재생성하지 않음(= 한 비디오당 하나의 컨테이너)
    */
   useEffect(() => {
-    const createOrGetMemos = async () => {
+    const initializeMemos = async () => {
+      if (!videoId || !userId) return;
+
       try {
-        const response = await memoService.getMemosByVideoId(videoId, userId);
-        if (response.memosId) {
-          setMemosId(response.memosId);
-          console.log("memosId set:", response.memosId); // 디버깅용
+        // 먼저 기존 memos 조회 시도
+        const existingMemos = await memoService.getMemosByVideoId(videoId, userId);
+        
+        if (existingMemos) {
+          setMemosId(existingMemos.id);
+          return;
         }
+
+        // 없으면 새로 생성
+        const newMemos = await memoService.createMemos({
+          title: "New Memos",
+          description: "Description",
+          videoId,
+          userId,
+        });
+
+        setMemosId(newMemos.id);
       } catch (error) {
-        console.error("Failed to get/create memos:", error);
+        console.error('Failed to initialize memos:', error);
       }
     };
 
-    // videoId가 있고 memosId가 아직 없다면 생성 시도
-    if (videoId && !memosId) {
-      createOrGetMemos();
-    }
-  }, [videoId]);
+    initializeMemos();
+  }, [videoId, userId]);
 
   /**
    * ----------------------------------------------------------------
