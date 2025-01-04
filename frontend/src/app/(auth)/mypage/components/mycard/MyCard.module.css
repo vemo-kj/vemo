@@ -38,7 +38,7 @@
 .thumbnailStack {
   position: relative;
   width: 100%;
-  height: 110px;
+  height: 100px;
   padding: 8px;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   margin: 0 0 6px 0;
   color: #333;
@@ -97,13 +97,13 @@
 .statsContainer {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .stat {
   display: flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 4px 8px;
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-bottom: 2px;
@@ -111,16 +111,13 @@
 
 .statLabel {
   color: #666;
-  font-size: 12px;
-.progressText {
-  font-size: 14px;
-  color: #666;
+  font-size: 11px;
 }
 
 .statValue {
   color: #1a73e8;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 11px;
   margin-left: auto;
 }
 
@@ -129,18 +126,14 @@
 }
 
 .previewVideo {
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
   padding: 2px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
-.cardLink {
-  text-decoration: none;
-  color: inherit;
-  display: block;
+  ㄴㅁㅇㄹㅁ text-decoration: none;
+  ㄹㅁㄴㅇㄹ color: inherit;
+  ㅇ display: block;
   height: 100%;
 }
