@@ -72,7 +72,7 @@ const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-    ssr: false,
+  ssr: false,
 });
 
 // ----------------------------------------------------------------
@@ -124,9 +124,9 @@ export default function VemoPage() {
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 interface PageProps {
-    params: {
-        vemo: string;
-    };
+  params: {
+    vemo: string;
+  };
 }
 
 // ----------------------------------------------------------------
@@ -221,7 +221,6 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         <div className={styles.container}>
             {/* (7) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
-                {/* 홈으로 이동하는 버튼 */}
                 <Link href="/" passHref>
                     <img
                         src="/icons/Button_home.svg"

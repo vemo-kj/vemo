@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query, Post } from '@nestjs/common';
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
+import { CreateMemosDto } from './dto/create-memos.dto';
 
 @Controller('memos')
 export class MemosController {

@@ -6,19 +6,6 @@ import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
-// 대신 필요한 함수들만 import
-<<<<<<< Updated upstream
-import { createMemos} from '@/app/api/memoService';
-=======
-import { createMemos } from '@/app/api/memoService';
->>>>>>> Stashed changes
-
-/**
- * ----------------------------------------------------------------
- * 📌 Section 인터페이스
- * - 하나의 메모(노트) 섹션을 의미
- * ----------------------------------------------------------------
- */
 interface Section {
     id: string;
     timestamp: string;
@@ -41,31 +28,16 @@ interface CustomEditorProps {
     onEditStart?: (itemId: string) => void;
     onEditEnd?: () => void;
     onPauseVideo?: () => void;
-    // [추가됨] 서버와 연동하기 위한 memosId
-    memosId?: number;
 }
 
-// memoService 객체를 로컬에서 정의
-const memoService = {
-    createMemo: async (data: { timestamp: string; description: string; memosId: number }) => {
-        // API 호출 로직
-    },
-    updateMemo: async (data: { id: number; timestamp: string; description: string }) => {
-        // API 호출 로직
-    },
-    deleteMemo: async (id: number) => {
-        // API 호출 로직
-    }
-};
+// parseTimeToSeconds는 동일
+function parseTimeToSeconds(timestamp: string): number {
+    const [mm, ss] = timestamp.split(':').map(Number);
+    return (mm || 0) * 60 + (ss || 0);
+}
 
-/**
- * ----------------------------------------------------------------
- * 📌 CustomEditor 컴포넌트
- * - forwardRef를 사용하여 부모에서 함수 호출 가능하도록 만듦
- * ----------------------------------------------------------------
- */
-const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
-    // 메모 목록(Section 배열)
+// forwardRef로 부모가 addCaptureItem을 호출 가능
+const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
 
     // Draft.js 에디터 상태
@@ -74,39 +46,14 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
     // 첫 글자 입력 시점을 저장하기 위한 상태
     const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
     const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
+    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
 
-    // 마지막으로 저장된 HTML (필요하다면 사용)
-    const [lastSavedHTML, setLastSavedHTML] = useState<string>('');
+    // ============ 1) 메모 역순 or 정순 =============
+    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
+    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
+    // (아래 handleSave에서 prev => [...prev, newItem])
 
-    /**
-     * ----------------------------------------------------------------
-     * (1) 컴포넌트가 마운트될 때, 서버에서 memosId에 해당하는
-     *     메모 목록을 불러오는 로직
-     * ----------------------------------------------------------------
-     */
-    useEffect(() => {
-        if (!props.memosId) return;
-
-        const loadMemos = async () => {
-            try {
-                if (props.memosId) {
-                    const memosData = await getMemosByVideoId(props.memosId);
-                    setSections(memosData);
-                }
-            } catch (error) {
-                console.error('Failed to fetch memos:', error);
-            }
-        };
-
-        loadMemos();
-    }, [props.memosId]);
-
-    /**
-     * ----------------------------------------------------------------
-     * (2) 부모에서 ref를 통해 직접 접근하기 위한 함수 (캡처 추가)
-     *     - addCaptureItem: 특정 timestamp와 스크린샷 이미지를 추가
-     * ----------------------------------------------------------------
-     */
+    // ============ 2) addCaptureItem =============
     useImperativeHandle(ref, () => ({
         /**
          * 캡처 이미지를 새 메모(Section)로 추가
