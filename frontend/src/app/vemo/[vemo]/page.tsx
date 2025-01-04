@@ -45,6 +45,17 @@ interface CustomEditorProps {
     memosId: number;
 }
 
+const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+  ssr: false,
+});
+
+export default function VemoPage() {
+  const params = useParams();
+  const vemo = params.vemo as string;
+
+  const editorRef = useRef(null);
+  const [memosId, setMemosId] = useState<number | null>(null);
+  const router = useRouter();
 // ----------------------------------------------------------------
 // 📌 Page 컴포넌트에 전달될 Params
 // (실제 사용 여부에 따라 제거 가능)
@@ -110,48 +121,45 @@ export default function VemoPage() {
                     />
                 </Link>
 
-                {/* 유튜브 iframe 플레이어 */}
-                <div className={styles.videoWrapper}>
-                    <iframe
-                        id="youtube-player"
-                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
-                        title="YouTube Video Player"
-                        frameBorder="0"
-                        allowFullScreen
-                    />
-                </div>
-            </div>
-
-            {/* (8) 사이드바 및 노트 영역 */}
-            <div className={styles.section3}>
-                <SummaryProvider>
-                    <SideBarNav
-                        selectedOption="내 메모 보기"
-                        onOptionSelect={() => {}}
-                        renderSectionContent={() => (
-                            <>
-                                <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
-                                {memosId && ( // memosId가 있을 때만 EditorNoSSR 렌더링
-                                    <EditorNoSSR
-                                        ref={editorRef} // editorRef 전달
-                                        getTimestamp={() => '00:00'}
-                                        onTimestampClick={() => {}}
-                                        isEditable={true}
-                                        editingItemId={null}
-                                        onEditStart={() => {}}
-                                        onEditEnd={() => {}}
-                                        memosId={memosId}
-                                    />
-                                )}
-                            </>
-                        )}
-                        currentTimestamp="00:00"
-                        handleCaptureTab={() => {}}
-                        editorRef={editorRef} // editorRef 전달
-                        handleCaptureArea={() => {}}
-                    />
-                </SummaryProvider>
-            </div>
+        {/* 유튜브 iframe 플레이어 */}
+        <div className={styles.videoWrapper}>
+          <iframe
+            id="youtube-player"
+            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+            title="YouTube Video Player"
+            frameBorder="0"
+            allowFullScreen
+          />
         </div>
-    );
+      </div>
+
+      {/* (8) 사이드바 및 노트 영역 */}
+      <div className={styles.section3}>
+        <SummaryProvider>
+          <SideBarNav
+            selectedOption="내 메모 보기"
+            onOptionSelect={() => {}}
+            renderSectionContent={() => (
+              <>
+                <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                <EditorNoSSR
+                  ref={null}
+                  getTimestamp={() => '00:00'}
+                  onTimestampClick={() => {}}
+                  isEditable={true}
+                  editingItemId={null}
+                  onEditStart={() => {}}
+                  onEditEnd={() => {}}
+                  memosId={memosId!}
+                />
+              </>
+            )}
+            currentTimestamp="00:00"
+            handleCaptureTab={() => {}}
+            editorRef={editorRef}
+          />
+        </SummaryProvider>
+      </div>
+    </div>
+  );
 }
