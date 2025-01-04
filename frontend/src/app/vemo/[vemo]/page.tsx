@@ -1,4 +1,3 @@
-// memoService
 'use client';
 
 import { createMemos } from '@/app/api/memoService';
@@ -9,25 +8,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import { SummaryProvider } from './context/SummaryContext';
-
-/**
- * ----------------------------------------------------------------
- * 📌 memoService (fetch 사용)
- * ----------------------------------------------------------------
- * - 비디오 별 메모 컨테이너(memos)를 생성(POST)하거나
- *   추후 필요한 경우 GET, PUT, DELETE 등으로 확장 가능
- * - 예: /api/memos 엔드포인트에 요청을 보내 메모 컨테이너 생성
- * ----------------------------------------------------------------
- */
-
-const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
-
-// ----------------------------------------------------------------
-// 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
-// ----------------------------------------------------------------
-const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-    ssr: false,
-});
 
 // ----------------------------------------------------------------
 // 📌 Editor 컴포넌트에 넘길 Props 인터페이스
@@ -65,7 +45,6 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
-
             try {
                 console.log('Creating memos for video:', vemo);
                 // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
