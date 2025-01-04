@@ -6,6 +6,15 @@ import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
+// memoService는 내부적으로 fetch를 사용한다고 가정
+import { memoService } from '@/app/api/memoService';
+
+/**
+ * ----------------------------------------------------------------
+ * 📌 Section 인터페이스
+ * - 하나의 메모(노트) 섹션을 의미
+ * ----------------------------------------------------------------
+ */
 interface Section {
     id: string;
     timestamp: string;
@@ -28,16 +37,18 @@ interface CustomEditorProps {
     onEditStart?: (itemId: string) => void;
     onEditEnd?: () => void;
     onPauseVideo?: () => void;
+    // [추가됨] 서버와 연동하기 위한 memosId
+    memosId?: number;
 }
 
-// parseTimeToSeconds는 동일
-function parseTimeToSeconds(timestamp: string): number {
-    const [mm, ss] = timestamp.split(':').map(Number);
-    return (mm || 0) * 60 + (ss || 0);
-}
-
-// forwardRef로 부모가 addCaptureItem을 호출 가능
-const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) => {
+/**
+ * ----------------------------------------------------------------
+ * 📌 CustomEditor 컴포넌트
+ * - forwardRef를 사용하여 부모에서 함수 호출 가능하도록 만듦
+ * ----------------------------------------------------------------
+ */
+const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
+    // 메모 목록(Section 배열)
     const [sections, setSections] = useState<Section[]>([]);
 
     // Draft.js 에디터 상태
@@ -46,14 +57,46 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
     // 첫 글자 입력 시점을 저장하기 위한 상태
     const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
     const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
-    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
 
-    // ============ 1) 메모 역순 or 정순 =============
-    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
-    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
-    // (아래 handleSave에서 prev => [...prev, newItem])
+    // 마지막으로 저장된 HTML (필요하다면 사용)
+    const [lastSavedHTML, setLastSavedHTML] = useState<string>('');
 
-    // ============ 2) addCaptureItem =============
+    /**
+     * ----------------------------------------------------------------
+     * (1) 컴포넌트가 마운트될 때, 서버에서 memosId에 해당하는
+     *     메모 목록을 불러오는 로직
+     * ----------------------------------------------------------------
+     */
+    useEffect(() => {
+        if (!props.memosId) return;
+
+        const loadMemos = async () => {
+            try {
+                // memoService를 통해 fetch 요청
+                if (typeof props.memosId !== 'number') return;
+
+                const data = await memoService.getMemos(props.memosId);
+                // 서버로부터 받은 데이터를 Section 형태로 가공
+                const newSections = data.map((item: any) => ({
+                    id: item.id.toString(),
+                    timestamp: item.timestamp,
+                    htmlContent: item.description,
+                }));
+                setSections(newSections);
+            } catch (error) {
+                console.error('Failed to fetch memos:', error);
+            }
+        };
+
+        loadMemos();
+    }, [props.memosId]);
+
+    /**
+     * ----------------------------------------------------------------
+     * (2) 부모에서 ref를 통해 직접 접근하기 위한 함수 (캡처 추가)
+     *     - addCaptureItem: 특정 timestamp와 스크린샷 이미지를 추가
+     * ----------------------------------------------------------------
+     */
     useImperativeHandle(ref, () => ({
         /**
          * 캡처 이미지를 새 메모(Section)로 추가
@@ -174,17 +217,31 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
     const handleEditorChange = (newState: EditorState) => {
         try {
             const contentState = newState.getCurrentContent();
-            const hasText = contentState.hasText();
-            
-            setEditorState(newState);
+            const selection = contentState.getSelectionAfter();
+            const startKey = selection.getStartKey();
+            const startBlock = contentState.getBlockForKey(startKey);
 
-            // 첫 입력 시점 기록
-            if (!isFirstInputRecorded && hasText) {
-                setIsFirstInputRecorded(true);
-                setFirstInputTimestamp(props.getTimestamp());
+            // 현재 블록이 비어있는지 확인
+            const isEmpty = !startBlock.getText().trim();
+
+            if (isEmpty && contentState.getBlockMap().size <= 1) {
+                // 완전히 빈 상태일 때는 기본 빈 상태 유지
+                const emptyState = EditorState.createEmpty();
+                setEditorState(emptyState);
+                setIsFirstInputRecorded(false);
+                setFirstInputTimestamp(null);
+            } else {
+                setEditorState(newState);
+
+                // 첫 입력 시점 기록
+                if (!isFirstInputRecorded && !isEmpty) {
+                    setIsFirstInputRecorded(true);
+                    setFirstInputTimestamp(props.getTimestamp());
+                }
             }
         } catch (error) {
             console.error('Editor change error:', error);
+            setEditorState(EditorState.createEmpty());
         }
     };
 
@@ -274,21 +331,30 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         return getDefaultKeyBinding(e);
                     }}
                     handleKeyCommand={handleKeyCommand}
-                    handleBeforeInput={(char) => {
-                        if (char.trim() === '') {
-                            const contentState = editorState.getCurrentContent();
-                            if (!contentState.hasText()) {
-                                return 'handled';
-                            }
+                    handleBeforeInput={(char, editorState) => {
+                        const contentState = editorState.getCurrentContent();
+                        const selection = contentState.getSelectionAfter();
+                        const startKey = selection.getStartKey();
+                        const startBlock = contentState.getBlockForKey(startKey);
+
+                        // 첫 번째 문자가 공백이고 블록이 비어있을 때만 처리
+                        if (!startBlock.getText().trim() && char.trim() === '') {
+                            return 'handled';
                         }
                         return 'not-handled';
                     }}
                     onBlur={() => {
+                        // 포커스를 잃을 때 빈 상태 체크
                         const contentState = editorState.getCurrentContent();
-                        if (!contentState.hasText()) {
+                        const hasText = contentState
+                            .getBlockMap()
+                            .some(
+                                (block): boolean =>
+                                    (block && block.getText().trim().length > 0) || false,
+                            );
+
+                        if (!hasText) {
                             setEditorState(EditorState.createEmpty());
-                            setIsFirstInputRecorded(false);
-                            setFirstInputTimestamp(null);
                         }
                     }}
                 />

@@ -25,7 +25,7 @@ const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-    ssr: false,
+  ssr: false,
 });
 
 // ----------------------------------------------------------------
@@ -42,13 +42,11 @@ interface CustomEditorProps {
     memosId: number;
 }
 
-// ----------------------------------------------------------------
-// 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
-// ----------------------------------------------------------------
+// 페이지 컴포넌트의 props 타입 정의 추가
 interface PageProps {
-    params: {
-        vemo: string;
-    };
+  params: {
+    vemo: string;
+  };
 }
 
 // ----------------------------------------------------------------
@@ -83,16 +81,71 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         initializeMemos();
     }, [vemo]);
 
-    // memosId 상태 변경 추적
+    // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
     useEffect(() => {
-        console.log('Current memosId:', memosId);
-    }, [memosId]);
+        const handleMessage = (e: MessageEvent) => {
+            if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
+                editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
+            } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
+                editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, [currentTimestamp]);
+
+    // 전체/부분 캡처
+    const handleCaptureTab = () => {
+        window.postMessage({ type: 'CAPTURE_TAB' }, '*');
+    };
+    // 부분 캡처
+    const handleCaptureArea = () => {
+        window.postMessage({ type: 'CAPTURE_AREA' }, '*');
+    };
+    // 캡처 기능 끝
+
+    // 섹션 내용 렌더링
+    const renderSectionContent = () => {
+        switch (selectedOption) {
+            case '내 메모 보기':
+                return (
+                    <>
+                        <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                        <EditorNoSSR
+                            ref={editorRef}
+                            getTimestamp={() => currentTimestamp}
+                            onTimestampClick={(timestamp: string) => {
+                                const [m, s] = timestamp.split(':').map(Number);
+                                const total = (m || 0) * 60 + (s || 0);
+                                playerRef.current?.seekTo(total, true);
+                            }}
+                            isEditable={true}
+                            editingItemId={editingItemId}
+                            onEditStart={(itemId: string) => setEditingItemId(itemId)}
+                            onEditEnd={() => setEditingItemId(null)}
+                        />
+                    </>
+                );
+            // 후에 내용별 반영 예정
+            case 'AI 요약 보기':
+                return <p className={styles.noteTitle}>AI 요약 내용을 여기에 표시</p>;
+            case '옵션 3':
+                return <p className={styles.noteTitle}>옵션 3의 내용을 여기에 표시</p>;
+            default:
+                return <p className={styles.noteTitle}>기본 내용을 여기에 표시</p>;
+        }
+    };
+
+    const changeVideo = (newVideoId: string) => {
+        router.push(`/vemo/${newVideoId}`);
+    };
 
     return (
         <div className={styles.container}>
-            {/* (7) 유튜브 영상 섹션 */}
+            {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
-                {/* 홈으로 이동하는 버튼 */}
                 <Link href="/" passHref>
                     <img
                         src="/icons/Button_home.svg"
@@ -100,12 +153,10 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                         className={styles.logoButton}
                     />
                 </Link>
-
-                {/* 유튜브 iframe 플레이어 */}
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen

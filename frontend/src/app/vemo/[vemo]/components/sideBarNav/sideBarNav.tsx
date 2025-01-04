@@ -183,8 +183,8 @@ export default function SidebarNav({
                             <ExportButton />
                             <button>저장하기</button>
                         </div>
-                    </>
-                )}
+          </>
+        )}
 
                 {/* 커뮤니티 탭 */}
                 {activeTab === 'community' && <Community />}
