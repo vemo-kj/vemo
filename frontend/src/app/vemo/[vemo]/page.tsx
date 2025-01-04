@@ -118,23 +118,12 @@ interface PageProps {
 // ----------------------------------------------------------------
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
-export default function VemoPage() {
-  const router = useRouter();
+export default function VemoPage({ params: pageParams }: PageProps) {
+  // params를 React.use()로 unwrap
+  // params를 useParams로 가져옴
   const params = useParams();
-  const videoId = params.vemo as string; // URL 파라미터로부터 videoId 추출
-  const playerRef = useRef<any>(null);   // YouTube Player 참조
-  const editorRef = useRef<any>(null);   // Editor 참조
-
-  // 현재 동영상 재생 시점
-  const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
-
-  // 사이드바에서 선택된 옵션
-  const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-
-  // 에디팅 중인 아이템(메모)의 ID
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-
-  // DB와 연동할 memosId (비디오별 메모 컨테이너 식별자)
+  const vemo = params.vemo as string;
+  const editorRef = useRef(null);
   const [memosId, setMemosId] = useState<number | null>(null);
 // ----------------------------------------------------------------
 // 📌 VemoPage 컴포넌트 (주요 로직)
@@ -173,47 +162,10 @@ export default function VemoPage({ params: pageParams }: PageProps) {
    * - onReady 시점에 `startTimestampUpdate()` 호출
    */
   useEffect(() => {
-    if (!videoId) return;
-
-    // 기존에 플레이어가 있다면 제거 후 새로 생성
-    if (playerRef.current) {
-      playerRef.current.destroy();
-    }
-
-    // 유튜브 IFrame API 스크립트 로드
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // 전역에 onYouTubeIframeAPIReady 함수 선언
-    (window as any).onYouTubeIframeAPIReady = () => {
-      playerRef.current = new (window as any).YT.Player('youtube-player', {
-        videoId: videoId,
-        events: {
-          onReady: () => {
-            console.log('Player ready');
-            startTimestampUpdate();
-          },
-        },
-      });
-    };
-  }, [videoId]);
-
-  /**
-   * (2) 타임스탬프 업데이트
-   * - 1초 간격으로 현재 플레이어의 재생 시간을 가져와
-   *   "MM:SS" 형태로 state에 저장
-   */
-  const startTimestampUpdate = () => {
-    const interval = setInterval(() => {
-      if (playerRef.current?.getCurrentTime) {
-        const sec = playerRef.current.getCurrentTime();
-        const mm = Math.floor(sec / 60);
-        const ss = Math.floor(sec % 60);
-        setCurrentTimestamp(
-          `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
-        );
+    const initializeMemos = async () => {
+      if (!vemo) {
+        console.log('No video ID available');
+        return;
       }
     }, 1000);
 
@@ -364,11 +316,11 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     }
   }, [videoId]);
 
-  /**
-   * ----------------------------------------------------------------
-   * 📌 최종 리턴 (UI 렌더링)
-   * ----------------------------------------------------------------
-   */
+  // memosId 상태 변경 추적
+  useEffect(() => {
+    console.log('Current memosId:', memosId);
+  }, [memosId]);
+
   return (
     <div className={styles.container}>
       {/* (7) 유튜브 영상 섹션 */}
@@ -386,7 +338,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         <div className={styles.videoWrapper}>
           <iframe
             id="youtube-player"
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+            src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
             title="YouTube Video Player"
             frameBorder="0"
             allowFullScreen
