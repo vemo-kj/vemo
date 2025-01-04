@@ -61,13 +61,29 @@ export class CapturesService {
     }
 
     async updateCapture(id: number, updateCapturesDto: UpdateCapturesDto): Promise<Captures> {
-        const capture = await this.capturesRepository.findOne({ where: { id } });
-        if (!capture) {
-            throw new NotFoundException('Capture not found', {
-                cause: 'Capture not found',
+        try {
+            const capture = await this.capturesRepository.findOne({
+                where: { id },
+                relations: ['memos'],
+            });
+
+            if (!capture) {
+                throw new NotFoundException(`Capture with ID ${id} not found`);
+            }
+
+            if (updateCapturesDto.image) {
+                capture.image = updateCapturesDto.image;
+            }
+
+            return await this.capturesRepository.save(capture);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to update capture', {
+                cause: error,
             });
         }
-        return await this.capturesRepository.save({ ...capture, ...updateCapturesDto });
     }
 
     async deleteCapture(id: number): Promise<void> {
