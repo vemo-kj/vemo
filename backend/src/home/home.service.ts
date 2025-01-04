@@ -6,6 +6,8 @@ import { VideoResponseDto } from '../video/dto/video-response.dto';
 import { CreatePlaylistWithMemosResponseDto } from './dto/create-playlist-with-memos-response.dto';
 import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
 import { PlaylistService } from '../playlist/playlist.service';
+import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
+import { Memos } from '../memos/memos.entity';
 
 @Injectable()
 export class HomeService {
@@ -19,16 +21,67 @@ export class HomeService {
         userId: number,
         createPlaylistWithMemosDto: CreatePlaylistWithMemosDto,
     ): Promise<CreatePlaylistWithMemosResponseDto> {
-        const playlist = await this.playlistService.createPlaylist(
-            createPlaylistWithMemosDto,
-            userId,
-        );
+        const { name, videoIds } = createPlaylistWithMemosDto;
 
-        // 첫 번째 비디오의 ID와 인덱스를 반환
+        const playlist = await this.playlistService.createPlaylist({ name, videoIds }, userId);
+
+        const firstVideoId = videoIds[0];
+        await this.memosService.createMemos(name, '', firstVideoId, userId);
+
         return {
             playlistId: playlist.id,
-            videoId: playlist.videos[0].id,
-            videoIndex: 0, // 첫 번째 비디오이므로 인덱스는 0
+            videoId: firstVideoId,
+        };
+    }
+
+    /**
+     * 비디오에 대한 메모 생성 또는 최신 메모 조회
+     * @param userId 사용자 ID
+     * @param videoId 비디오 ID
+     * @returns CreateMemosResponseDto
+     */
+    async createOrGetLatestMemos(userId: number, videoId: string): Promise<CreateMemosResponseDto> {
+        // 사용자의 해당 비디오에 대한 메모 조회
+        const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
+
+        // 메모가 없으면 새로 생성
+        if (!userMemos || userMemos.length === 0) {
+            const newMemos = await this.createInitialMemos(userId, videoId);
+            return this.mapMemosToDto(newMemos);
+        }
+
+        // 메모가 있으면 가장 최신 메모와 내용을 함께 반환
+        const latestMemos = userMemos[0]; // getMemosByVideoAndUser가 createdAt DESC로 정렬되어 있음
+        const memosWithContent = await this.memosService.getMemosById(latestMemos.id);
+
+        return this.mapMemosToDto(memosWithContent);
+    }
+
+    /**
+     * 초기 메모 생성
+     * @private
+     * @param userId 사용자 ID
+     * @param videoId 비디오 ID
+     * @returns Memos
+     */
+    private async createInitialMemos(userId: number, videoId: string): Promise<Memos> {
+        const video = await this.videoService.getVideoById(videoId);
+        return await this.memosService.createMemos(video.title, '내용없음', videoId, userId);
+    }
+
+    /**
+     * Memos 엔티티를 DTO로 변환
+     * @private
+     * @param memos Memos 엔티티
+     * @returns CreateMemosResponseDto
+     */
+    private mapMemosToDto(memos: Memos): CreateMemosResponseDto {
+        return {
+            id: memos.id,
+            title: memos.title,
+            description: memos.description,
+            createdAt: memos.createdAt,
+            updatedAt: memos.updatedAt,
         };
     }
 
