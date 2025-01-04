@@ -25,7 +25,12 @@ export class CapturesService {
 
     async getCaptures(): Promise<Captures[]> {
         try {
-            return await this.capturesRepository.find();
+            return await this.capturesRepository.find({
+                relations: ['memos'],
+                order: {
+                    timestamp: 'ASC',
+                },
+            });
         } catch (error) {
             throw new InternalServerErrorException('Failed to get captures', {
                 cause: error,
