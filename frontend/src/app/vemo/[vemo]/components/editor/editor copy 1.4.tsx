@@ -217,17 +217,31 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
     const handleEditorChange = (newState: EditorState) => {
         try {
             const contentState = newState.getCurrentContent();
-            const hasText = contentState.hasText();
-            
-            setEditorState(newState);
+            const selection = contentState.getSelectionAfter();
+            const startKey = selection.getStartKey();
+            const startBlock = contentState.getBlockForKey(startKey);
 
-            // 첫 입력 시점 기록
-            if (!isFirstInputRecorded && hasText) {
-                setIsFirstInputRecorded(true);
-                setFirstInputTimestamp(props.getTimestamp());
+            // 현재 블록이 비어있는지 확인
+            const isEmpty = !startBlock.getText().trim();
+
+            if (isEmpty && contentState.getBlockMap().size <= 1) {
+                // 완전히 빈 상태일 때는 기본 빈 상태 유지
+                const emptyState = EditorState.createEmpty();
+                setEditorState(emptyState);
+                setIsFirstInputRecorded(false);
+                setFirstInputTimestamp(null);
+            } else {
+                setEditorState(newState);
+
+                // 첫 입력 시점 기록
+                if (!isFirstInputRecorded && !isEmpty) {
+                    setIsFirstInputRecorded(true);
+                    setFirstInputTimestamp(props.getTimestamp());
+                }
             }
         } catch (error) {
             console.error('Editor change error:', error);
+            setEditorState(EditorState.createEmpty());
         }
     };
 
@@ -317,21 +331,30 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
                         return getDefaultKeyBinding(e);
                     }}
                     handleKeyCommand={handleKeyCommand}
-                    handleBeforeInput={(char) => {
-                        if (char.trim() === '') {
-                            const contentState = editorState.getCurrentContent();
-                            if (!contentState.hasText()) {
-                                return 'handled';
-                            }
+                    handleBeforeInput={(char, editorState) => {
+                        const contentState = editorState.getCurrentContent();
+                        const selection = contentState.getSelectionAfter();
+                        const startKey = selection.getStartKey();
+                        const startBlock = contentState.getBlockForKey(startKey);
+
+                        // 첫 번째 문자가 공백이고 블록이 비어있을 때만 처리
+                        if (!startBlock.getText().trim() && char.trim() === '') {
+                            return 'handled';
                         }
                         return 'not-handled';
                     }}
                     onBlur={() => {
+                        // 포커스를 잃을 때 빈 상태 체크
                         const contentState = editorState.getCurrentContent();
-                        if (!contentState.hasText()) {
+                        const hasText = contentState
+                            .getBlockMap()
+                            .some(
+                                (block): boolean =>
+                                    (block && block.getText().trim().length > 0) || false,
+                            );
+
+                        if (!hasText) {
                             setEditorState(EditorState.createEmpty());
-                            setIsFirstInputRecorded(false);
-                            setFirstInputTimestamp(null);
                         }
                     }}
                 />
