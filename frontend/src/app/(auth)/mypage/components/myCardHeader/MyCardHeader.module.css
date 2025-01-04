@@ -1,56 +1,36 @@
 .headerContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
-}
-
-.titleSection {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
 }
 
 .title {
   font-size: 24px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #333;
+  margin-bottom: 16px;
 }
 
-.userMemoCount {
-  font-size: 16px;
-  color: #666;
-}
-
-.buttonGroup {
+.statsSection {
   display: flex;
-  gap: 12px;
+  gap: 24px;
 }
 
-.AllButton, .studyingButton {
-  padding: 8px 20px;
-  border-radius: 20px;
-  border: none;
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.statLabel {
+  color: #666;
   font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.AllButton {
-  background-color: #667eea;
-  color: white;
-}
-
-.AllButton:hover {
-  background-color: #5a6fd1;
-}
-
-.studyingButton {
-  background-color: #f5f5f7;
-  color: #667eea;
-}
-
-.studyingButton:hover {
-  background-color: #e8e8ea;
+.statValue {
+  color: #1a73e8;
+  font-weight: 600;
+  font-size: 16px;
 }
