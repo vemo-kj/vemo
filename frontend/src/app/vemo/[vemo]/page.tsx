@@ -21,38 +21,6 @@ import { SummaryProvider } from './context/SummaryContext';
 
 const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
 
-const memoService = {
-  /**
-   * 메모 컨테이너 생성
-   * @param data 생성할 메모 컨테이너의 정보를 담은 객체
-   * @returns 생성된 메모 컨테이너 정보(JSON)
-   */
-  createMemos: async (data: {
-    title: string;
-    description: string;
-    videoId: string;
-    userId: number;
-  }) => {
-    // fetch를 이용해 POST 요청을 보냄
-    const res = await fetch(`${API_URL}/home/memos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    // 응답이 정상적이지 않으면 에러 발생
-    if (!res.ok) {
-      throw new Error(`Failed to create memos: ${res.statusText}`);
-    }
-
-    // 응답이 정상이라면 JSON 형태로 변환해 반환
-    return await res.json();
-  },
-};
-
 // ----------------------------------------------------------------
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
@@ -89,7 +57,8 @@ interface PageProps {
 // ----------------------------------------------------------------
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
-export default function VemoPage({ params: pageParams }: PageProps) {
+export default function VemoPage({
+  params: pageParams }: PageProps) {
   // params를 React.use()로 unwrap
   // params를 useParams로 가져옴
   const params = useParams();
@@ -100,37 +69,23 @@ export default function VemoPage({ params: pageParams }: PageProps) {
 
   useEffect(() => {
     const initializeMemos = async () => {
-      if (!vemo) {
-        console.log('No video ID available');
-        return;
-      }
-
-      const token = sessionStorage.getItem('token');
-      if (!token) {
-        console.error('No authentication token found');
-        router.push('/login'); // 로그인 페이지로 리다이렉트
-        return;
-      }
+      if (!vemo) return;
 
       try {
         console.log('Creating memos for video:', vemo);
-        const response = await createMemos(vemo);
-        console.log('API Response:', response);
-        
-        if (response) {
-          setMemosId(response);
-          console.log('Successfully set memosId:', response);
+        // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
+        const newMemosId = await createMemos(vemo);
+        if (newMemosId) {
+          setMemosId(newMemosId);
+          console.log('Successfully set memosId:', newMemosId);
         }
       } catch (error) {
         console.error('Failed to initialize memos:', error);
-        if (error.message.includes('401')) {
-          router.push('/login'); // 인증 에러시 로그인 페이지로
-        }
       }
     };
 
     initializeMemos();
-  }, [vemo, router]);
+  }, [vemo]);
 
   // memosId 상태 변경 추적
   useEffect(() => {

@@ -30,7 +30,7 @@ export class HomeController {
     @Post('playlist')
     @HttpCode(HttpStatus.CREATED)
     async createPlaylistWithMemos(
-        @Body() createMemosDto: CreatePlaylistWithMemosDto,
+        @Body() createMemosDto: CreatePlaylistWithMemosDto, 
         @Req() req: RequestWithUserInterface,
     ): Promise<CreatePlaylistWithMemosResponseDto> {
         const userId = req.user.id;
