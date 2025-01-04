@@ -1,8 +1,6 @@
 node_modules
 npm-debug.log
-.env
+dist
 .git
-.gitignore
-Dockerfile
-docker-compose.yml
-Vemo.session.sql
+.env
+.env.*

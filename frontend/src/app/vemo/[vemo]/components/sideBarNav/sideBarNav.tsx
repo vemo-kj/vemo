@@ -190,8 +190,21 @@ export default function SidebarNav({
                             <ExportButton />
                             <button>저장하기</button>
                         </div>
-          </>
-        )}
+                        <div className={styles.notesContent}>
+                            <div className={styles.noteActions}>
+                                {/* 드롭다운: "내 메모 보기" / "AI 요약 보기" / "퀴즈 보기" */}
+                                <div className={styles.dropdown}>
+                                    <select
+                                        value={selectedOption}
+                                        onChange={e => onOptionSelect(e.target.value)}
+                                        className={styles.dropdownSelect}
+                                    >
+                                        <option value="내 메모 보기">내 메모 보기</option>
+                                        <option value="AI 요약 보기">AI 요약 보기</option>
+                                        <option value="퀴즈 보기">퀴즈 보기</option>
+                                    </select>
+                                </div>
+                            </div>
 
                 {/* 커뮤니티 탭 */}
                 {activeTab === 'community' && <Community />}
