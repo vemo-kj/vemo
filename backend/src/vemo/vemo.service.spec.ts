@@ -149,7 +149,7 @@ describe('VemoService', () => {
 
             (playlistService.getPlaylistsByUser as jest.Mock).mockResolvedValue(mockPlaylists);
 
-            const result = await service.getUserPlaylists(userId);
+            const result = await service.getPlaylist(userId);
 
             expect(playlistService.getPlaylistsByUser).toHaveBeenCalledWith(userId);
             expect(result).toEqual(mockPlaylists);
