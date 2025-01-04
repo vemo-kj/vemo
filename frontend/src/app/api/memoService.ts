@@ -73,20 +73,60 @@ export const memoService = {
     videoId: string;
     userId: number;
   }) => {
-    const res = await fetch(`${API_URL}/home/memos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      // 먼저 videoId로 기존 memos가 있는지 확인
+      const existingMemos = await memoService.getMemosByVideoId(data.videoId, data.userId);
+      
+      if (existingMemos) {
+        return existingMemos; // 이미 존재하는 memos 반환
+      }
 
-    if (!res.ok) {
-      throw new Error(`Failed to create memos: ${res.statusText}`);
+      // 없으면 새로 생성
+      const res = await fetch(`${API_URL}/home/memos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        // 404 에러인 경우 playlist를 통해 생성 시도
+        if (res.status === 404) {
+          const playlistRes = await fetch(`${API_URL}/home/playlist`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: "New Playlist",
+              videoIds: [data.videoId]
+            })
+          });
+
+          if (!playlistRes.ok) {
+            throw new Error(`Failed to create playlist: ${playlistRes.statusText}`);
+          }
+
+          const playlistData = await playlistRes.json();
+          return {
+            id: playlistData.memos.id,
+            ...playlistData.memos
+          };
+        }
+        throw new Error(`Failed to create memos: ${res.statusText}`);
+      }
+
+      const response = await res.json();
+      return {
+        id: response.id || response.memosId,
+        ...response
+      };
+    } catch (error) {
+      console.error('Error creating memos:', error);
+      throw error;
     }
-
-    return await res.json();
   },
 
   // 새로운 getMemosByVideoId 함수 추가
