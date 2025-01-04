@@ -119,6 +119,11 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
      * ----------------------------------------------------------------
      */
     const handleSave = async () => {
+        if (!props.memosId) {
+            console.error('Cannot save memo: memosId is not initialized');
+            return;
+        }
+        
         const contentState = editorState.getCurrentContent();
 
         // 아무 글자도 없다면 저장하지 않음
@@ -132,12 +137,6 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
             isFirstInputRecorded && firstInputTimestamp
                 ? firstInputTimestamp
                 : props.getTimestamp();
-
-        // memosId가 없으면 서버 저장 불가
-        if (!props.memosId) {
-            console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
-            return;
-        }
 
         try {
             // createMemo API 호출 (fetch)

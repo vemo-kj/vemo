@@ -3,7 +3,7 @@ import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 import { CreateMemosDto } from './dto/create-memos.dto';
 
-@Controller('home/memos')
+@Controller('memos')
 export class MemosController {
     constructor(private readonly memosService: MemosService) {}
 
@@ -31,18 +31,19 @@ export class MemosController {
     async deleteMemos(@Param('id') id: number) {
         return this.memosService.deleteMemos(id);
     }
-
     @Post()
-    async create(@Body() createMemosDto: CreateMemosDto) {
-        console.log('Received request body:', createMemosDto);
-        
-        try {
-            const result = await this.memosService.create(createMemosDto);
-            console.log('Created memos:', result);
-            return result;
-        } catch (error) {
-            console.error('Error creating memos:', error);
-            throw error;
-        }
+    async createMemos(@Body() createMemosDto: CreateMemosDto) {
+        // createMemosDto 구조: { title, description, videoId, userId } 가정
+        const { title, description, videoId, userId } = createMemosDto;
+
+        // memosService의 createMemos 호출
+        const Memos = await this.memosService.createMemos(
+            title,
+            description,
+            videoId,
+            userId,
+        );
+        // 생성된 memos 엔티티(전체) 반환
+        return Memos;
     }
 }
