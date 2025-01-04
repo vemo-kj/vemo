@@ -32,21 +32,47 @@ export class SubtitlesService {
     // yt-dlp 를 사용하여 자막 다운로드
     private async downloadSubtitles(videoId: string): Promise<void> {
         const command = this.buildYtDlpCommand(videoId);
+        const maxRetries = 3;
+        let retryCount = 0;
 
-        return new Promise((resolve, reject) => {
-            exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    console.error('자막 다운로드 실패:', stderr);
-                    reject(new Error(stderr || error.message));
-                }
-                resolve();
+        const tryDownload = async (): Promise<void> => {
+            return new Promise((resolve, reject) => {
+                exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Download attempt ${retryCount + 1} failed:`, stderr);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            console.log(`Retrying download (${retryCount}/${maxRetries})...`);
+                            setTimeout(() => {
+                                tryDownload().then(resolve).catch(reject);
+                            }, 5000); // 5초 대기 후 재시도
+                        } else {
+                            reject(new Error(`Failed after ${maxRetries} attempts: ${stderr}`));
+                        }
+                    } else {
+                        resolve();
+                    }
+                });
             });
-        });
+        };
+        try {
+            await tryDownload();
+        } catch (error) {
+            console.error('Download error:', error);
+            throw error;
+        }
     }
+
 
     // yt-dlp 명령어 생성
     private buildYtDlpCommand(videoId: string): string {
-        return `yt-dlp --write-auto-sub --sub-lang ko --skip-download --output "${this.tempDir}/${videoId}.ko.vtt" "https://www.youtube.com/watch?v=${videoId}"`;
+        return `yt-dlp \
+            --proxy socks5://host.docker.internal:9051 \
+            --write-auto-sub \
+            --sub-lang ko \
+            --skip-download \
+            --output "${this.tempDir}/${videoId}.ko.vtt" \
+            "https://www.youtube.com/watch?v=${videoId}"`;
     }
 
     // 자막 파일 경로 생성
