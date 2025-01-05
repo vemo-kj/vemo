@@ -184,7 +184,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         try {
             const contentState = newState.getCurrentContent();
             const hasText = contentState.hasText();
-            
+
             setEditorState(newState);
 
             // 첫 입력 시점 기록
@@ -283,7 +283,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         return getDefaultKeyBinding(e);
                     }}
                     handleKeyCommand={handleKeyCommand}
-                    handleBeforeInput={(char) => {
+                    handleBeforeInput={char => {
                         if (char.trim() === '') {
                             const contentState = editorState.getCurrentContent();
                             if (!contentState.hasText()) {
