@@ -1,21 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UseInterceptors } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Channel } from './channel.entity';
+import { YoutubeApiInterceptor } from '../youtubeauth/youtube-api.interceptor';
 import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
-
+import { Channel } from './channel.entity';
 @Injectable()
 export class ChannelService {
     constructor(
         @InjectRepository(Channel)
         private channelRepository: Repository<Channel>,
         private youtubeAuthService: YoutubeAuthService,
-    ) {
-    }
+    ) {}
 
+    @UseInterceptors(YoutubeApiInterceptor)
     async getChannel(channelId: string): Promise<Channel> {
-        await this.youtubeAuthService.ensureAuthenticated();
-
         const existingChannel = await this.channelRepository.findOne({ where: { id: channelId } });
         if (existingChannel) {
             return existingChannel;
