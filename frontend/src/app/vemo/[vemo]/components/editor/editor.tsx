@@ -67,20 +67,26 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
     // 마지막으로 저장된 HTML (필요하다면 사용)
     const [lastSavedHTML, setLastSavedHTML] = useState<string>('');
 
-    // YouTube IFrame API 로드
+    // YouTube Player 상태를 추적하기 위한 state 추가
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+    // YouTube IFrame API 초기화
     useEffect(() => {
-        // 이미 로드되었는지 확인
-        if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+        if (!window.YT) {
+            // YouTube IFrame API 로드
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             const firstScriptTag = document.getElementsByTagName('script')[0];
             firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-        }
 
-        // API 준비 완료 시 호출될 함수
-        window.onYouTubeIframeAPIReady = () => {
-            console.log('YouTube IFrame API is ready');
-        };
+            // API 준비 완료 시 호출될 함수
+            window.onYouTubeIframeAPIReady = () => {
+                console.log('YouTube IFrame API is ready');
+                setIsPlayerReady(true);
+            };
+        } else {
+            setIsPlayerReady(true);
+        }
 
         return () => {
             window.onYouTubeIframeAPIReady = undefined;
@@ -121,18 +127,29 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
-    const getCurrentVideoTime = () => {
+    const getCurrentVideoTime = (): string => {
         try {
+            if (!isPlayerReady) {
+                console.warn('YouTube player is not ready yet');
+                return '00:00';
+            }
+
             const timestamp = props.getTimestamp();
             console.log('Raw timestamp from player:', timestamp);
-            
-            // 숫자로 변환하여 포맷팅
-            const timeInSeconds = parseFloat(timestamp);
-            if (!isNaN(timeInSeconds)) {
-                const formattedTime = formatVideoTime(timeInSeconds);
-                console.log('Formatted timestamp:', formattedTime);
-                return formattedTime;
+
+            // 숫자나 문자열 형식의 시간을 처리
+            if (typeof timestamp === 'number') {
+                return formatVideoTime(timestamp);
+            } else if (typeof timestamp === 'string' && timestamp.includes(':')) {
+                return timestamp; // 이미 MM:SS 형식이면 그대로 반환
+            } else if (typeof timestamp === 'string') {
+                const timeInSeconds = parseFloat(timestamp);
+                if (!isNaN(timeInSeconds)) {
+                    return formatVideoTime(timeInSeconds);
+                }
             }
+
+            console.warn('Invalid timestamp format received:', timestamp);
             return '00:00';
         } catch (error) {
             console.error('Error getting timestamp:', error);
@@ -144,10 +161,15 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
+        // 플레이어가 준비되지 않았으면 경고
+        if (!isPlayerReady) {
+            console.warn('YouTube player is not ready. Current time might not be accurate.');
+        }
+
         const html = convertToHTML(contentState);
         const currentTimestamp = getCurrentVideoTime();
 
-        console.log('Saving memo with timestamp:', currentTimestamp);
+        console.log('Attempting to save memo with timestamp:', currentTimestamp);
 
         if (!props.memosId) {
             console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
@@ -155,11 +177,6 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         }
 
         try {
-            // 타임스탬프 유효성 검사 추가
-            if (currentTimestamp === '00:00' && props.getTimestamp()) {
-                console.warn('Warning: Using default timestamp despite player time being available');
-            }
-
             const savedMemo = await memoService.createMemo({
                 timestamp: currentTimestamp,
                 description: html,

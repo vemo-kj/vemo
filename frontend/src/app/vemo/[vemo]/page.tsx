@@ -63,6 +63,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
     const [player, setPlayer] = useState<YT.Player | null>(null);
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
 
     // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
@@ -102,29 +103,76 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         console.log('Current memosId:', memosId);
     }, [memosId]);
 
-    const getVideoTimestamp = () => {
-        if (!player) return "00:00";
-        const time = player.getCurrentTime();
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    // YouTube Player 초기화
+    // YouTube Player 초기화 수정
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const YT = (window as any).YT;
-            if (!YT) return;
+        if (typeof window === 'undefined') return;
 
-            new YT.Player('youtube-player', {
-                events: {
-                    onReady: (event: YT.PlayerEvent) => {
-                        setPlayer(event.target);
-                    }
-                }
-            });
+        // YouTube IFrame API가 로드되었는지 확인
+        if (!(window as any).YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            // API 준비 완료 시 호출될 함수
+            (window as any).onYouTubeIframeAPIReady = () => {
+                initializeYouTubePlayer();
+            };
+        } else {
+            initializeYouTubePlayer();
         }
     }, []);
+
+    // YouTube Player 초기화 함수
+    const initializeYouTubePlayer = () => {
+        const YT = (window as any).YT;
+        if (!YT) return;
+
+        new YT.Player('youtube-player', {
+            events: {
+                onReady: (event: YT.PlayerEvent) => {
+                    console.log('YouTube Player is ready');
+                    setPlayer(event.target);
+                    setIsPlayerReady(true);
+                },
+                onStateChange: (event: YT.OnStateChangeEvent) => {
+                    // 플레이어 상태 변경 시 처리
+                    console.log('Player state changed:', event.data);
+                },
+                onError: (event: YT.OnErrorEvent) => {
+                    console.error('YouTube Player Error:', event.data);
+                }
+            }
+        });
+    };
+
+    // 타임스탬프 가져오기 함수 수정
+    const getVideoTimestamp = () => {
+        try {
+            if (!player || !isPlayerReady) {
+                console.warn('YouTube player is not ready');
+                return '00:00';
+            }
+
+            const time = player.getCurrentTime();
+            console.log('Current video time:', time);
+
+            if (typeof time !== 'number') {
+                console.warn('Invalid time value from player:', time);
+                return '00:00';
+            }
+
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            const timestamp = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            console.log('Formatted timestamp:', timestamp);
+            return timestamp;
+        } catch (error) {
+            console.error('Error getting video timestamp:', error);
+            return '00:00';
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -143,7 +191,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1&origin=${window.location.origin}`}
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
@@ -164,7 +212,13 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                     <EditorNoSSR
                                         ref={editorRef}
                                         getTimestamp={getVideoTimestamp}
-                                        onTimestampClick={() => {}}
+                                        onTimestampClick={(timestamp) => {
+                                            if (player && isPlayerReady) {
+                                                const [minutes, seconds] = timestamp.split(':').map(Number);
+                                                const timeInSeconds = minutes * 60 + seconds;
+                                                player.seekTo(timeInSeconds, true);
+                                            }
+                                        }}
                                         isEditable={true}
                                         editingItemId={null}
                                         onEditStart={() => {}}
@@ -174,7 +228,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                 )}
                             </>
                         )}
-                        currentTimestamp="00:00"
+                        currentTimestamp={getVideoTimestamp()}
                         handleCaptureTab={() => {}}
                         editorRef={editorRef}
                     />
