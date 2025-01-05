@@ -1,49 +1,42 @@
-// memoService.ts
+// [수정됨] memoService.ts
 'use client';
 
 // 환경 변수에서 API URL을 가져오거나 기본값을 설정
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5050';
 console.log('Using API URL:', API_URL);
 
-// 1. 스토리지 타입을 일관되게 유지 (localStorage 사용)
-const storage = sessionStorage; // 또는 sessionStorage로 변경 가능
-console.log('Using storage:', storage);
-// 2. 토큰 관리를 위한 유틸리티 함수들 추가
+// 스토리지 (sessionStorage)
+const storage = sessionStorage;
 const TOKEN_KEY = 'token';
 
-// 토큰을 스토리지에 저장하는 함수
 export const setToken = (token: string) => {
     storage.setItem(TOKEN_KEY, token);
 };
-
-// 스토리지에서 토큰을 가져오는 함수
 export const getToken = () => {
     const token = storage.getItem(TOKEN_KEY);
     console.log('Getting token from storage:', token);
     return token;
 };
-
-// 스토리지에서 토큰을 제거하는 함수
 export const removeToken = () => {
     storage.removeItem(TOKEN_KEY);
 };
 
-// 3. 인증 헤더를 가져오는 함수
+// 인증 헤더
 const getAuthHeader = () => {
     const token = getToken();
     if (!token) {
         throw new Error('No authentication token found');
     }
-
     return {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
     };
 };
 
-// --------------------------------------
-// 1) 비디오별 Memos 생성
-// --------------------------------------
+// ----------------------------------------------------------------
+// (1) 비디오별 Memos 컨테이너 생성 or 조회
+//     백엔드: POST /home/memos/:videoId
+// ----------------------------------------------------------------
 export const createMemos = async (videoId: string) => {
     try {
       // 먼저 videoId로 기존 memos가 있는지 확인
@@ -103,26 +96,27 @@ export const createMemos = async (videoId: string) => {
 
 // Memo 관련 인터페이스 추가
 interface CreateMemoData {
-    timestamp: string;
+    timestamp: string;    // 유튜브 재생 시간
     description: string;
     memosId: number;
 }
-
 interface UpdateMemoData {
     id: number;
     timestamp: string;
     description: string;
 }
 
-// Memo CRUD 함수들 추가
 export const memoService = {
-    createMemo: async (data: CreateMemoData) => {
+    // 생성
+    async createMemo(data: CreateMemoData) {
         try {
             const requestData = {
-                ...data,
-                timestamp: new Date(data.timestamp),
+                timestamp: data.timestamp,
                 description: data.description || '',
+                memosId: data.memosId,
             };
+
+            console.log('Sending memo data:', requestData); // 디버깅용
 
             const response = await fetch(`${API_URL}/memo`, {
                 method: 'POST',
@@ -131,6 +125,8 @@ export const memoService = {
             });
 
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Server error:', errorData);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -141,24 +137,23 @@ export const memoService = {
         }
     },
 
-    updateMemo: async (data: UpdateMemoData) => {
+    // 수정
+    async updateMemo(data: UpdateMemoData) {
         try {
             const requestData = {
                 ...data,
                 timestamp: new Date(data.timestamp),
-                description: data.description || '',
             };
 
+            // [수정됨] PUT /memo/:id
             const response = await fetch(`${API_URL}/memo/${data.id}`, {
                 method: 'PUT',
                 headers: getAuthHeader(),
                 body: JSON.stringify(requestData),
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             return await response.json();
         } catch (error) {
             console.error('Failed to update memo:', error);
@@ -166,17 +161,17 @@ export const memoService = {
         }
     },
 
-    deleteMemo: async (id: number) => {
+    // 삭제
+    async deleteMemo(id: number) {
         try {
+            // [수정됨] DELETE /memo/:id
             const response = await fetch(`${API_URL}/memo/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeader(),
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             return await response.json();
         } catch (error) {
             console.error('Failed to delete memo:', error);

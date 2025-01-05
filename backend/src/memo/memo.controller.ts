@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Put, BadRequestException } from '@nestjs/common';
 import { MemoService } from './memo.service';
 import { CreateMemoDto } from './dto/create-memo.dto';
 import { UpdateMemoDto } from './dto/update-memo.dto';
@@ -9,7 +9,23 @@ export class MemoController {
 
     @Post()
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
-        return await this.memoService.createMemo(createMemoDto);
+        console.log('Received request body:', createMemoDto);
+        try {
+            // 문자열로 받은 타임스탬프를 Date 객체로 변환
+            const timestamp = new Date(createMemoDto.timestamp);
+            
+            // 유효한 날짜인지 확인
+            if (isNaN(timestamp.getTime())) {
+                throw new BadRequestException('Invalid timestamp');
+            }
+
+            return await this.memoService.createMemo({
+                ...createMemoDto,
+                timestamp
+            });
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
     }
 
     @Put(':id')

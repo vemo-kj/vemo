@@ -1,4 +1,10 @@
 import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
+
+declare global {
+    interface Window {
+        onYouTubeIframeAPIReady?: () => void;
+    }
+}
 import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
@@ -86,25 +92,21 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
      */
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
-
-        // 아무 글자도 없다면 저장하지 않음
         if (!contentState.hasText()) return;
 
-        // Draft.js Content → HTML
         const html = convertToHTML(contentState);
-        const stamp = isFirstInputRecorded && firstInputTimestamp
-            ? firstInputTimestamp
-            : props.getTimestamp();
+        const currentTimestamp = props.getTimestamp(); // 유튜브 재생 시간
 
-        // memosId가 없으면 서버 저장 불가
         if (!props.memosId) {
             console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
             return;
         }
 
         try {
+            console.log('Saving memo with timestamp:', currentTimestamp); // 디버깅용
+
             const savedMemo = await memoService.createMemo({
-                timestamp: stamp,
+                timestamp: currentTimestamp, // 유튜브 재생 시간을 타임스탬프로 사용
                 description: html,
                 memosId: props.memosId,
             });
@@ -112,7 +114,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
             // 새로 생성된 아이템을 sections에 추가
             const newItem: Section = {
                 id: savedMemo.id.toString(),
-                timestamp: stamp,
+                timestamp: currentTimestamp, // 화면에는 유튜브 재생 시간 표시
                 htmlContent: html,
             };
             setSections(prev => [...prev, newItem]);
@@ -217,7 +219,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         try {
             await memoService.updateMemo({
                 id: Number(id),
-                timestamp: props.getTimestamp(),
+                timestamp: props.getTimestamp(), // 기존 timestamp 또는 현재 timestamp
                 description: newHTML,
             });
         } catch (error) {

@@ -150,6 +150,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     const editorRef = useRef(null);
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
+    const [player, setPlayer] = useState<YT.Player | null>(null);
 
     // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
