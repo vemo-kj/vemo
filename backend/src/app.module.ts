@@ -19,6 +19,7 @@ import { SummarizationModule } from './summarization/summarization.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
+import { PdfModule } from './pdf/pdf.module';
 
 @Module({
     imports: [
@@ -45,6 +46,7 @@ import { PlaylistModule } from './playlist/playlist.module';
         QuizModule,
         CapturesModule,
         SummarizationModule,
+        PdfModule,
     ],
     controllers: [AppController],
     providers: [
