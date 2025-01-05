@@ -110,24 +110,32 @@ export const memoService = {
     // 생성
     async createMemo(data: CreateMemoData) {
         try {
+            // 타임스탬프 형식 검증
+            if (!data.timestamp.match(/^\d{2}:\d{2}$/)) {
+                throw new Error('Invalid timestamp format. Expected format: MM:SS');
+            }
+
             const requestData = {
                 timestamp: data.timestamp,
                 description: data.description || '',
                 memosId: data.memosId,
             };
 
-            console.log('Sending memo data:', requestData); // 디버깅용
+            console.log('Sending memo data:', requestData);
 
             const response = await fetch(`${API_URL}/memo`, {
                 method: 'POST',
-                headers: getAuthHeader(),
+                headers: {
+                    ...getAuthHeader(),
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(requestData),
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = await response.json();
                 console.error('Server error:', errorData);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(errorData.message || 'Failed to create memo');
             }
 
             return await response.json();
