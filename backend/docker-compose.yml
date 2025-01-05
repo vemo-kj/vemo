@@ -19,6 +19,11 @@ services:
             - ./src:/usr/src/app/src
         networks:
             - vemo-network
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
 
 networks:
     vemo-network:
