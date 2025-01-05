@@ -62,6 +62,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     const editorRef = useRef(null);
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
+    const [player, setPlayer] = useState<YT.Player | null>(null);
 
     // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
@@ -101,6 +102,30 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         console.log('Current memosId:', memosId);
     }, [memosId]);
 
+    const getVideoTimestamp = () => {
+        if (!player) return "00:00";
+        const time = player.getCurrentTime();
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    // YouTube Player 초기화
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const YT = (window as any).YT;
+            if (!YT) return;
+
+            new YT.Player('youtube-player', {
+                events: {
+                    onReady: (event: YT.PlayerEvent) => {
+                        setPlayer(event.target);
+                    }
+                }
+            });
+        }
+    }, []);
+
     return (
         <div className={styles.container}>
             {/* (7) 유튜브 영상 섹션 */}
@@ -137,8 +162,8 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                 <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
                                 {memosId && (
                                     <EditorNoSSR
-                                        ref={null}
-                                        getTimestamp={() => '00:00'}
+                                        ref={editorRef}
+                                        getTimestamp={getVideoTimestamp}
                                         onTimestampClick={() => {}}
                                         isEditable={true}
                                         editingItemId={null}
