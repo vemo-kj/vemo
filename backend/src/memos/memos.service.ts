@@ -67,7 +67,7 @@ export class MemosService {
     async getMemosById(memosId: number): Promise<Memos> {
         const memos = await this.memosRepository.findOne({
             where: { id: memosId },
-            relations: ['user', 'video', 'memos'],
+            relations: ['user', 'video'],
         });
         if (!memos) throw new NotFoundException(`Memos with ID ${memosId} not found`);
         return memos;
