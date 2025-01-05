@@ -48,24 +48,7 @@ export default function LoginPage() {
             // 토큰 저장
             sessionStorage.setItem('token', data.access_token);
 
-            // YouTube 인증 요청
-            const youtubeAuthResponse = await fetch('http://localhost:5050/youtubeauth', {
-                headers: {
-                    Authorization: `Bearer ${data.access_token}`,
-                    Accept: 'application/json',
-                },
-                credentials: 'include',
-            });
-
-            if (!youtubeAuthResponse.ok) {
-                const errorData = await youtubeAuthResponse.json();
-                console.error('YouTube 인증 에러:', errorData);
-                throw new Error('YouTube 인증 요청 실패');
-            }
-
-            const authData = await youtubeAuthResponse.json();
-            // YouTube 인증 URL로 리다이렉트
-            window.location.href = authData.url;
+            router.push('/');
         } catch (err) {
             console.error('로그인 에러:', err);
             setError(err instanceof Error ? err.message : '네트워크 오류가 발생했습니다.');
