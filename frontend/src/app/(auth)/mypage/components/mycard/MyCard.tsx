@@ -1,52 +1,70 @@
-import Image from 'next/image'
 import Link from 'next/link';
-import styles from './MyCard.module.css'
+import styles from './MyCard.module.css';
+
+interface PreviewVideo {
+  id: string;
+  title: string;
+  channel: string;
+}
 
 interface MyCardProps {
   id: number;
   name: string;
   totalVideos: number;
   thumbnail: string;
-  previewVideos: Array<{
-    id: string;
-    title: string;
-    channel: string;
-  }>;
+  previewVideos: PreviewVideo[];
 }
 
 export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos }: MyCardProps) {
+  const showPreviewList = previewVideos.length >= 1;
+  const previewList = previewVideos.slice(0, 2);
+  const hasMultipleVideos = previewVideos.length >= 2;
+  const firstVideoId = previewVideos[0]?.id;
+
   return (
-    <Link href={`/vemo/${previewVideos[0]?.id}?playlistId=${id}`} className={styles.cardLink}>
+    <Link href={`/vemo/${firstVideoId}?playlistId=${id}`} className={styles.cardLink}>
       <div className={styles.myCard}>
         <div className={styles.thumbnailContainer}>
           <div className={styles.thumbnailStack}>
-            {previewVideos.slice(0, 3).map((video, index) => (
+            {hasMultipleVideos ? (
+              <>
+                <img
+                  src={thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={name}
+                  className={`${styles.thumbnail} ${styles.thumbnailBack}`}
+                />
+                <img
+                  src={thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={name}
+                  className={`${styles.thumbnail} ${styles.thumbnailFront}`}
+                />
+              </>
+            ) : (
               <img
-                key={video.id}
-                src={thumbnail || '/default-thumbnail.jpg'}
+                src={thumbnail || '/images/default-thumbnail.jpg'}
                 alt={name}
                 className={styles.thumbnail}
               />
-            ))}
+            )}
           </div>
         </div>
         <div className={styles.cardContent}>
           <h3 className={styles.title}>{name}</h3>
           <div className={styles.statsContainer}>
             <div className={styles.stat}>
-              <span className={styles.statLabel}>총 영상</span>
+              <span className={styles.statLabel}>총 영상 수</span>
               <span className={styles.statValue}>{totalVideos}개</span>
             </div>
-            {previewVideos.length > 0 && (
-              <div className={styles.previewVideos}>
-                {previewVideos.map((video, index) => (
-                  <p key={video.id} className={styles.previewVideo}>
-                    {index + 1}. {video.title}
-                  </p>
-                ))}
-              </div>
-            )}
           </div>
+          {showPreviewList && (
+            <div className={styles.previewVideos}>
+              {previewList.map((video, index) => (
+                <div key={video.id} className={styles.previewVideo}>
+                  {index + 1}. {video.title}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Link>

@@ -8,22 +8,26 @@
   align-items: center;
   justify-content: space-between;
   background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 0 40px;
   z-index: 1000;
 }
 
 .buttonHome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   border: none;
   padding: 8px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .buttonHome:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   transform: scale(1.05);
 }
 
@@ -40,6 +44,9 @@
 }
 
 .mainNavCreate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 16px;
   height: 36px;
   border: none;
@@ -49,6 +56,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .mainNavCreate:hover {
@@ -59,4 +67,3 @@
 .mainNavCreate:active {
   transform: translateY(0);
 }
-
