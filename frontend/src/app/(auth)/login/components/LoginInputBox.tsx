@@ -26,4 +26,3 @@ export default function LoginInputBox({ label, type, id, name, required, classNa
     </div>
   );
 } 
-

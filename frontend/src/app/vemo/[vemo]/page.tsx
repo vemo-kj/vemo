@@ -19,13 +19,14 @@ import { SummaryProvider } from './context/SummaryContext';
  * ----------------------------------------------------------------
  */
 
-const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
+// 백엔드 서버 주소
+const API_URL = 'http://localhost:5050';
 
 // ----------------------------------------------------------------
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
 const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-    ssr: false,
+    ssr: false, // 서버 사이드 렌더링 비활성화
 });
 
 // ----------------------------------------------------------------
@@ -55,21 +56,30 @@ interface PageProps {
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
 export default function VemoPage({ params: pageParams }: PageProps) {
-    // params를 React.use()로 unwrap
-    // params를 useParams로 가져옴
+    // useParams를 사용하여 URL 파라미터 가져오기
     const params = useParams();
     const vemo = params.vemo as string;
     const editorRef = useRef(null);
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
 
+    // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
 
+            // localStorage에서 sessionStorage로 변경
+            const token = sessionStorage.getItem('token');
+            console.log('Current token:', token);
+            
+            if (!token) {
+                console.log('No token found, redirecting to login...');
+                router.push('/login');
+                return;
+            }
+
             try {
                 console.log('Creating memos for video:', vemo);
-                // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
                 const newMemosId = await createMemos(vemo);
                 if (newMemosId) {
                     setMemosId(newMemosId);
@@ -77,11 +87,14 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 }
             } catch (error) {
                 console.error('Failed to initialize memos:', error);
+                if (error.message.includes('401')) {
+                    router.push('/login');
+                }
             }
         };
 
         initializeMemos();
-    }, [vemo]);
+    }, [vemo, router]);
 
     // memosId 상태 변경 추적
     useEffect(() => {
