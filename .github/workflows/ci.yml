@@ -1,0 +1,40 @@
+name: Deploy to EC2
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Set up SSH
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.VEMOKEYPAIR }}" | base64 -d > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -H ${{ secrets.AWS_EC2_HOST }} >> ~/.ssh/known_hosts
+
+            - name: Deploy to EC2
+              run: |
+                  ssh ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "
+                    cd /home/${{ secrets.AWS_EC2_USER }}/app &&
+                    git pull &&
+                    cd backend &&
+                    docker stop backend-vemo-1 || true &&
+                    docker rm backend-vemo-1 || true &&
+                    docker system prune -f &&
+                    docker build -t backend-vemo-1 . &&
+                    docker run -d \
+                      --name backend-vemo-1 \
+                      -p 5050:5050 \
+                      --env-file .env \
+                      --restart unless-stopped \
+                      backend-vemo-1 &&
+                    docker ps -a
+                  "
