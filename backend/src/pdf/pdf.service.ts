@@ -1,70 +1,105 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-const PDFDocument = require('pdfkit');
+import * as puppeteer from 'puppeteer';
 
 @Injectable()
 export class PdfService {
     async createMemoCapturePDF(title: string, memos: any[], capture: any[]): Promise<Buffer> {
-        const doc = new PDFDocument();
-        const buffers = [];
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
 
-        doc.on('data', buffers.push.bind(buffers));
+        // HTML 템플릿 구성
+        const htmlContent = this.generateHTML(title, memos, capture);
 
-        const combined = [
-            ...memos.map(memo => ({ ...memo, type: 'memo' })),
-            ...capture.map(capture => ({ ...capture, type: 'capture' })),
-        ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        // HTML 렌더링
+        await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
-        doc.fontSize(20).text(`${title}`, { align: 'center' });
-        doc.moveDown();
+        // PDF 생성
+        const pdfBuffer = Buffer.from(
+            await page.pdf({
+                format: 'A4',
+                printBackground: true,
+            }),
+        );
 
-        for (const item of combined) {
-            const formattedTime = new Date(item.timestamp)
-                .toISOString()
-                .replace('T', ' ')
-                .substring(0, 19);
-
-            if (item.type === 'memo') {
-                doc.fontSize(14).text(`📝 ${formattedTime}`);
-                doc.fontSize(12).text(`${item.description}`);
-                doc.moveDown();
-            } else if (item.type === 'capture') {
-                try {
-                    const imageBuffer = await this.downloadImage(item.image);
-                    doc.fontSize(14).text(`🖼️ ${formattedTime}`);
-                    doc.image(imageBuffer, {
-                        fit: [400, 400],
-                        align: 'center',
-                        valign: 'center',
-                    });
-                    doc.moveDown();
-                } catch (error) {
-                    console.error(`이미지 다운로드 실패: ${item.image}`);
-                    doc.fontSize(12).text(`이미지를 불러오지 못했습니다.`);
-                }
-            }
-        }
-
-        return new Promise(resolve => {
-            doc.on('end', () => {
-                const pdfBuffer = Buffer.concat(buffers);
-                resolve(pdfBuffer);
-            });
-            doc.end(); // 이 위치로 이동
-        });
+        await browser.close();
+        return pdfBuffer;
     }
 
-    private async downloadImage(url: string): Promise<Buffer> {
-        try {
-            const response = await axios({
-                method: 'get',
-                url: url,
-                responseType: 'arraybuffer',
-            });
-            return Buffer.from(response.data, 'binary');
-        } catch (error) {
-            console.error(`이미지 다운로드 실패: ${url}`);
-            throw new Error('이미지 다운로드 실패');
-        }
+    // HTML 템플릿 생성 함수
+    private generateHTML(title: string, memos: any[], capture: any[]): string {
+        return `
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8">
+            <title>${title}</title>
+            <style>
+                body {
+                    font-family: 'Noto Sans KR', sans-serif;
+                    margin: 40px;
+                    line-height: 1.6;
+                }
+                h1 {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .memo, .capture {
+                    margin-bottom: 20px;
+                }
+                .timestamp {
+                    font-size: 14px;
+                    color: #555;
+                }
+                .description {
+                    font-size: 16px;
+                }
+                .image {
+                    text-align: center;
+                    margin-top: 20px;
+                }
+                img {
+                    width: 400px;
+                    max-width: 100%;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>${title}</h2>
+            ${memos
+                .map(
+                    memo => `
+                <div class="memo">
+                    <div class="timestamp">[${this.formatTimestamp(memo.timestamp)}]</div>
+                    <div class="description">${memo.description}</div>
+                </div>
+            `,
+                )
+                .join('')}
+            
+            ${capture
+                .map(
+                    item => `
+                <div class="capture">
+                    <div class="timestamp">${this.formatTimestamp(item.timestamp)}</div>
+                    <div class="image">
+                        <img src="${item.image}" alt="Captured Image" />
+                    </div>
+                </div>
+            `,
+                )
+                .join('')}
+        </body>
+        </html>
+        `;
+    }
+
+    // 타임스탬프 포맷팅 함수
+    private formatTimestamp(timestamp: string): string {
+        const date = new Date(timestamp);
+        const minutes = String(date.getMinutes()).padStart(2, '0'); // 두 자리 분
+        const seconds = String(date.getSeconds()).padStart(2, '0'); // 두 자리 초
+        return `${minutes}:${seconds}`;
     }
 }
