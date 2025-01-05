@@ -52,10 +52,9 @@ export class MemosService {
      * @returns 메모 개수
      */
     async getVemoCountByVideo(videoId: string): Promise<number> {
-        const count = await this.memosRepository.count({ where: { video: { id: videoId } } });
-        return count;
+        return await this.memosRepository.count({ where: { video: { id: videoId } } });
     }
-    //TODO: 확인 필요
+
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { user: { id: userId } },
@@ -78,14 +77,27 @@ export class MemosService {
             });
         }
     }
-    //TODO: 확인 필요 
+
     async getMemosById(memosId: number): Promise<Memos> {
-        const memos = await this.memosRepository.findOne({
-            where: { id: memosId },
-            relations: ['user', 'video', 'memos'],
-        });
-        if (!memos) throw new NotFoundException(`Memos with ID ${memosId} not found`);
-        return memos;
+        try {
+            const memos = await this.memosRepository.findOne({
+                where: { id: memosId },
+                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+            });
+
+            if (!memos) {
+                throw new NotFoundException(`Memos with ID ${memosId} not found`);
+            }
+
+            return memos;
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to get memos', {
+                cause: error,
+            });
+        }
     }
 
     async updateMemos(id: number, updateMemosDto: UpdateMemosDto): Promise<Memos> {
@@ -104,15 +116,21 @@ export class MemosService {
     }
 
     async getMemosByVideoAndUser(videoId: string, userId: number): Promise<Memos[]> {
-        return await this.memosRepository.find({
-            where: {
-                video: { id: videoId },
-                user: { id: userId },
-            },
-            relations: ['user'],
-            order: {
-                createdAt: 'DESC',
-            },
-        });
+        try {
+            return await this.memosRepository.find({
+                where: {
+                    video: { id: videoId },
+                    user: { id: userId },
+                },
+                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                order: {
+                    createdAt: 'DESC',
+                },
+            });
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to get memos by video and user', {
+                cause: error,
+            });
+        }
     }
 }
