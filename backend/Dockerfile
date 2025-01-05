@@ -1,5 +1,5 @@
 # 베이스 이미지 설정
-FROM node:22
+FROM node:18-alpine
 
 # 필수 패키지 설치
 RUN apk add --no-cache \
@@ -12,20 +12,23 @@ RUN apk add --no-cache \
 # 작업 디렉토리 생성
 WORKDIR /usr/src/app
 
-# 루트 package.json 복사
-COPY package.json .
-COPY backend/package.json ./backend/
-
-# 의존성 설치
+# 패키지 파일 복사 및 의존성 설치
+COPY package*.json ./
 RUN npm install
 
-WORKDIR /usr/src/app/backend
-COPY backend/ .
+# TypeScript 설정 파일 복사
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
+
+# 소스 코드 복사
+COPY src/ ./src/
 
 # 백엔드 애플리케이션 빌드 (TypeScript 컴파일 등)
 RUN npm run build
 
-# 개발 모드로 실행
-CMD ["npm", "run", "start:dev"]
-
+# 프로덕션 환경 설정
+ENV NODE_ENV=production
 EXPOSE 5050
+
+# 제발 실행 제발 진짜 제발요
+CMD ["npm", "run", "start:prod"]

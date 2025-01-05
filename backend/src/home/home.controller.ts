@@ -10,8 +10,6 @@ import {
     Query,
     Req,
     Param,
-    UnauthorizedException,
-    HttpException,
 } from '@nestjs/common';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 import { Public } from '../public.decorator';
@@ -47,35 +45,14 @@ export class HomeController {
      * @param req
      * @returns CreateMemosResponseDto
      */
-    @Post('/memos/video/:videoId')
+    @Post('/memos/:videoId')
     @HttpCode(HttpStatus.CREATED)
     async createOrGetLatestMemos(
         @Param('videoId') videoId: string,
         @Req() req: RequestWithUserInterface,
     ): Promise<CreateMemosResponseDto> {
-        // TODO: 디버깅용 코드 제거
-        try {
-            console.log('Request received:', {
-                videoId,
-                user: req.user,
-                headers: req.headers
-            });
-            
-            if (!req.user) {
-                throw new UnauthorizedException('User not authenticated');
-            }
-
-            const userId = req.user.id;
-            const result = await this.homeService.createOrGetLatestMemos(userId, videoId);
-            console.log('Memos created successfully:', result);
-            return result;
-        } catch (error) {
-            console.error('Error in createOrGetLatestMemos:', error);
-            throw new HttpException(
-                error.message || 'Internal server error',
-                error.status || HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
+        const userId = req.user.id;
+        return await this.homeService.createOrGetLatestMemos(userId, videoId);
     }
 
     /**
