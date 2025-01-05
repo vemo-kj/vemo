@@ -9,16 +9,10 @@ export class MemosDto {
     @IsString()
     title: string;
 
-    @IsString()
-    description: string;
-
     @ValidateNested()
     @Type(() => UserDto)
     user: UserDto;
 
     @IsDate()
     created_at: Date;
-
-    @IsDate()
-    updated_at?: Date;
 }
