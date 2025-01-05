@@ -22,7 +22,7 @@ interface SidebarNavProps {
     renderSectionContent: () => React.ReactNode;
     currentTimestamp: string;
     handleCaptureTab: () => void;
-    handleCaptureArea: () => void;
+    handleCaptureArea?: () => void;
     editorRef: React.RefObject<any>;
     playlistData?: {
         playlist: {
@@ -33,7 +33,7 @@ interface SidebarNavProps {
             title: string;
         };
     };
-    memosId?: string;
+    memosId?: number | null;
 }
 
 /**

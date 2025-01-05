@@ -9,6 +9,25 @@ import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import { SummaryProvider } from './context/SummaryContext';
 
+/**
+ * ----------------------------------------------------------------
+ * 📌 memoService (fetch 사용)
+ * ----------------------------------------------------------------
+ * - 비디오 별 메모 컨테이너(memos)를 생성(POST)하거나
+ *   추후 필요한 경우 GET, PUT, DELETE 등으로 확장 가능
+ * - 예: /api/memos 엔드포인트에 요청을 보내 메모 컨테이너 생성
+ * ----------------------------------------------------------------
+ */
+
+const API_URL = 'http://localhost:5050'; // 백엔드 서버 주소
+
+// ----------------------------------------------------------------
+// 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
+// ----------------------------------------------------------------
+const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+    ssr: false,
+});
+
 // ----------------------------------------------------------------
 // 📌 Editor 컴포넌트에 넘길 Props 인터페이스
 // ----------------------------------------------------------------
@@ -26,14 +45,18 @@ interface CustomEditorProps {
 // ----------------------------------------------------------------
 // 📌 동적 로드(Dynamic Import)로 에디터 컴포넌트를 가져옴
 // ----------------------------------------------------------------
-const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
-    ssr: false,
-});
+interface PageProps {
+    params: {
+        vemo: string;
+    };
+}
 
 // ----------------------------------------------------------------
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
-export default function VemoPage() {
+export default function VemoPage({ params: pageParams }: PageProps) {
+    // params를 React.use()로 unwrap
+    // params를 useParams로 가져옴
     const params = useParams();
     const vemo = params.vemo as string;
     const editorRef = useRef(null);
@@ -43,32 +66,33 @@ export default function VemoPage() {
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
+
             try {
                 console.log('Creating memos for video:', vemo);
-                const data = await createMemos(vemo);
-                if (data.id) {
-                    setMemosId(data.id);
-                    console.log('Successfully created memos with ID:', data.id);
+                // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
+                const newMemosId = await createMemos(vemo);
+                if (newMemosId) {
+                    setMemosId(newMemosId);
+                    console.log('Successfully set memosId:', newMemosId);
                 }
-            } catch (error: any) {
+            } catch (error) {
                 console.error('Failed to initialize memos:', error);
-                if (error?.response?.status === 401) {
-                    router.push('/login');
-                }
             }
         };
 
         initializeMemos();
-    }, [vemo, router]);
+    }, [vemo]);
 
+    // memosId 상태 변경 추적
     useEffect(() => {
         console.log('Current memosId:', memosId);
     }, [memosId]);
 
     return (
         <div className={styles.container}>
-            {/* 유튜브 영상 섹션 */}
+            {/* (7) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
+                {/* 홈으로 이동하는 버튼 */}
                 <Link href="/" passHref>
                     <img
                         src="/icons/Button_home.svg"
@@ -77,6 +101,7 @@ export default function VemoPage() {
                     />
                 </Link>
 
+                {/* 유튜브 iframe 플레이어 */}
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
@@ -88,13 +113,12 @@ export default function VemoPage() {
                 </div>
             </div>
 
-            {/* 사이드바 및 노트 영역 */}
+            {/* (8) 사이드바 및 노트 영역 */}
             <div className={styles.section3}>
                 <SummaryProvider>
                     <SideBarNav
                         selectedOption="내 메모 보기"
                         onOptionSelect={() => {}}
-                        handleCaptureArea={() => {}}
                         renderSectionContent={() => (
                             <>
                                 <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
