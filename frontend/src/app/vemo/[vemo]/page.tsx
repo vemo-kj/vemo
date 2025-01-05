@@ -159,12 +159,12 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 console.log('Creating memos for video:', vemo);
                 const newMemosId = await createMemos(vemo);
                 if (newMemosId) {
-                    setMemosId(newMemosId);
-                    console.log('Successfully set memosId:', newMemosId);
+                    setMemosId(newMemosId.memosId);
+                    console.log('Successfully set memosId:', newMemosId.memosId);
                 }
             } catch (error) {
                 console.error('Failed to initialize memos:', error);
-                if (error.message.includes('401')) {
+                if ((error as any).message.includes('401')) {
                     router.push('/login');
                 }
             }

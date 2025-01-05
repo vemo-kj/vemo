@@ -100,3 +100,87 @@ export const createMemos = async (videoId: string) => {
         throw error;
     }
 };
+
+// Memo 관련 인터페이스 추가
+interface CreateMemoData {
+    timestamp: string;
+    description: string;
+    memosId: number;
+}
+
+interface UpdateMemoData {
+    id: number;
+    timestamp: string;
+    description: string;
+}
+
+// Memo CRUD 함수들 추가
+export const memoService = {
+    createMemo: async (data: CreateMemoData) => {
+        try {
+            const requestData = {
+                ...data,
+                timestamp: new Date(data.timestamp),
+                description: data.description || '',
+            };
+
+            const response = await fetch(`${API_URL}/memo`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to create memo:', error);
+            throw error;
+        }
+    },
+
+    updateMemo: async (data: UpdateMemoData) => {
+        try {
+            const requestData = {
+                ...data,
+                timestamp: new Date(data.timestamp),
+                description: data.description || '',
+            };
+
+            const response = await fetch(`${API_URL}/memo/${data.id}`, {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to update memo:', error);
+            throw error;
+        }
+    },
+
+    deleteMemo: async (id: number) => {
+        try {
+            const response = await fetch(`${API_URL}/memo/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeader(),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to delete memo:', error);
+            throw error;
+        }
+    },
+};

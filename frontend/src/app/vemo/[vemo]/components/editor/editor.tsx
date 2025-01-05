@@ -92,12 +92,9 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
 
         // Draft.js Content → HTML
         const html = convertToHTML(contentState);
-
-        // 첫 입력 기록된 timestamp가 있다면 사용, 없다면 현재 timestamp
-        const stamp =
-            isFirstInputRecorded && firstInputTimestamp
-                ? firstInputTimestamp
-                : props.getTimestamp();
+        const stamp = isFirstInputRecorded && firstInputTimestamp
+            ? firstInputTimestamp
+            : props.getTimestamp();
 
         // memosId가 없으면 서버 저장 불가
         if (!props.memosId) {
@@ -106,7 +103,6 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         }
 
         try {
-            // createMemo API 호출 (fetch)
             const savedMemo = await memoService.createMemo({
                 timestamp: stamp,
                 description: html,
@@ -221,7 +217,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         try {
             await memoService.updateMemo({
                 id: Number(id),
-                timestamp: props.getTimestamp(), // 기존 timestamp 또는 현재 timestamp
+                timestamp: props.getTimestamp(),
                 description: newHTML,
             });
         } catch (error) {
