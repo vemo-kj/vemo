@@ -14,7 +14,6 @@ export class CapturesService {
     ) {}
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
-    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
             return await this.capturesRepository.save(captures);
@@ -46,13 +45,9 @@ export class CapturesService {
                 where: { id },
                 relations: ['memos'],
             });
-            const capture = await this.capturesRepository.findOne({
-                where: { id },
-                relations: ['memos'],
-            });
+
 
             if (!capture) {
-                throw new NotFoundException(`Capture with ID ${id} not found`);
                 throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
@@ -80,7 +75,6 @@ export class CapturesService {
         return await this.capturesRepository.save({ ...capture, ...updateCapturesDto });
     }
 
-    async deleteCapture(id: number): Promise<void> {
     async deleteCapture(id: number): Promise<void> {
         const capture = await this.capturesRepository.findOne({ where: { id } });
         if (!capture) {

@@ -8,8 +8,6 @@ import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto
 import { PlaylistService } from '../playlist/playlist.service';
 import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
 import { Memos } from '../memos/memos.entity';
-import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
-import { Memos } from '../memos/memos.entity';
 
 @Injectable()
 export class HomeService {
@@ -27,12 +25,12 @@ export class HomeService {
 
         const playlist = await this.playlistService.createPlaylist({ name, videoIds }, userId);
 
-        const firstVideoId = videoIds[0];
-        await this.memosService.createMemos(name, '', firstVideoId, userId);
+        const firstVideo = await this.videoService.getVideoById(videoIds[0]);
+        await this.memosService.createMemos(firstVideo.title, firstVideo.id, userId);
 
         return {
-            playlist: playlist.id,
-            videoId: firstVideoId,
+            playlistId: playlist.id,
+            videoId: firstVideo.id,
         };
     }
 
@@ -43,20 +41,26 @@ export class HomeService {
      * @returns CreateMemosResponseDto
      */
     async createOrGetLatestMemos(userId: number, videoId: string): Promise<CreateMemosResponseDto> {
-        // 사용자의 해당 비디오에 대한 메모 조회
-        const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
+        try {
+            // 사용자의 해당 비디오에 대한 메모 조회
+            const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
 
-        // 메모가 없으면 새로 생성
-        if (!userMemos || userMemos.length === 0) {
-            const newMemos = await this.createInitialMemos(userId, videoId);
-            return this.mapMemosToDto(newMemos);
+            // 메모가 없으면 새로 생성
+            if (!userMemos || userMemos.length === 0) {
+                const newMemos = await this.createInitialMemos(userId, videoId);
+                return this.mapMemosToDto(newMemos);
+            }
+
+            // 메모가 있으면 가장 최신 메모 반환
+            return this.mapMemosToDto(userMemos[0]); // getMemosByVideoAndUser가 createdAt DESC로 정렬되어 있음
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to create or get memos', {
+                cause: error,
+            });
         }
-
-        // 메모가 있으면 가장 최신 메모와 내용을 함께 반환
-        const latestMemos = userMemos[0]; // getMemosByVideoAndUser가 createdAt DESC로 정렬되어 있음
-        const memosWithContent = await this.memosService.getMemosById(latestMemos.id);
-
-        return this.mapMemosToDto(memosWithContent);
     }
 
     /**
@@ -67,8 +71,17 @@ export class HomeService {
      * @returns Memos
      */
     private async createInitialMemos(userId: number, videoId: string): Promise<Memos> {
-        const video = await this.videoService.getVideoById(videoId);
-        return await this.memosService.createMemos(video.title, '내용없음', videoId, userId);
+        try {
+            const video = await this.videoService.getVideoById(videoId);
+            return await this.memosService.createMemos(video.title, videoId, userId);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to create initial memos', {
+                cause: error,
+            });
+        }
     }
 
     /**
@@ -81,9 +94,7 @@ export class HomeService {
         return {
             id: memos.id,
             title: memos.title,
-            description: memos.description,
             createdAt: memos.createdAt,
-            updatedAt: memos.updatedAt,
         };
     }
 
@@ -93,7 +104,6 @@ export class HomeService {
      * @param limit 페이지당 비디오 수 (기본값: 10)
      * @returns HomeResponseDto
      */
-    async getAllVideos(page: number = 1, limit: number = 8): Promise<HomeResponseDto> {
     async getAllVideos(page: number = 1, limit: number = 8): Promise<HomeResponseDto> {
         const videos = await this.videoService.getAllVideos(page, limit);
 
