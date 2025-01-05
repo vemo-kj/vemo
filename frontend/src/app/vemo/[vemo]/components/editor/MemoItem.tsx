@@ -133,9 +133,12 @@ const MemoItem = memo(({
   /**
    * (5) 타임스탬프를 클릭하면 영상 해당 시점으로 이동
    */
-  const handleTimestampClick = () => {
-    onTimestampClick?.(timestamp);
-  };
+  const handleTimestampClick = useCallback(() => {
+    console.log('Clicking timestamp:', timestamp);
+    if (onTimestampClick) {
+      onTimestampClick(timestamp);
+    }
+  }, [timestamp, onTimestampClick]);
 
   /**
    * (6) HTML 변경을 일정 시간 지연(debounce) 후 처리하고 싶다면:
@@ -156,8 +159,11 @@ const MemoItem = memo(({
     <div className={styles.memoItemContainer}>
       {/* 헤더 영역: 타임스탬프 버튼 */}
       <div className={styles.memoHeader}>
-        <button className={styles.timestampBtn} onClick={handleTimestampClick}>
-          {timestamp}
+        <button 
+          className={styles.timestampBtn} 
+          onClick={handleTimestampClick}
+        >
+          {timestamp || '00:00'}
         </button>
       </div>
 
@@ -196,7 +202,7 @@ const MemoItem = memo(({
         </button>
       </div>
 
-      {/* 그림 그리기 모달 (DrawingCanvas) */}
+      {/* 그림기 모달 */}
       {isDrawingOpen && screenshot && (
         <div className={styles.drawOverlay}>
           <div className={styles.drawPopup}>

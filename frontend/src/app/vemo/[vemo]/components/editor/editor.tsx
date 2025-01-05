@@ -82,6 +82,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
             };
             setSections(prev => [...prev, newItem]);
         },
+        getCurrentTimestamp: getCurrentVideoTime
     }));
 
     /**
@@ -90,12 +91,39 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
      * - Draft.js의 contentState → HTML 변환 후 서버로 전송
      * ----------------------------------------------------------------
      */
+    const formatVideoTime = (seconds: number): string => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+
+    const getCurrentVideoTime = () => {
+        try {
+            const timestamp = props.getTimestamp();
+            console.log('Raw timestamp from player:', timestamp);
+            
+            // 숫자로 변환하여 포맷팅
+            const timeInSeconds = parseFloat(timestamp);
+            if (!isNaN(timeInSeconds)) {
+                const formattedTime = formatVideoTime(timeInSeconds);
+                console.log('Formatted timestamp:', formattedTime);
+                return formattedTime;
+            }
+            return '00:00';
+        } catch (error) {
+            console.error('Error getting timestamp:', error);
+            return '00:00';
+        }
+    };
+
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
         const html = convertToHTML(contentState);
-        const currentTimestamp = props.getTimestamp(); // 유튜브 재생 시간
+        const currentTimestamp = getCurrentVideoTime();
+
+        console.log('Saving memo with timestamp:', currentTimestamp);
 
         if (!props.memosId) {
             console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
@@ -103,29 +131,35 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         }
 
         try {
-            console.log('Saving memo with timestamp:', currentTimestamp); // 디버깅용
+            // 타임스탬프 유효성 검사 추가
+            if (currentTimestamp === '00:00' && props.getTimestamp()) {
+                console.warn('Warning: Using default timestamp despite player time being available');
+            }
 
             const savedMemo = await memoService.createMemo({
-                timestamp: currentTimestamp, // 유튜브 재생 시간을 타임스탬프로 사용
+                timestamp: currentTimestamp,
                 description: html,
                 memosId: props.memosId,
             });
 
-            // 새로 생성된 아이템을 sections에 추가
+            console.log('Successfully saved memo:', savedMemo);
+
+            // 새로운 메모 아이템 생성
             const newItem: Section = {
                 id: savedMemo.id.toString(),
-                timestamp: currentTimestamp, // 화면에는 유튜브 재생 시간 표시
+                timestamp: currentTimestamp,
                 htmlContent: html,
             };
-            setSections(prev => [...prev, newItem]);
 
-            // 에디터 초기화
+            setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
             setLastSavedHTML(html);
             setIsFirstInputRecorded(false);
             setFirstInputTimestamp(null);
         } catch (error) {
             console.error('Failed to save memo:', error);
+            // 사용자에게 에러 메시지 표시
+            alert('메모 저장에 실패했습니다. 다시 시도해주세요.');
         }
     };
 
@@ -260,9 +294,12 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         timestamp={item.timestamp}
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
-                        onTimestampClick={props.onTimestampClick}
+                        onTimestampClick={(timestamp) => {
+                            console.log('Timestamp clicked:', timestamp); // 디버깅용
+                            props.onTimestampClick(timestamp);
+                        }}
                         onDelete={() => handleDeleteItem(item.id)}
-                        onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
+                        onChangeHTML={(newVal) => handleChangeItem(item.id, newVal)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
                     />

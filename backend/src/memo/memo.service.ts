@@ -1,8 +1,11 @@
+
+// memo.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Memo } from './memo.entity';
 import { Repository } from 'typeorm';
-import { CreateMemoDto } from './dto/create-memo.dto';
+import { CreateMemoData } from './interfaces/memo.interface';
 import { UpdateMemoDto } from './dto/update-memo.dto';
 
 @Injectable()
@@ -12,8 +15,8 @@ export class MemoService {
         private memoRepository: Repository<Memo>,
     ) {}
 
-    async createMemo(createMemoDto: CreateMemoDto): Promise<Memo> {
-        const memo = this.memoRepository.create(createMemoDto);
+    async createMemo(createMemoData: CreateMemoData): Promise<Memo> {
+        const memo = this.memoRepository.create(createMemoData);
         return await this.memoRepository.save(memo);
     }
 
