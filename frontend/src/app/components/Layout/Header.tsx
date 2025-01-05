@@ -10,30 +10,27 @@ import DropDownMenu from './DropDownMenu';
 export default function Header() {
   return (
     <header className={styles.mainNav}>
-      
+
       <div>
-      <Link href="/">
-          <button className={styles.buttonHome}>
-            <img 
-              src="/icons/Button_home.svg"
-              alt='home'
-            />
-          </button>
-        </ Link>
+        <Link href="/" className={styles.buttonHome}>
+          <img
+            src="/icons/Button_home.svg"
+            alt='home'
+          />
+        </Link>
       </div>
 
       <div>
         <SearchBox />
       </div>
-      
+
       <div className={styles.mainNavButton}>
         <div className={styles.mainNavUser}>
           <DropDownMenu />
         </div>
         <div>
-          <Link href="/create">
-            <button 
-              className={styles.mainNavCreate}>작성하기</button>
+          <Link href="/create" className={styles.mainNavCreate}>
+            작성하기
           </Link>
         </div>
       </div>
