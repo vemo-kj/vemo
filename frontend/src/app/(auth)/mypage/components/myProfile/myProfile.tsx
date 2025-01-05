@@ -2,7 +2,11 @@
 import { useState, useEffect } from 'react';
 import styles from './myProfile.module.css';
 
-type UserProfile = {
+// src/app/(auth)/mypage/components/myProfile/myProfile.tsx
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
   nickname: string;
   birth: string;
   gender: string;
@@ -13,7 +17,7 @@ type UserProfile = {
 export default function MyProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {

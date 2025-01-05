@@ -1,17 +1,39 @@
 // memoService.ts
 'use client';
 
+// 환경 변수에서 API URL을 가져오거나 기본값을 설정
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5050';
 console.log('Using API URL:', API_URL);
 
-// 인증 토큰 헤더
+// 1. 스토리지 타입을 일관되게 유지 (localStorage 사용)
+const storage = sessionStorage; // 또는 sessionStorage로 변경 가능
+console.log('Using storage:', storage);
+// 2. 토큰 관리를 위한 유틸리티 함수들 추가
+const TOKEN_KEY = 'token';
+
+// 토큰을 스토리지에 저장하는 함수
+export const setToken = (token: string) => {
+    storage.setItem(TOKEN_KEY, token);
+};
+
+// 스토리지에서 토큰을 가져오는 함수
+export const getToken = () => {
+    const token = storage.getItem(TOKEN_KEY);
+    console.log('Getting token from storage:', token);
+    return token;
+};
+
+// 스토리지에서 토큰을 제거하는 함수
+export const removeToken = () => {
+    storage.removeItem(TOKEN_KEY);
+};
+
+// 3. 인증 헤더를 가져오는 함수
 const getAuthHeader = () => {
-    const token = sessionStorage.getItem('token');
+    const token = getToken();
     if (!token) {
         throw new Error('No authentication token found');
     }
-
-    console.log('Using token:', token);
 
     return {
         'Content-Type': 'application/json',
@@ -20,7 +42,7 @@ const getAuthHeader = () => {
 };
 
 // --------------------------------------
-// 1) 비디오별 Momos 생성
+// 1) 비디오별 Memos 생성
 // --------------------------------------
 export const createMemos = async (videoId: string) => {
     try {
@@ -77,19 +99,4 @@ export const createMemos = async (videoId: string) => {
         console.error('Error in createMemos:', error);
         throw error;
     }
-  },
-
-  // 새로운 getMemosByVideoId 함수 추가
-  getMemosByVideoId: async (videoId: string, userId: number) => {
-    const res = await fetch(`${API_URL}/home/memos?videoId=${videoId}&userId=${userId}`);
-    
-    if (!res.ok) {
-      if (res.status === 404) {
-        return null; // 메모가 없는 경우
-      }
-      throw new Error(`Failed to get memos: ${res.statusText}`);
-    }
-
-    return await res.json();
-  }
 };

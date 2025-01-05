@@ -34,20 +34,19 @@ interface PageProps {
 // 📌 VemoPage 컴포넌트 (주요 로직)
 // ----------------------------------------------------------------
 export default function VemoPage({ params: pageParams }: PageProps) {
-    // params를 React.use()로 unwrap
-    // params를 useParams로 가져옴
+    // useParams를 사용하여 URL 파라미터 가져오기
     const params = useParams();
     const vemo = params.vemo as string;
     const editorRef = useRef(null);
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
 
+    // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
             try {
                 console.log('Creating memos for video:', vemo);
-                // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
                 const newMemosId = await createMemos(vemo);
                 if (newMemosId) {
                     setMemosId(newMemosId);
@@ -55,11 +54,14 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 }
             } catch (error) {
                 console.error('Failed to initialize memos:', error);
+                if (error.message.includes('401')) {
+                    router.push('/login');
+                }
             }
         };
 
         initializeMemos();
-    }, [vemo]);
+    }, [vemo, router]);
 
     // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
     useEffect(() => {
