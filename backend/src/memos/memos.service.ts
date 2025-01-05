@@ -87,4 +87,17 @@ export class MemosService {
             throw new NotFoundException(`Memos with ID ${id} not found`);
         }
     }
+
+    async getMemosByVideoAndUser(videoId: string, userId: number): Promise<Memos[]> {
+        return await this.memosRepository.find({
+            where: {
+                video: { id: videoId },
+                user: { id: userId },
+            },
+            relations: ['user'],
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+    }
 }

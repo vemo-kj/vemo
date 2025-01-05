@@ -9,16 +9,16 @@ export class MemoController {
 
     @Post()
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
-        return await this.memoService.create(createMemoDto);
+        return await this.memoService.createMemo(createMemoDto);
     }
 
     @Put(':id')
-    async update(@Body() updateMemoDto: UpdateMemoDto) {
-        return await this.memoService.update(updateMemoDto);
+    async updateMemo(@Body() updateMemoDto: UpdateMemoDto) {
+        return await this.memoService.updateMemo(updateMemoDto);
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: number) {
-        return await this.memoService.delete(id);
+    async deleteMemo(@Param('id') id: number) {
+        return await this.memoService.deleteMemo(id);
     }
 }
