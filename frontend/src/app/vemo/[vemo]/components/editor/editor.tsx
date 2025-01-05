@@ -7,11 +7,7 @@ import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
 // 대신 필요한 함수들만 import
-<<<<<<< Updated upstream
-import { createMemos} from '@/app/api/memoService';
-=======
 import { createMemos } from '@/app/api/memoService';
->>>>>>> Stashed changes
 
 /**
  * ----------------------------------------------------------------
@@ -55,7 +51,7 @@ const memoService = {
     },
     deleteMemo: async (id: number) => {
         // API 호출 로직
-    }
+    },
 };
 
 /**
@@ -228,7 +224,7 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         try {
             const contentState = newState.getCurrentContent();
             const hasText = contentState.hasText();
-            
+
             setEditorState(newState);
 
             // 첫 입력 시점 기록
@@ -327,7 +323,7 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
                         return getDefaultKeyBinding(e);
                     }}
                     handleKeyCommand={handleKeyCommand}
-                    handleBeforeInput={(char) => {
+                    handleBeforeInput={char => {
                         if (char.trim() === '') {
                             const contentState = editorState.getCurrentContent();
                             if (!contentState.hasText()) {
