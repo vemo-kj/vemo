@@ -6,6 +6,7 @@ import { MemosDto } from './dto/memos.dto';
 import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 import { CreatePlaylistDto } from '../playlist/dto/create-playlist.dto';
 import { Playlist } from '../playlist/entities/playlist.entity';
+import { Memos } from '../memos/memos.entity';
 
 @Injectable()
 export class VemoService {
@@ -26,7 +27,7 @@ export class VemoService {
         filter: 'all' | 'mine',
         userId?: number,
     ): Promise<GetCommunityMemosResponseDto> {
-        let memos;
+        let memos: Memos[];
 
         if (filter === 'mine' && userId) {
             memos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
@@ -37,13 +38,11 @@ export class VemoService {
         const mappedMemos: MemosDto[] = memos.map(memo => ({
             id: memo.id,
             title: memo.title,
-            description: memo.description,
             user: {
                 id: memo.user.id,
                 nickname: memo.user.nickname,
             },
             created_at: memo.createdAt,
-            updated_at: memo.updatedAt || memo.createdAt,
         }));
 
         return { memos: mappedMemos };

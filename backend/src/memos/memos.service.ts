@@ -63,10 +63,19 @@ export class MemosService {
     }
 
     async getAllMemosByVideo(videoId: string): Promise<Memos[]> {
-        return await this.memosRepository.find({
-            where: { video: { id: videoId } },
-            relations: ['user', 'video', 'memos'],
-        });
+        try {
+            return await this.memosRepository.find({
+                where: { video: { id: videoId } },
+                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                order: {
+                    createdAt: 'DESC',
+                },
+            });
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to get all memos by video', {
+                cause: error,
+            });
+        }
     }
 
     async getMemosById(memosId: number): Promise<Memos> {
