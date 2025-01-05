@@ -1,3 +1,56 @@
-.header button:hover img {
-  filter: brightness(0) invert(1); /* 이미지를 흰색으로 변경 */
+.profileContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  margin-bottom: 4px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 12px 24px;
+  margin-bottom: 4px;
+}
+
+.email,
+.nickname,
+.gender,
+.birth {
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email::before,
+.nickname::before,
+.gender::before,
+.birth::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background-color: #1a73e8;
+  border-radius: 50%;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
 }

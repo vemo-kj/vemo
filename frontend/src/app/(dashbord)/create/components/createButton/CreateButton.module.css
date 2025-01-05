@@ -1,0 +1,41 @@
+.createButtonContainer {
+  text-decoration: none;
+}
+
+.createButton {
+  padding: 14px 40px;
+  background-color: #007AFF;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  margin: 0 auto;
+  min-width: 120px;
+}
+
+.createButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.createButton:active {
+  transform: translateY(0);
+}
+
+.createButton:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+}
+
+/* 로딩 상태일 때 */
+.createButton:disabled:hover {
+  background-color: #adb5bd;
+  transform: none;
+}
+

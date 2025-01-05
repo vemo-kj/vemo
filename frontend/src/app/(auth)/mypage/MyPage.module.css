@@ -1,115 +1,89 @@
 .pageContainer {
   min-height: 100vh;
-  background-color: #fff;
-}
-
-.banner {
-  position: relative;
-  height: 300px;
-  background: #1a73e8;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.waveBg {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='100%25' gradientTransform='rotate(240)'%3E%3Cstop offset='0' stop-color='%231a73e8'/%3E%3Cstop offset='1' stop-color='%234285f4'/%3E%3C/linearGradient%3E%3Cpattern patternUnits='userSpaceOnUse' id='b' width='540' height='450' x='0' y='0' viewBox='0 0 1080 900'%3E%3Cg fill-opacity='0.1'%3E%3Cpath fill='%23444' d='M90 150L0 300h180z'/%3E%3Cpath d='M90 150L180 0H0z'/%3E%3Cpath fill='%23AAA' d='M270 150L360 0H180z'/%3E%3Cpath fill='%23DDD' d='M450 150l-90 150h180z'/%3E%3Cpath fill='%23999' d='M450 150L540 0H360z'/%3E%3Cpath d='M630 150l-90 150h180z'/%3E%3Cpath fill='%23DDD' d='M630 150L720 0H540z'/%3E%3Cpath fill='%23444' d='M810 150l-90 150h180z'/%3E%3Cpath fill='%23FFF' d='M810 150L900 0H720z'/%3E%3Cpath fill='%23DDD' d='M990 150l-90 150h180z'/%3E%3Cpath fill='%23444' d='M990 150l90-150H900z'/%3E%3Cpath fill='%23DDD' d='M90 450L0 600h180z'/%3E%3Cpath d='M90 450l90-150H0z'/%3E%3Cpath fill='%23666' d='M270 450l-90 150h180z'/%3E%3Cpath fill='%23AAA' d='M270 450l90-150H180z'/%3E%3Cpath fill='%23DDD' d='M450 450l-90 150h180z'/%3E%3Cpath fill='%23999' d='M450 450l90-150H360z'/%3E%3Cpath fill='%23999' d='M630 450l-90 150h180z'/%3E%3Cpath fill='%23FFF' d='M630 450l90-150H540z'/%3E%3Cpath d='M810 450l-90 150h180z'/%3E%3Cpath fill='%23DDD' d='M810 450l90-150H720z'/%3E%3Cpath fill='%23AAA' d='M990 450l-90 150h180z'/%3E%3Cpath fill='%23444' d='M990 450l90-150H900z'/%3E%3Cpath fill='%23222' d='M90 750L0 900h180z'/%3E%3Cpath d='M270 750l-90 150h180z'/%3E%3Cpath fill='%23DDD' d='M270 750l90-150H180z'/%3E%3Cpath d='M450 750l90-150H360z'/%3E%3Cpath fill='%23444' d='M630 750l-90 150h180z'/%3E%3Cpath fill='%23AAA' d='M630 750l90-150H540z'/%3E%3Cpath fill='%23666' d='M810 750l90-150H720z'/%3E%3Cpath fill='%23999' d='M990 750l-90 150h180zM990 750l90-150H900z'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='100%25' height='100%25'/%3E%3Crect x='0' y='0' fill='url(%23b)' width='100%25' height='100%25'/%3E%3C/svg%3E");
-  opacity: 0.8;
-}
-
-.changeCover {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  z-index: 2;
+  background-color: #f9f9f9;
+  padding: 80px 40px 40px;
 }
 
 .profileContent {
-  position: relative;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
-  z-index: 2;
 }
 
 .profileHeader {
-  position: relative;
-  margin-top: -80px;
-  margin-bottom: 40px;
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 24px;
   background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+  width: 100%;
 }
 
 .profileImageWrapper {
   flex-shrink: 0;
-  margin-top: -60px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f0f0f0;
 }
 
 .profileImage {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 4px solid white;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.profileInfo {
-  padding-top: 0;
-}
-
-/* 나머지 스타일은 동일하게 유지 */
-.nameSection {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.nameSection h1 {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.editButton {
-  padding: 8px 16px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.bio {
-  color: #666;
-  line-height: 1.5;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .contentSection {
-  margin-top: 40px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
-
-
-.sectionTitle h2 {
-  font-size: 20px;
-  font-weight: bold;
-}
-
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+  width: 100%;
 }
 
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .pageContainer {
+    padding: 80px 20px 20px;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .profileHeader {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+}
