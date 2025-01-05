@@ -35,72 +35,72 @@ export class PdfService {
         ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
         let htmlContent = `
-  <!DOCTYPE html>
-  <html lang="ko">
-  <head>
-      <meta charset="UTF-8">
-      <title>${title}</title>
-      <style>
-          body {
-              font-family: 'Noto Sans KR', sans-serif;
-              margin: 40px;
-              line-height: 1.6;
-          }
-          h1 {
-              text-align: center;
-              margin-bottom: 30px;
-          }
-          .memo, .capture {
-              margin-bottom: 20px;
-          }
-          .timestamp {
-              font-size: 14px;
-              color: #555;
-          }
-          .description {
-              font-size: 16px;
-          }
-          .image {
-              text-align: center;
-              margin-top: 20px;
-          }
-          img {
-              width: 400px;
-              max-width: 100%;
-              border: 1px solid #ddd;
-              border-radius: 8px;
-          }
-      </style>
-  </head>
-  <body>
-  <h2>${title}</h2>
-  `;
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <title>${title}</title>
+                <style>
+                    body {
+                        font-family: 'Noto Sans KR', sans-serif;
+                        margin: 40px;
+                        line-height: 1.6;
+                    }
+                    h1 {
+                        text-align: center;
+                        margin-bottom: 30px;
+                    }
+                    .memo, .capture {
+                        margin-bottom: 20px;
+                    }
+                    .timestamp {
+                        font-size: 14px;
+                        color: #555;
+                    }
+                    .description {
+                        font-size: 16px;
+                    }
+                    .image {
+                        text-align: center;
+                        margin-top: 20px;
+                    }
+                    img {
+                        width: 400px;
+                        max-width: 100%;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                    }
+                </style>
+            </head>
+            <body>
+            <h2>${title}</h2>
+            `;
 
         for (const item of combined) {
             const time = this.formatTimestamp(item.timestamp);
 
             if (item.type === 'memo') {
                 htmlContent += `
-          <div class="memo">
-              <div class="timestamp">[${time}]</div>
-              <div>${item.description}</div>
-          </div>`;
+                    <div class="memo">
+                        <div class="timestamp">[${time}]</div>
+                        <div>${item.description}</div>
+                    </div>`;
             } else if (item.type === 'capture') {
                 const base64Image = await this.fetchBase64FromUrl(item.image);
                 if (base64Image) {
                     htmlContent += `
-              <div class="capture">
-                  <div class="timestamp">[${time}]</div>
-                  <div class="image">
-                      <img src="data:image/png;base64,${base64Image}" alt="Captured Image" />
-                  </div>
-              </div>`;
+                        <div class="capture">
+                            <div class="timestamp">[${time}]</div>
+                            <div class="image">
+                                <img src="data:image/png;base64,${base64Image}" alt="Captured Image" />
+                            </div>
+                        </div>`;
                 } else {
                     htmlContent += `
-              <div class="capture">
-                  <div class="timestamp">[${time}]</div>
-                  <div>이미지를 불러올 수 없습니다.</div>
-              </div>`;
+                        <div class="capture">
+                            <div class="timestamp">[${time}]</div>
+                            <div>이미지를 불러올 수 없습니다.</div>
+                        </div>`;
                 }
             }
         }
