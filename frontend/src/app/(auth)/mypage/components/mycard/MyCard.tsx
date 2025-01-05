@@ -1,47 +1,73 @@
-// next
-import Image from 'next/image'
 import Link from 'next/link';
-// components
-import styles from './MyCard.module.css'
-//types
-import { MyCardProps } from '../../../../types/MyCardProps';
+import styles from './MyCard.module.css';
 
-
-export default function MyCard({
-
-  thumbnail,
-  myCardTitle,
-  // myCardTitle -> playListTitle 이 더 괜찮을듯
-  cardMemoCount,
-  youtubeLink,
-
-}: MyCardProps) {
-  return(
-    // 카드 클릭시 해당youtubeLink를 가진 vemo페이지로 이동
-    <Link href='/vemo/[id]' as={`/vemo/${youtubeLink}`}>
-      <div className={styles.myCard}>
-        <div className={styles.thumbnailContainer}>
-          <Image 
-            src={thumbnail} 
-            alt={myCardTitle} 
-            width={280} 
-            height={157} 
-            className={styles.thumbnail}
-          />
-        </div>
-
-        <div className={styles.cardContent}>
-          <h3 className={styles.title}>{myCardTitle}</h3>
-
-          <div className={styles.progressBar}>
-            <div className={styles.progress} style={{ width: '75%' }}></div>
-          </div>
-          
-          <span className={styles.progressText}>진행률 75% / 100</span>
-        </div>
-
-      </div>
-      </Link>
-  )
+interface PreviewVideo {
+  id: string;
+  title: string;
+  channel: string;
+  thumbnail: string;
 }
 
+interface MyCardProps {
+  id: number;
+  name: string;
+  totalVideos: number;
+  thumbnail: string;
+  previewVideos: PreviewVideo[];
+}
+
+export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos }: MyCardProps) {
+  const showPreviewList = previewVideos.length >= 1;
+  const previewList = previewVideos.slice(0, 2);
+  const hasMultipleVideos = previewVideos.length >= 2;
+  const firstVideoId = previewVideos[0]?.id;
+
+  return (
+    <Link href={`/vemo/${firstVideoId}?playlistId=${id}`} className={styles.cardLink}>
+      <div className={styles.myCard}>
+        <div className={styles.thumbnailContainer}>
+          <div className={styles.thumbnailStack}>
+            {hasMultipleVideos ? (
+              <>
+                <img
+                  src={previewVideos[1].thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={previewVideos[1].title}
+                  className={`${styles.thumbnail} ${styles.thumbnailBack}`}
+                />
+                <img
+                  src={previewVideos[0].thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={previewVideos[0].title}
+                  className={`${styles.thumbnail} ${styles.thumbnailFront}`}
+                />
+              </>
+            ) : (
+              <img
+                src={thumbnail || '/images/default-thumbnail.jpg'}
+                alt={name}
+                className={styles.thumbnail}
+              />
+            )}
+          </div>
+        </div>
+        <div className={styles.cardContent}>
+          <h3 className={styles.title}>{name}</h3>
+          <div className={styles.statsContainer}>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>총 영상 수</span>
+              <span className={styles.statValue}>{totalVideos}개</span>
+            </div>
+          </div>
+          {showPreviewList && (
+            <div className={styles.previewVideos}>
+              {previewList.map((video, index) => (
+                <div key={video.id} className={styles.previewVideo}>
+                  {index + 1}. {video.title}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
