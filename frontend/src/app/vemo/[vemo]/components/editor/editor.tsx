@@ -7,7 +7,7 @@ import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
 // 대신 필요한 함수들만 import
-import { createMemos } from '@/app/api/memoService';
+import { memoService } from '@/app/api/memoService';
 
 /**
  * ----------------------------------------------------------------
@@ -38,21 +38,8 @@ interface CustomEditorProps {
     onEditEnd?: () => void;
     onPauseVideo?: () => void;
     // [추가됨] 서버와 연동하기 위한 memosId
-    memosId?: number;
+    memosId: number;
 }
-
-// memoService 객체를 로컬에서 정의
-const memoService = {
-    createMemo: async (data: { timestamp: string; description: string; memosId: number }) => {
-        // API 호출 로직
-    },
-    updateMemo: async (data: { id: number; timestamp: string; description: string }) => {
-        // API 호출 로직
-    },
-    deleteMemo: async (id: number) => {
-        // API 호출 로직
-    },
-};
 
 /**
  * ----------------------------------------------------------------
@@ -74,28 +61,6 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
     // 마지막으로 저장된 HTML (필요하다면 사용)
     const [lastSavedHTML, setLastSavedHTML] = useState<string>('');
 
-    /**
-     * ----------------------------------------------------------------
-     * (1) 컴포넌트가 마운트될 때, 서버에서 memosId에 해당하는
-     *     메모 목록을 불러오는 로직
-     * ----------------------------------------------------------------
-     */
-    useEffect(() => {
-        if (!props.memosId) return;
-
-        const loadMemos = async () => {
-            try {
-                if (props.memosId) {
-                    const memosData = await getMemosByVideoId(props.memosId);
-                    setSections(memosData);
-                }
-            } catch (error) {
-                console.error('Failed to fetch memos:', error);
-            }
-        };
-
-        loadMemos();
-    }, [props.memosId]);
 
     /**
      * ----------------------------------------------------------------
@@ -132,12 +97,9 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
 
         // Draft.js Content → HTML
         const html = convertToHTML(contentState);
-
-        // 첫 입력 기록된 timestamp가 있다면 사용, 없다면 현재 timestamp
-        const stamp =
-            isFirstInputRecorded && firstInputTimestamp
-                ? firstInputTimestamp
-                : props.getTimestamp();
+        const stamp = isFirstInputRecorded && firstInputTimestamp
+            ? firstInputTimestamp
+            : props.getTimestamp();
 
         // memosId가 없으면 서버 저장 불가
         if (!props.memosId) {
@@ -146,7 +108,6 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         }
 
         try {
-            // createMemo API 호출 (fetch)
             const savedMemo = await memoService.createMemo({
                 timestamp: stamp,
                 description: html,
@@ -261,7 +222,7 @@ const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
         try {
             await memoService.updateMemo({
                 id: Number(id),
-                timestamp: props.getTimestamp(), // 기존 timestamp 또는 현재 timestamp
+                timestamp: props.getTimestamp(),
                 description: newHTML,
             });
         } catch (error) {

@@ -47,8 +47,6 @@ const getAuthHeader = () => {
 export const createMemos = async (videoId: string) => {
     try {
         const token = getToken();
-        console.log('Token being used for request:', token);
-
         const headers: HeadersInit = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -56,15 +54,12 @@ export const createMemos = async (videoId: string) => {
 
         console.log('Request headers:', headers);
 
-        const response = await fetch(`${API_URL}/home/memos/video/${videoId}`, {
+        // createOrGetLatestMemos 엔드포인트로 요청
+        const response = await fetch(`${API_URL}/home/memos/${videoId}`, {
             method: 'POST',
             headers,
             credentials: 'include' // 쿠키를 포함하여 요청
         });
-
-        // 응답 상태 로깅 추가
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers));
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -73,7 +68,14 @@ export const createMemos = async (videoId: string) => {
         }
 
         const data = await response.json();
-        return data;
+        console.log('Created/Retrieved memos:', data);
+        
+        // 전체 데이터를 반환
+        return {
+            memosId: data.id,
+            title: data.title,
+            createdAt: data.createdAt
+        };
     } catch (error) {
         console.error('Error in createMemos:', error);
         throw error;
@@ -104,4 +106,88 @@ const handleLogin = async (credentials: Credentials) => {
     } catch (error) {
         console.error('Login failed:', error);
     }
+};
+
+// Memo 관련 인터페이스 추가
+interface CreateMemoData {
+    timestamp: string;
+    description: string;
+    memosId: number;
+}
+
+interface UpdateMemoData {
+    id: number;
+    timestamp: string;
+    description: string;
+}
+
+// Memo CRUD 함수들 추가
+export const memoService = {
+    createMemo: async (data: CreateMemoData) => {
+        try {
+            const requestData = {
+                ...data,
+                timestamp: new Date(data.timestamp),
+                description: data.description || '',
+            };
+
+            const response = await fetch(`${API_URL}/memo`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to create memo:', error);
+            throw error;
+        }
+    },
+
+    updateMemo: async (data: UpdateMemoData) => {
+        try {
+            const requestData = {
+                ...data,
+                timestamp: new Date(data.timestamp),
+                description: data.description || '',
+            };
+
+            const response = await fetch(`${API_URL}/memo/${data.id}`, {
+                method: 'PUT',
+                headers: getAuthHeader(),
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to update memo:', error);
+            throw error;
+        }
+    },
+
+    deleteMemo: async (id: number) => {
+        try {
+            const response = await fetch(`${API_URL}/memo/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeader(),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to delete memo:', error);
+            throw error;
+        }
+    },
 };
