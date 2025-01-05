@@ -5,6 +5,7 @@ interface PreviewVideo {
   id: string;
   title: string;
   channel: string;
+  thumbnail: string;
 }
 
 interface MyCardProps {
@@ -29,13 +30,13 @@ export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos
             {hasMultipleVideos ? (
               <>
                 <img
-                  src={thumbnail || '/images/default-thumbnail.jpg'}
-                  alt={name}
+                  src={previewVideos[1].thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={previewVideos[1].title}
                   className={`${styles.thumbnail} ${styles.thumbnailBack}`}
                 />
                 <img
-                  src={thumbnail || '/images/default-thumbnail.jpg'}
-                  alt={name}
+                  src={previewVideos[0].thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={previewVideos[0].title}
                   className={`${styles.thumbnail} ${styles.thumbnailFront}`}
                 />
               </>
