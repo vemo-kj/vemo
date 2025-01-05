@@ -128,9 +128,12 @@ const MemoItem = memo(({
   /**
    * (5) 타임스탬프를 클릭하면 영상 해당 시점으로 이동
    */
-  const handleTimestampClick = () => {
-    onTimestampClick?.(timestamp);
-  };
+  const handleTimestampClick = useCallback(() => {
+    console.log('Clicking timestamp:', timestamp);
+    if (onTimestampClick) {
+      onTimestampClick(timestamp);
+    }
+  }, [timestamp, onTimestampClick]);
 
     // debounce를 적용하여 잦은 상태 업데이트 방지
     const debouncedOnChangeHTML = useCallback(
@@ -244,8 +247,11 @@ const MemoItem = memo(({
     <div className={styles.memoItemContainer}>
       {/* 헤더 영역: 타임스탬프 버튼 */}
       <div className={styles.memoHeader}>
-        <button className={styles.timestampBtn} onClick={handleTimestampClick}>
-          {timestamp}
+        <button 
+          className={styles.timestampBtn} 
+          onClick={handleTimestampClick}
+        >
+          {timestamp || '00:00'}
         </button>
       </div>
 
