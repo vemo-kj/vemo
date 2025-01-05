@@ -151,6 +151,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
     const [player, setPlayer] = useState<YT.Player | null>(null);
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
 
     // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
@@ -236,7 +237,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 <div className={styles.videoWrapper}>
                     <iframe
                         id="youtube-player"
-                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1`}
+                        src={`https://www.youtube.com/embed/${vemo}?enablejsapi=1&origin=${window.location.origin}`}
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
@@ -382,7 +383,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                 )}
                             </>
                         )}
-                        currentTimestamp="00:00"
+                        currentTimestamp={getVideoTimestamp()}
                         handleCaptureTab={() => {}}
                         editorRef={editorRef}
                     />

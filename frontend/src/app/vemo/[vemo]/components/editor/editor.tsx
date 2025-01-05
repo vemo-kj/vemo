@@ -97,18 +97,29 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
-    const getCurrentVideoTime = () => {
+    const getCurrentVideoTime = (): string => {
         try {
+            if (!isPlayerReady) {
+                console.warn('YouTube player is not ready yet');
+                return '00:00';
+            }
+
             const timestamp = props.getTimestamp();
             console.log('Raw timestamp from player:', timestamp);
-            
-            // 숫자로 변환하여 포맷팅
-            const timeInSeconds = parseFloat(timestamp);
-            if (!isNaN(timeInSeconds)) {
-                const formattedTime = formatVideoTime(timeInSeconds);
-                console.log('Formatted timestamp:', formattedTime);
-                return formattedTime;
+
+            // 숫자나 문자열 형식의 시간을 처리
+            if (typeof timestamp === 'number') {
+                return formatVideoTime(timestamp);
+            } else if (typeof timestamp === 'string' && timestamp.includes(':')) {
+                return timestamp; // 이미 MM:SS 형식이면 그대로 반환
+            } else if (typeof timestamp === 'string') {
+                const timeInSeconds = parseFloat(timestamp);
+                if (!isNaN(timeInSeconds)) {
+                    return formatVideoTime(timeInSeconds);
+                }
             }
+
+            console.warn('Invalid timestamp format received:', timestamp);
             return '00:00';
         } catch (error) {
             console.error('Error getting timestamp:', error);
@@ -120,10 +131,15 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
+        // 플레이어가 준비되지 않았으면 경고
+        if (!isPlayerReady) {
+            console.warn('YouTube player is not ready. Current time might not be accurate.');
+        }
+
         const html = convertToHTML(contentState);
         const currentTimestamp = getCurrentVideoTime();
 
-        console.log('Saving memo with timestamp:', currentTimestamp);
+        console.log('Attempting to save memo with timestamp:', currentTimestamp);
 
         if (!props.memosId) {
             console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
@@ -131,11 +147,6 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
         }
 
         try {
-            // 타임스탬프 유효성 검사 추가
-            if (currentTimestamp === '00:00' && props.getTimestamp()) {
-                console.warn('Warning: Using default timestamp despite player time being available');
-            }
-
             const savedMemo = await memoService.createMemo({
                 timestamp: currentTimestamp,
                 description: html,
