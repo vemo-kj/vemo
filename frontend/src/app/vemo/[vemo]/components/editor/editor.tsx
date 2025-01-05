@@ -7,7 +7,11 @@ import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
 // 대신 필요한 함수들만 import
+<<<<<<< Updated upstream
 import { createMemos} from '@/app/api/memoService';
+=======
+import { createMemos } from '@/app/api/memoService';
+>>>>>>> Stashed changes
 
 /**
  * ----------------------------------------------------------------

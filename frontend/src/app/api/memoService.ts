@@ -24,33 +24,43 @@ const getAuthHeader = () => {
 // --------------------------------------
 export const createMemos = async (videoId: string) => {
     try {
-        const token = sessionStorage.getItem('token');
-        console.log('Token:', token); // 토큰 확인용
+        const token = localStorage.getItem('token');
+        console.log('=== Request Details ===');
+        console.log('API URL:', `${API_URL}/home/memos/video/${videoId}`);
+        console.log('Token:', token);
 
-        if (!token) {
-            throw new Error('No authentication token found');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+        };
+
+        // JWT 토큰이 있다면 Authorization 헤더에 추가
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // 임시 userId (실제로는 로그인한 사용자의 ID를 사용해야 함)
-        const userId = 1;
         const response = await fetch(`${API_URL}/home/memos/video/${videoId}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            credentials: 'include',
+            headers: headers,
+            credentials: 'include', // 쿠키도 함께 전송
         });
 
-        console.log('Full response:', response);
+        console.log('=== Response Details ===');
+        console.log('Status:', response.status);
+        console.log('Headers:', Object.fromEntries(response.headers));
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Server error details:', errorData);
-            throw new Error(`Failed to create memos: ${response.statusText}`);
+            console.log('Error Response:', errorData);
+
+            if (response.status === 401) {
+                throw new Error('Authentication failed');
+            }
+            throw new Error(errorData.message || 'Failed to create memos');
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('Success Response:', data);
+        return data;
     } catch (error) {
         console.error('Error in createMemos:', error);
         throw error;
