@@ -12,7 +12,9 @@ async function bootstrap() {
         DB_HOST: process.env.DB_HOST,
     });
     app.enableCors({
-        origin: '*',
+        //TODO: 배포 전 변경
+        // origin: '*',
+        origin: 'http://localhost:3000',
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],

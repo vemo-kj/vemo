@@ -151,12 +151,12 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     const [memosId, setMemosId] = useState<number | null>(null);
     const router = useRouter();
 
+    // 컴포넌트 마운트 시 메모 초기화
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
             try {
                 console.log('Creating memos for video:', vemo);
-                // createMemos가 성공하면 생성된 memos.id를 반환 (memoService에서 return data.id)
                 const newMemosId = await createMemos(vemo);
                 if (newMemosId) {
                     setMemosId(newMemosId);
@@ -164,6 +164,9 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                 }
             } catch (error) {
                 console.error('Failed to initialize memos:', error);
+                if (error.message.includes('401')) {
+                    router.push('/login');
+                }
             }
         };
 

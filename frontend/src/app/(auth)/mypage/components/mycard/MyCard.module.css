@@ -132,8 +132,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  ㄴㅁㅇㄹㅁ text-decoration: none;
-  ㄹㅁㄴㅇㄹ color: inherit;
-  ㅇ display: block;
+text-decoration: none;
+ color: inherit;
+display: block;
   height: 100%;
 }
