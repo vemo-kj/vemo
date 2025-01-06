@@ -6,7 +6,7 @@ export class Memo {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('datetime')
+    @Column('time')
     timestamp: Date;
 
     @Column({ length: 1000, nullable: true })
