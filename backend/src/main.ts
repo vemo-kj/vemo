@@ -3,7 +3,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
-import { json } from 'express';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -30,7 +30,8 @@ async function bootstrap() {
         }),
     );
 
-    app.use(json({ limit: '10mb' }));
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ extended: true, limit: '50mb' }));
 
     const config = new DocumentBuilder()
         .setTitle('VEMO API')
