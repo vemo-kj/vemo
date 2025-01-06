@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString, IsUrl, isNotEmpty } from 'class-validator';
 
 export class pdfMemoeDto {
     @IsNotEmpty()
-    timestamp: string;
+    timestamp: Date;
 
     @IsNotEmpty()
     @IsString()
@@ -10,9 +10,8 @@ export class pdfMemoeDto {
 }
 
 export class pdfCaptureDto {
-    @IsString()
     @IsNotEmpty()
-    timestamp: string;
+    timestamp: Date;
 
     @IsString()
     @IsUrl()
