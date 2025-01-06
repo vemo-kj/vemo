@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import axios from 'axios';
+import { HttpService } from '@nestjs/axios';
 import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class PdfService {
     // Memo와 Capture PDF로 변환
+    constructor(private readonly httpService: HttpService) {}
+
     async createMemoCapturePDF(
         title: string,
         memos: pdfMemoeDto[],
@@ -152,7 +155,7 @@ export class PdfService {
     //
     private async fetchBase64FromUrl(url: string): Promise<string> {
         try {
-            const response = await axios.get(url);
+            const response = await firstValueFrom(this.httpService.get(url));
             return response.data.trim(); // base64 문자열 반환
         } catch (error) {
             console.error(`Base64 이미지 다운로드 실패: ${url}`);
