@@ -8,7 +8,7 @@ import QuizView from '../quizView/QuizView';
 import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
-
+import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 interface SidebarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
@@ -18,6 +18,7 @@ interface SidebarNavProps {
     handleCaptureTab: () => void; // 캡처하기 함수 추가
     handleCaptureArea: () => void; // 부분 캡처하기 함수 추가
     editorRef: React.RefObject<any>; // 에디터 참조 추가
+    vemoData: CreateMemosResponseDto | null; // 베모 데이터 추가
 }
 
 export default function SidebarNav({
@@ -28,6 +29,7 @@ export default function SidebarNav({
     handleCaptureTab,
     handleCaptureArea,
     editorRef,
+    vemoData,
 }: SidebarNavProps) {
     const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
 
