@@ -16,7 +16,7 @@ import styles from './editor.module.css';
 import MomoItem from './MemoItem';
 
 // 대신 필요한 함수들만 import
-import { createMemos} from '@/app/api/memoService';
+import { memoService } from '@/app/api/memoService';
 
 /**
  * ----------------------------------------------------------------
@@ -46,16 +46,18 @@ interface CustomEditorProps {
     onEditStart?: (itemId: string) => void;
     onEditEnd?: () => void;
     onPauseVideo?: () => void;
+    // [추가됨] 서버와 연동하기 위한 memosId
+    memosId: number;
 }
 
-// parseTimeToSeconds는 동일
-function parseTimeToSeconds(timestamp: string): number {
-    const [mm, ss] = timestamp.split(':').map(Number);
-    return (mm || 0) * 60 + (ss || 0);
-}
-
-// forwardRef로 부모가 addCaptureItem을 호출 가능
-const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) => {
+/**
+ * ----------------------------------------------------------------
+ * 📌 CustomEditor 컴포넌트
+ * - forwardRef를 사용하여 부모에서 함수 호출 가능하도록 만듦
+ * ----------------------------------------------------------------
+ */
+export const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
+    // 메모 목록(Section 배열)
     const [sections, setSections] = useState<Section[]>([]);
 
     // Draft.js 에디터 상태
@@ -64,14 +66,52 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
     // 첫 글자 입력 시점을 저장하기 위한 상태
     const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
     const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
-    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
 
-    // ============ 1) 메모 역순 or 정순 =============
-    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
-    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
-    // (아래 handleSave에서 prev => [...prev, newItem])
+    // 마지막으로 저장된 HTML (필요하다면 사용)
+    const [lastSavedHTML, setLastSavedHTML] = useState<string>('');
 
-    // ============ 2) addCaptureItem =============
+    // YouTube Player 상태를 추적하기 위한 state 추가
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+    // 브라우저 환경에서만 sessionStorage에 접근
+    const storage = typeof window !== 'undefined' ? window.sessionStorage : null;
+    const TOKEN_KEY = 'token';
+
+    const setToken = (token: string) => {
+        if (storage) {
+            storage.setItem(TOKEN_KEY, token);
+        }
+    };
+
+    // YouTube IFrame API 초기화
+    useEffect(() => {
+        if (!window.YT) {
+            // YouTube IFrame API 로드
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            // API 준비 완료 시 호출될 함수
+            window.onYouTubeIframeAPIReady = () => {
+                console.log('YouTube IFrame API is ready');
+                setIsPlayerReady(true);
+            };
+        } else {
+            setIsPlayerReady(true);
+        }
+
+        return () => {
+            window.onYouTubeIframeAPIReady = undefined;
+        };
+    }, []);
+
+    /**
+     * ----------------------------------------------------------------
+     * (2) 부모에서 ref를 통해 직접 접근하기 위한 함수 (캡처 추가)
+     *     - addCaptureItem: 특정 timestamp와 스크린샷 이미지를 추가
+     * ----------------------------------------------------------------
+     */
     useImperativeHandle(ref, () => ({
         /**
          * 캡처 이미지를 새 메모(Section)로 추가

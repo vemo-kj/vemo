@@ -57,6 +57,4 @@
   line-height: 1.4;
   padding-top: 8px;
   border-top: 1px solid #eee;
-}.header button:hover img {
-  filter: brightness(0) invert(1); /* 이미지를 흰색으로 변경 */
 }

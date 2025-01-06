@@ -158,6 +158,17 @@ export default function VemoPage({ params: pageParams }: PageProps) {
     useEffect(() => {
         const initializeMemos = async () => {
             if (!vemo) return;
+
+            // localStorage에서 sessionStorage로 변경
+            const token = sessionStorage.getItem('token');
+            console.log('Current token:', token);
+
+            if (!token) {
+                console.log('No token found, redirecting to login...');
+                router.push('/login');
+                return;
+            }
+
             try {
                 console.log('Creating memos for video:', vemo);
                 const newMemosId = await createMemos(vemo);
@@ -342,6 +353,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         <div className={styles.container}>
             {/* 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
+                {/* 홈으로 이동하는 버튼 */}
                 <Link href="/" passHref>
                     <img
                         src="/icons/Button_home.svg"
@@ -370,11 +382,17 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                         renderSectionContent={() => (
                             <>
                                 <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
-                                {memosId && ( // memosId가 있을 때만 EditorNoSSR 렌더링
+                                {memosId && (
                                     <EditorNoSSR
-                                        ref={editorRef} // editorRef 전달
-                                        getTimestamp={() => '00:00'}
-                                        onTimestampClick={() => {}}
+                                        ref={editorRef}
+                                        getTimestamp={getVideoTimestamp}
+                                        onTimestampClick={(timestamp) => {
+                                            if (player && isPlayerReady) {
+                                                const [minutes, seconds] = timestamp.split(':').map(Number);
+                                                const timeInSeconds = minutes * 60 + seconds;
+                                                player.seekTo(timeInSeconds, true);
+                                            }
+                                        }}
                                         isEditable={true}
                                         editingItemId={null}
                                         onEditStart={() => {}}

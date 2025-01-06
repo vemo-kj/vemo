@@ -23,7 +23,7 @@ COPY nest-cli.json ./
 # 소스 코드 복사
 COPY src/ ./src/
 
-# 백엔드 애플리케이션 빌드 (TypeScript 컴파일 등)
+# 빌드
 RUN npm run build
 
 # 프로덕션 환경 설정
