@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import axios from 'axios';
+import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
 
 @Injectable()
 export class PdfService {
-    async createMemoCapturePDF(title: string, memos: any[], capture: any[]): Promise<Buffer> {
+    async createMemoCapturePDF(
+        title: string,
+        memos: pdfMemoeDto[],
+        capture: pdfCaptureDto[],
+    ): Promise<Buffer> {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
 
@@ -27,8 +32,11 @@ export class PdfService {
     }
 
     // HTML 템플릿 생성 함수
-    // HTML 템플릿 생성 함수
-    private async generateHTML(title: string, memos: any[], capture: any[]): Promise<string> {
+    private async generateHTML(
+        title: string,
+        memos: pdfMemoeDto[],
+        capture: pdfCaptureDto[],
+    ): Promise<string> {
         const combined = [
             ...memos.map(memo => ({ ...memo, type: 'memo' })),
             ...capture.map(capture => ({ ...capture, type: 'capture' })),
