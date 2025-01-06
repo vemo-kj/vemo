@@ -3,7 +3,7 @@ import { MemoService } from './memo.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Memo } from './memo.entity';
-import { CreateMemoDto } from './dto/create-memo.dto';
+import { CreateMemoData } from './interfaces/memo.interface';
 import { UpdateMemoDto } from './dto/update-memo.dto';
 import { Memos } from '../memos/memos.entity';
 
@@ -11,8 +11,10 @@ describe('MemoService', () => {
     let service: MemoService;
     let repository: Repository<Memo>;
 
-    const mockCreateMemoDto: CreateMemoDto = {
-        timestamp: new Date(),
+    const mockDate = new Date('2024-01-01T00:01:30.000Z'); // "00:01:30" 시간 데이터
+
+    const mockCreateMemoData: CreateMemoData = {
+        timestamp: mockDate,
         description: 'Test description',
         memosId: 1,
     };
@@ -50,24 +52,24 @@ describe('MemoService', () => {
     describe('createMemo', () => {
         it('메모를 성공적으로 생성해야 한다', async () => {
             const createdMemo = {
-                timestamp: mockCreateMemoDto.timestamp,
-                description: mockCreateMemoDto.description,
-                memos: { id: mockCreateMemoDto.memosId },
+                timestamp: mockCreateMemoData.timestamp,
+                description: mockCreateMemoData.description,
+                memos: { id: mockCreateMemoData.memosId },
             } as Memo;
 
             const savedMemo = {
                 id: 1,
-                timestamp: mockCreateMemoDto.timestamp,
-                description: mockCreateMemoDto.description,
+                timestamp: mockCreateMemoData.timestamp,
+                description: mockCreateMemoData.description,
                 memos: mockMemos,
             } as Memo;
 
             jest.spyOn(repository, 'create').mockReturnValue(createdMemo);
             jest.spyOn(repository, 'save').mockResolvedValue(savedMemo);
 
-            const result = await service.createMemo(mockCreateMemoDto);
+            const result = await service.createMemo(mockCreateMemoData);
 
-            expect(repository.create).toHaveBeenCalledWith(mockCreateMemoDto);
+            expect(repository.create).toHaveBeenCalledWith(mockCreateMemoData);
             expect(repository.save).toHaveBeenCalledWith(createdMemo);
             expect(result).toEqual(savedMemo);
         });
@@ -75,7 +77,7 @@ describe('MemoService', () => {
         it('저장 중 에러가 발생하면 에러를 전파해야 한다', async () => {
             jest.spyOn(repository, 'save').mockRejectedValue(new Error('DB Error'));
 
-            await expect(service.createMemo(mockCreateMemoDto)).rejects.toThrow('DB Error');
+            await expect(service.createMemo(mockCreateMemoData)).rejects.toThrow('DB Error');
         });
     });
 
@@ -88,7 +90,7 @@ describe('MemoService', () => {
 
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: mockDate,
                 description: 'Original description',
                 memos: mockMemos,
             } as Memo;
@@ -130,7 +132,7 @@ describe('MemoService', () => {
         it('메모를 성공적으로 삭제해야 한다', async () => {
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: mockDate,
                 description: 'Test description',
                 memos: mockMemos,
             } as Memo;
@@ -153,7 +155,7 @@ describe('MemoService', () => {
         it('삭제 중 에러가 발생하면 에러를 전파해야 한다', async () => {
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: mockDate,
                 description: 'Test description',
                 memos: mockMemos,
             } as Memo;
