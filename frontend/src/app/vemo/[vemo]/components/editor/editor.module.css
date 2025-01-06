@@ -8,9 +8,12 @@
 /* 노트(메모) 리스트 감싸는 영역 - 빨간 박스, 고정 높이, 스크롤 */
 .noteListContainer {
     width: 100%;
-    max-height: 300px; /* 원하는 고정 높이 */
-    overflow-y: auto; /* 내용 넘치면 스크롤 */
-    background-color: #f44; /* 빨간색 예시 */
+    max-height: 300px;
+    /* 원하는 고정 높이 */
+    overflow-y: auto;
+    /* 내용 넘치면 스크롤 */
+    background-color: #f44;
+    /* 빨간색 예시 */
     padding: 10px;
     border-radius: 8px;
 }
@@ -40,8 +43,10 @@
     flex: 1;
     min-height: 20px;
     padding: 4px;
-    cursor: text; /* 편집 가능하다는 암시 */
-    outline: none; /* contentEditable 포커스 테두리 제거 */
+    cursor: text;
+    /* 편집 가능하다는 암시 */
+    outline: none;
+    /* contentEditable 포커스 테두리 제거 */
     white-space: pre-wrap;
 }
 
@@ -109,8 +114,10 @@
 
 /* 메모 노트 영역 */
 .displayArea {
-    height: 520px; /* 3) 스크롤 제한 */
-    max-height: 530px; /* 3) 스크롤 제한 */
+    height: 520px;
+    /* 3) 스크롤 제한 */
+    max-height: 530px;
+    /* 3) 스크롤 제한 */
     overflow-y: auto;
 }
 
@@ -141,7 +148,8 @@
 
 /* 캡처 이미지 */
 .captureImage {
-    max-width: 300px; /* 4) 영역 제한 */
+    max-width: 300px;
+    /* 4) 영역 제한 */
     height: auto;
     border: 1px solid #ccc;
 }
@@ -170,7 +178,8 @@
     /* height: 1080px; */
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.8); /* 오퍼시티 배경 */
+    background-color: rgba(0, 0, 0, 0.8);
+    /* 오퍼시티 배경 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,11 +193,9 @@
 }
 
 .sigCanvas {
-    border: 1px solid #ff0000;
-}
-
-.drawButtons {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
+    .drawButtons {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
 }

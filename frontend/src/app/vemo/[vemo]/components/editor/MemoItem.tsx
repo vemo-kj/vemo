@@ -72,7 +72,7 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
     const handleBlur = () => {
         setIsEditing(false);
         if (!contentRef.current) return;
-        
+
         const newValue = contentRef.current.innerHTML;
         if (newValue.trim().length === 0) {
             onDelete();
@@ -92,6 +92,35 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
         }, 300),
         [onChangeHTML]
     );
+
+    // 추출하기 버튼 클릭 핸들러 추가
+    const handleExtractText = async () => {
+        if (!screenshot) return;
+
+        try {
+            const response = await fetch('http://localhost:5050/text-extraction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageBase64: screenshot }),
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '텍스트 추출에 실패했습니다.');
+            }
+
+            // 추출된 텍스트를 HTML 컨텐츠에 추가
+            const newContent = htmlContent + '<p>' + data.text + '</p>';
+            onChangeHTML(newContent);
+
+        } catch (error) {
+            console.error('텍스트 추출 실패:', error);
+            alert('텍스트 추출에 실패했습니다.');
+        }
+    };
 
     return (
         <div className={styles.memoItemContainer}>
