@@ -18,7 +18,7 @@ interface MemoItemProps {
   screenshot?: string;
   onTimestampClick?: (timestamp: string) => void;
   onChangeHTML: (newHTML: string) => void;
-  onDelete: () => void;
+  onDelete: () => void; // 삭제 요청 전달
   onPauseVideo?: () => void;
   isEditable?: boolean;
 }
@@ -124,13 +124,21 @@ const MemoItem = memo(({
     if (!contentRef.current) return;
 
     const newValue = contentRef.current.innerHTML;
-    if (newValue.trim().length === 0) {
-      // 내용이 아예 없다면 삭제
-      onDelete();
+    const isEmpty = !newValue || 
+                   newValue.trim() === '' || 
+                   newValue === '<br>' || 
+                   newValue === '<div><br></div>' ||
+                   newValue === '<p><br></p>' ||
+                   newValue.replace(/<[^>]*>/g, '').trim() === '';
+                   
+    if (isEmpty) {
+        console.log('Content is empty, deleting memo...');
+        onDelete(); // 부모 컴포넌트의 삭제 함수 호출
     } else {
-      onChangeHTML(newValue);
+        console.log('Updating memo with new content:', newValue);
+        onChangeHTML(newValue);
     }
-  };
+};
 
   /**
    * (5) 타임스탬프를 클릭하면 영상 해당 시점으로 이동

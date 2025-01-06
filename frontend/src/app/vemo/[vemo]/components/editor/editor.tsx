@@ -293,9 +293,11 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
     const handleDeleteItem = async (id: string) => {
         try {
             await memoService.deleteMemo(Number(id));
-            setSections(prev => prev.filter(s => s.id !== id));
+            setSections(prev => prev.filter(section => section.id !== id)); // **수정: 삭제 후 로컬 상태 업데이트**
         } catch (error) {
             console.error('Failed to delete memo:', error);
+            alert('메모 삭제에 실패했습니다. 다시 시도해주세요.');
+
         }
     };
 
