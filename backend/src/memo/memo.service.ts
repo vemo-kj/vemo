@@ -42,4 +42,5 @@ export class MemoService {
 
         await this.memoRepository.delete(id);
     }
+    
 }
