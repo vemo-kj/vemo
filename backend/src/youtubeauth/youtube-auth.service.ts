@@ -25,7 +25,6 @@ export class YoutubeAuthService implements OnModuleInit {
 
         this.oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 
-        // 초기 인증 설정
         this.initializeYoutubeClient(refreshToken);
     }
 
