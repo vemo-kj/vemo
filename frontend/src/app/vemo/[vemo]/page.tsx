@@ -3,14 +3,15 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import { SummaryProvider } from './context/SummaryContext';
 import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
+import { toPng } from 'html-to-image';
 
 // 동적 로드된 DraftEditor
-const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
 
@@ -30,6 +31,55 @@ export default function VemoPage() {
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
+    const fetchVemoData = useCallback(async () => {
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.error('토큰이 없습니다.');
+                setError('로그인이 필요한 서비스입니다.');
+                router.push('/login');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('서버 응답:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorText
+                });
+                throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
+            }
+
+            const data: CreateMemosResponseDto = await response.json();
+            console.log('받은 메모 데이터:', data);
+            setVemoData(data);
+
+        } catch (error) {
+            console.error('데이터 로딩 실패:', error);
+            setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [videoId, router]);
+
+    // 초기 데이터 로드를 위한 useEffect
+    useEffect(() => {
+        if (videoId) {
+            fetchVemoData();
+        }
+    }, [videoId, fetchVemoData]);
 
     useEffect(() => {
         if (!videoId) return;
@@ -111,14 +161,41 @@ export default function VemoPage() {
     }, [currentTimestamp]);
 
     // 전체/부분 캡처
-    const handleCaptureTab = () => {
-        window.postMessage({ type: 'CAPTURE_TAB' }, '*');
+    const handleCaptureTab = async () => {
+        if (!editorRef.current) return;
+
+        const timestamp = currentTimestamp;
+        const element = document.getElementById('youtube-player');
+        if (!element) return;
+
+        try {
+            const dataUrl = await toPng(element);
+            // 캡처 이미지를 에디터에 추가
+            editorRef.current.addCaptureItem(timestamp, dataUrl);
+        } catch (error) {
+            console.error('캡처 실패:', error);
+        }
     };
-    // 부분 캡처
-    const handleCaptureArea = () => {
-        window.postMessage({ type: 'CAPTURE_AREA' }, '*');
+
+    const handleCaptureArea = async () => {
+        if (!editorRef.current) return;
+
+        // 부분 캡처 로직
+        const element = document.getElementById('youtube-player');
+        if (!element) return;
+
+        try {
+            // 선택 영역만 캡처하는 로직 구현 필요
+            const dataUrl = await toPng(element, {
+                // 선택 영역 설정
+                width: element.clientWidth,
+                height: element.clientHeight
+            });
+            editorRef.current.addCaptureItem(currentTimestamp, dataUrl);
+        } catch (error) {
+            console.error('부분 캡처 실패:', error);
+        }
     };
-    // 캡처 기능 끝
 
     // 섹션 내용 렌더링
     const renderSectionContent = () => {
@@ -139,6 +216,9 @@ export default function VemoPage() {
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
+                            videoId={videoId}
+                            onPauseVideo={() => playerRef.current?.pauseVideo()}
+                            onMemoSaved={handleMemoSaved}
                         />
                     </>
                 );
@@ -156,53 +236,12 @@ export default function VemoPage() {
         router.push(`/vemo/${newVideoId}`);
     };
 
-    // 데모 데이터를 가져오는 useEffect 추가
-    useEffect(() => {
-        const fetchVemoData = async () => {
-            try {
-                const token = sessionStorage.getItem('token');
-                if (!token) {
-                    console.error('토큰이 없습니다.');
-                    setError('로그인이 필요한 서비스입니다.');
-                    router.push('/login');
-                    return;
-                }
-
-                const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('서버 응답:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        body: errorText
-                    });
-                    throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
-                }
-
-                const data: CreateMemosResponseDto = await response.json();
-                console.log('받은 메모 데이터:', data);
-                setVemoData(data);
-
-            } catch (error) {
-                console.error('데이터 로딩 실패:', error);
-                setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
+    // 데모 저장 후 데이터 갱신을 위한 핸들러
+    const handleMemoSaved = useCallback(() => {
         if (videoId) {
             fetchVemoData();
         }
-    }, [videoId, router]);
+    }, [videoId, fetchVemoData]);
 
     // 로딩 상태 UI
     if (isLoading) {

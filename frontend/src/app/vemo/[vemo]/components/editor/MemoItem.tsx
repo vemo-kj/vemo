@@ -6,13 +6,13 @@ import { debounce } from 'lodash';
 interface MemoItemProps {
     id: string;
     timestamp: string;
-    htmlContent: string; // HTML 형식
+    htmlContent: string;
     screenshot?: string;
     onTimestampClick?: (timestamp: string) => void;
     onChangeHTML: (newHTML: string) => void;
     onDelete: () => void;
     onPauseVideo?: () => void;
-    isEditable?: boolean; // 추가된 부분
+    isEditable?: boolean;
 }
 
 const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MemoItemProps) => {

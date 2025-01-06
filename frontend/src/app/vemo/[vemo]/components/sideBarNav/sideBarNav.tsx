@@ -9,16 +9,16 @@ import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
-interface SidebarNavProps {
+
+interface SideBarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
     renderSectionContent: () => React.ReactNode;
     currentTimestamp: string;
-
-    handleCaptureTab: () => void; // 캡처하기 함수 추가
-    handleCaptureArea: () => void; // 부분 캡처하기 함수 추가
-    editorRef: React.RefObject<any>; // 에디터 참조 추가
-    vemoData: CreateMemosResponseDto | null; // 베모 데이터 추가
+    handleCaptureTab: () => void;
+    handleCaptureArea: () => void;
+    editorRef: React.RefObject<any>;
+    vemoData: CreateMemosResponseDto | null;
 }
 
 export default function SidebarNav({
@@ -30,7 +30,7 @@ export default function SidebarNav({
     handleCaptureArea,
     editorRef,
     vemoData,
-}: SidebarNavProps) {
+}: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
 
     return (

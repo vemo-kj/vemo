@@ -2,7 +2,12 @@ import React, { useRef } from 'react';
 import { toPng, toJpeg } from 'html-to-image';
 import styles from './Capture.module.css'; // 스타일 정의
 
-export default function CaptureComponent() {
+interface CaptureComponentProps {
+    onCapture: (timestamp: string, imageUrl: string) => void;
+    currentTimestamp: string;
+}
+
+export default function CaptureComponent({ onCapture, currentTimestamp }: CaptureComponentProps) {
     const captureRef = useRef<HTMLDivElement | null>(null); // 캡처할 영역 참조
     const selectionRef = useRef<HTMLDivElement | null>(null); // 선택된 영역 참조
 
@@ -11,7 +16,7 @@ export default function CaptureComponent() {
         if (!captureRef.current) return;
         try {
             const dataUrl = await toPng(captureRef.current); // 캡처된 이미지를 Data URL로 변환
-            downloadImage(dataUrl, 'full-capture.png');
+            onCapture(currentTimestamp, dataUrl);
         } catch (error) {
             console.error('캡처 중 오류 발생:', error);
         }
@@ -22,7 +27,7 @@ export default function CaptureComponent() {
         if (!selectionRef.current) return;
         try {
             const dataUrl = await toPng(selectionRef.current);
-            downloadImage(dataUrl, 'partial-capture.png');
+            onCapture(currentTimestamp, dataUrl);
         } catch (error) {
             console.error('부분 캡처 중 오류 발생:', error);
         }

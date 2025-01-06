@@ -33,6 +33,9 @@ export interface CustomEditorProps {
   editingItemId?: string | null;
   onEditStart?: (itemId: string) => void;
   onEditEnd?: () => void;
+  onPauseVideo?: () => void;
+  videoId?: string;
+  onMemoSaved?: () => void;
 }
 
 // 페이지 props 인터페이스
