@@ -37,57 +37,37 @@ const getAuthHeader = () => {
 // (1) 비디오별 Memos 컨테이너 생성 or 조회
 //     백엔드: POST /home/memos/:videoId
 // ----------------------------------------------------------------
-export const createMemos = async (videoId: string, userId: string) => {
+export const createMemos = async (videoId: string) => {
     try {
-        const data = { videoId, userId };
-        // 먼저 videoId로 기존 memos가 있는지 확인
-        const existingMemos = await memoService.getMemosByVideoId(data.videoId, data.userId);
+        const token = getToken();
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        };
 
-        if (existingMemos) {
-            return existingMemos; // 이미 존재하는 memos 반환
-        }
+        console.log('Request headers:', headers);
 
-        // 없으면 새로 생성
-        const res = await fetch(`${API_URL}/home/memos`, {
+        // [수정됨] 경로: POST http://localhost:5050/home/memos/:videoId
+        const response = await fetch(`${API_URL}/home/memos/${videoId}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify(data),
+            headers,
+            credentials: 'include', // 쿠키 포함
         });
 
-        if (!res.ok) {
-            // 404 에러인 경우 playlist를 통해 생성 시도
-            if (res.status === 404) {
-                const playlistRes = await fetch(`${API_URL}/home/playlist`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: 'New Playlist',
-                        videoIds: [data.videoId],
-                    }),
-                });
-
-                if (!playlistRes.ok) {
-                    throw new Error(`Failed to create playlist: ${playlistRes.statusText}`);
-                }
-
-                const playlistData = await playlistRes.json();
-                return {
-                    id: playlistData.memos.id,
-                    ...playlistData.memos,
-                };
-            }
-            throw new Error(`Failed to create memos: ${res.statusText}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Error response:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const response = await res.json();
+        const data = await response.json();
+        console.log('Created/Retrieved memos:', data);
+
+        // 백엔드에서 { id, title, createdAt, ... } 형태로 반환한다고 가정
         return {
-            id: response.id || response.memosId,
-            ...response,
+            memosId: data.id,
+            title: data.title,
+            createdAt: data.createdAt,
         };
     } catch (error) {
         console.error('Error in createMemos:', error);
@@ -95,38 +75,42 @@ export const createMemos = async (videoId: string, userId: string) => {
     }
 };
 
-// Memo 관련 인터페이스 추가
+// 사용자 로그인 처리를 위한 예시 함수
+interface Credentials {
+    username: string;
+    password: string;
+}
+export const handleLogin = async (credentials: Credentials) => {
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials),
+        });
+        const data = await response.json();
+        if (data.access_token) {
+            setToken(data.access_token);
+        }
+    } catch (error) {
+        console.error('Login failed:', error);
+    }
+};
+
+// ----------------------------------------------------------------
+// (2) Memo 아이템 CRUD (백엔드: /memo)
+// ----------------------------------------------------------------
 interface CreateMemoData {
-    timestamp: string; // 유튜브 재생 시간
+    timestamp: string;    // 유튜브 재생 시간
     description: string;
     memosId: number;
 }
 interface UpdateMemoData {
     id: number;
     description: string;
-    timestamp?: string; // optional로 변경
+    timestamp?: string;  // optional로 변경
 }
 
 export const memoService = {
-    // 비디오별 Memos 조회
-    async getMemosByVideoId(videoId: string, userId: string) {
-        try {
-            const response = await fetch(`${API_URL}/home/memos/${videoId}?userId=${userId}`, {
-                method: 'GET',
-                headers: getAuthHeader(),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to get memos: ${response.statusText}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error in getMemosByVideoId:', error);
-            throw error;
-        }
-    },
-
     // 생성
     async createMemo(data: CreateMemoData) {
         try {
@@ -172,9 +156,9 @@ export const memoService = {
                 id: data.id,
                 description: data.description, // id는 URL로 전달되므로 제거
             };
-
+    
             console.log(`Updating memo with ID: ${data.id}, Data:`, requestData);
-
+    
             // URL에 id 포함
             const response = await fetch(`${API_URL}/memo/${data.id}`, {
                 method: 'PUT',
@@ -184,20 +168,22 @@ export const memoService = {
                 },
                 body: JSON.stringify(requestData),
             });
-
+    
             // 응답 상태 확인
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 console.error('Failed to update memo:', errorData);
-                throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+                throw new Error(
+                    errorData?.message || `HTTP error! status: ${response.status}`
+                );
             }
-
+    
             // 백엔드가 응답 본문을 제공하는 경우만 JSON 파싱
             const contentType = response.headers.get('Content-Type');
             if (contentType && contentType.includes('application/json')) {
                 return await response.json();
             }
-
+    
             // 응답 본문이 없는 경우 처리
             return { message: 'Memo updated successfully' };
         } catch (error) {
@@ -209,30 +195,30 @@ export const memoService = {
     // 삭제
     async deleteMemo(id: number) {
         const response = await fetch(`${API_URL}/memo/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeader(),
+          method: 'DELETE',
+          headers: getAuthHeader(),
         });
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        // 백엔드가 body를 전혀 반환하지 않는 경우, 200/204라면 굳이 JSON 파싱 안 함
-        if (response.status === 204) {
-            // 서버가 204 No Content로 응답했다고 가정
-            return { message: 'No Content' };
-        }
-        // 혹은 200 OK지만 body가 빈 문자열일 수도 있으니 text()로 판별
-        const text = await response.text();
-        if (!text) {
-            // 정말 빈 문자열인 경우
-            return { message: 'Deleted (no body)' };
-        }
-
-        // body가 있다면 JSON 파싱
-        try {
-            return JSON.parse(text);
-        } catch {
-            return { message: 'Deleted (invalid JSON body)' };
-        }
-    },
+      
+       // 백엔드가 body를 전혀 반환하지 않는 경우, 200/204라면 굳이 JSON 파싱 안 함
+       if (response.status === 204) {
+         // 서버가 204 No Content로 응답했다고 가정
+         return { message: 'No Content' };
+       }
+       // 혹은 200 OK지만 body가 빈 문자열일 수도 있으니 text()로 판별
+       const text = await response.text();
+       if (!text) {
+         // 정말 빈 문자열인 경우
+         return { message: 'Deleted (no body)' };
+       }
+      
+       // body가 있다면 JSON 파싱
+       try {
+         return JSON.parse(text);
+       } catch {
+         return { message: 'Deleted (invalid JSON body)' };
+       }
+      }
 };
