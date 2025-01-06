@@ -14,8 +14,7 @@ export class AuthService {
         private userRepository: Repository<Users>,
         private jwtService: JwtService,
         private youtubeAuthService: YoutubeAuthService,
-    ) {
-    }
+    ) {}
 
     async signIn(dto: LoginRequestDto) {
         const user = await this.userRepository.findOne({ where: { email: dto.email } });
@@ -33,7 +32,6 @@ export class AuthService {
 
         return {
             access_token,
-            redirectUrl: this.youtubeAuthService.getAuthUrl(),
         };
     }
 
@@ -47,9 +45,6 @@ export class AuthService {
             if (!user) {
                 throw new UnauthorizedException('존재하지 않는 사용자입니다.');
             }
-
-            // 2. YouTube OAuth 인증 정보 제거
-            await this.youtubeAuthService.clearCredentials();
 
             return {
                 success: true,

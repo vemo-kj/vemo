@@ -19,6 +19,7 @@ import { SummarizationModule } from './summarization/summarization.module';
 import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
+import { TextExtractionModule } from './text-extraction/text-extraction.module';
 import { PdfModule } from './pdf/pdf.module';
 
 @Module({
@@ -46,6 +47,7 @@ import { PdfModule } from './pdf/pdf.module';
         QuizModule,
         CapturesModule,
         SummarizationModule,
+        TextExtractionModule,
         PdfModule,
     ],
     controllers: [AppController],

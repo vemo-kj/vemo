@@ -1,97 +1,167 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { MemoService } from './memo.service';
-// import { Repository } from 'typeorm';
-// import { Memo } from './memo.entity';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { CreateMemoDto } from './dto/create-memo.dto';
-// import { UpdateMemoDto } from './dto/update-memo.dto';
+import { Test, TestingModule } from '@nestjs/testing';
+import { MemoService } from './memo.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Memo } from './memo.entity';
+import { CreateMemoDto } from './dto/create-memo.dto';
+import { UpdateMemoDto } from './dto/update-memo.dto';
+import { Memos } from '../memos/memos.entity';
 
-// // MM:SS 형식 -> Date 변환 유틸리티 함수
-// function convertToTimestamp(time: string): Date {
-//     const [minutes, seconds] = time.split(':').map(Number);
-//     if (minutes === undefined || seconds === undefined || isNaN(minutes) || isNaN(seconds)) {
-//         throw new Error('Invalid timestamp format');
-//     }
-//     return new Date(1970, 0, 1, 0, minutes, seconds);
-// }
+describe('MemoService', () => {
+    let service: MemoService;
+    let repository: Repository<Memo>;
 
-// describe('MemoService', () => {
-//     let service: MemoService;
-//     let repository: Repository<Memo>;
+    const mockCreateMemoDto: CreateMemoDto = {
+        timestamp: new Date(),
+        description: 'Test description',
+        memosId: 1,
+    };
 
-//     const mockMemo: Memo = {
-//         id: 1,
-//         timestamp: convertToTimestamp('03:40'), // Date 객체로 변환
-//         description: '테스트 메모입니다.',
-//         memos: null,
-//     };
+    const mockMemos = {
+        id: 1,
+        title: 'Test Memos',
+        createdAt: new Date(),
+        user: null,
+        video: null,
+        memo: [],
+        capture: [],
+    } as Memos;
 
-//     beforeEach(async () => {
-//         const module: TestingModule = await Test.createTestingModule({
-//             providers: [
-//                 MemoService,
-//                 {
-//                     provide: getRepositoryToken(Memo),
-//                     useClass: Repository,
-//                 },
-//             ],
-//         }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                MemoService,
+                {
+                    provide: getRepositoryToken(Memo),
+                    useValue: {
+                        create: jest.fn(),
+                        save: jest.fn(),
+                        findOne: jest.fn(),
+                        delete: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
 
-//         service = module.get<MemoService>(MemoService);
-//         repository = module.get<Repository<Memo>>(getRepositoryToken(Memo));
-//     });
+        service = module.get<MemoService>(MemoService);
+        repository = module.get<Repository<Memo>>(getRepositoryToken(Memo));
+    });
 
-//     describe('메모 생성', () => {
-//         it('유효한 타임스탬프로 메모를 생성해야 한다.', async () => {
-//             const createMemoDto: CreateMemoDto = {
-//                 timestamp: convertToTimestamp('04:20'), // Date로 변환
-//                 description: '새로운 메모입니다.',
-//                 memosId: 1,
-//             };
+    describe('createMemo', () => {
+        it('메모를 성공적으로 생성해야 한다', async () => {
+            const createdMemo = {
+                timestamp: mockCreateMemoDto.timestamp,
+                description: mockCreateMemoDto.description,
+                memos: { id: mockCreateMemoDto.memosId },
+            } as Memo;
 
-//             jest.spyOn(repository, 'create').mockReturnValue(mockMemo);
-//             jest.spyOn(repository, 'save').mockResolvedValue(mockMemo);
+            const savedMemo = {
+                id: 1,
+                timestamp: mockCreateMemoDto.timestamp,
+                description: mockCreateMemoDto.description,
+                memos: mockMemos,
+            } as Memo;
 
-//             const result = await service.create(createMemoDto);
-//             expect(result).toEqual(mockMemo);
-//             expect(repository.create).toHaveBeenCalledWith(createMemoDto);
-//             expect(repository.save).toHaveBeenCalledWith(mockMemo);
-//         });
-//     });
+            jest.spyOn(repository, 'create').mockReturnValue(createdMemo);
+            jest.spyOn(repository, 'save').mockResolvedValue(savedMemo);
 
-//     describe('메모 수정', () => {
-//         it('기존 메모의 타임스탬프를 수정해야 한다.', async () => {
-//             const updateMemoDto: UpdateMemoDto = {
-//                 id: 1,
-//                 timestamp: convertToTimestamp('05:15'), // 수정된 타임스탬프
-//                 description: '수정된 메모입니다.',
-//             };
+            const result = await service.createMemo(mockCreateMemoDto);
 
-//             jest.spyOn(repository, 'findOne').mockResolvedValue(mockMemo);
-//             jest.spyOn(repository, 'save').mockResolvedValue({
-//                 ...mockMemo,
-//                 ...updateMemoDto,
-//             });
+            expect(repository.create).toHaveBeenCalledWith(mockCreateMemoDto);
+            expect(repository.save).toHaveBeenCalledWith(createdMemo);
+            expect(result).toEqual(savedMemo);
+        });
 
-//             const result = await service.update(updateMemoDto);
-//             expect(result.timestamp).toEqual(updateMemoDto.timestamp);
-//             expect(result.description).toBe('수정된 메모입니다.');
-//         });
-//     });
+        it('저장 중 에러가 발생하면 에러를 전파해야 한다', async () => {
+            jest.spyOn(repository, 'save').mockRejectedValue(new Error('DB Error'));
 
-//     describe('메모 삭제', () => {
-//         it('존재하는 메모를 삭제해야 한다.', async () => {
-//             jest.spyOn(repository, 'findOne').mockResolvedValue(mockMemo);
-//             jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 1 } as any);
+            await expect(service.createMemo(mockCreateMemoDto)).rejects.toThrow('DB Error');
+        });
+    });
 
-//             await expect(service.delete(1)).resolves.toBeUndefined();
-//             expect(repository.delete).toHaveBeenCalledWith(1);
-//         });
+    describe('updateMemo', () => {
+        it('메모를 성공적으로 수정해야 한다', async () => {
+            const updateMemoDto: UpdateMemoDto = {
+                id: 1,
+                description: 'Updated description',
+            };
 
-//         it('존재하지 않는 메모를 삭제하려고 하면 예외를 발생시켜야 한다.', async () => {
-//             jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+            const existingMemo = {
+                id: 1,
+                timestamp: new Date(),
+                description: 'Original description',
+                memos: mockMemos,
+            } as Memo;
 
-//             await expect(service.delete(1)).rejects.toThrow('Memo not found');
-//         });
-//     });
-// });
+            const updatedMemo = {
+                ...existingMemo,
+                description: 'Updated description',
+            };
+
+            jest.spyOn(repository, 'findOne').mockResolvedValue(existingMemo);
+            jest.spyOn(repository, 'save').mockResolvedValue(updatedMemo);
+
+            const result = await service.updateMemo(updateMemoDto);
+
+            expect(repository.findOne).toHaveBeenCalledWith({ where: { id: updateMemoDto.id } });
+            expect(repository.save).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 1,
+                    description: 'Updated description',
+                    memos: mockMemos,
+                }),
+            );
+            expect(result).toEqual(updatedMemo);
+        });
+
+        it('존재하지 않는 메모를 수정하려고 하면 에러를 던져야 한다', async () => {
+            const updateMemoDto: UpdateMemoDto = {
+                id: 999,
+                description: 'Updated description',
+            };
+
+            jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+            await expect(service.updateMemo(updateMemoDto)).rejects.toThrow('Memo not found');
+        });
+    });
+
+    describe('deleteMemo', () => {
+        it('메모를 성공적으로 삭제해야 한다', async () => {
+            const existingMemo = {
+                id: 1,
+                timestamp: new Date(),
+                description: 'Test description',
+                memos: mockMemos,
+            } as Memo;
+
+            jest.spyOn(repository, 'findOne').mockResolvedValue(existingMemo);
+            jest.spyOn(repository, 'delete').mockResolvedValue({ affected: 1, raw: [] });
+
+            await service.deleteMemo(1);
+
+            expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+            expect(repository.delete).toHaveBeenCalledWith(1);
+        });
+
+        it('존재하지 않는 메모를 삭제하려고 하면 에러를 던져야 한다', async () => {
+            jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+            await expect(service.deleteMemo(999)).rejects.toThrow('Memo not found');
+        });
+
+        it('삭제 중 에러가 발생하면 에러를 전파해야 한다', async () => {
+            const existingMemo = {
+                id: 1,
+                timestamp: new Date(),
+                description: 'Test description',
+                memos: mockMemos,
+            } as Memo;
+
+            jest.spyOn(repository, 'findOne').mockResolvedValue(existingMemo);
+            jest.spyOn(repository, 'delete').mockRejectedValue(new Error('DB Error'));
+
+            await expect(service.deleteMemo(1)).rejects.toThrow('DB Error');
+        });
+    });
+});

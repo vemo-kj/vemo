@@ -20,10 +20,13 @@ export class PdfController {
 
         const pdfBuffer = await this.pdfService.createMemoCapturePDF(title, memo, capture);
 
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename=${title}_vemo.pdf`,
-        });
+        const safeTitle = encodeURIComponent(title);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${safeTitle}_vemo.pdf"; filename*=UTF-8''${safeTitle}_vemo.pdf`,
+        );
 
         res.send(pdfBuffer);
     }

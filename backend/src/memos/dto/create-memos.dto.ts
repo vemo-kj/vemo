@@ -6,10 +6,4 @@ export class CreateMemosDto {
     @MinLength(1)
     @MaxLength(50)
     title: string;
-
-    @IsNotEmpty()
-    @IsString()
-    @MinLength(1)
-    @MaxLength(255)
-    description: string;
 }
