@@ -14,8 +14,7 @@ export class PdfController {
     @Public()
     @Get('download/:memosId')
     async downloadPDF(@Param('memosId') memosId: number, @Res() res: Response) {
-        // 실제 데이터 조회
-
+        // memosId에 맞춰 title,memo,capture DB에 추출
         const memos = await this.memosService.getMemosById(memosId);
         const { title, memo, capture } = memos;
 

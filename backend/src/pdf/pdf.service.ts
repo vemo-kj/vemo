@@ -5,6 +5,7 @@ import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
 
 @Injectable()
 export class PdfService {
+    // Memo와 Capture PDF로 변환
     async createMemoCapturePDF(
         title: string,
         memos: pdfMemoeDto[],
@@ -13,10 +14,7 @@ export class PdfService {
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
 
-        // HTML 템플릿 구성
         const htmlContent = await this.generateHTML(title, memos, capture);
-
-        // HTML 렌더링
         await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
         // PDF 생성
@@ -37,6 +35,7 @@ export class PdfService {
         memos: pdfMemoeDto[],
         capture: pdfCaptureDto[],
     ): Promise<string> {
+        // Timestamp에 맞춰 메모와 사진 정렬
         const combined = [
             ...memos.map(memo => ({
                 ...memo,
@@ -137,13 +136,14 @@ export class PdfService {
         return `${minutes}:${seconds}`;
     }
 
+    //
     private async fetchBase64FromUrl(url: string): Promise<string> {
         try {
             const response = await axios.get(url);
             return response.data.trim(); // base64 문자열 반환
         } catch (error) {
             console.error(`Base64 이미지 다운로드 실패: ${url}`);
-            return ''; // 실패 시 빈 문자열 반환
+            return '';
         }
     }
 }
