@@ -11,7 +11,7 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  height: 220px;
+  height: 300px;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -25,14 +25,17 @@
 }
 
 .thumbnailContainer {
-  width: 100%;
-  height: 110px;
   position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  /* 16:9 비율 */
   overflow: hidden;
 }
 
 .thumbnailStack {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -41,33 +44,39 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
   border-radius: 8px;
-  transition: transform 0.2s ease;
 }
 
 .thumbnailBack {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  transform: rotate(-2deg);
-  filter: brightness(0.9);
+  transform: translateX(4px) translateY(4px);
+  filter: blur(2px) brightness(0.8);
+  opacity: 0.6;
   z-index: 1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .thumbnailFront {
   position: absolute;
-  top: 0;
-  left: 0;
-  transform: rotate(2deg);
   z-index: 2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.myCard:hover .thumbnailFront {
+  transform: translateX(-3px) translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.myCard:hover .thumbnailBack {
+  transform: translateX(6px) translateY(6px);
+  filter: blur(3px) brightness(0.7);
+  opacity: 0.5;
 }
 
 .cardContent {
-  padding: 8px;
-  flex: 1;
+  padding: 12px;
+  height: 140px;
   display: flex;
   flex-direction: column;
 }
@@ -76,23 +85,24 @@
   font-size: 12px;
   font-weight: 800;
   color: #333;
-  margin-bottom: 4px;
+  height: 28px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.3;
+  margin-bottom: 4px;
 }
 
 .statsContainer {
-  margin-top: auto;
+  margin: 4px 0;
 }
 
 .stat {
   display: flex;
   align-items: center;
   background-color: #f8f9fa;
-  padding: 4px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
   margin-bottom: 4px;
 }
@@ -110,18 +120,23 @@
 }
 
 .previewVideos {
-  margin-top: 4px;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  overflow: hidden;
+  margin-top: 4px;
 }
 
 .previewVideo {
   font-size: 11px;
   color: #666;
-  padding: 1px 0;
+  padding: 4px 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  height: 24px;
+  line-height: 16px;
 }
