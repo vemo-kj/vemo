@@ -6,13 +6,11 @@ import styles from './Community.module.css';
 interface Memos {
   id: number;
   title: string;
-  description: string;
   user: {
     id: number;
     nickname: string;
   };
   created_at: Date;
-  updated_at: Date;
 }
 
 interface CommunityResponse {
@@ -145,7 +143,6 @@ export default function Community() {
               >
                 <div className={styles.memoContent}>
                   <h3 className={styles.memoTitle}>{memo.title}</h3>
-                  <p className={styles.memoDescription}>{memo.description}</p>
                 </div>
                 <div className={styles.memoInfo}>
                   <span className={styles.author}>{memo.user.nickname}</span>
@@ -172,15 +169,11 @@ export default function Community() {
           </div>
           <div className={styles.detailContent}>
             <h3 className={styles.detailTitle}>{selectedCard.title}</h3>
-            <p className={styles.detailDescription}>{selectedCard.description}</p>
             <div className={styles.detailInfo}>
               <span className={styles.author}>{selectedCard.user.nickname}</span>
               <div className={styles.dateInfo}>
                 <span className={styles.date}>
                   작성: {new Date(selectedCard.created_at).toLocaleDateString()}
-                </span>
-                <span className={styles.date}>
-                  수정: {new Date(selectedCard.updated_at).toLocaleDateString()}
                 </span>
               </div>
             </div>
