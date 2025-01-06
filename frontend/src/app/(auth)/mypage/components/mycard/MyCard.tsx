@@ -5,7 +5,6 @@ interface PreviewVideo {
   id: string;
   title: string;
   channel: string;
-  thumbnail: string;
 }
 
 interface MyCardProps {
@@ -17,9 +16,7 @@ interface MyCardProps {
 }
 
 export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos }: MyCardProps) {
-  const showPreviewList = previewVideos.length >= 1;
-  const previewList = previewVideos.slice(0, 2);
-  const hasMultipleVideos = previewVideos.length >= 2;
+  const hasMultipleVideos = totalVideos >= 2;
   const firstVideoId = previewVideos[0]?.id;
 
   return (
@@ -30,13 +27,13 @@ export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos
             {hasMultipleVideos ? (
               <>
                 <img
-                  src={previewVideos[1].thumbnail || '/images/default-thumbnail.jpg'}
-                  alt={previewVideos[1].title}
+                  src={thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={name}
                   className={`${styles.thumbnail} ${styles.thumbnailBack}`}
                 />
                 <img
-                  src={previewVideos[0].thumbnail || '/images/default-thumbnail.jpg'}
-                  alt={previewVideos[0].title}
+                  src={thumbnail || '/images/default-thumbnail.jpg'}
+                  alt={name}
                   className={`${styles.thumbnail} ${styles.thumbnailFront}`}
                 />
               </>
@@ -57,15 +54,13 @@ export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos
               <span className={styles.statValue}>{totalVideos}개</span>
             </div>
           </div>
-          {showPreviewList && (
-            <div className={styles.previewVideos}>
-              {previewList.map((video, index) => (
-                <div key={video.id} className={styles.previewVideo}>
-                  {index + 1}. {video.title}
-                </div>
-              ))}
-            </div>
-          )}
+          <div className={styles.previewVideos}>
+            {previewVideos.slice(0, 2).map((video, index) => (
+              <div key={video.id} className={styles.previewVideo}>
+                {index + 1}. {video.title}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </Link>
