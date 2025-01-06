@@ -21,7 +21,6 @@ export class PdfController {
 
         const pdfBuffer = await this.pdfService.createMemoCapturePDF(title, memo, capture);
 
-        console.log(pdfBuffer);
         res.set({
             'Content-Type': 'application/pdf',
             'Content-Disposition': 'attachment; filename=memo_timeline.pdf',
