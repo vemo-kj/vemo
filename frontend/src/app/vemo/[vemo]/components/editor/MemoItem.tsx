@@ -140,22 +140,32 @@ const MemoItem = memo(({
         [onChangeHTML]
     );
 
-    // 추출하기 버튼 클릭 핸들러 추가
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [extractedText, setExtractedText] = useState('');
+    const [isExtracting, setIsExtracting] = useState(false);
+
     const handleExtractText = async () => {
         if (!screenshot) return;
 
         try {
+            setIsExtracting(true);
+
+            // 이미지 압축 처리
+            const compressedImage = await compressImageBeforeSend(screenshot);
+
             const response = await fetch('http://localhost:5050/text-extraction', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ imageBase64: screenshot }),
+                body: JSON.stringify({ imageBase64: compressedImage }),
             });
 
             const data = await response.json();
-
-            if (!data.success) {
+            if (data.success) {
+                setExtractedText(data.text);
+                setIsModalOpen(true);
+            } else {
                 throw new Error(data.error || '텍스트 추출에 실패했습니다.');
             }
 
@@ -169,19 +179,17 @@ const MemoItem = memo(({
         }
     };
 
-  /**
-   * ----------------------------------------------------------------
-   * 📌 최종 렌더링
-   * ----------------------------------------------------------------
-   */
-  return (
-    <div className={styles.memoItemContainer}>
-      {/* 헤더 영역: 타임스탬프 버튼 */}
-      <div className={styles.memoHeader}>
-        <button className={styles.timestampBtn} onClick={handleTimestampClick}>
-          {timestamp}
-        </button>
-      </div>
+    return (
+        <div className={styles.memoItemContainer}>
+            {/* 1) 상단에 타임스탬프 */}
+            <div className={styles.memoHeader}>
+                <button
+                    className={styles.timestampBtn}
+                    onClick={() => onTimestampClick?.(timestamp)}
+                >
+                    {timestamp}
+                </button>
+            </div>
 
       {/* 본문 영역: 이미지(스크린샷) 또는 텍스트(contentEditable) */}
       {screenshot ? (
@@ -205,34 +213,62 @@ const MemoItem = memo(({
         />
       )}
 
-      {/* 푸터 영역: 그리기 버튼, 추출하기, 삭제 버튼 */}
-      <div className={styles.memoFooter}>
-        {screenshot && (
-          <button className={styles.drawBtn} onClick={handleOpenDrawing}>
-            그리기
-          </button>
-        )}
-        <button className="style export">추출하기</button>
-        <button className={styles.deleteBtn} onClick={onDelete}>
-          삭제
-        </button>
-      </div>
+            {/* 3) 하단에 그리기, 삭제 버튼 */}
+            <div className={styles.memoFooter}>
+                {screenshot && (
+                    <>
+                        <button className={styles.drawBtn} onClick={handleOpenDrawing}>
+                            그리기
+                        </button>
+                        <button
+                            className={styles.extractBtn}
+                            onClick={handleExtractText}
+                            disabled={isExtracting}
+                        >
+                            {isExtracting ? '추출 중...' : '추출하기'}
+                        </button>
+                    </>
+                )}
+                <button className={styles.deleteBtn} onClick={onDelete}>
+                    삭제
+                </button>
+            </div>
 
-      {/* 그림 그리기 모달 (DrawingCanvas) */}
-      {isDrawingOpen && screenshot && (
-        <div className={styles.drawOverlay}>
-          <div className={styles.drawPopup}>
-            <h3>그리기</h3>
-            <DrawingCanvas
-              onSave={handleSaveDrawing}
-              onClose={handleCloseDrawing}
-              backgroundImage={screenshot}
-            />
-          </div>
+            {/* 4) 그리기 모달 (DrawingCanvas로 교체) */}
+            {isDrawingOpen && screenshot && (
+                <div className={styles.drawOverlay}>
+                    <div className={styles.drawPopup}>
+                        <h3>그리기</h3>
+                        <DrawingCanvas
+                            onSave={handleSaveDrawing}
+                            onClose={handleCloseDrawing}
+                            backgroundImage={screenshot} // 배경 이미지 전달
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* 추출 결과 모달 */}
+            {isModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                        <h2>추출된 텍스트</h2>
+                        <div className={styles.modalContent}>
+                            <p>{extractedText}</p>
+                        </div>
+                        <div className={styles.modalActions}>
+                            <button onClick={handleUseText} className={styles.useButton}>
+                                사용하기
+                            </button>
+                            <button onClick={handleCancelExtract} className={styles.cancelButton}>
+                                삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 });
 
 MemoItem.displayName = 'MemoItem';
