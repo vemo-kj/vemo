@@ -233,6 +233,117 @@ export default function VemoPage({ params: pageParams }: PageProps) {
         console.log('Current memosId:', memosId);
     }, [memosId]);
 
+    // YouTube Player 초기화 수정
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        // YouTube IFrame API가 로드되었는지 확인
+        if (!(window as any).YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            // API 준비 완료 시 호출될 함수
+            (window as any).onYouTubeIframeAPIReady = () => {
+                initializeYouTubePlayer();
+            };
+        } else {
+            initializeYouTubePlayer();
+        }
+    }, []);
+
+    // YouTube Player 초기화 함수
+    const initializeYouTubePlayer = () => {
+        const YT = (window as any).YT;
+        if (!YT) return;
+
+        new YT.Player('youtube-player', {
+            events: {
+                onReady: (event: YT.PlayerEvent) => {
+                    console.log('YouTube Player is ready');
+                    setPlayer(event.target);
+                    setIsPlayerReady(true);
+                },
+                onStateChange: (event: YT.OnStateChangeEvent) => {
+                    // 플레이어 상태 변경 시 처리
+                    console.log('Player state changed:', event.data);
+                },
+                onError: (event: YT.OnErrorEvent) => {
+                    console.error('YouTube Player Error:', event.data);
+                }
+            }
+        });
+    };
+
+    // 타임스탬프 가져오기 함수 수정
+    const getVideoTimestamp = () => {
+        try {
+            if (!player || !isPlayerReady) {
+                console.warn('YouTube player is not ready');
+                return '00:00';
+            }
+
+            const time = player.getCurrentTime();
+            console.log('Current video time:', time);
+
+            if (typeof time !== 'number') {
+                console.warn('Invalid time value from player:', time);
+                return '00:00';
+            }
+
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            const timestamp = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            console.log('Formatted timestamp:', timestamp);
+            return timestamp;
+        } catch (error) {
+            console.error('Error getting video timestamp:', error);
+            return '00:00';
+        }
+    };
+
+    const handleCaptureTab = async () => {
+        try {
+            if (!editorRef.current || !memosId) {
+                console.error('Editor ref or memosId is missing');
+                return;
+            }
+
+            // 비디오 요소 찾기
+            const video = document.querySelector('iframe');
+            if (!video) {
+                console.error('Video element not found');
+                return;
+            }
+
+            // 캔버스 생성 및 비디오 프레임 캡처
+            const canvas = document.createElement('canvas');
+            canvas.width = video.clientWidth;
+            canvas.height = video.clientHeight;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Failed to get canvas context');
+                return;
+            }
+
+            // 비디오 프레임을 캔버스에 그리기
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // 캔버스를 이미지로 변환
+            const imageUrl = canvas.toDataURL('image/jpeg');
+
+            // Editor 컴포넌트의 handleCapture 호출
+            await editorRef.current.handleCapture(imageUrl);
+
+        } catch (error) {
+            console.error('Capture failed:', error);
+            alert('캡처에 실패했습니다.');
+        }
+    };
+
     return (
         <div className={styles.container}>
             {/* (7) 유튜브 영상 섹션 */}
@@ -386,6 +497,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                     <EditorNoSSR
                                         ref={editorRef}
                                         getTimestamp={getVideoTimestamp}
+                                        memosId={memosId} // 에디터에 memosId 정상 전달
                                         onTimestampClick={(timestamp) => {
                                             if (player && isPlayerReady) {
                                                 const [minutes, seconds] = timestamp.split(':').map(Number);
@@ -397,7 +509,7 @@ export default function VemoPage({ params: pageParams }: PageProps) {
                                         editingItemId={null}
                                         onEditStart={() => {}}
                                         onEditEnd={() => {}}
-                                        memosId={memosId}
+                                        
                                     />
                                 )}
                             </>

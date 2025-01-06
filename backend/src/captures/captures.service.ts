@@ -14,9 +14,11 @@ export class CapturesService {
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
+            console.log('[Vemo] 캡처 생성 요청 데이터:', createCapturesDto); // [수정됨] 디버깅용 로그 추가
             const captures = this.capturesRepository.create(createCapturesDto);
             return await this.capturesRepository.save(captures);
         } catch (error) {
+            console.error('[Vemo] 캡처 생성 실패:', error); // [수정됨] 에러 로그 추가
             throw new InternalServerErrorException('Failed to create capture', {
                 cause: error,
             });

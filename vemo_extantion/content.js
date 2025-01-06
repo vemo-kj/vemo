@@ -7,10 +7,14 @@ window.addEventListener("message", (event) => {
   if (event.source !== window) return; // 보안상 체크
 
   const { type } = event.data;
+  console.log('[Vemo Extension] 메시지 수신:', type);
+
   if (type === "CAPTURE_TAB") {
+    console.log('[Vemo Extension] 전체 캡처 시작');
     // "전체 캡처" 버튼 → 실제로는 유튜브 플레이어 영역만 잘라서 반환
     captureYouTubePlayer();
   } else if (type === "CAPTURE_AREA") {
+    console.log('[Vemo Extension] 부분 캡처 시작');
     // "영역 선택" 버튼
     chrome.runtime.sendMessage({ action: "startSelection" }, (resp) => {
       if (resp && resp.started) {
@@ -276,6 +280,7 @@ function cropImage(dataUrl, cropX, cropY, cropW, cropH, callback) {
 }
 
 function postMessageToPage(type, dataUrl) {
+  console.log('[Vemo Extension] 캡처 완료, 웹으로 전송:', type);
   window.postMessage({ type, dataUrl }, "*");
 }
 

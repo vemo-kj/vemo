@@ -220,5 +220,64 @@ export const memoService = {
        } catch {
          return { message: 'Deleted (invalid JSON body)' };
        }
-      }
+      },
+
+    async saveCapture(data: {
+        memosId: number;
+        imageUrl: string;
+        timestamp: string;
+    }) {
+        try {
+            const response = await fetch(`${API_URL}/capture`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save capture');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to save capture:', error);
+            throw error;
+        }
+    }
+};
+
+interface CaptureData {
+    timestamp: string;
+    image: string;
+    memosId: number;
+}
+
+export const captureService = {
+    async createCapture(data: CaptureData) {
+        try {
+            const requestData = {
+                timestamp: data.timestamp,
+                image: data.image,
+                memosId: data.memosId,
+            };
+            console.log('Sending capture data:', requestData);
+            const response = await fetch(`${API_URL}/captures`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify(requestData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to create capture:', error);
+            throw error;
+        }
+    }
 };

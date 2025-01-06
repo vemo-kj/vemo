@@ -18,7 +18,7 @@ interface MemoItemProps {
   screenshot?: string;
   onTimestampClick?: (timestamp: string) => void;
   onChangeHTML: (newHTML: string) => void;
-  onDelete: () => void; // 삭제 요청 전달
+  onDelete: (id: string) => void;
   onPauseVideo?: () => void;
   isEditable?: boolean;
 }
@@ -198,12 +198,13 @@ const MemoItem = memo(({
 
       {/* 본문 영역: 이미지(스크린샷) 또는 텍스트(contentEditable) */}
       {screenshot ? (
-        <img
-          id={`capture-${id}`}
-          src={screenshot}
-          alt="capture"
-          className={styles.captureImage}
-        />
+        <div className={styles.screenshotContainer}>
+          <img 
+            src={screenshot} 
+            alt="Captured screenshot" 
+            className={styles.screenshot}
+          />
+        </div>
       ) : (
         <div
           className={styles.itemContent}

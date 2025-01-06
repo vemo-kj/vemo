@@ -3,9 +3,16 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
+import * as bodyParser from 'body-parser'; // [추가]
+
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    // [추가] request body 용량 제한 확대
+  app.use(bodyParser.json({ limit: '20mb' }));
+  app.use(bodyParser.urlencoded({ limit: '20mb', extended: true }));
+
     console.log('🚀 애플리케이션이 시작됩니다! 환경변수:', {
         PORT: process.env.PORT,
         NODE_ENV: process.env.NODE_ENV,

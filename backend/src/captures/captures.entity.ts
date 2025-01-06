@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Memos } from '../memos/memos.entity';
 
 @Entity()
@@ -6,13 +6,12 @@ export class Captures {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('datetime')
-    timestamp: Date;
+    @Column({ type: 'time' })
+    timestamp: string;
 
-    @Column({ length: 255 })
+    @Column({ type: 'longtext' })
     image: string;
 
-    @ManyToOne(() => Memos, memos => memos.memo, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'memosId' })
+    @ManyToOne(() => Memos, memos => memos.capture)
     memos: Memos;
 }
