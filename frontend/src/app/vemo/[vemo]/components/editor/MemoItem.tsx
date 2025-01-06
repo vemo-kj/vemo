@@ -112,23 +112,18 @@ const MemoItem = memo(({
     setIsComposing(false);
   };
 
-  /**
-   * (4) onBlur
-   * - 포커스 해제 시점에 최종적으로 새 HTML을 부모에게 전달
-   * - 내용이 비어 있으면 해당 메모를 삭제하도록 처리
-   */
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (!contentRef.current) return;
+    // 편집 완료할 때
+    const handleBlur = () => {
+        setIsEditing(false);
+        if (!contentRef.current) return;
 
-    const newValue = contentRef.current.innerHTML;
-    if (newValue.trim().length === 0) {
-      // 내용이 아예 없다면 삭제
-      onDelete();
-    } else {
-      onChangeHTML(newValue);
-    }
-  };
+        const newValue = contentRef.current.innerHTML;
+        if (newValue.trim().length === 0) {
+            onDelete();
+        } else {
+            onChangeHTML(newValue);
+        }
+    };
 
   /**
    * (5) 타임스탬프를 클릭하면 영상 해당 시점으로 이동
@@ -137,15 +132,42 @@ const MemoItem = memo(({
     onTimestampClick?.(timestamp);
   };
 
-  /**
-   * (6) HTML 변경을 일정 시간 지연(debounce) 후 처리하고 싶다면:
-   */
-  const debouncedOnChangeHTML = useCallback(
-    debounce((newValue: string) => {
-      onChangeHTML(newValue);
-    }, 300),
-    [onChangeHTML]
-  );
+    // debounce를 적용하여 잦은 상태 업데이트 방지
+    const debouncedOnChangeHTML = useCallback(
+        debounce((newValue: string) => {
+            onChangeHTML(newValue);
+        }, 300),
+        [onChangeHTML]
+    );
+
+    // 추출하기 버튼 클릭 핸들러 추가
+    const handleExtractText = async () => {
+        if (!screenshot) return;
+
+        try {
+            const response = await fetch('http://localhost:5050/text-extraction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ imageBase64: screenshot }),
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || '텍스트 추출에 실패했습니다.');
+            }
+
+            // 추출된 텍스트를 HTML 컨텐츠에 추가
+            const newContent = htmlContent + '<p>' + data.text + '</p>';
+            onChangeHTML(newContent);
+
+        } catch (error) {
+            console.error('텍스트 추출 실패:', error);
+            alert('텍스트 추출에 실패했습니다.');
+        }
+    };
 
   /**
    * ----------------------------------------------------------------
