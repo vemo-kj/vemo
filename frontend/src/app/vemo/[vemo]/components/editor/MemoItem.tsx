@@ -18,7 +18,7 @@ interface MemoItemProps {
   screenshot?: string;
   onTimestampClick?: (timestamp: string) => void;
   onChangeHTML: (newHTML: string) => void;
-  onDelete: () => void;
+  onDelete: () => void; // 삭제 요청 전달
   onPauseVideo?: () => void;
   isEditable?: boolean;
 }
