@@ -38,8 +38,20 @@ export class PdfService {
         capture: pdfCaptureDto[],
     ): Promise<string> {
         const combined = [
-            ...memos.map(memo => ({ ...memo, type: 'memo' })),
-            ...capture.map(capture => ({ ...capture, type: 'capture' })),
+            ...memos.map(memo => ({
+                ...memo,
+                type: 'memo',
+                timestamp:
+                    memo.timestamp instanceof Date ? memo.timestamp.toISOString() : memo.timestamp,
+            })),
+            ...capture.map(capture => ({
+                ...capture,
+                type: 'capture',
+                timestamp:
+                    capture.timestamp instanceof Date
+                        ? capture.timestamp.toISOString()
+                        : capture.timestamp,
+            })),
         ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
         let htmlContent = `
@@ -87,13 +99,13 @@ export class PdfService {
         for (const item of combined) {
             const time = this.formatTimestamp(item.timestamp);
 
-            if (item.type === 'memo') {
+            if (item.type === 'memo' && 'description' in item) {
                 htmlContent += `
                     <div class="memo">
                         <div class="timestamp">[${time}]</div>
                         <div>${item.description}</div>
                     </div>`;
-            } else if (item.type === 'capture') {
+            } else if (item.type === 'capture' && 'image' in item) {
                 const base64Image = await this.fetchBase64FromUrl(item.image);
                 if (base64Image) {
                     htmlContent += `
@@ -120,8 +132,8 @@ export class PdfService {
     // 타임스탬프 포맷팅 함수
     private formatTimestamp(timestamp: string): string {
         const date = new Date(timestamp);
-        const minutes = String(date.getMinutes()).padStart(2, '0'); // 두 자리 분
-        const seconds = String(date.getSeconds()).padStart(2, '0'); // 두 자리 초
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
         return `${minutes}:${seconds}`;
     }
 
