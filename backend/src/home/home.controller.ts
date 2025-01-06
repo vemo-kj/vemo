@@ -5,11 +5,11 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Param,
     ParseIntPipe,
     Post,
     Query,
     Req,
-    Param,
 } from '@nestjs/common';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 import { Public } from '../public.decorator';

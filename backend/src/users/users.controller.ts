@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Request, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Request } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginRequestDto } from 'src/auth/dto/login.requests.dto';
 import { Public } from '../public.decorator';
@@ -32,7 +32,6 @@ export class UsersController {
 
     @Get()
     async getCurrentUser(@Request() req) {
-        this.logger.log(`getUser: ${req.user.sub}`);
         return this.usersService.findById(req.user.sub);
     }
 

@@ -20,6 +20,8 @@ import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { MemoModule } from './memo/memo.module';
+import { TextExtractionModule } from './text-extraction/text-extraction.module';
+import { PdfModule } from './pdf/pdf.module';
 
 @Module({
     imports: [
@@ -47,6 +49,8 @@ import { MemoModule } from './memo/memo.module';
         CapturesModule,
         SummarizationModule,
         MemoModule,
+        TextExtractionModule,
+        PdfModule,
     ],
     controllers: [AppController],
     providers: [

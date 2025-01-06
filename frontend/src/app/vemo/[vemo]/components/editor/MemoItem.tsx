@@ -181,7 +181,63 @@ const MemoItem = memo(({
         } catch (error) {
             console.error('텍스트 추출 실패:', error);
             alert('텍스트 추출에 실패했습니다.');
+        } finally {
+            setIsExtracting(false);
         }
+    };
+
+    // 이미지 압축 유틸리티 함수
+    const compressImageBeforeSend = async (base64String: string): Promise<string> => {
+        // Base64 헤더 분리
+        const [header, base64Image] = base64String.split(',');
+
+        // Canvas 생성
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        return new Promise((resolve) => {
+            img.onload = () => {
+                // 최대 너비/높이 설정 (예: 800px)
+                const maxDimension = 800;
+                let width = img.width;
+                let height = img.height;
+
+                // 비율 유지하면서 크기 조정
+                if (width > height && width > maxDimension) {
+                    height = (height * maxDimension) / width;
+                    width = maxDimension;
+                } else if (height > maxDimension) {
+                    width = (width * maxDimension) / height;
+                    height = maxDimension;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // 이미지 그리기
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                // 압축된 Base64 생성 (품질 0.7)
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(compressedBase64);
+            };
+
+            // 원본 이미지 로드
+            img.src = base64String;
+        });
+    };
+
+    const handleUseText = () => {
+        const newContent = htmlContent + '<p>' + extractedText + '</p>';
+        onChangeHTML(newContent);
+        setIsModalOpen(false);
+        setExtractedText('');
+    };
+
+    const handleCancelExtract = () => {
+        setIsModalOpen(false);
+        setExtractedText('');
     };
 
     return (

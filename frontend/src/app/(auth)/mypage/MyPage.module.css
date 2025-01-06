@@ -1,13 +1,14 @@
 .pageContainer {
   min-height: 100vh;
   background-color: #f9f9f9;
-  padding: 80px 20px 20px;
+  padding: 80px 40px 40px;
 }
 
 .profileContent {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+
 }
 
 .profileHeader {
@@ -15,10 +16,11 @@
   align-items: center;
   gap: 24px;
   background: white;
-  padding: 24px;
+  padding: 32px;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  width: 100%;
 }
 
 .profileImageWrapper {
@@ -28,7 +30,6 @@
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .profileImage {
@@ -37,28 +38,54 @@
   object-fit: cover;
 }
 
+.contentSection {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  padding: 20px 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+  width: 100%;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
   .cardGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 900px) {
+  .pageContainer {
+    padding: 80px 20px 20px;
+  }
+
   .cardGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .profileHeader {
+    padding: 24px;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .cardGrid {
     grid-template-columns: 1fr;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
   }
 }

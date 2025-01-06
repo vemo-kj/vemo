@@ -1,8 +1,4 @@
-import Image from 'next/image';
-import styles from './ExportButton.module.css';
-
-import Image from 'next/image';
-import styles from './ExportButton.module.css';
+'use client';
 
 export default function ExportButton() {
   const memosId = 46;  // 다른 ID로 테스트
@@ -28,27 +24,37 @@ export default function ExportButton() {
         throw new Error(`서버 에러: ${response.status}`);
       }
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sample.pdf";
-    a.click();
-    window.URL.revokeObjectURL(url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vemo_${memosId}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      console.log('PDF 다운로드 완료');
+    } catch (error) {
+      console.error('PDF 다운로드 실패:', error);
+      alert('PDF 다운로드에 실패했습니다.');
+    }
   };
 
   return (
-    <button onClick={handleDownloadPDF} className={styles.iconButton}>
-      <div className={styles.iconContainer}>
-        <Image
-          className={styles.defaultIcon}
-          src="/icons/bt_edit_nav_export.svg"
-          alt="내보내기"
-          width={20}
-          height={20}
-        />
-      </div>
-      <span className={styles.iconButtonText}>내보내기</span>
+    <button
+      onClick={handleDownloadPDF}
+      style={{
+        padding: '8px 16px',
+        backgroundColor: '#007AFF',
+        color: 'white',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s'
+      }}
+      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
+      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007AFF'}
+    >
+      내보내기
     </button>
   );
 }

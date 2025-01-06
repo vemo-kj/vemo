@@ -267,6 +267,11 @@ export default function SidebarNav({
                                 <ExportButton />
                             </div>
                         )}
+                        <div className={styles.footerButtons}>
+                            <SummaryButton />
+                            <ExportButton />
+                            <button>저장하기</button>
+                        </div>
                     </>
                 )}
 
