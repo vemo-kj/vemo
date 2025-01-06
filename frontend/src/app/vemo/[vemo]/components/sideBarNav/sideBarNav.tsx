@@ -10,15 +10,20 @@ import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
 import Image from 'next/image';
 
+/**
+ * ----------------------------------------------------------------
+ * 📌 SidebarNavProps
+ * - 사이드바 탭 전환, 캡처하기, 부분캡처 등 props 정의
+ * ----------------------------------------------------------------
+ */
 interface SidebarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
     renderSectionContent: () => React.ReactNode;
     currentTimestamp: string;
-
-    handleCaptureTab: () => void; // 캡처하기 함수 추가
-    handleCaptureArea: () => void; // 부분 캡처하기 함수 추가
-    editorRef: React.RefObject<any>; // 에디터 참조 추가
+    handleCaptureTab: () => void;
+    handleCaptureArea?: () => void;
+    editorRef: React.RefObject<any>;
     playlistData?: {
         playlist: {
             id: number;
@@ -26,11 +31,18 @@ interface SidebarNavProps {
         };
         memos: {
             title: string;
-            // 필요한 경우 다른 비디오 정보도 추가
         };
     };
+    memosId?: number | null;
 }
 
+/**
+ * ----------------------------------------------------------------
+ * 📌 SidebarNav 컴포넌트
+ * - 좌측(또는 우측)에 위치하는 사이드 탭(작성하기, 커뮤니티, 재생목록)
+ * - '나만의 노트' 섹션에서 작성 시 DraftEditor가 렌더링됨
+ * ----------------------------------------------------------------
+ */
 export default function SidebarNav({
     selectedOption,
     onOptionSelect,
@@ -40,35 +52,19 @@ export default function SidebarNav({
     handleCaptureArea,
     editorRef,
     playlistData,
+    memosId,
 }: SidebarNavProps) {
-    const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
-    const [memos, setMemos] = useState([]);
-
-    // 메모 목록 불러오기
-    useEffect(() => {
-        const fetchMemos = async () => {
-            try {
-                const response = await fetch('/api/memo');
-                if (response.ok) {
-                    const data = await response.json();
-                    setMemos(data);
-                }
-            } catch (error) {
-                console.error('메모 목록 불러오기 실패:', error);
-            }
-        };
-
-        if (activeTab === 'write' && selectedOption === '내 메모 보기') {
-            fetchMemos();
-        }
-    }, [activeTab, selectedOption]);
+    // 탭 상태: 'write' | 'community' | 'playlist'
+    const [activeTab, setActiveTab] = useState('write');
 
     return (
         <div className={styles.container}>
-            {/* 왼쪽 탭 버튼 영역 */}
+            {/* (1) 상단 탭 메뉴 */}
             <div className={styles.tabs}>
                 <button
-                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'write' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${
+                        activeTab === 'write' ? styles.activeTab : ''
+                    }`}
                     onClick={() => setActiveTab('write')}
                 >
                     <div className={styles.iconButton}>
@@ -83,7 +79,9 @@ export default function SidebarNav({
                 </button>
 
                 <button
-                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'community' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${
+                        activeTab === 'community' ? styles.activeTab : ''
+                    }`}
                     onClick={() => setActiveTab('community')}
                 >
                     <div className={styles.iconButton}>
@@ -98,7 +96,9 @@ export default function SidebarNav({
                 </button>
 
                 <button
-                    className={`${styles.tab} ${styles.mainTab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
+                    className={`${styles.tab} ${styles.mainTab} ${
+                        activeTab === 'playlist' ? styles.activeTab : ''
+                    }`}
                     onClick={() => setActiveTab('playlist')}
                 >
                     <div className={styles.iconButton}>
@@ -113,8 +113,9 @@ export default function SidebarNav({
                 </button>
             </div>
 
-            {/* 탭 내용 표시 영역 */}
+            {/* (2) 탭 별 콘텐츠 영역 */}
             <div className={styles.tabContent}>
+                {/* 작성하기 탭 */}
                 {activeTab === 'write' && (
                     <>
                         <h1 className={styles.notesHeader}>나만의 노트</h1>
@@ -128,6 +129,7 @@ export default function SidebarNav({
                         </div>
                         <div className={styles.notesContent}>
                             <div className={styles.noteActions}>
+                                {/* 드롭다운: "내 메모 보기" / "AI 요약 보기" / "퀴즈 보기" */}
                                 <div className={styles.dropdown}>
                                     <select
                                         value={selectedOption}
@@ -140,6 +142,8 @@ export default function SidebarNav({
                                     </select>
                                 </div>
                             </div>
+
+                            {/* 드롭다운 선택에 따라 다른 컴포넌트 렌더링 */}
                             {selectedOption === 'AI 요약 보기' ? (
                                 <SummaryView />
                             ) : selectedOption === '퀴즈 보기' ? (
@@ -148,6 +152,8 @@ export default function SidebarNav({
                                 renderSectionContent()
                             )}
                         </div>
+
+                        {/* "내 메모 보기" 상태일 때만 하단 버튼 활성화 */}
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtonContainer}>
                                 <button onClick={handleCaptureTab} className={styles.iconButton}>
@@ -168,14 +174,35 @@ export default function SidebarNav({
                                     />
                                     <span className={styles.iconButtonText}>부분캡처</span>
                                 </button>
-                                    <SummaryButton />
-                                    <ExportButton />
+                                <SummaryButton />
+                                <ExportButton />
                             </div>
                         )}
-                    </>
-                )}
+                        <div className={styles.footerButtons}>
+                            <SummaryButton />
+                            <ExportButton />
+                            <button>저장하기</button>
+                        </div>
+                        <div className={styles.notesContent}>
+                            <div className={styles.noteActions}>
+                                {/* 드롭다운: "내 메모 보기" / "AI 요약 보기" / "퀴즈 보기" */}
+                                <div className={styles.dropdown}>
+                                    <select
+                                        value={selectedOption}
+                                        onChange={e => onOptionSelect(e.target.value)}
+                                        className={styles.dropdownSelect}
+                                    >
+                                        <option value="내 메모 보기">내 메모 보기</option>
+                                        <option value="AI 요약 보기">AI 요약 보기</option>
+                                        <option value="퀴즈 보기">퀴즈 보기</option>
+                                    </select>
+                                </div>
+                            </div>
 
+                {/* 커뮤니티 탭 */}
                 {activeTab === 'community' && <Community />}
+
+                {/* 재생목록 탭 */}
                 {activeTab === 'playlist' && <PlayList />}
             </div>
         </div>

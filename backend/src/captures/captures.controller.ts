@@ -8,8 +8,8 @@ export class CapturesController {
     constructor(private readonly capturesService: CapturesService) {}
 
     @Post()
-    async create(@Body() createCapturesDto: CreateCapturesDto) {
-        return await this.capturesService.create(createCapturesDto);
+    async createCapture(@Body() createCapturesDto: CreateCapturesDto) {
+        return await this.capturesService.createCapture(createCapturesDto);
     }
 
     @Get()
@@ -23,12 +23,12 @@ export class CapturesController {
     }
 
     @Put(':id')
-    async update(@Param('id') id: number, @Body() updateCapturesDto: UpdateCapturesDto) {
-        return await this.capturesService.update(id, updateCapturesDto);
+    async updateCapture(@Param('id') id: number, @Body() updateCapturesDto: UpdateCapturesDto) {
+        return await this.capturesService.updateCapture(id, updateCapturesDto);
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: number) {
-        return await this.capturesService.delete(id);
+    async deleteCapture(@Param('id') id: number) {
+        return await this.capturesService.deleteCapture(id);
     }
 }

@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 
-@Controller('memos')
+@Controller('home/memos')
 export class MemosController {
     constructor(private readonly memosService: MemosService) {}
 
@@ -29,5 +29,19 @@ export class MemosController {
     @Delete('/:id')
     async deleteMemos(@Param('id') id: number) {
         return this.memosService.deleteMemos(id);
+    }
+
+    @Post()
+    async create(@Body() createMemosDto: CreateMemosDto) {
+        console.log('Received request body:', createMemosDto);
+        
+        try {
+            const result = await this.memosService.create(createMemosDto);
+            console.log('Created memos:', result);
+            return result;
+        } catch (error) {
+            console.error('Error creating memos:', error);
+            throw error;
+        }
     }
 }

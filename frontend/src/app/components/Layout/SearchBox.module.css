@@ -1,19 +1,53 @@
 .searchBox {
-  width: 350px;
-  height: 30px;
-  border: 1px solid;
-  border-radius: 5px;
-  border-color: rgb(197, 195, 195);
-  box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
-
+  width: 400px;
+  height: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: #f5f5f5;
   display: flex;
+  align-items: center;
+  padding: 0 16px;
+  transition: all 0.2s ease;
 }
+
+.searchBox:focus-within {
+  border-color: #007AFF;
+  background-color: white;
+  box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+}
+
 .searchIcon {
-  /* 아이콘 색상변경 방법 찾기 */
-  fill: currentColor;
-  color: tomato;
+  width: 20px;
+  height: 20px;
+  color: #666;
+  margin-right: 8px;
 }
+
 .searchbar {
-  width: 300px;
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+}
+
+.searchbar::placeholder {
+  color: #999;
+}
+
+.searchButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 15px;
+  background-color: #007AFF;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.searchButton:hover {
+  background-color: #0056b3;
 }
 

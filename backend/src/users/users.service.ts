@@ -1,11 +1,17 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    InternalServerErrorException,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
+import { PlaylistListResponseDto } from './dto/playlist-list.response.dto';
 import { SignupRequestsDto } from './dto/signup.requests.dto';
+import { UpdateUserDto } from './dto/updateUser.requests.dto';
 import { Users } from './users.entity';
-
 @Injectable()
 export class UsersService {
     constructor(
@@ -50,5 +56,44 @@ export class UsersService {
             throw new NotFoundException(`User with ID ${userId} not found`);
         }
         return user;
+    }
+
+    async updateUser(userId: number, dto: UpdateUserDto) {
+        try {
+            const result = await this.userRepository.update(userId, dto);
+            if (result.affected === 0) {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+            return result;
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to update user');
+        }
+    }
+
+    async getPlaylists(userId: number): Promise<PlaylistListResponseDto[]> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['playlists', 'playlists.videos', 'playlists.videos.channel'],
+        });
+
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+
+        return user.playlists.map(playlist => {
+            const videos = playlist.videos || [];
+
+            return {
+                id: playlist.id,
+                name: playlist.name,
+                totalVideos: videos.length,
+                thumbnail: videos[0]?.thumbnails || '',
+                previewVideos: videos.slice(0, 2).map(video => ({
+                    id: video.id,
+                    title: video.title,
+                    channel: video.channel.title,
+                })),
+            };
+        });
     }
 }

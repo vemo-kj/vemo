@@ -5,8 +5,8 @@ export class CreateCapturesDto {
     timestamp: Date;
 
     @IsNotEmpty()
-    memosId: number;
+    image: string;
 
     @IsNotEmpty()
-    image: string;
+    memosId: number;
 }

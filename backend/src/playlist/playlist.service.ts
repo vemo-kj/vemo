@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Playlist } from './entities/playlist.entity';
 import { Repository } from 'typeorm';
@@ -62,6 +62,24 @@ export class PlaylistService {
                 category: video.category,
             })),
         };
+    }
+
+    /**
+     * 플레이리스트 반환
+     * @param playlistId
+     * @return Playlist
+     */
+    async getPlaylist(playlistId: number): Promise<Playlist> {
+        const playlist = await this.playlistRepository.findOne({
+            where: { id: playlistId },
+            relations: ['videos', 'user'], // 필요한 관계 데이터 포함
+        });
+
+        if (!playlist) {
+            throw new NotFoundException(`Playlist with ID ${playlistId} not found`);
+        }
+
+        return playlist;
     }
 
     /**

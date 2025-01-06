@@ -1,47 +1,54 @@
-// next
 import Image from 'next/image'
 import Link from 'next/link';
-// components
 import styles from './MyCard.module.css'
-//types
-import { MyCardProps } from '../../../../types/MyCardProps';
 
-
-export default function MyCard({
-
-  thumbnail,
-  myCardTitle,
-  // myCardTitle -> playListTitle 이 더 괜찮을듯
-  cardMemoCount,
-  youtubeLink,
-
-}: MyCardProps) {
-  return(
-    // 카드 클릭시 해당youtubeLink를 가진 vemo페이지로 이동
-    <Link href='/vemo/[id]' as={`/vemo/${youtubeLink}`}>
-      <div className={styles.myCard}>
-        <div className={styles.thumbnailContainer}>
-          <Image 
-            src={thumbnail} 
-            alt={myCardTitle} 
-            width={280} 
-            height={157} 
-            className={styles.thumbnail}
-          />
-        </div>
-
-        <div className={styles.cardContent}>
-          <h3 className={styles.title}>{myCardTitle}</h3>
-
-          <div className={styles.progressBar}>
-            <div className={styles.progress} style={{ width: '75%' }}></div>
-          </div>
-          
-          <span className={styles.progressText}>진행률 75% / 100</span>
-        </div>
-
-      </div>
-      </Link>
-  )
+interface MyCardProps {
+  id: number;
+  name: string;
+  totalVideos: number;
+  thumbnail: string;
+  previewVideos: Array<{
+    id: string;
+    title: string;
+    channel: string;
+  }>;
 }
 
+export default function MyCard({ id, name, totalVideos, thumbnail, previewVideos }: MyCardProps) {
+  return (
+    <Link href={`/vemo/${previewVideos[0]?.id}?playlistId=${id}`} className={styles.cardLink}>
+      <div className={styles.myCard}>
+        <div className={styles.thumbnailContainer}>
+          <div className={styles.thumbnailStack}>
+            {previewVideos.slice(0, 3).map((video, index) => (
+              <img
+                key={video.id}
+                src={thumbnail || '/default-thumbnail.jpg'}
+                alt={name}
+                className={styles.thumbnail}
+              />
+            ))}
+          </div>
+        </div>
+        <div className={styles.cardContent}>
+          <h3 className={styles.title}>{name}</h3>
+          <div className={styles.statsContainer}>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>총 영상</span>
+              <span className={styles.statValue}>{totalVideos}개</span>
+            </div>
+            {previewVideos.length > 0 && (
+              <div className={styles.previewVideos}>
+                {previewVideos.map((video, index) => (
+                  <p key={video.id} className={styles.previewVideo}>
+                    {index + 1}. {video.title}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}

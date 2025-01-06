@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Captures } from './captures.entity';
 import { CreateCapturesDto } from './dto/create-capture.dto';
 import { UpdateCapturesDto } from './dto/update-capture.dto';
+
 @Injectable()
 export class CapturesService {
     constructor(
@@ -11,7 +12,7 @@ export class CapturesService {
         private capturesRepository: Repository<Captures>,
     ) {}
 
-    async create(createCapturesDto: CreateCapturesDto): Promise<Captures> {
+    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
             return await this.capturesRepository.save(captures);
@@ -24,7 +25,12 @@ export class CapturesService {
 
     async getCaptures(): Promise<Captures[]> {
         try {
-            return await this.capturesRepository.find();
+            return await this.capturesRepository.find({
+                relations: ['memos'],
+                order: {
+                    timestamp: 'ASC',
+                },
+            });
         } catch (error) {
             throw new InternalServerErrorException('Failed to get captures', {
                 cause: error,
@@ -34,33 +40,53 @@ export class CapturesService {
 
     async getCaptureById(id: number): Promise<Captures> {
         try {
-            const capture = await this.capturesRepository.findOne({ where: { id } });
+            const capture = await this.capturesRepository.findOne({
+                where: { id },
+                relations: ['memos'],
+            });
 
             if (!capture) {
-                throw new NotFoundException('Capture not found', {
-                    cause: 'Capture not found',
-                });
+                throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
             return capture;
         } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
             throw new InternalServerErrorException('Failed to get capture', {
                 cause: error,
             });
         }
     }
 
-    async update(id: number, updateCapturesDto: UpdateCapturesDto): Promise<Captures> {
-        const capture = await this.capturesRepository.findOne({ where: { id } });
-        if (!capture) {
-            throw new NotFoundException('Capture not found', {
-                cause: 'Capture not found',
+    async updateCapture(id: number, updateCapturesDto: UpdateCapturesDto): Promise<Captures> {
+        try {
+            const capture = await this.capturesRepository.findOne({
+                where: { id },
+                relations: ['memos'],
+            });
+
+            if (!capture) {
+                throw new NotFoundException(`Capture with ID ${id} not found`);
+            }
+
+            if (updateCapturesDto.image) {
+                capture.image = updateCapturesDto.image;
+            }
+
+            return await this.capturesRepository.save(capture);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to update capture', {
+                cause: error,
             });
         }
-        return await this.capturesRepository.save({ ...capture, ...updateCapturesDto });
     }
 
-    async delete(id: number): Promise<void> {
+    async deleteCapture(id: number): Promise<void> {
         const capture = await this.capturesRepository.findOne({ where: { id } });
         if (!capture) {
             throw new NotFoundException('Capture not found', {

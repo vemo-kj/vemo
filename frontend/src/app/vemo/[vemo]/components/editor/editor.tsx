@@ -1,27 +1,51 @@
-import React, { useImperativeHandle, forwardRef, useState } from 'react';
-import { Editor as DraftEditor, EditorState, RichUtils } from 'draft-js';
-import { stateToHTML } from 'draft-js-export-html';
+//editor.tsx
+
+import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
+
+declare global {
+    interface Window {
+        onYouTubeIframeAPIReady?: () => void;
+        YT?: any;
+    }
+}
+import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
+import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
+
 import styles from './editor.module.css';
 import MomoItem from './MemoItem';
-import { memoService } from '../../api/memoService';
 
+// 대신 필요한 함수들만 import
+import { createMemos} from '@/app/api/memoService';
+
+/**
+ * ----------------------------------------------------------------
+ * 📌 Section 인터페이스
+ * - 하나의 메모(노트) 섹션을 의미
+ * ----------------------------------------------------------------
+ */
 interface Section {
-  id: string;
-  timestamp: Date;
-  htmlContent: string; // Draft.js 인라인 스타일을 포함한 HTML
-  screenshot?: string;
+    id: string;
+    timestamp: string;
+    htmlContent: string;
+    screenshot?: string;
 }
 
+/**
+ * ----------------------------------------------------------------
+ * 📌 CustomEditorProps
+ * - 부모 컴포넌트(VemoPage 등)로부터 전달받을 Props 정의
+ * ----------------------------------------------------------------
+ */
 interface CustomEditorProps {
-  ref: React.RefObject<any>;
-  getTimestamp: () => Date;
-  onTimestampClick: (timestamp: Date) => void;
-  isEditable?: boolean;
-  editingItemId?: string | null;
-  onEditStart?: (itemId: string) => void;
-  onEditEnd?: () => void;
-  onPauseVideo?: () => void;
+    ref?: React.RefObject<any>;
+    getTimestamp: () => string;
+    onTimestampClick: (timestamp: string) => void;
+    isEditable?: boolean;
+    editingItemId?: string | null;
+    onEditStart?: (itemId: string) => void;
+    onEditEnd?: () => void;
+    onPauseVideo?: () => void;
 }
 
 // parseTimeToSeconds는 동일
@@ -30,161 +54,278 @@ function parseTimeToSeconds(timestamp: string): number {
   return (mm || 0) * 60 + (ss || 0);
 }
 
-const CustomEditor = forwardRef<unknown, CustomEditorProps>((props, ref) => {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+// forwardRef로 부모가 addCaptureItem을 호출 가능
+const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) => {
+    const [sections, setSections] = useState<Section[]>([]);
 
-  const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
-  const [firstInputTimestamp, setFirstInputTimestamp] = useState<Date | null>(null);
+    // Draft.js 에디터 상태
+    const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
 
-  // ============ 1) addCaptureItem =============
-  // 부모에서 ref로 호출
-  useImperativeHandle(ref, () => ({
-    addCaptureItem: (timestamp: Date, imageUrl: string) => {
-      const newItem: Section = {
-        id: Math.random().toString(36).substr(2, 9),
-        timestamp,
-        htmlContent: '', // 텍스트 없이
-        screenshot: imageUrl, // 이미지만
-      };
-      setSections(prev => [...prev, newItem]);
-    },
-  }));
+    // 첫 글자 입력 시점을 저장하기 위한 상태
+    const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
+    const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
+    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
 
-  // ============ 2) handleSave (Draft -> HTML)
-  const handleSave = async () => {
-    const contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) return;
+    // ============ 1) 메모 역순 or 정순 =============
+    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
+    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
+    // (아래 handleSave에서 prev => [...prev, newItem])
 
-    const html = stateToHTML(contentState);
-    const stamp = isFirstInputRecorded && firstInputTimestamp 
-      ? firstInputTimestamp 
-      : props.getTimestamp();
+    // ============ 2) addCaptureItem =============
+    useImperativeHandle(ref, () => ({
+        /**
+         * 캡처 이미지를 새 메모(Section)로 추가
+         */
+        addCaptureItem: (timestamp: string, imageUrl: string) => {
+            const newItem: Section = {
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp,
+                htmlContent: '',
+                screenshot: imageUrl,
+            };
+            setSections(prev => [...prev, newItem]);
+        },
+        getCurrentTimestamp: getCurrentVideoTime,
+    }));
 
-    try {
-      // memoService.create 호출 시 Date를 toISOString()으로 변환
-      const savedMemo = await memoService.create({
-        timestamp: new Date(stamp),
-        htmlContent: html,
-      });
+    /**
+     * ----------------------------------------------------------------
+     * (3) 메모 저장 핸들러
+     * - Draft.js의 contentState → HTML 변환 후 서버로 전송
+     * ----------------------------------------------------------------
+     */
+    const formatVideoTime = (seconds: number): string => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
 
-      if (savedMemo) {
-        const newSection: Section = {
-          id: savedMemo.id.toString(),
-          timestamp: new Date(stamp),
-          htmlContent: html,
-        };
+    const getCurrentVideoTime = (): string => {
+        try {
+            if (!isPlayerReady) {
+                console.warn('YouTube player is not ready yet');
+                return '00:00';
+            }
 
-        setSections(prev => [...prev, newSection]);
-        setEditorState(EditorState.createEmpty());
-        setIsFirstInputRecorded(false);
-        setFirstInputTimestamp(null);
-      }
-    } catch (error) {
-      console.error('메모 저장 실패:', error);
-      alert('메모 저장에 실패했습니다. 다시 시도해주세요.');
-    }
-  };
+            const timestamp = props.getTimestamp();
+            console.log('Raw timestamp from player:', timestamp);
 
-  // ============ 3) handleKeyCommand (엔터 => 저장)
-  const handleKeyCommand = (command: string) => {
-    if (command === 'submit') {
-      handleSave();
-      return 'handled';
-    }
-    return 'not-handled';
-  };
+            // 숫자나 문자열 형식의 시간을 처리
+            if (typeof timestamp === 'number') {
+                return formatVideoTime(timestamp);
+            } else if (typeof timestamp === 'string' && timestamp.includes(':')) {
+                return timestamp; // 이미 MM:SS 형식이면 그대로 반환
+            } else if (typeof timestamp === 'string') {
+                const timeInSeconds = parseFloat(timestamp);
+                if (!isNaN(timeInSeconds)) {
+                    return formatVideoTime(timeInSeconds);
+                }
+            }
 
-  // Draft onChange
-  const handleEditorChange = (newState: EditorState) => {
-    setEditorState(newState);
-    const t = newState.getCurrentContent().getPlainText().trim();
-    if (t.length > 0 && !isFirstInputRecorded) {
-      setIsFirstInputRecorded(true);
-      setFirstInputTimestamp(props.getTimestamp());
-    }
-  };
+            console.warn('Invalid timestamp format received:', timestamp);
+            return '00:00';
+        } catch (error) {
+            console.error('Error getting timestamp:', error);
+            return '00:00';
+        }
+    };
 
-  // 인라인 스타일
-  const isStyleActive = (style: string) => editorState.getCurrentInlineStyle().has(style);
+    const handleSave = async () => {
+        const contentState = editorState.getCurrentContent();
+        if (!contentState.hasText()) return;
 
-  const toggleInlineStyle = (style: string) => {
-    setEditorState(prev => RichUtils.toggleInlineStyle(prev, style));
-  };
+        // 플레이어가 준비되지 않았으면 경고
+        if (!isPlayerReady) {
+            console.warn('YouTube player is not ready. Current time might not be accurate.');
+        }
 
-  // 메모 수정/삭제
-  const handleChangeItem = (id: string, newHTML: string) => {
-    setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
-  };
-  const handleDeleteItem = (id: string) => {
-    setSections(prev => prev.filter(s => s.id !== id));
-  };
+        const html = convertToHTML(contentState);
+        const currentTimestamp = getCurrentVideoTime();
 
-  return (
-    <div className={styles.container}>
-      {/* 메모 목록 */}
-      <div className={styles.displayArea}>
-        {sections.map(item => (
-          <MomoItem
-            key={item.id}
-            id={item.id}
-            timestamp={item.timestamp}
-            htmlContent={item.htmlContent}
-            screenshot={item.screenshot}
-            onTimestampClick={props.onTimestampClick}
-            onDelete={() => handleDeleteItem(item.id)}
-            onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
-            onPauseVideo={props.onPauseVideo}
-            isEditable={props.isEditable}
-          />
-        ))}
-      </div>
+        console.log('Attempting to save memo with timestamp:', currentTimestamp);
 
-      {/* Draft Editor */}
-      <div className={styles.editorArea}>
-        <DraftEditor
-          editorState={editorState}
-          onChange={handleEditorChange}
-          placeholder="내용을 입력하세요..."
-          keyBindingFn={e => (e.key === 'Enter' ? 'submit' : null)}
-          handleKeyCommand={handleKeyCommand}
-        />
-        <div className={styles.toolbar}>
-          {/* B I U 버튼 */}
-          <button
-            className={isStyleActive('BOLD') ? styles.activeButton : ''}
-            onMouseDown={e => {
-              e.preventDefault();
-              toggleInlineStyle('BOLD');
-            }}
-          >
-            B
-          </button>
-          <button
-            className={isStyleActive('ITALIC') ? styles.activeButton : ''}
-            onMouseDown={e => {
-              e.preventDefault();
-              toggleInlineStyle('ITALIC');
-            }}
-          >
-            I
-          </button>
-          <button
-            className={isStyleActive('UNDERLINE') ? styles.activeButton : ''}
-            onMouseDown={e => {
-              e.preventDefault();
-              toggleInlineStyle('UNDERLINE');
-            }}
-          >
-            U
-          </button>
-          <button className={styles.addButton} onClick={handleSave}>
-            +
-          </button>
+        if (!props.memosId) {
+            console.warn('memosId가 없어 메모를 저장할 수 없습니다.');
+            return;
+        }
+
+        try {
+            const savedMemo = await memoService.createMemo({
+                timestamp: currentTimestamp,
+                description: html,
+                memosId: props.memosId,
+            });
+
+            console.log('Successfully saved memo:', savedMemo);
+
+            // 새로운 메모 아이템 생성
+            const newItem: Section = {
+                id: savedMemo.id.toString(),
+                timestamp: currentTimestamp,
+                htmlContent: html,
+            };
+
+            setSections(prev => [...prev, newItem]);
+            setEditorState(EditorState.createEmpty());
+            setLastSavedHTML(html);
+            setIsFirstInputRecorded(false);
+            setFirstInputTimestamp(null);
+        } catch (error) {
+            console.error('Failed to save memo:', error);
+            // 사용자에게 에러 메시지 표시
+            alert('메모 저장에 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
+    /**
+     * ----------------------------------------------------------------
+     * (4) 엔터 키와 백스페이스 키 입력 처리
+     */
+    const handleKeyCommand = (command: string) => {
+        try {
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const startKey = selection.getStartKey();
+            const startBlock = contentState.getBlockForKey(startKey);
+            const isEmpty = !startBlock.getText().trim();
+
+            // 백스페이스 처리
+            if (command === 'backspace') {
+                if (isEmpty && contentState.getBlockMap().size <= 1) {
+                    // 마지막 블록이고 비어있으면 더 이상 삭제하지 않음
+                    return 'handled';
+                }
+            }
+
+            // 기본 rich text 명령어 처리
+            const newState = RichUtils.handleKeyCommand(editorState, command);
+            if (newState) {
+                setEditorState(newState);
+                return 'handled';
+            }
+
+            // 엔터 키 처리
+            if (command === 'split-block') {
+                if (!isEmpty) {
+                    handleSave();
+                    setEditorState(EditorState.createEmpty());
+                }
+                return 'handled';
+            }
+
+            return 'not-handled';
+        } catch (error) {
+            console.error('Key command error:', error);
+            return 'not-handled';
+        }
+    };
+
+    /**
+     * ----------------------------------------------------------------
+     * (5) Draft.js onChange
+     * - 글자 입력 시 첫 입력된 시점을 기록
+     * ----------------------------------------------------------------
+     */
+    const handleEditorChange = (newState: EditorState) => {
+        try {
+            const contentState = newState.getCurrentContent();
+            const hasText = contentState.hasText();
+
+            setEditorState(newState);
+
+            // 첫 입력 시점 기록
+            if (!isFirstInputRecorded && hasText) {
+                setIsFirstInputRecorded(true);
+                setFirstInputTimestamp(props.getTimestamp());
+            }
+        } catch (error) {
+            console.error('Editor change error:', error);
+        }
+    };
+
+    // 인라인 스타일
+    const isStyleActive = (style: string) => editorState.getCurrentInlineStyle().has(style);
+
+    const toggleInlineStyle = (style: string) => {
+        setEditorState(prev => RichUtils.toggleInlineStyle(prev, style));
+    };
+
+    // 메모 수정(HTML), 삭제
+    const handleChangeItem = (id: string, newHTML: string) => {
+        setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
+    };
+    const handleDeleteItem = (id: string) => {
+        setSections(prev => prev.filter(s => s.id !== id));
+    };
+
+    return (
+        <div className={styles.container}>
+            {/* 메모 목록 (빨간 영역) */}
+            <div className={styles.displayArea}>
+                {/* 1) 위→아래 생성이므로, 그냥 map (인덱스 순) */}
+                {sections.map(item => (
+                    <MomoItem
+                        key={item.id}
+                        id={item.id}
+                        timestamp={item.timestamp}
+                        htmlContent={item.htmlContent}
+                        screenshot={item.screenshot}
+                        onTimestampClick={props.onTimestampClick}
+                        onDelete={() => handleDeleteItem(item.id)}
+                        onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
+                        onPauseVideo={props.onPauseVideo}
+                        isEditable={props.isEditable}
+                    />
+                ))}
+            </div>
+
+            {/* Draft Editor */}
+            <div className={styles.editorArea}>
+                <DraftEditor
+                    editorState={editorState}
+                    onChange={handleEditorChange}
+                    placeholder="내용을 입력하세요..."
+                    keyBindingFn={e => (e.key === 'Enter' ? 'submit' : null)}
+                    handleKeyCommand={handleKeyCommand}
+                />
+                <div className={styles.toolbar}>
+                    {/* B I U 버튼 */}
+                    <button
+                        className={isStyleActive('BOLD') ? styles.activeButton : ''}
+                        onMouseDown={e => {
+                            e.preventDefault();
+                            toggleInlineStyle('BOLD');
+                        }}
+                    >
+                        B
+                    </button>
+                    <button
+                        className={isStyleActive('ITALIC') ? styles.activeButton : ''}
+                        onMouseDown={e => {
+                            e.preventDefault();
+                            toggleInlineStyle('ITALIC');
+                        }}
+                    >
+                        I
+                    </button>
+                    <button
+                        className={isStyleActive('UNDERLINE') ? styles.activeButton : ''}
+                        onMouseDown={e => {
+                            e.preventDefault();
+                            toggleInlineStyle('UNDERLINE');
+                        }}
+                    >
+                        U
+                    </button>
+                    {/* 더 필요하면 추가 */}
+                    <button className={styles.addButton} onClick={handleSave}>
+                        +
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 });
 
+CustomEditor.displayName = 'CustomEditor';
 export default CustomEditor;

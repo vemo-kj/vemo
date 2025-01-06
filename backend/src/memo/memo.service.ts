@@ -1,8 +1,11 @@
+
+// memo.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Memo } from './entities/memo.entity';
-import { CreateMemoDto } from './dto/create-memo.dto';
+import { CreateMemoData } from './interfaces/memo.interface';
+import { UpdateMemoDto } from './dto/update-memo.dto';
 
 @Injectable()
 export class MemoService {
@@ -11,12 +14,32 @@ export class MemoService {
         private memoRepository: Repository<Memo>,
     ) {}
 
-    async create(createMemoDto: CreateMemoDto) {
-        const memo = this.memoRepository.create(createMemoDto);
+    async createMemo(createMemoData: CreateMemoData): Promise<Memo> {
+        const memo = this.memoRepository.create(createMemoData);
         return await this.memoRepository.save(memo);
     }
 
-    async findAll() {
-        return await this.memoRepository.find();
+    async updateMemo(dto: UpdateMemoDto): Promise<Memo> {
+        const { id, description } = dto;
+        const memo = await this.memoRepository.findOne({ where: { id } });
+
+        if (!memo) {
+            throw new Error('Memo not found');
+        }
+
+        memo.description = description;
+
+        return await this.memoRepository.save(memo);
     }
+
+    async deleteMemo(id: number): Promise<void> {
+        const memo = await this.memoRepository.findOne({ where: { id } });
+
+        if (!memo) {
+            throw new Error('Memo not found');
+        }
+
+        await this.memoRepository.delete(id);
+    }
+    
 }

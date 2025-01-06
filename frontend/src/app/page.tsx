@@ -12,7 +12,6 @@ import { MainCardProps } from './types/MainCardProps';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-
 // Home page
 export default function Home() {
     const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
@@ -32,13 +31,13 @@ export default function Home() {
     const fetchMainCards = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('http://localhost:5050/home', {
+            const response = await fetch('http://localhost:5050/home/cards', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
             console.log(response);
             if (!response.ok) throw new Error('Failed to fetch main cards');
-            
+
             const data = await response.json();
 
             // 데이터 매핑
@@ -78,12 +77,10 @@ export default function Home() {
         }
     };
 
-    const filteredCards = mainCards.filter((card) => {
-        const matchesCategory =
-            selectedCategory === 'All' || card.category === selectedCategory;
+    const filteredCards = mainCards.filter(card => {
+        const matchesCategory = selectedCategory === 'All' || card.category === selectedCategory;
 
-        const matchesSearch =
-            search !== '' ? card.title.includes(search) : true;
+        const matchesSearch = search !== '' ? card.title.includes(search) : true;
 
         if (search !== '') {
             return matchesSearch;
