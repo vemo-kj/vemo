@@ -22,7 +22,7 @@ export class PdfController {
 
         res.set({
             'Content-Type': 'application/pdf',
-            'Content-Disposition': 'attachment; filename=memo_timeline.pdf',
+            'Content-Disposition': `attachment; filename=${title}_vemo.pdf`,
         });
 
         res.send(pdfBuffer);
