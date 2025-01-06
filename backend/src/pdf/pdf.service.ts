@@ -63,31 +63,44 @@ export class PdfService {
                     body {
                         font-family: 'Noto Sans KR', sans-serif;
                         margin: 40px;
-                        line-height: 1.6;
+                        line-height: 1.8;
+                        background-color: #f4f6f9;
                     }
-                    h1 {
+                    h1, h2 {
                         text-align: center;
-                        margin-bottom: 30px;
+                        margin: 30px 0;
+                        color: #5D73E6;
+                        font-size: 1.5em;
+                        font-weight: 700;
+                        letter-spacing: 0.5px;
                     }
                     .memo, .capture {
-                        margin-bottom: 20px;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        margin: 20px auto;
+                        padding: 20px;
+                        max-width: 800px;
                     }
                     .timestamp {
                         font-size: 14px;
-                        color: #555;
+                        color: #666;
+                        margin-bottom: 10px;
                     }
                     .description {
-                        font-size: 16px;
+                        font-size: 18px;
+                        color: #444;
                     }
                     .image {
                         text-align: center;
                         margin-top: 20px;
                     }
                     img {
-                        width: 400px;
-                        max-width: 100%;
+                        width: 100%;
+                        max-width: 600px;
                         border: 1px solid #ddd;
-                        border-radius: 8px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
                     }
                 </style>
             </head>
