@@ -1,179 +1,127 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { NotFoundException } from '@nestjs/common';
-// import { Repository } from 'typeorm';
-// import { VideoService } from './video.service';
-// import { ChannelService } from '../channel/channel.service';
-// import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
-// import { Video } from './video.entity';
-// import { Channel } from '../channel/channel.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { VideoService } from './video.service';
+import { ChannelService } from '../channel/channel.service';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
+import { Video } from './video.entity';
+import { Channel } from '../channel/channel.entity';
 
-// const mockVideoRepository = {
-//     findOne: jest.fn(),
-//     create: jest.fn(),
-//     save: jest.fn(),
-//     find: jest.fn(),
-// };
+describe('VideoService', () => {
+    let service: VideoService;
+    let videoRepository: jest.Mocked<Repository<Video>>;
+    let channelService: jest.Mocked<ChannelService>;
 
-// const mockYoutubeauthService = {
-//     ensureAuthenticated: jest.fn(),
-//     youtube: {
-//         videos: {
-//             list: jest.fn(),
-//         },
-//     },
-// };
+    const mockVideoId = 'dQw4w9WgXcQ';
+    const mockChannelId = 'UCuAXFkgsw1L7xaCfnd5JJOw';
 
-// const mockChannelService = {
-//     getChannel: jest.fn(),
-// };
+    const mockChannel: Channel = {
+        id: mockChannelId,
+        title: 'Test Channel',
+        thumbnails: 'channel-thumbnail.jpg',
+        videos: [],
+    };
 
-// describe('VideoService', () => {
-//     let service: VideoService;
-//     let videoRepository: jest.Mocked<Repository<Video>>;
-//     let youtubeauthService: typeof mockYoutubeauthService;
-//     let channelService: typeof mockChannelService;
+    const mockVideo: Video = {
+        id: mockVideoId,
+        title: 'Test Video',
+        thumbnails: 'video-thumbnail.jpg',
+        duration: '01:30:00',
+        category: 'Education',
+        channel: mockChannel,
+        playlists: [],
+    };
 
-//     beforeEach(async () => {
-//         const module: TestingModule = await Test.createTestingModule({
-//             providers: [
-//                 VideoService,
-//                 { provide: getRepositoryToken(Video), useValue: mockVideoRepository },
-//                 { provide: YoutubeAuthService, useValue: mockYoutubeauthService },
-//                 { provide: ChannelService, useValue: mockChannelService },
-//             ],
-//         }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                VideoService,
+                {
+                    provide: getRepositoryToken(Video),
+                    useValue: {
+                        findOne: jest.fn(),
+                        create: jest.fn(),
+                        save: jest.fn(),
+                        find: jest.fn(),
+                    },
+                },
+                {
+                    provide: YoutubeAuthService,
+                    useValue: {
+                        youtube: {},
+                    },
+                },
+                {
+                    provide: ChannelService,
+                    useValue: {
+                        getChannel: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
 
-//         service = module.get<VideoService>(VideoService);
-//         videoRepository = module.get(getRepositoryToken(Video));
-//         youtubeauthService = module.get(YoutubeAuthService);
-//         channelService = module.get(ChannelService);
-//     });
+        service = module.get<VideoService>(VideoService);
+        videoRepository = module.get(getRepositoryToken(Video));
+        channelService = module.get(ChannelService);
+    });
 
-//     afterEach(() => {
-//         jest.clearAllMocks();
-//     });
+    describe('findVideoInDatabase', () => {
+        it('DB에서 비디오를 찾으면 해당 비디오를 반환해야 한다', async () => {
+            videoRepository.findOne.mockResolvedValue(mockVideo);
 
-//     describe('getVideoById', () => {
-//         it('DB에 비디오가 존재하면 해당 비디오를 반환해야 한다', async () => {
-//             const mockChannel: Channel = {
-//                 id: '456',
-//                 thumbnails: 'channel-thumbnail',
-//                 title: 'Test Channel',
-//                 videos: [],
-//             };
+            const result = await service.findVideoInDatabase(mockVideoId);
 
-//             const mockVideo: Video = {
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '00:10:00',
-//                 category: 'Test Category',
-//                 playlists: [],
-//                 channel: mockChannel,
-//             };
-//             videoRepository.findOne.mockResolvedValue(mockVideo);
+            expect(result).toEqual(mockVideo);
+            expect(videoRepository.findOne).toHaveBeenCalledWith({
+                where: { id: mockVideoId },
+                relations: ['channel'],
+            });
+        });
 
-//             const result = await service.getVideoById('123');
+        it('DB에서 비디오를 찾지 못하면 null을 반환해야 한다', async () => {
+            videoRepository.findOne.mockResolvedValue(null);
 
-//             expect(result).toEqual(mockVideo);
-//             expect(videoRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: '123' },
-//                 relations: ['channel'],
-//             });
-//         });
+            const result = await service.findVideoInDatabase(mockVideoId);
 
-//         it('DB에 비디오가 없을 경우 YouTube에서 데이터를 가져와야 한다', async () => {
-//             videoRepository.findOne.mockResolvedValue(null);
-//             youtubeauthService.youtube.videos.list.mockResolvedValue({
-//                 data: {
-//                     items: [
-//                         {
-//                             id: '123',
-//                             snippet: {
-//                                 title: 'Test Video',
-//                                 channelId: '456',
-//                                 thumbnails: { high: { url: 'test-thumbnail' } },
-//                                 categoryId: '789',
-//                             },
-//                             contentDetails: {
-//                                 duration: 'PT1H2M3S',
-//                             },
-//                         },
-//                     ],
-//                 },
-//             });
-//             channelService.getChannel.mockResolvedValue({
-//                 id: '456',
-//                 thumbnails: 'channel-thumbnail',
-//                 title: 'Test Channel',
-//             });
-//             videoRepository.create.mockReturnValue({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             } as Video);
-//             videoRepository.save.mockResolvedValue({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             } as Video);
+            expect(result).toBeNull();
+            expect(videoRepository.findOne).toHaveBeenCalledWith({
+                where: { id: mockVideoId },
+                relations: ['channel'],
+            });
+        });
+    });
 
-//             const result = await service.getVideoById('123');
+    describe('getAllVideos', () => {
+        it('페이지네이션과 함께 모든 비디오를 반환해야 한다', async () => {
+            const mockVideos = [mockVideo];
+            videoRepository.find.mockResolvedValue(mockVideos);
 
-//             expect(result).toEqual({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             });
-//             expect(youtubeauthService.youtube.videos.list).toHaveBeenCalledWith({
-//                 part: ['snippet', 'contentDetails', 'statistics'],
-//                 id: ['123'],
-//             });
-//             expect(videoRepository.save).toHaveBeenCalled();
-//         });
+            const result = await service.getAllVideos(1, 10);
 
-//         it('YouTube에서 비디오를 찾을 수 없을 경우 예외를 발생시켜야 한다', async () => {
-//             videoRepository.findOne.mockResolvedValue(null);
-//             youtubeauthService.youtube.videos.list.mockResolvedValue({ data: { items: [] } });
+            expect(result).toEqual(mockVideos);
+            expect(videoRepository.find).toHaveBeenCalledWith({
+                relations: ['channel'],
+                order: { id: 'DESC' },
+                skip: 0,
+                take: 10,
+            });
+        });
+    });
 
-//             await expect(service.getVideoById('123')).rejects.toThrow(NotFoundException);
-//         });
-//     });
+    describe('parseDuration', () => {
+        it('YouTube 시간 형식을 올바르게 파싱해야 한다', () => {
+            const testCases = [
+                { input: 'PT1H30M', expected: '01:30:00' },
+                { input: 'PT45M', expected: '00:45:00' },
+                { input: 'PT2H', expected: '02:00:00' },
+                { input: 'PT30S', expected: '00:00:30' },
+                { input: 'PT1H30M15S', expected: '01:30:15' },
+            ];
 
-//     describe('parseDuration', () => {
-//         it('ISO 8601 형식의 duration을 올바르게 파싱해야 한다', () => {
-//             const result = service['parseDuration']('PT1H2M3S');
-//             expect(result).toEqual('01:02:03');
-//         });
-
-//         it('누락된 시간 단위를 처리할 수 있어야 한다', () => {
-//             const result = service['parseDuration']('PT45M');
-//             expect(result).toEqual('00:45:00');
-//         });
-//     });
-// });
+            testCases.forEach(({ input, expected }) => {
+                const result = service['parseDuration'](input);
+                expect(result).toBe(expected);
+            });
+        });
+    });
+});
