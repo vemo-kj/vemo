@@ -1,8 +1,11 @@
+//editor.tsx
+
 import React, { useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 
 declare global {
     interface Window {
         onYouTubeIframeAPIReady?: () => void;
+        YT?: any;
     }
 }
 import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
@@ -82,7 +85,7 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
             };
             setSections(prev => [...prev, newItem]);
         },
-        getCurrentTimestamp: getCurrentVideoTime
+        getCurrentTimestamp: getCurrentVideoTime,
     }));
 
     /**
@@ -257,18 +260,27 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
      * ----------------------------------------------------------------
      */
     const handleChangeItem = async (id: string, newHTML: string) => {
-        // 로컬 state 업데이트
-        setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
-
-        // 서버 업데이트 (fetch)
         try {
+            // 로컬 state 업데이트
+            setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
+
+            console.log('Updating memo with:', {
+                id: Number(id),
+                description: newHTML,
+            });
+
+            // 서버 업데이트 (timestamp 제외)
             await memoService.updateMemo({
                 id: Number(id),
-                timestamp: props.getTimestamp(), // 기존 timestamp 또는 현재 timestamp
                 description: newHTML,
             });
         } catch (error) {
             console.error('Failed to update memo:', error);
+            // 에러 발생 시 로컬 상태 롤백
+            setSections(prev =>
+                prev.map(s => (s.id === id ? { ...s, htmlContent: s.htmlContent } : s)),
+            );
+            alert('메모 수정에 실패했습니다. 다시 시도해주세요.');
         }
     };
 
@@ -305,12 +317,12 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         timestamp={item.timestamp}
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
-                        onTimestampClick={(timestamp) => {
+                        onTimestampClick={timestamp => {
                             console.log('Timestamp clicked:', timestamp); // 디버깅용
                             props.onTimestampClick(timestamp);
                         }}
                         onDelete={() => handleDeleteItem(item.id)}
-                        onChangeHTML={(newVal) => handleChangeItem(item.id, newVal)}
+                        onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
                     />

@@ -1,3 +1,4 @@
+// vemo/[vemo]/page.tsx
 'use client';
 
 import { createMemos } from '@/app/api/memoService';

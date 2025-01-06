@@ -1,3 +1,5 @@
+// MemoItem.tsx
+
 import React, { memo, useRef, useState, useEffect, useCallback } from 'react';
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';

@@ -1,4 +1,4 @@
-// [수정됨] memoService.ts
+// memoService.ts
 'use client';
 
 // 환경 변수에서 API URL을 가져오거나 기본값을 설정
@@ -102,8 +102,8 @@ interface CreateMemoData {
 }
 interface UpdateMemoData {
     id: number;
-    timestamp: string;
     description: string;
+    timestamp?: string;  // optional로 변경
 }
 
 export const memoService = {
@@ -149,41 +149,72 @@ export const memoService = {
     async updateMemo(data: UpdateMemoData) {
         try {
             const requestData = {
-                ...data,
-                timestamp: new Date(data.timestamp),
+                id: data.id,
+                description: data.description, // id는 URL로 전달되므로 제거
             };
-
-            // [수정됨] PUT /memo/:id
+    
+            console.log(`Updating memo with ID: ${data.id}, Data:`, requestData);
+    
+            // URL에 id 포함
             const response = await fetch(`${API_URL}/memo/${data.id}`, {
                 method: 'PUT',
-                headers: getAuthHeader(),
+                headers: {
+                    ...getAuthHeader(),
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(requestData),
             });
+    
+            // 응답 상태 확인
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => null);
+                console.error('Failed to update memo:', errorData);
+                throw new Error(
+                    errorData?.message || `HTTP error! status: ${response.status}`
+                );
             }
-            return await response.json();
+    
+            // 백엔드가 응답 본문을 제공하는 경우만 JSON 파싱
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            }
+    
+            // 응답 본문이 없는 경우 처리
+            return { message: 'Memo updated successfully' };
         } catch (error) {
-            console.error('Failed to update memo:', error);
+            console.error('Error in updateMemo:', error);
             throw error;
         }
     },
 
     // 삭제
     async deleteMemo(id: number) {
-        try {
-            // [수정됨] DELETE /memo/:id
-            const response = await fetch(`${API_URL}/memo/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeader(),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Failed to delete memo:', error);
-            throw error;
+        const response = await fetch(`${API_URL}/memo/${id}`, {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-    },
+      
+       // 백엔드가 body를 전혀 반환하지 않는 경우, 200/204라면 굳이 JSON 파싱 안 함
+       if (response.status === 204) {
+         // 서버가 204 No Content로 응답했다고 가정
+         return { message: 'No Content' };
+       }
+       // 혹은 200 OK지만 body가 빈 문자열일 수도 있으니 text()로 판별
+       const text = await response.text();
+       if (!text) {
+         // 정말 빈 문자열인 경우
+         return { message: 'Deleted (no body)' };
+       }
+      
+       // body가 있다면 JSON 파싱
+       try {
+         return JSON.parse(text);
+       } catch {
+         return { message: 'Deleted (invalid JSON body)' };
+       }
+      }
 };
