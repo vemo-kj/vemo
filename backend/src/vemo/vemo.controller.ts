@@ -6,7 +6,7 @@ import { Playlist } from '../playlist/entities/playlist.entity';
 
 @Controller('vemo')
 export class VemoController {
-    constructor(private readonly vemoService: VemoService) {}
+    constructor(private readonly vemoService: VemoService) { }
 
     /**
      * 커뮤니티 메모를 조회
