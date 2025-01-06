@@ -12,25 +12,25 @@ export class MemoService {
         private memoRepository: Repository<Memo>,
     ) {}
 
-    // Create Memo
-    async create(createMemoDto: CreateMemoDto): Promise<Memo> {
+    async createMemo(createMemoDto: CreateMemoDto): Promise<Memo> {
         const memo = this.memoRepository.create(createMemoDto);
         return await this.memoRepository.save(memo);
     }
 
-    // Memo Update
-    async update(dto: UpdateMemoDto): Promise<Memo> {
-        const { id } = dto;
+    async updateMemo(dto: UpdateMemoDto): Promise<Memo> {
+        const { id, description } = dto;
         const memo = await this.memoRepository.findOne({ where: { id } });
 
         if (!memo) {
             throw new Error('Memo not found');
         }
 
+        memo.description = description;
+
         return await this.memoRepository.save(memo);
     }
 
-    async delete(id: number): Promise<void> {
+    async deleteMemo(id: number): Promise<void> {
         const memo = await this.memoRepository.findOne({ where: { id } });
 
         if (!memo) {

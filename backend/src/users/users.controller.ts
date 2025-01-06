@@ -1,11 +1,10 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Request } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginRequestDto } from 'src/auth/dto/login.requests.dto';
-import { JwtAuthGuard } from '../auth/jwt/jwt.guard';
 import { Public } from '../public.decorator';
 import { SignupRequestsDto } from './dto/signup.requests.dto';
+import { UpdateUserDto } from './dto/updateUser.requests.dto';
 import { UsersService } from './users.service';
-
 @Controller('users')
 export class UsersController {
     constructor(
@@ -25,9 +24,23 @@ export class UsersController {
         return this.authService.signIn(dto);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post('logout')
     async logout(@Request() req) {
         return this.authService.signOut(req.user.sub);
+    }
+
+    @Get()
+    async getCurrentUser(@Request() req) {
+        return this.usersService.findById(req.user.sub);
+    }
+
+    @Put('update')
+    async update(@Request() req, @Body() dto: UpdateUserDto) {
+        return this.usersService.updateUser(req.user.sub, dto);
+    }
+
+    @Get('playlists')
+    async getPlaylists(@Request() req) {
+        return this.usersService.getPlaylists(req.user.sub);
     }
 }

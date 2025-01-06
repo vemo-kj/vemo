@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Memos } from './memos.entity';
@@ -14,30 +14,36 @@ export class MemosService {
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) {}
 
-    async createMemos(
-        memosTitle: string,
-        memosDescription: string,
-        videoId: string,
-        userId: number,
-    ): Promise<Memos> {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
-        if (!user) {
-            throw new NotFoundException(`User with ID ${userId} not found`);
+    async createMemos(memosTitle: string, videoId: string, userId: number): Promise<Memos> {
+        try {
+            const user = await this.userRepository.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+
+            const video = await this.videoRepository.findOne({
+                where: { id: videoId },
+                relations: ['channel'],
+            });
+            if (!video) {
+                throw new NotFoundException(`Video with ID ${videoId} not found`);
+            }
+
+            const memos = this.memosRepository.create({
+                title: memosTitle,
+                user: user,
+                video: video,
+            });
+
+            return await this.memosRepository.save(memos);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to create memos', {
+                cause: error,
+            });
         }
-
-        const video = await this.videoRepository.findOne({ where: { id: videoId } });
-        if (!video) {
-            throw new NotFoundException(`Video with ID ${videoId} not found`);
-        }
-
-        const memos = this.memosRepository.create({
-            title: memosTitle,
-            description: memosDescription,
-            user: user,
-            video: video,
-        });
-
-        return await this.memosRepository.save(memos);
     }
 
     /**
@@ -46,8 +52,7 @@ export class MemosService {
      * @returns 메모 개수
      */
     async getVemoCountByVideo(videoId: string): Promise<number> {
-        const count = await this.memosRepository.count({ where: { video: { id: videoId } } });
-        return count;
+        return await this.memosRepository.count({ where: { video: { id: videoId } } });
     }
 
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
@@ -58,19 +63,41 @@ export class MemosService {
     }
 
     async getAllMemosByVideo(videoId: string): Promise<Memos[]> {
-        return await this.memosRepository.find({
-            where: { video: { id: videoId } },
-            relations: ['user', 'video', 'memos'],
-        });
+        try {
+            return await this.memosRepository.find({
+                where: { video: { id: videoId } },
+                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                order: {
+                    createdAt: 'DESC',
+                },
+            });
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to get all memos by video', {
+                cause: error,
+            });
+        }
     }
 
     async getMemosById(memosId: number): Promise<Memos> {
-        const memos = await this.memosRepository.findOne({
-            where: { id: memosId },
-            relations: ['user', 'video', 'memos'],
-        });
-        if (!memos) throw new NotFoundException(`Memos with ID ${memosId} not found`);
-        return memos;
+        try {
+            const memos = await this.memosRepository.findOne({
+                where: { id: memosId },
+                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+            });
+
+            if (!memos) {
+                throw new NotFoundException(`Memos with ID ${memosId} not found`);
+            }
+
+            return memos;
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to get memos', {
+                cause: error,
+            });
+        }
     }
 
     async updateMemos(id: number, updateMemosDto: UpdateMemosDto): Promise<Memos> {
@@ -85,6 +112,25 @@ export class MemosService {
         const result = await this.memosRepository.delete(id);
         if (result.affected === 0) {
             throw new NotFoundException(`Memos with ID ${id} not found`);
+        }
+    }
+
+    async getMemosByVideoAndUser(videoId: string, userId: number): Promise<Memos[]> {
+        try {
+            return await this.memosRepository.find({
+                where: {
+                    video: { id: videoId },
+                    user: { id: userId },
+                },
+                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                order: {
+                    createdAt: 'DESC',
+                },
+            });
+        } catch (error) {
+            throw new InternalServerErrorException('Failed to get memos by video and user', {
+                cause: error,
+            });
         }
     }
 }
