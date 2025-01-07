@@ -1,29 +1,27 @@
 import React from 'react';
+import styles from './CaptureButton.module.css';
 
 interface CaptureButtonProps {
-    // These callbacks should eventually trigger image capture and processing
-    onCaptureTab: () => void;    // Handles full tab capture
-    onCaptureArea: () => void;   // Handles partial area capture
+    onCaptureTab: () => void;    // 유튜브 플레이어 영역 캡처
+    onCaptureArea: () => void;   // 사용자 선택 영역 캡처
 }
 
 const CaptureButton: React.FC<CaptureButtonProps> = ({ onCaptureTab, onCaptureArea }) => {
-    // Consider adding loading state to disable buttons during capture
-    // const [isCapturing, setIsCapturing] = useState(false);
-
     return (
-        <div style={{ marginBottom: '10px' }}>
+        <div className={styles.captureButtonContainer}>
             <button
                 onClick={onCaptureTab}
-                style={{ marginRight: '10px' }}
-            // disabled={isCapturing}
+                className={styles.captureButton}
+                title="유튜브 플레이어 영역을 캡처합니다"
             >
-                캡처하기
+                플레이어 캡처
             </button>
             <button
                 onClick={onCaptureArea}
-            // disabled={isCapturing}
+                className={`${styles.captureButton} ${styles.areaButton}`}
+                title="원하는 영역을 직접 선택하여 캡처합니다"
             >
-                부분캡처
+                영역 선택
             </button>
         </div>
     );
