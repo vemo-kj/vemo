@@ -1,7 +1,7 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 
 @WebSocketGateway({
-    namespace: /\/video-[A-Za-z0-9]{11}/,
+    namespace: 'video',
     cors: {
         origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
