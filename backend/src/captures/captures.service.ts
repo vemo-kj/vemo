@@ -23,9 +23,7 @@ export class CapturesService {
         @Inject('S3')
         private readonly s3: S3,
         private readonly configService: ConfigService,
-    ) {
-        this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
-    }
+    ) {}
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
