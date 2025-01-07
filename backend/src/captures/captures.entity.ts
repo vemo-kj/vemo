@@ -6,8 +6,8 @@ export class Captures {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('datetime')
-    timestamp: Date;
+    @Column('time')
+    timestamp: string;
 
     @Column({ length: 255 })
     image: string;
