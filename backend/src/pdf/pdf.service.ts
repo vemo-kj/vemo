@@ -43,16 +43,12 @@ export class PdfService {
             ...memos.map(memo => ({
                 ...memo,
                 type: 'memo',
-                timestamp:
-                    memo.timestamp instanceof Date ? memo.timestamp.toISOString() : memo.timestamp,
+                timestamp: memo.timestamp,
             })),
             ...capture.map(capture => ({
                 ...capture,
                 type: 'capture',
-                timestamp:
-                    capture.timestamp instanceof Date
-                        ? capture.timestamp.toISOString()
-                        : capture.timestamp,
+                timestamp: capture.timestamp,
             })),
         ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 

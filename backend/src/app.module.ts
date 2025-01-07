@@ -20,10 +20,9 @@ import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
-import { PdfModule } from './pdf/pdf.module';
-import { RedisTestController } from './test/redis-test.controller';
 import { RedisConfigService } from './config/redis.config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { PdfModule } from './pdf/pdf.module';
 
 @Module({
     imports: [
@@ -57,7 +56,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         TextExtractionModule,
         PdfModule,
     ],
-    controllers: [AppController, RedisTestController],
+    controllers: [AppController],
     providers: [
         AppService,
         {
