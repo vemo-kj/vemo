@@ -82,17 +82,14 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
             if (!roomState.viewers.includes(client.id)) {
                 roomState.viewers.push(client.id);
             }
-            // 현재 상태 전송
-            client.emit('syncVideoState', {
-                currentTime: roomState.currentTime,
-                isPlaying: roomState.isPlaying,
-            });
         }
 
-        // 시청자 수 업데이트
+        // 시청자 수 업데이트와 함께 현재 상태 브로드캐스트
         const roomState = this.rooms.get(videoId)!;
         this.server.to(videoId).emit('viewerUpdate', {
             count: roomState.viewers.length,
+            currentTime: roomState.currentTime,
+            isPlaying: roomState.isPlaying,
         });
     }
 
@@ -126,7 +123,7 @@ export class VideoGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (roomState) {
             const now = Date.now();
             // 마지막 업데이트로부터 500ms 이상 지났을 때만 상태 업데이트
-            if (now - roomState.lastUpdate > 500) {
+            if (now - roomState.lastUpdate > 1500) {
                 roomState.currentTime = currentTime;
                 roomState.lastUpdate = now;
 
