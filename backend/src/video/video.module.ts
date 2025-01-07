@@ -5,10 +5,11 @@ import { YoutubeAuthModule } from 'src/youtubeauth/youtube-auth.module';
 import { VideoController } from './video.controller';
 import { Video } from './video.entity';
 import { VideoService } from './video.service';
+import { VideoGateway } from './video.gateway';
 
 @Module({
     imports: [TypeOrmModule.forFeature([Video]), YoutubeAuthModule, ChannelModule],
-    providers: [VideoService],
+    providers: [VideoService, VideoGateway],
     controllers: [VideoController],
     exports: [VideoService, TypeOrmModule],
 })
