@@ -1,13 +1,12 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { HttpService } from '@nestjs/axios';
-import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
 import { firstValueFrom } from 'rxjs';
+import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
 
 @Injectable()
 export class PdfService {
-    // Memo와 Capture PDF로 변환
-    constructor(private readonly httpService: HttpService) { }
+    constructor(private readonly httpService: HttpService) {}
 
     async createMemoCapturePDF(
         title: string,
@@ -20,7 +19,6 @@ export class PdfService {
         const htmlContent = await this.generateHTML(title, memos, capture);
         await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
-        // PDF 생성
         const pdfBuffer = Buffer.from(
             await page.pdf({
                 format: 'A4',
@@ -32,13 +30,11 @@ export class PdfService {
         return pdfBuffer;
     }
 
-    // HTML 템플릿 생성 함수
     private async generateHTML(
         title: string,
         memos: pdfMemoeDto[],
         capture: pdfCaptureDto[],
     ): Promise<string> {
-        // Timestamp에 맞춰 메모와 사진 정렬
         const combined = [
             ...memos.map(memo => ({
                 ...memo,
@@ -50,7 +46,13 @@ export class PdfService {
                 type: 'capture',
                 timestamp: capture.timestamp,
             })),
-        ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        ].sort((a, b) => {
+            const timeA = a.timestamp.split(':').map(Number);
+            const timeB = b.timestamp.split(':').map(Number);
+            const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
+            const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
+            return secondsA - secondsB;
+        });
 
         let htmlContent = `
             <!DOCTYPE html>
@@ -108,28 +110,35 @@ export class PdfService {
             `;
 
         for (const item of combined) {
-            const time = this.formatTimestamp(item.timestamp);
-
             if (item.type === 'memo' && 'description' in item) {
                 htmlContent += `
                     <div class="memo">
-                        <div class="timestamp">[${time}]</div>
+                        <div class="timestamp">[${item.timestamp}]</div>
                         <div>${item.description}</div>
                     </div>`;
             } else if (item.type === 'capture' && 'image' in item) {
-                const base64Image = await this.fetchBase64FromUrl(item.image);
-                if (base64Image) {
+                try {
+                    let imageUrl = item.image;
+                    if (!item.image.startsWith('data:image')) {
+                        const response = await firstValueFrom(
+                            this.httpService.get(item.image, { responseType: 'arraybuffer' }),
+                        );
+                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        imageUrl = `data:image/jpeg;base64,${base64}`;
+                    }
+
                     htmlContent += `
                         <div class="capture">
-                            <div class="timestamp">[${time}]</div>
+                            <div class="timestamp">[${item.timestamp}]</div>
                             <div class="image">
-                                <img src="data:image/png;base64,${base64Image}" alt="Captured Image" />
+                                <img src="${imageUrl}" alt="Captured Image" />
                             </div>
                         </div>`;
-                } else {
+                } catch (error) {
+                    console.error(`이미지 로드 실패: ${item.image}`, error);
                     htmlContent += `
                         <div class="capture">
-                            <div class="timestamp">[${time}]</div>
+                            <div class="timestamp">[${item.timestamp}]</div>
                             <div>이미지를 불러올 수 없습니다.</div>
                         </div>`;
                 }
@@ -140,22 +149,22 @@ export class PdfService {
         return htmlContent;
     }
 
-    // 타임스탬프 포맷팅 함수
-    private formatTimestamp(timestamp: string): string {
-        const date = new Date(timestamp);
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${minutes}:${seconds}`;
-    }
-
-    //
-    private async fetchBase64FromUrl(url: string): Promise<string> {
+    private async fetchBase64FromUrl(url: string): Promise<{ base64: string; mimeType?: string }> {
         try {
-            const response = await firstValueFrom(this.httpService.get(url));
-            return response.data.trim(); // base64 문자열 반환
+            if (url.startsWith('data:image')) {
+                const [header, base64] = url.split(',');
+                const mimeType = header.split(';')[0].split(':')[1];
+                return { base64, mimeType };
+            }
+
+            const response = await firstValueFrom(
+                this.httpService.get(url, { responseType: 'arraybuffer' }),
+            );
+            const base64 = Buffer.from(response.data, 'binary').toString('base64');
+            return { base64, mimeType: 'image/jpeg' };
         } catch (error) {
             console.error(`Base64 이미지 다운로드 실패: ${url}`);
-            return '';
+            return { base64: '' };
         }
     }
 }
