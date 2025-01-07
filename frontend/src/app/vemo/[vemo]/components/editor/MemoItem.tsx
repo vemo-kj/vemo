@@ -1,7 +1,8 @@
 import React, { memo, useRef, useState, useEffect, ChangeEvent, FocusEvent, useCallback } from 'react';
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
-import { debounce } from 'lodash';
+const debounce = require('lodash/debounce');
+
 
 interface MemoItemProps {
     id: string;

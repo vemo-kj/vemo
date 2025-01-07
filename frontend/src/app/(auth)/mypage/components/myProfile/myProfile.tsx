@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
-import styles from './myProfile.module.css';
+import styles from './MyProfile.module.css';
 
 // src/app/(auth)/mypage/components/myProfile/myProfile.tsx
 interface UserProfile {
