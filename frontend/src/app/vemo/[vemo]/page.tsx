@@ -19,7 +19,7 @@ const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
 export default function VemoPage() {
     const router = useRouter();
     const params = useParams();
-    const videoId = params.vemo as string;
+    const videoId = params?.vemo as string | null;
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
@@ -216,7 +216,7 @@ export default function VemoPage() {
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
-                            videoId={videoId}
+                            videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
                         />
