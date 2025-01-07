@@ -9,7 +9,7 @@ export class Captures {
     @Column('datetime')
     timestamp: Date;
 
-    @Column('text')
+    @Column({ nullable: true }) // 업로드된 이미지 URL 저장
     image: string;
 
     @ManyToOne(() => Memos)

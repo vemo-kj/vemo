@@ -21,6 +21,7 @@ import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
 import { PdfModule } from './pdf/pdf.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
     imports: [
@@ -33,7 +34,7 @@ import { PdfModule } from './pdf/pdf.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-
+        S3Module,
         MemosModule,
         VideoModule,
         ChannelModule,
