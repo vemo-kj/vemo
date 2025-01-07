@@ -1,14 +1,16 @@
-import { IsNotEmpty, IsOptional, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateMemoDto {
     @IsNotEmpty()
-    timestamp: Date;
+    @IsString()
+    timestamp: string;
 
     @IsOptional()
+    @IsString()
     @Length(0, 500)
     description?: string;
 
-    // memoseId 임시
     @IsNotEmpty()
+    @IsNumber()
     memosId: number;
 }
