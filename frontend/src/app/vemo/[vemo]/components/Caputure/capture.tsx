@@ -29,7 +29,7 @@ export default function CaptureComponent({ onCapture, currentTimestamp, targetRe
 
             const dataUrl = await toPng(targetRef.current, options);
             onCapture(currentTimestamp, dataUrl);
-        } catch (error) {
+        } catch (error: any) {
             console.error('캡처 중 오류 발생:', error);
             setCaptureError(`캡처 중 오류가 발생했습니다: ${error.message}`);
         } finally {
