@@ -21,6 +21,9 @@ import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
 import { PdfModule } from './pdf/pdf.module';
+import { RedisTestController } from './test/redis-test.controller';
+import { RedisConfigService } from './config/redis.config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
     imports: [
@@ -33,7 +36,11 @@ import { PdfModule } from './pdf/pdf.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-
+        CacheModule.registerAsync({
+            imports: [ConfigModule],
+            useClass: RedisConfigService,
+            isGlobal: true,
+        }),
         MemosModule,
         VideoModule,
         ChannelModule,
@@ -50,7 +57,7 @@ import { PdfModule } from './pdf/pdf.module';
         TextExtractionModule,
         PdfModule,
     ],
-    controllers: [AppController],
+    controllers: [AppController, RedisTestController],
     providers: [
         AppService,
         {
