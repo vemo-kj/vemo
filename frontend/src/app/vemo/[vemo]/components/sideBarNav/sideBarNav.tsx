@@ -82,7 +82,7 @@ export default function SidebarNav({
                                 </div>
                             </div>
                             {selectedOption === 'AI 요약 보기' ? (
-                                <SummaryView />
+                                <SummaryView videoId={vemoData?.videoId ?? ''} />
                             ) : selectedOption === '퀴즈 보기' ? (
                                 <QuizView />
                             ) : (
