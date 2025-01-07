@@ -15,7 +15,7 @@ export class HomeService {
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
-    ) {}
+    ) { }
 
     async createPlaylistWithMemos(
         userId: number,

@@ -1,0 +1,48 @@
+.captureButtonContainer {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.captureButton {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.captureButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.captureButton:active {
+  transform: translateY(0);
+}
+
+.areaButton {
+  background-color: #28a745;
+}
+
+.areaButton:hover {
+  background-color: #218838;
+}
+
+/* 버튼 비활성화 상태 */
+.captureButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}

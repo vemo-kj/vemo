@@ -1,34 +1,3 @@
-// import Link from "next/link";
-// import React from 'react';
-// //style
-// import styles from './CreateButton.module.css';
-
-// type CreateButtonProps = {
-//   onSave: () => void;
-//   isLoading: boolean;
-//   responseData: { playlistId: number; videoId: string; videoIndex: number }[] | null;
-// };
-
-// const CreateButton: React.FC<CreateButtonProps> = ({ onSave, isLoading }) => {
-//   return (
-//     <Link href="/" className={styles.createButtonContainer}>
-//       <button
-//         className={styles.createButton}
-//         onClick={onSave}
-//         disabled={isLoading}
-//       >
-//         저장
-//       </button>
-//     </Link>
-//   );
-// };
-
-// export default CreateButton;
-
-// src/app/(dashbord)/create/components/createButton/CreateButton.tsx
-
-// src/app/(dashbord)/create/components/createButton/CreateButton.tsx
-
 import React from 'react';
 import { VideoResponse } from '@/app/types/VideoResponse';
 import styles from './CreateButton.module.css';
