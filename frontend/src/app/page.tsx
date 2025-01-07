@@ -105,7 +105,7 @@ function SearchParamsComponent() {
 
     return (
         <main className={styles.main}>
-            <Category 
+            <Category
                 categories={categories}
                 onCategoryClick={handleCategoryClick}
             />
