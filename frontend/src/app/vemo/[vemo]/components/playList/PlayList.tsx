@@ -20,7 +20,8 @@ interface Playlist {
 
 export default function Playlist() {
   const searchParams = useSearchParams();
-  const playlistId = searchParams.get('playlistId');
+  const playlistId = searchParams ? searchParams.get('playlistId') : null;
+  const videoId = searchParams ? searchParams.get('vemo') : null;
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [totalDuration, setTotalDuration] = useState<string>('00:00:00');
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +114,7 @@ export default function Playlist() {
       </div>
       <div className={styles.videoList}>
         {playlist.videos.map((video, index) => {
-          const isPlaying = video.id === searchParams.get('vemo');
+          const isPlaying = video.id === (searchParams?.get('vemo') ?? null);
 
           return (
             <Link

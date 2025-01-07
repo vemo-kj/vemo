@@ -1,28 +1,23 @@
 'use client';
 
 //style
-import styles from './page.module.css';
 //component
-import Category from './components/category/Category';
-import Header from './components/Layout/Header';
-import MainCard from './components/mainCard/MainCard';
 //type
 import { MainCardProps } from './types/MainCardProps';
 //next
-import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import router from 'next/router';
+import { Suspense, useEffect, useState } from 'react';
 
-// Home page
-export default function Home() {
-    const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
-    const router = useRouter();
+// SearchParams를 사용하는 컴포넌트를 분리
+function SearchParamsComponent() {
     const searchParams = useSearchParams();
-    const search = searchParams.get('q') || '';
-    const category = searchParams.get('category') || 'All';
+    const search = searchParams?.get('q') ?? '';
+    const category = searchParams?.get('category') ?? 'All';
+    const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
     // API
     const fetchMainCards = async () => {
@@ -98,28 +93,21 @@ export default function Home() {
     const filteredCards = mainCards.filter(card => {
         const matchesCategory = selectedCategory === 'All' || card.category === selectedCategory;
         const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
-        return search ? matchesSearch : matchesCategory;
+        return matchesCategory && matchesSearch;
     });
 
+    return <div>{/* 컴포넌트 내용 */}</div>;
+}
+
+// Home page
+export default function Home() {
+    const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
+    const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
+    const router = useRouter();
+
     return (
-        <main className={styles.mainContainer}>
-            <Header />
-            <Category categories={categories} onCategorySelect={handleCategoryClick} />
-            <div className={styles.content}>
-                {error ? (
-                    <div className={styles.error}>{error}</div>
-                ) : isLoading ? (
-                    <div className={styles.loading}>로딩 중...</div>
-                ) : filteredCards.length > 0 ? (
-                    <div className={styles.mainCardContainer}>
-                        {filteredCards.map(mainCard => (
-                            <MainCard key={mainCard.id} {...mainCard} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className={styles.noResults}>표시할 컨텐츠가 없습니다.</div>
-                )}
-            </div>
-        </main>
+        <Suspense fallback={<div>Loading...</div>}>
+            <SearchParamsComponent />
+        </Suspense>
     );
 }
