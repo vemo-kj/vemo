@@ -25,7 +25,7 @@ export class HomeService {
 
         const playlist = await this.playlistService.createPlaylist({ name, videoIds }, userId);
 
-        const firstVideo = await this.videoService.getVideoById(videoIds[0]);
+        const firstVideo = await this.videoService.getVideoData(videoIds[0]);
         await this.memosService.createMemos(firstVideo.title, firstVideo.id, userId);
 
         return {
@@ -72,7 +72,7 @@ export class HomeService {
      */
     private async createInitialMemos(userId: number, videoId: string): Promise<Memos> {
         try {
-            const video = await this.videoService.getVideoById(videoId);
+            const video = await this.videoService.getVideoData(videoId);
             return await this.memosService.createMemos(video.title, videoId, userId);
         } catch (error) {
             if (error instanceof NotFoundException) {
