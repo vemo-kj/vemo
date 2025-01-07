@@ -10,7 +10,7 @@ export class CapturesService {
     constructor(
         @InjectRepository(Captures)
         private capturesRepository: Repository<Captures>,
-    ) {}
+    ) { }
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {

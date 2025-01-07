@@ -9,10 +9,10 @@ export class Captures {
     @Column('datetime')
     timestamp: Date;
 
-    @Column({ length: 255 })
+    @Column('text')
     image: string;
 
-    @ManyToOne(() => Memos, memos => memos.memo, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Memos)
     @JoinColumn({ name: 'memosId' })
     memos: Memos;
 }

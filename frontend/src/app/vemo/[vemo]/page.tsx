@@ -9,6 +9,7 @@ import SideBarNav from './components/sideBarNav/sideBarNav';
 import { SummaryProvider } from './context/SummaryContext';
 import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
 import { toPng } from 'html-to-image';
+import CaptureButton from './components/Caputure/CaptureButton';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -31,6 +32,10 @@ export default function VemoPage() {
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Add capture status tracking
+    const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
+    const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
 
     // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     const fetchVemoData = useCallback(async () => {
@@ -148,9 +153,14 @@ export default function VemoPage() {
     // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
+            if (e.source !== window) return; // 보안상 체크
+
+            console.log('메시지 수신:', e.data);
             if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
+                console.log('전체 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
+                console.log('부분 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             }
         };
@@ -164,36 +174,26 @@ export default function VemoPage() {
     const handleCaptureTab = async () => {
         if (!editorRef.current) return;
 
-        const timestamp = currentTimestamp;
-        const element = document.getElementById('youtube-player');
-        if (!element) return;
-
         try {
-            const dataUrl = await toPng(element);
-            // 캡처 이미지를 에디터에 추가
-            editorRef.current.addCaptureItem(timestamp, dataUrl);
+            console.log('전체 캡처 요청 전송');
+            window.postMessage({
+                type: 'CAPTURE_TAB'
+            }, '*');
         } catch (error) {
-            console.error('캡처 실패:', error);
+            console.error('캡처 요청 실패:', error);
         }
     };
 
     const handleCaptureArea = async () => {
         if (!editorRef.current) return;
 
-        // 부분 캡처 로직
-        const element = document.getElementById('youtube-player');
-        if (!element) return;
-
         try {
-            // 선택 영역만 캡처하는 로직 구현 필요
-            const dataUrl = await toPng(element, {
-                // 선택 영역 설정
-                width: element.clientWidth,
-                height: element.clientHeight
-            });
-            editorRef.current.addCaptureItem(currentTimestamp, dataUrl);
+            console.log('부분 캡처 요청 전송');
+            window.postMessage({
+                type: 'CAPTURE_AREA'
+            }, '*');
         } catch (error) {
-            console.error('부분 캡처 실패:', error);
+            console.error('부분 캡처 요청 실패:', error);
         }
     };
 

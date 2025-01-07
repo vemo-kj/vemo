@@ -1,62 +1,56 @@
-import React, { useRef } from 'react';
-import { toPng, toJpeg } from 'html-to-image';
-import styles from './Capture.module.css'; // 스타일 정의
+import React, { useRef, useState } from 'react';
+import { toPng } from 'html-to-image';
+import styles from './Capture.module.css';
 
 interface CaptureComponentProps {
     onCapture: (timestamp: string, imageUrl: string) => void;
     currentTimestamp: string;
+    targetRef: React.RefObject<HTMLElement>;
 }
 
-export default function CaptureComponent({ onCapture, currentTimestamp }: CaptureComponentProps) {
-    const captureRef = useRef<HTMLDivElement | null>(null); // 캡처할 영역 참조
-    const selectionRef = useRef<HTMLDivElement | null>(null); // 선택된 영역 참조
+export default function CaptureComponent({ onCapture, currentTimestamp, targetRef }: CaptureComponentProps) {
+    const [isCapturing, setIsCapturing] = useState<boolean>(false);
+    const [captureError, setCaptureError] = useState<string | null>(null);
 
-    // 전체 캡처
-    const handleFullCapture = async () => {
-        if (!captureRef.current) return;
+    const handleCapture = async () => {
+        if (!targetRef.current) {
+            console.error('캡처할 대상을 찾을 수 없습니다.');
+            return;
+        }
+
+        setIsCapturing(true);
+        setCaptureError(null);
+
         try {
-            const dataUrl = await toPng(captureRef.current); // 캡처된 이미지를 Data URL로 변환
+            const options = {
+                quality: 0.95,
+                cacheBust: true,
+            };
+
+            const dataUrl = await toPng(targetRef.current, options);
             onCapture(currentTimestamp, dataUrl);
         } catch (error) {
             console.error('캡처 중 오류 발생:', error);
+            setCaptureError(`캡처 중 오류가 발생했습니다: ${error.message}`);
+        } finally {
+            setIsCapturing(false);
         }
-    };
-
-    // 선택된 부분 캡처
-    const handlePartialCapture = async () => {
-        if (!selectionRef.current) return;
-        try {
-            const dataUrl = await toPng(selectionRef.current);
-            onCapture(currentTimestamp, dataUrl);
-        } catch (error) {
-            console.error('부분 캡처 중 오류 발생:', error);
-        }
-    };
-
-    // 이미지 다운로드
-    const downloadImage = (dataUrl: string, fileName: string) => {
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     };
 
     return (
-        <div>
-            <div ref={captureRef} className={styles.captureArea}>
-                <h1>캡처할 영역</h1>
-                <p>이 영역 전체를 캡처하거나 선택한 부분만 캡처할 수 있습니다.</p>
-                <div ref={selectionRef} className={styles.selectionArea}>
-                    <p>부분 캡처할 영역</p>
+        <div className={styles.captureControls}>
+            <button
+                onClick={handleCapture}
+                disabled={isCapturing}
+                className={styles.captureButton}
+            >
+                {isCapturing ? '캡처 중...' : '화면 캡처'}
+            </button>
+            {captureError && (
+                <div className={styles.error}>
+                    {captureError}
                 </div>
-            </div>
-
-            <div className={styles.buttons}>
-                <button onClick={handleFullCapture}>전체 캡처</button>
-                <button onClick={handlePartialCapture}>부분 캡처</button>
-            </div>
+            )}
         </div>
     );
 }

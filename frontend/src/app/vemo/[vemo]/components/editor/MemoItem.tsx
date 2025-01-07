@@ -16,6 +16,13 @@ interface MemoItemProps {
 }
 
 const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MemoItemProps) => {
+    console.log('MemoItem 렌더링:', {
+        id,
+        timestamp,
+        hasScreenshot: !!screenshot,
+        screenshotLength: screenshot?.length
+    });
+
     // ====== (1) 그리기 영역 ======
     const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
@@ -188,6 +195,61 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
         setExtractedText('');
     };
 
+    const [imageLoading, setImageLoading] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    // 이미지 로딩 시작 시 호출
+    useEffect(() => {
+        if (screenshot) {
+            console.log('이미지 로딩 시작:', {
+                id,
+                screenshotStart: screenshot.substring(0, 50) + '...'
+            });
+
+            setImageLoading(true);
+            const img = new Image();
+
+            img.onload = () => {
+                console.log('이미지 로드 성공:', {
+                    id,
+                    width: img.width,
+                    height: img.height
+                });
+                setImageLoading(false);
+                setImageError(false);
+            };
+
+            img.onerror = (error) => {
+                console.error('이미지 로드 실패:', {
+                    id,
+                    error
+                });
+                setImageLoading(false);
+                setImageError(true);
+            };
+
+            img.src = screenshot;
+        }
+    }, [screenshot, id]);
+
+    // 이미지 엘리먼트 참조 추가
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    // 이미지 엘리먼트 마운트 후 확인
+    useEffect(() => {
+        if (imgRef.current) {
+            console.log('이미지 엘리먼트 상태:', {
+                id,
+                element: imgRef.current,
+                displayStyle: window.getComputedStyle(imgRef.current).display,
+                dimensions: {
+                    width: imgRef.current.offsetWidth,
+                    height: imgRef.current.offsetHeight
+                }
+            });
+        }
+    }, [id]);
+
     return (
         <div className={styles.memoItemContainer}>
             {/* 1) 상단에 타임스탬프 */}
@@ -203,12 +265,72 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
             {/* 2) 중앙 영역: 이미지 or HTML */}
             {/* contentEditable 영역 (노션처럼 인라인 수정) */}
             {screenshot ? (
-                <img
-                    id={`capture-${id}`}
-                    src={screenshot}
-                    alt="capture"
-                    className={styles.captureImage} // width:100%
-                />
+                <div className={styles.imageContainer}>
+                    {imageLoading && (
+                        <div className={styles.loadingIndicator}>
+                            로딩중...
+                        </div>
+                    )}
+                    {imageError && (
+                        <div className={styles.errorMessage}>
+                            이미지를 불러올 수 없습니다
+                            <button
+                                onClick={() => {
+                                    setImageLoading(true);
+                                    setImageError(false);
+                                    if (imgRef.current) {
+                                        imgRef.current.src = screenshot;
+                                    }
+                                }}
+                                className={styles.retryButton}
+                            >
+                                다시 시도
+                            </button>
+                        </div>
+                    )}
+                    <div
+                        className={styles.captureImageWrapper}
+                        style={{
+                            width: '100%',
+                            minHeight: '200px',
+                            position: 'relative',
+                            backgroundColor: '#f5f5f5',
+                            borderRadius: '8px',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <img
+                            ref={imgRef}
+                            id={`capture-${id}`}
+                            src={screenshot}
+                            alt="capture"
+                            className={styles.captureImage}
+                            style={{
+                                display: 'block',
+                                width: '100%',
+                                height: 'auto',
+                                position: 'relative',
+                                zIndex: 1
+                            }}
+                            onLoad={(e) => {
+                                console.log('이미지 로드 완료:', {
+                                    naturalWidth: (e.target as HTMLImageElement).naturalWidth,
+                                    naturalHeight: (e.target as HTMLImageElement).naturalHeight
+                                });
+                                setImageLoading(false);
+                                setImageError(false);
+                            }}
+                            onError={() => {
+                                console.error('이미지 로드 실패:', {
+                                    id,
+                                    screenshotLength: screenshot.length
+                                });
+                                setImageLoading(false);
+                                setImageError(true);
+                            }}
+                        />
+                    </div>
+                </div>
             ) : (
                 <div
                     className={styles.itemContent}
