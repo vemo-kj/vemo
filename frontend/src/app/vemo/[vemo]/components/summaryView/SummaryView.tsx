@@ -1,26 +1,41 @@
 'use client';
 
-import { useSummary } from "@/app/vemo/[vemo]/context/SummaryContext";
+import { useEffect, useState } from 'react';
 
+// Define the props interface
+interface SummaryViewProps {
+    videoId: string; // Specify the type of videoId
+}
 
-export default function SummaryView() {
-    const { summaryData } = useSummary();
+export default function SummaryView({ videoId }: SummaryViewProps) {
+    const [summaryData, setSummaryData] = useState<any>(null); // You can specify a more specific type if known
+    const [error, setError] = useState<string | null>(null);
 
-    if (!summaryData) {
-        return <div>요약 데이터가 없습니다.</div>;
-    }
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const response = await fetch('/api/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoId }),
+                });
+                const data = await response.json();
+                setSummaryData(data);
+            } catch (err) {
+                setError('데이터를 가져오는 데 실패했습니다.');
+            }
+        };
+
+        fetchSummary();
+    }, [videoId]);
+
+    if (error) return <div>{error}</div>;
+    if (!summaryData) return <div>로딩 중...</div>;
 
     return (
-        <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">AI 요약</h2>
-            <div className="space-y-4">
-                {summaryData.summaryList.map(item => (
-                    <div key={item.id} className="border p-3 rounded-lg">
-                        <div className="font-semibold text-blue-600">{item.timestamp}</div>
-                        <p className="mt-1">{item.description}</p>
-                    </div>
-                ))}
-            </div>
+        <div>
+            <h2>요약 및 퀴즈</h2>
+            <p>{summaryData.url}</p> {/* S3 URL 표시 */}
         </div>
     );
 }
