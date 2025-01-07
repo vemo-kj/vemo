@@ -293,18 +293,16 @@ export default function VemoPage() {
 
             {/* (3) Sidebar */}
             <div className={styles.section3}>
-                <SummaryProvider>
-                    <SideBarNav
-                        selectedOption={selectedOption}
-                        onOptionSelect={handleOptionSelect}
-                        renderSectionContent={renderSectionContent}
-                        currentTimestamp={currentTimestamp}
-                        handleCaptureTab={handleCaptureTab}
-                        handleCaptureArea={handleCaptureArea}
-                        editorRef={editorRef}
-                        vemoData={vemoData}
-                    />
-                </SummaryProvider>
+                <SideBarNav
+                    selectedOption={selectedOption}
+                    onOptionSelect={handleOptionSelect}
+                    renderSectionContent={renderSectionContent}
+                    currentTimestamp={currentTimestamp}
+                    handleCaptureTab={handleCaptureTab}
+                    handleCaptureArea={handleCaptureArea}
+                    editorRef={editorRef}
+                    vemoData={vemoData}
+                />
             </div>
         </div>
     );
