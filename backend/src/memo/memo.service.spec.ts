@@ -12,7 +12,7 @@ describe('MemoService', () => {
     let repository: Repository<Memo>;
 
     const mockCreateMemoDto: CreateMemoDto = {
-        timestamp: new Date(),
+        timestamp: '12:34:56',
         description: 'Test description',
         memosId: 1,
     };
@@ -88,7 +88,7 @@ describe('MemoService', () => {
 
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: '12:34:56',
                 description: 'Original description',
                 memos: mockMemos,
             } as Memo;
@@ -130,7 +130,7 @@ describe('MemoService', () => {
         it('메모를 성공적으로 삭제해야 한다', async () => {
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: '12:34:56',
                 description: 'Test description',
                 memos: mockMemos,
             } as Memo;
@@ -153,7 +153,7 @@ describe('MemoService', () => {
         it('삭제 중 에러가 발생하면 에러를 전파해야 한다', async () => {
             const existingMemo = {
                 id: 1,
-                timestamp: new Date(),
+                timestamp: '12:34:56',
                 description: 'Test description',
                 memos: mockMemos,
             } as Memo;
