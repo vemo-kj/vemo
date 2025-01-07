@@ -5,9 +5,11 @@
 //type
 import { MainCardProps } from './types/MainCardProps';
 //next
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import router from 'next/router';
-import { Suspense, useEffect, useState } from 'react';
+
+// categories 배열을 컴포넌트 외부로 이동
+const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
 
 // SearchParams를 사용하는 컴포넌트를 분리
 function SearchParamsComponent() {
@@ -96,18 +98,32 @@ function SearchParamsComponent() {
         return matchesCategory && matchesSearch;
     });
 
-    return <div>{/* 컴포넌트 내용 */}</div>;
+    return (
+        <main className={styles.main}>
+            <Category categories={categories} onCategoryClick={handleCategoryClick} />
+            {isLoading ? (
+                <div>Loading...</div>
+            ) : error ? (
+                <div>{error}</div>
+            ) : (
+                <div className={styles.cardContainer}>
+                    {filteredCards.map(card => (
+                        <MainCard key={card.id} {...card} />
+                    ))}
+                </div>
+            )}
+        </main>
+    );
 }
 
 // Home page
 export default function Home() {
-    const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
-    const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
-    const router = useRouter();
-
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <SearchParamsComponent />
-        </Suspense>
+        <>
+            <Header />
+            <Suspense fallback={<div>Loading...</div>}>
+                <SearchParamsComponent />
+            </Suspense>
+        </>
     );
 }
