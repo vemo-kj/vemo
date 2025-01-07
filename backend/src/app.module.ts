@@ -6,24 +6,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
+import { CapturesModule } from './captures/captures.module';
 import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
+import { HomeModule } from './home/home.module';
 import { MemosModule } from './memos/memos.module';
+import { PdfModule } from './pdf/pdf.module';
+import { PlaylistModule } from './playlist/playlist.module';
+import { QuizModule } from './quiz/quiz.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
+import { SummarizationModule } from './summarization/summarization.module';
+import { TextExtractionModule } from './text-extraction/text-extraction.module';
 import { UsersModule } from './users/users.module';
+import { VemoModule } from './vemo/vemo.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
-import { CapturesModule } from './captures/captures.module';
-import { QuizModule } from './quiz/quiz.module';
-import { SummarizationModule } from './summarization/summarization.module';
-import { VemoModule } from './vemo/vemo.module';
-import { HomeModule } from './home/home.module';
-import { PlaylistModule } from './playlist/playlist.module';
-import { TextExtractionModule } from './text-extraction/text-extraction.module';
-import { PdfModule } from './pdf/pdf.module';
-import { RedisTestController } from './test/redis-test.controller';
-import { RedisConfigService } from './config/redis.config';
-import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
     imports: [
@@ -36,11 +33,11 @@ import { CacheModule } from '@nestjs/cache-manager';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-        CacheModule.registerAsync({
-            imports: [ConfigModule],
-            useClass: RedisConfigService,
-            isGlobal: true,
-        }),
+        // CacheModule.registerAsync({
+        //     imports: [ConfigModule],
+        //     useClass: RedisConfigService,
+        //     isGlobal: true,
+        // }),
         MemosModule,
         VideoModule,
         ChannelModule,
@@ -57,7 +54,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         TextExtractionModule,
         PdfModule,
     ],
-    controllers: [AppController, RedisTestController],
+    controllers: [AppController],
     providers: [
         AppService,
         {
