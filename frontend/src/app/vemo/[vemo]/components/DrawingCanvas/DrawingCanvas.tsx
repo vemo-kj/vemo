@@ -9,6 +9,16 @@ interface DrawingCanvasProps {
     backgroundImage: string; // 추가된 부분
 }
 
+// ReactSketchCanvas를 위한 타입 정의 추가
+const Canvas = ReactSketchCanvas as unknown as React.ComponentType<{
+    ref: React.RefObject<ReactSketchCanvasRef>;
+    style: React.CSSProperties;
+    strokeColor: string;
+    strokeWidth: number;
+    className: string;
+    backgroundImage?: string;
+}>;
+
 export default function DrawingCanvas({ onSave, onClose, backgroundImage }: DrawingCanvasProps) {
     const canvasRef = useRef<ReactSketchCanvasRef | null>(null);
     const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number }>({
@@ -62,7 +72,7 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     return (
         <div className={styles.drawingContainer}>
             <h2>그리기</h2>
-            <ReactSketchCanvas
+            <Canvas
                 ref={canvasRef}
                 style={{
                     border: '1px solid #000',
@@ -72,7 +82,7 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
                 strokeColor="#ff0000"
                 strokeWidth={3}
                 className={styles.canvasBox}
-                backgroundImage={backgroundImage} // 배경 이미지 설정
+                backgroundImage={backgroundImage}
             />
             <div className={styles.drawToolbar}>
                 <button onClick={handleUndo} className={styles.button}>
