@@ -1,7 +1,7 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { Editor as DraftEditor, EditorState, RichUtils } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
+import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import 'draft-js/dist/Draft.css';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 
@@ -10,6 +10,9 @@ const Editor = DraftEditor as unknown as React.ComponentType<{
     editorState: EditorState;
     onChange: (state: EditorState) => void;
     placeholder?: string;
+    keybinding?: (e: any) => void;
+    handleKeyCommand?: (command: string) => 'handled' | 'not-handled';
+    keyBindingFn?: (e: any) => string | null;
 }>;
 
 interface Section {
@@ -350,6 +353,14 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         return editorState.getCurrentInlineStyle().has(style);
     };
 
+    const handleKeyCommand = (command: string) => {
+        if (command === 'split-block') {
+            handleSave();
+            return 'handled';
+        }
+        return 'not-handled';
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.displayArea}>
@@ -373,6 +384,13 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     editorState={editorState}
                     onChange={setEditorState}
                     placeholder="내용을 입력하세요..."
+                    handleKeyCommand={handleKeyCommand}
+                    keyBindingFn={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            return 'split-block';
+                        }
+                        return getDefaultKeyBinding(e);
+                    }}
                 />
                 <div className={styles.toolbar}>
                     <button
