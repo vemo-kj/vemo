@@ -151,7 +151,7 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
                     onClick={() => {
                         setActiveTab('write');
-                        handleWriteClick();
+                        // handleWriteClick();
                     }}
                 >
                     <div className={styles.iconButton}>
