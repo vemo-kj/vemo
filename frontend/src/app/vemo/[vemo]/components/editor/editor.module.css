@@ -8,9 +8,12 @@
 /* 노트(메모) 리스트 감싸는 영역 - 빨간 박스, 고정 높이, 스크롤 */
 .noteListContainer {
     width: 100%;
-    max-height: 300px; /* 원하는 고정 높이 */
-    overflow-y: auto; /* 내용 넘치면 스크롤 */
-    background-color: #f44; /* 빨간색 예시 */
+    max-height: 300px;
+    /* 원하는 고정 높이 */
+    overflow-y: auto;
+    /* 내용 넘치면 스크롤 */
+    background-color: #f44;
+    /* 빨간색 예시 */
     padding: 10px;
     border-radius: 8px;
 }
@@ -40,8 +43,10 @@
     flex: 1;
     min-height: 20px;
     padding: 4px;
-    cursor: text; /* 편집 가능하다는 암시 */
-    outline: none; /* contentEditable 포커스 테두리 제거 */
+    cursor: text;
+    /* 편집 가능하다는 암시 */
+    outline: none;
+    /* contentEditable 포커스 테두리 제거 */
     white-space: pre-wrap;
 }
 
@@ -77,40 +82,44 @@
 /* 툴바 */
 .toolbar {
     display: flex;
-    gap: 5px;
-    margin-top: 10px;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid #eee;
 }
 
-.toolbar button {
-    background-color: #f1f3f5;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
+.styleButton {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    background: white;
     border-radius: 4px;
     cursor: pointer;
 }
 
-.toolbar button:hover {
-    background-color: #e0e0e0;
+.activeButton {
+    background-color: #e6e6e6;
+    border-color: #999;
 }
 
-/* 활성화된 인라인 스타일 버튼 */
-.toolbar button.activeButton {
+.saveButton {
+    margin-left: auto;
+    padding: 4px 12px;
     background-color: #007bff;
     color: white;
-    border: 1px solid #0056b3;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-/* editor.module.css */
-.container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.saveButton:hover {
+    background-color: #0056b3;
 }
 
 /* 메모 노트 영역 */
 .displayArea {
-    height: 520px; /* 3) 스크롤 제한 */
-    max-height: 530px; /* 3) 스크롤 제한 */
+    height: 520px;
+    /* 3) 스크롤 제한 */
+    max-height: 530px;
+    /* 3) 스크롤 제한 */
     overflow-y: auto;
 }
 
@@ -141,7 +150,8 @@
 
 /* 캡처 이미지 */
 .captureImage {
-    max-width: 300px; /* 4) 영역 제한 */
+    max-width: 300px;
+    /* 4) 영역 제한 */
     height: auto;
     border: 1px solid #ccc;
 }
@@ -170,7 +180,8 @@
     /* height: 1080px; */
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.8); /* 오퍼시티 배경 */
+    background-color: rgba(0, 0, 0, 0.8);
+    /* 오퍼시티 배경 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,11 +195,209 @@
 }
 
 .sigCanvas {
-    border: 1px solid #ff0000;
+    .drawButtons {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
 }
 
-.drawButtons {
-    margin-top: 10px;
+/* 모달 오버레이 */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* 모달 컨테이너 */
+.modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.3s ease-out;
+}
+
+/* 모달 헤더 */
+.modal h2 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 모달 컨텐츠 */
+.modalContent {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.modalContent p {
+    margin: 0;
+    line-height: 1.5;
+    color: #333;
+    font-size: 14px;
+    white-space: pre-wrap;
+}
+
+/* 모달 버튼 영역 */
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* 버튼 스타일 */
+.useButton,
+.cancelButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.useButton {
+    background-color: #007AFF;
+    color: white;
+}
+
+.useButton:hover {
+    background-color: #0056b3;
+}
+
+.cancelButton {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.cancelButton:hover {
+    background-color: #dee2e6;
+}
+
+/* 애니메이션 키프레임 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 스크롤바 스타일링 */
+.modalContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.imageContainer {
+    margin: 10px 0;
+    width: 100%;
+    position: relative;
+}
+
+.captureImageWrapper {
+    width: 100%;
+    position: relative;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.captureImage {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.loadingIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.errorMessage {
+    color: #ff4444;
+    text-align: center;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
+}
+
+.retryButton {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+    background-color: #ff6666;
+}
+
+.memoItemContainer {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

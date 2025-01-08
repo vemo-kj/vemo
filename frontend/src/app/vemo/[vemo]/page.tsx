@@ -3,33 +3,18 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
-
 import { SummaryProvider } from './context/SummaryContext';
+import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
+import { toPng } from 'html-to-image';
+import CaptureButton from './components/Caputure/CaptureButton';
 
 // 동적 로드된 DraftEditor
-const EditorNoSSR = dynamic<CustomEditorProps>(() => import('./components/editor/editor'), {
+const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
-
-interface CustomEditorProps {
-    ref?: React.Ref<unknown>;
-    getTimestamp: () => string;
-    onTimestampClick: (timestamp: string) => void;
-    isEditable?: boolean;
-    editingItemId?: string | null;
-    onEditStart?: (itemId: string) => void;
-    onEditEnd?: () => void;
-}
-
-// 페이지 컴포넌트의 props 타입 정의 추가
-interface PageProps {
-    params: {
-        vemo: string;
-    };
-}
 
 export default function VemoPage() {
     const router = useRouter();
@@ -42,6 +27,64 @@ export default function VemoPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     // const [videoId, setVideoId] = useState('pEt89CrE-6A');
+
+    // 새로 추가되는 상태들
+    const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Add capture status tracking
+    const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
+    const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
+
+    // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
+    const fetchVemoData = useCallback(async () => {
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.error('토큰이 없습니다.');
+                setError('로그인이 필요한 서비스입니다.');
+                router.push('/login');
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('서버 응답:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorText
+                });
+                throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
+            }
+
+            const data: CreateMemosResponseDto = await response.json();
+            console.log('받은 메모 데이터:', data);
+            setVemoData(data);
+
+        } catch (error) {
+            console.error('데이터 로딩 실패:', error);
+            setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [videoId, router]);
+
+    // 초기 데이터 로드를 위한 useEffect
+    useEffect(() => {
+        if (videoId) {
+            fetchVemoData();
+        }
+    }, [videoId, fetchVemoData]);
 
     useEffect(() => {
         if (!videoId) return;
@@ -110,9 +153,14 @@ export default function VemoPage() {
     // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
+            if (e.source !== window) return; // 보안상 체크
+
+            console.log('메시지 수신:', e.data);
             if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
+                console.log('전체 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
+                console.log('부분 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             }
         };
@@ -123,14 +171,31 @@ export default function VemoPage() {
     }, [currentTimestamp]);
 
     // 전체/부분 캡처
-    const handleCaptureTab = () => {
-        window.postMessage({ type: 'CAPTURE_TAB' }, '*');
+    const handleCaptureTab = async () => {
+        if (!editorRef.current) return;
+
+        try {
+            console.log('전체 캡처 요청 전송');
+            window.postMessage({
+                type: 'CAPTURE_TAB'
+            }, '*');
+        } catch (error) {
+            console.error('캡처 요청 실패:', error);
+        }
     };
-    // 부분 캡처
-    const handleCaptureArea = () => {
-        window.postMessage({ type: 'CAPTURE_AREA' }, '*');
+
+    const handleCaptureArea = async () => {
+        if (!editorRef.current) return;
+
+        try {
+            console.log('부분 캡처 요청 전송');
+            window.postMessage({
+                type: 'CAPTURE_AREA'
+            }, '*');
+        } catch (error) {
+            console.error('부분 캡처 요청 실패:', error);
+        }
     };
-    // 캡처 기능 끝
 
     // 섹션 내용 렌더링
     const renderSectionContent = () => {
@@ -151,6 +216,9 @@ export default function VemoPage() {
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
+                            videoId={videoId}
+                            onPauseVideo={() => playerRef.current?.pauseVideo()}
+                            onMemoSaved={handleMemoSaved}
                         />
                     </>
                 );
@@ -167,6 +235,36 @@ export default function VemoPage() {
     const changeVideo = (newVideoId: string) => {
         router.push(`/vemo/${newVideoId}`);
     };
+
+    // 데모 저장 후 데이터 갱신을 위한 핸들러
+    const handleMemoSaved = useCallback(() => {
+        if (videoId) {
+            fetchVemoData();
+        }
+    }, [videoId, fetchVemoData]);
+
+    // 로딩 상태 UI
+    if (isLoading) {
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.loadingSpinner}></div>
+                <p>메모 데이터를 불러오는 중...</p>
+            </div>
+        );
+    }
+
+    // 에러 상태 UI
+    if (error) {
+        return (
+            <div className={styles.errorContainer}>
+                <h3>오류가 발생했습니다</h3>
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()}>
+                    다시 시도
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -195,17 +293,16 @@ export default function VemoPage() {
 
             {/* (3) Sidebar */}
             <div className={styles.section3}>
-                <SummaryProvider>
-                    <SideBarNav
-                        selectedOption={selectedOption} // 선택된 옵션
-                        onOptionSelect={handleOptionSelect} // 옵션 선택 함수
-                        renderSectionContent={renderSectionContent} // 섹션 내용 렌더링
-                        currentTimestamp={currentTimestamp} // 현재 재생 시간
-                        handleCaptureTab={handleCaptureTab} // 캡처 기능
-                        handleCaptureArea={handleCaptureArea} // 캡처 기능
-                        editorRef={editorRef} // 추가
-                    />
-                </SummaryProvider>
+                <SideBarNav
+                    selectedOption={selectedOption}
+                    onOptionSelect={handleOptionSelect}
+                    renderSectionContent={renderSectionContent}
+                    currentTimestamp={currentTimestamp}
+                    handleCaptureTab={handleCaptureTab}
+                    handleCaptureArea={handleCaptureArea}
+                    editorRef={editorRef}
+                    vemoData={vemoData}
+                />
             </div>
         </div>
     );

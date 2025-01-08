@@ -1,14 +1,36 @@
 .mainCategory {
-  /* 글로벌css설정시 margin-top수정 필요 */
   margin-top: 80px;
   margin-bottom: 30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
 
-  border: 2px solid;
-}
 .mainCategoryButtonContainer {
-  border: 2px solid;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
+
 .mainCategoryButton {
-  margin-right: 20px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mainCategoryButton:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+.mainCategoryButton:active {
+  background-color: #d0d0d0;
+  transform: translateY(0);
 }
 

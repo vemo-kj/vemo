@@ -1,23 +1,25 @@
-import React, { useImperativeHandle, forwardRef, useState, useRef } from 'react';
-import { Editor as DraftEditor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
+import React, { useImperativeHandle, forwardRef, useState } from 'react';
+import { Editor as DraftEditor, EditorState, RichUtils } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
-// import { convertToHTML } from 'draft-js-export-html';
-
-import { ReactSketchCanvas } from 'react-sketch-canvas';
-
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
-import MomoItem from './MemoItem';
+import MemoItem from './MemoItem';
+
+// DraftEditor를 위한 타입 정의 추가
+const Editor = DraftEditor as unknown as React.ComponentType<{
+    editorState: EditorState;
+    onChange: (state: EditorState) => void;
+    placeholder?: string;
+}>;
 
 interface Section {
     id: string;
     timestamp: string;
-    htmlContent: string; // Draft.js 인라인 스타일을 포함한 HTML
+    htmlContent: string;
     screenshot?: string;
 }
 
 interface CustomEditorProps {
-    ref: React.RefObject<any>;
     getTimestamp: () => string;
     onTimestampClick: (timestamp: string) => void;
     isEditable?: boolean;
@@ -25,134 +27,338 @@ interface CustomEditorProps {
     onEditStart?: (itemId: string) => void;
     onEditEnd?: () => void;
     onPauseVideo?: () => void;
+    videoId: string;
+    onMemoSaved?: () => void;
 }
 
-// parseTimeToSeconds는 동일
+// ref 타입 정의
+interface EditorRef {
+    addCaptureItem: (timestamp: string, imageUrl: string) => void;
+}
+
 function parseTimeToSeconds(timestamp: string): number {
     const [mm, ss] = timestamp.split(':').map(Number);
     return (mm || 0) * 60 + (ss || 0);
 }
 
-// forwardRef로 부모가 addCaptureItem을 호출 가능
-const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) => {
+// base64 이미지 데이터 검증 함수
+const validateBase64Image = (base64String: string) => {
+    console.log('[Capture Event] Validating image data:', {
+        isString: typeof base64String === 'string',
+        length: base64String?.length,
+        startsWithData: base64String?.startsWith('data:'),
+        containsBase64: base64String?.includes('base64'),
+        firstChars: base64String?.substring(0, 50) + '...'
+    });
+
+    if (!base64String || typeof base64String !== 'string') {
+        console.error('[Capture Event] Invalid image data: Not a string');
+        return false;
+    }
+
+    if (!base64String.startsWith('data:image/')) {
+        console.error('[Capture Event] Invalid image data: Does not start with data:image/');
+        return false;
+    }
+
+    if (!base64String.includes('base64,')) {
+        console.error('[Capture Event] Invalid image data: No base64 marker');
+        return false;
+    }
+
+    return true;
+};
+
+const compressImage = async (base64Image: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            // 원본 비율 유지하면서 최대 너비/높이 설정
+            const MAX_WIDTH = 1024;
+            const MAX_HEIGHT = 1024;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            // 0.8은 80% 품질을 의미합니다 - 적절한 압축률
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            resolve(compressedBase64);
+        };
+        img.onerror = reject;
+        img.src = base64Image;
+    });
+};
+
+const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
+    const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
 
-    const [isFirstInputRecorded, setIsFirstInputRecorded] = useState(false);
-    const [firstInputTimestamp, setFirstInputTimestamp] = useState<string | null>(null);
-    const [lastSavedHTML, setLastSavedHTML] = useState<string>(''); // HTML 저장
-
-    // ============ 1) 메모 역순 or 정순 =============
-    // 이번 요구사항은 "위에서 아래로" → 즉, **새 메모가 위에**가 아니라, **아래**에 추가
-    // 따라서 render할 때 그냥 map을 쓰고, 맨 앞에 추가가 아닌, 맨 뒤에 추가
-    // (아래 handleSave에서 prev => [...prev, newItem])
-
-    // ============ 2) addCaptureItem =============
     useImperativeHandle(ref, () => ({
-        addCaptureItem: (timestamp: string, imageUrl: string) => {
-            const newItem: Section = {
-                id: Math.random().toString(36).substr(2, 9),
-                timestamp,
-                htmlContent: '', // text 없이
-                screenshot: imageUrl, // 이미지만
-            };
-            setSections(prev => [...prev, newItem]); // 아래로 붙이기
+        addCaptureItem: async (timestamp: string, imageUrl: string) => {
+            try {
+                const token = sessionStorage.getItem('token');
+                console.log('[Capture Event] Starting capture process:', {
+                    eventTimestamp: new Date().toISOString(),
+                    hasToken: !!token,
+                    timestamp,
+                    imageUrlValid: validateBase64Image(imageUrl)
+                });
+
+                if (props.onPauseVideo) {
+                    console.log('[Capture Event] Pausing video');
+                    props.onPauseVideo();
+                }
+
+                setImageLoadingStates(prev => ({
+                    ...prev,
+                    [timestamp]: true
+                }));
+
+                if (!imageUrl || typeof imageUrl !== 'string') {
+                    throw new Error('[Capture Event] Invalid image URL format');
+                }
+
+                console.log('[Capture Event] Creating memo - videoId:', props.videoId);
+                const memosResponse = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!memosResponse.ok) {
+                    const errorText = await memosResponse.text();
+                    console.error('[Capture Event] Failed to create memo:', {
+                        status: memosResponse.status,
+                        statusText: memosResponse.statusText,
+                        body: errorText
+                    });
+                    throw new Error('[Capture Event] Failed to create memo');
+                }
+
+                const memosData = await memosResponse.json();
+                console.log('[Capture Event] Memo created successfully:', memosData);
+
+                // timestamp를 Date 형식으로 변환
+                const [minutes, seconds] = timestamp.split(':').map(Number);
+                const date = new Date();
+                date.setMinutes(minutes);
+                date.setSeconds(seconds);
+
+                // 캡처 저장
+                console.log('[Capture Event] Saving capture:', {
+                    timestamp: date,
+                    memosId: memosData.id
+                });
+
+                const compressedImage = await compressImage(imageUrl);
+                console.log('Original size:', imageUrl.length);
+                console.log('Compressed size:', compressedImage.length);
+
+                const captureResponse = await fetch(`http://localhost:5050/captures`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        timestamp: date.toISOString(),
+                        image: compressedImage,
+                        memos: { id: memosData.id }
+                    })
+                });
+
+                setImageLoadingStates(prev => ({
+                    ...prev,
+                    [timestamp]: false
+                }));
+
+                if (!captureResponse.ok) {
+                    const errorText = await captureResponse.text();
+                    console.error('[Capture Event] Failed to save capture:', {
+                        status: captureResponse.status,
+                        statusText: captureResponse.statusText,
+                        body: errorText
+                    });
+                    throw new Error('[Capture Event] Failed to save capture');
+                }
+
+                const data = await captureResponse.json();
+                console.log('[Capture Event] Server response data:', data);
+
+                // 이미지 데이터 처리
+                let processedImageUrl = data.image;
+                if (!processedImageUrl) {
+                    console.error('[Capture Event] No image data in server response:', data);
+                    throw new Error('[Capture Event] No image data');
+                }
+
+                // 이미지 데이터가 base64 형식인지 확인
+                if (!processedImageUrl.startsWith('data:image')) {
+                    console.log('[Capture Event] Adding image data prefix:', processedImageUrl.substring(0, 100));
+                    processedImageUrl = `data:image/png;base64,${processedImageUrl}`;
+                    console.log('[Capture Event] Image data prefix added:', processedImageUrl.substring(0, 100));
+                }
+
+                // 로컬 상태 업데이트
+                const newItem: Section = {
+                    id: `capture-${data.id}`,
+                    timestamp,
+                    htmlContent: '',
+                    screenshot: processedImageUrl,
+                };
+
+                console.log('[Capture Event] New section item created:', {
+                    id: newItem.id,
+                    timestamp: newItem.timestamp,
+                    screenshotLength: newItem.screenshot?.length || 0,
+                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot'
+                });
+
+                setSections(prev => [...prev, newItem]);
+                console.log('[Capture Event] Section update completed');
+                props.onMemoSaved?.();
+
+            } catch (error) {
+                console.error('[Capture Event] Error in capture process:', error);
+                setImageLoadingStates(prev => ({
+                    ...prev,
+                    [timestamp]: false
+                }));
+                throw error;
+            }
         },
     }));
 
-    // ============ 3) handleSave (Draft -> HTML)
-    const handleSave = () => {
+    const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
-        if (!contentState.hasText()) return; // 비어있으면 무시
+        if (!contentState.hasText()) return;
 
-        // Draft -> HTML
-        const html = convertToHTML(editorState.getCurrentContent());
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.error('토큰이 없습니다.');
+                return;
+            }
 
-        const stamp =
-            isFirstInputRecorded && firstInputTimestamp ? firstInputTimestamp : props.getTimestamp();
+            const html = convertToHTML(contentState);
+            const timestamp = props.getTimestamp();
 
-        const newItem: Section = {
-            id: Math.random().toString(36).substr(2, 9),
-            timestamp: stamp,
-            htmlContent: html,
-        };
+            const response = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
 
-        setSections(prev => [...prev, newItem]); // 아래로 추가
-        setEditorState(EditorState.createEmpty());
-        setLastSavedHTML(html);
-        setIsFirstInputRecorded(false);
-        setFirstInputTimestamp(null);
-    };
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('서버 응답:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorText
+                });
+                throw new Error('메모 저장에 실패했습니다.');
+            }
 
-    // ============ 4) handleKeyCommand (엔터 => 저장)
-    const handleKeyCommand = (command: string) => {
-        if (command === 'submit') {
-            handleSave();
-            return 'handled';
+            const data = await response.json();
+            console.log('메모 저장 성공:', data);
+
+            props.onMemoSaved?.();
+
+            const newItem: Section = {
+                id: `memo-${Date.now()}`,
+                timestamp,
+                htmlContent: html,
+            };
+
+            setSections(prev => [...prev, newItem]);
+            setEditorState(EditorState.createEmpty());
+
+        } catch (error) {
+            console.error('메모 저장 실패:', error);
         }
-        return 'not-handled';
     };
 
-    // Draft onChange
-    const handleEditorChange = (newState: EditorState) => {
-        setEditorState(newState);
-        const t = newState.getCurrentContent().getPlainText().trim();
-        if (t.length > 0 && !isFirstInputRecorded) {
-            setIsFirstInputRecorded(true);
-            setFirstInputTimestamp(props.getTimestamp());
-        }
-    };
-
-    // 인라인 스타일
-    const isStyleActive = (style: string) => editorState.getCurrentInlineStyle().has(style);
-
-    const toggleInlineStyle = (style: string) => {
-        setEditorState(prev => RichUtils.toggleInlineStyle(prev, style));
-    };
-
-    // 메모 수정(HTML), 삭제
     const handleChangeItem = (id: string, newHTML: string) => {
-        setSections(prev => prev.map(s => (s.id === id ? { ...s, htmlContent: newHTML } : s)));
+        const updatedSections = sections.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    htmlContent: newHTML,
+                };
+            }
+            return item;
+        });
+        setSections(updatedSections);
     };
+
     const handleDeleteItem = (id: string) => {
-        setSections(prev => prev.filter(s => s.id !== id));
+        const updatedSections = sections.filter(item => item.id !== id);
+        setSections(updatedSections);
+    };
+
+    // 인라인 스타일 토글 함수 추가
+    const toggleInlineStyle = (style: string) => {
+        setEditorState(RichUtils.toggleInlineStyle(editorState, style));
+    };
+
+    // 현재 스타일 상태 확인 함수 추가
+    const isStyleActive = (style: string) => {
+        return editorState.getCurrentInlineStyle().has(style);
     };
 
     return (
         <div className={styles.container}>
-            {/* 메모 목록 (빨간 영역) */}
             <div className={styles.displayArea}>
-                {/* 1) 위→아래 생성이므로, 그냥 map (인덱스 순) */}
                 {sections.map(item => (
-                    <MomoItem
+                    <MemoItem
                         key={item.id}
                         id={item.id}
                         timestamp={item.timestamp}
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
                         onTimestampClick={props.onTimestampClick}
+                        onChangeHTML={(newHTML) => handleChangeItem(item.id, newHTML)}
                         onDelete={() => handleDeleteItem(item.id)}
-                        onChangeHTML={newVal => handleChangeItem(item.id, newVal)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
                     />
                 ))}
             </div>
-
-            {/* Draft Editor */}
             <div className={styles.editorArea}>
-                <DraftEditor
+                <Editor
                     editorState={editorState}
-                    onChange={handleEditorChange}
+                    onChange={setEditorState}
                     placeholder="내용을 입력하세요..."
-                    keyBindingFn={e => (e.key === 'Enter' ? 'submit' : null)}
-                    handleKeyCommand={handleKeyCommand}
                 />
                 <div className={styles.toolbar}>
-                    {/* B I U 버튼 */}
                     <button
-                        className={isStyleActive('BOLD') ? styles.activeButton : ''}
-                        onMouseDown={e => {
+                        className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
+                        onMouseDown={(e) => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
                         }}
@@ -160,8 +366,8 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         B
                     </button>
                     <button
-                        className={isStyleActive('ITALIC') ? styles.activeButton : ''}
-                        onMouseDown={e => {
+                        className={`${styles.styleButton} ${isStyleActive('ITALIC') ? styles.activeButton : ''}`}
+                        onMouseDown={(e) => {
                             e.preventDefault();
                             toggleInlineStyle('ITALIC');
                         }}
@@ -169,22 +375,23 @@ const CustomEditor = React.forwardRef<unknown, CustomEditorProps>((props, ref) =
                         I
                     </button>
                     <button
-                        className={isStyleActive('UNDERLINE') ? styles.activeButton : ''}
-                        onMouseDown={e => {
+                        className={`${styles.styleButton} ${isStyleActive('UNDERLINE') ? styles.activeButton : ''}`}
+                        onMouseDown={(e) => {
                             e.preventDefault();
                             toggleInlineStyle('UNDERLINE');
                         }}
                     >
                         U
                     </button>
-                    {/* 더 필요하면 추가 */}
-                    <button className={styles.addButton} onClick={handleSave}>
-                        +
+                    <button onClick={handleSave} className={styles.saveButton}>
+                        저장
                     </button>
                 </div>
             </div>
         </div>
     );
 });
+
+CustomEditor.displayName = 'CustomEditor';
 
 export default CustomEditor;

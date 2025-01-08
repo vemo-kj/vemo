@@ -17,6 +17,7 @@
         "html-to-image": "^1.11.11",
         "next": "15.1.2",
         "next-svgr": "^0.0.2",
+        "puppeteer": "^23.11.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-sketch-canvas": "^6.2.0",
@@ -32,11 +33,13 @@
         "@types/webpack": "^5.28.5",
         "@typescript-eslint/eslint-plugin": "^8.18.1",
         "@typescript-eslint/parser": "^8.18.1",
+        "css-loader": "^7.1.2",
         "eslint": "^9",
         "eslint-config-next": "15.1.2",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
         "prettier": "^3.4.2",
+        "style-loader": "^4.0.0",
         "typescript": "^5"
     }
 }
