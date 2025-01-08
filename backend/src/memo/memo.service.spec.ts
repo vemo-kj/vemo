@@ -24,7 +24,7 @@ describe('MemoService', () => {
         user: null,
         video: null,
         memo: [],
-        capture: [],
+        captures: [],
     } as Memos;
 
     beforeEach(async () => {

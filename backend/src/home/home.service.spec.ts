@@ -40,7 +40,7 @@ describe('HomeService', () => {
         user: null,
         video: mockVideo,
         memo: [],
-        capture: null,
+        captures: null,
     };
 
     beforeEach(async () => {
@@ -141,6 +141,8 @@ describe('HomeService', () => {
                 id: mockMemos.id,
                 title: mockMemos.title,
                 createdAt: mockMemos.createdAt,
+                memo: mockMemos.memo,
+                captures: mockMemos.captures,
             });
         });
 
@@ -156,6 +158,8 @@ describe('HomeService', () => {
                 id: mockMemos.id,
                 title: mockMemos.title,
                 createdAt: mockMemos.createdAt,
+                memo: mockMemos.memo,
+                captures: mockMemos.captures,
             });
         });
 
@@ -200,10 +204,14 @@ describe('HomeService', () => {
             });
         });
 
-        it('비디오가 없을 경우 NotFoundException을 던져야 한다', async () => {
+        it('비디오가 없을 경우 빈 배열을 반환해야 한다', async () => {
             videoService.getAllVideos.mockResolvedValue([]);
 
-            await expect(service.getAllVideos(1, 10)).rejects.toThrow(NotFoundException);
+            const result = await service.getAllVideos(1, 10);
+
+            expect(result).toEqual({
+                videos: [],
+            });
         });
     });
 });
