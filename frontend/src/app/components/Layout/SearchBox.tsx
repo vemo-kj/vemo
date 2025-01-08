@@ -4,22 +4,21 @@ import styles from './SearchBox.module.css'
 import Image from 'next/image'
 // next
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SearchBox() {
-
-  const [q, setValue] = useState<string>('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [q, setValue] = useState<string>(searchParams?.get('q') || '');
 
   const handleSearch = () => {
     const trimmedQuery = q.trim();
-
     if (trimmedQuery === '') {
       router.push('/');
     } else {
       router.push(`/?q=${encodeURIComponent(trimmedQuery)}`);
     }
-    setValue('');
+    // setValue(''); // 검색 후 입력값 유지
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
