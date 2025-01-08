@@ -1,4 +1,6 @@
 'use client';
+import styles from '../sideBarNav/sideBarNav.module.css';
+import Image from 'next/image';
 
 export default function ExportButton() {
   const memosId = 46;  // 다른 ID로 테스트
@@ -41,20 +43,17 @@ export default function ExportButton() {
 
   return (
     <button
-      onClick={handleDownloadPDF}
-      style={{
-        padding: '8px 16px',
-        backgroundColor: '#007AFF',
-        color: 'white',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s'
-      }}
-      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
-      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007AFF'}
-    >
-      내보내기
+      onClick={handleDownloadPDF} className={styles.iconButton}>
+        
+        <Image
+          className={styles.defaultIcon}
+          src="/icons/bt_edit_nav_export.svg"
+          alt="내보내기"
+          width={20}
+          height={20}
+        />
+      
+      <span className={styles.iconButtonText}>내보내기</span>
     </button>
   );
 }
