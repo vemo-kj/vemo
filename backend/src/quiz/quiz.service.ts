@@ -87,7 +87,7 @@ export class QuizService {
 
     // 퀴즈의 타임스탬프/문제/정답로 파싱한 배열열
     private parseQuizToArray(text: string): string[][] {
-        const regex = /\[(\d{2}:\d{2})\]\s*문제:\s*(.*?)\s*정답:\s*(O|X)/g;
+        const regex = /\[(\d{1,2}:\d{2})\]\s*문제:\s*(.*?)\s*정답:\s*(O|X)/g;
         let match;
         const result: string[][] = [];
 
