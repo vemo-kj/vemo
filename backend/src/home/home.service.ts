@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
 import { VideoService } from '../video/video.service';
 import { MemosService } from '../memos/memos.service';
 import { HomeResponseDto } from './dto/home-response.dto';
@@ -11,11 +16,13 @@ import { Memos } from '../memos/memos.entity';
 
 @Injectable()
 export class HomeService {
+    private readonly logger = new Logger(HomeService.name);
+
     constructor(
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
-    ) { }
+    ) {}
 
     async createPlaylistWithMemos(
         userId: number,
@@ -42,6 +49,7 @@ export class HomeService {
      */
     async createOrGetLatestMemos(userId: number, videoId: string): Promise<CreateMemosResponseDto> {
         try {
+            this.logger.log('service');
             // 사용자의 해당 비디오에 대한 메모 조회
             const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
 
