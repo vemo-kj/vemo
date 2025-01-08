@@ -9,7 +9,7 @@ import MainCard from './components/mainCard/MainCard';
 //type
 import { MainCardProps } from './types/MainCardProps';
 //next
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 // Home page
@@ -30,7 +30,7 @@ export default function Home() {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:5050/home/cards', {
+            const response = await fetch('http://localhost:5050/home', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -51,7 +51,7 @@ export default function Home() {
                 const channel = video.channel || {};
 
                 return {
-                    id: String(video.id || ''),  // 문자열로 변환
+                    id: String(video.id || ''), // 문자열로 변환
                     title: String(video.title || '제목 없음'),
                     thumbnails: String(video.thumbnails || '/default-thumbnail.jpg'),
                     duration: String(video.duration || '00:00'),
@@ -61,7 +61,7 @@ export default function Home() {
                         thumbnails: String(channel.thumbnails || '/default-channel-thumbnail.jpg'),
                         title: String(channel.title || '채널명 없음'),
                     },
-                    vemoCount: Number(video.vemoCount || 0),  // 숫자로 변환
+                    vemoCount: Number(video.vemoCount || 0), // 숫자로 변환
                 };
             });
 
@@ -95,9 +95,8 @@ export default function Home() {
         }
     };
 
-    const filteredCards = mainCards.filter((card) => {
-        const matchesCategory =
-            selectedCategory === 'All' || card.category === selectedCategory;
+    const filteredCards = mainCards.filter(card => {
+        const matchesCategory = selectedCategory === 'All' || card.category === selectedCategory;
         const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         return search ? matchesSearch : matchesCategory;
     });
@@ -113,7 +112,7 @@ export default function Home() {
                     <div className={styles.loading}>로딩 중...</div>
                 ) : filteredCards.length > 0 ? (
                     <div className={styles.mainCardContainer}>
-                        {filteredCards.map((mainCard) => (
+                        {filteredCards.map(mainCard => (
                             <MainCard key={mainCard.id} {...mainCard} />
                         ))}
                     </div>

@@ -12,7 +12,7 @@ export class MemosService {
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
         @InjectRepository(Users) private readonly userRepository: Repository<Users>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-    ) { }
+    ) {}
 
     async createMemos(memosTitle: string, videoId: string, userId: number): Promise<Memos> {
         try {
@@ -66,7 +66,7 @@ export class MemosService {
         try {
             return await this.memosRepository.find({
                 where: { video: { id: videoId } },
-                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                relations: ['user', 'video', 'video.channel', 'memo', 'captures'],
                 order: {
                     createdAt: 'DESC',
                 },
@@ -82,7 +82,7 @@ export class MemosService {
         try {
             const memos = await this.memosRepository.findOne({
                 where: { id: memosId },
-                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+                relations: ['user', 'video', 'memo', 'captures', 'video.channel'],
             });
 
             if (!memos) {
@@ -122,7 +122,7 @@ export class MemosService {
                     video: { id: videoId },
                     user: { id: userId },
                 },
-                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                relations: ['user', 'video', 'video.channel', 'memo', 'captures'],
                 order: {
                     createdAt: 'DESC',
                 },
