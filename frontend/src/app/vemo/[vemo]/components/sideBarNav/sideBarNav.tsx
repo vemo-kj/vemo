@@ -43,8 +43,9 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('write')}
                 >
-                                       <div className={styles.iconButton}>
+                    <div className={styles.iconButton}>
                         <Image
+                            className={styles.defaultIcon}
                             src="/icons/bt_SideNav_Edit.svg"
                             alt="작성하기"
                             width={20}
@@ -60,6 +61,7 @@ export default function SidebarNav({
                 >
                         <div className={styles.iconButton}>
                         <Image
+                            className={styles.defaultIcon}
                             src="/icons/bt_SideNav_Community.svg"
                             alt="커뮤니티"
                             width={20}
@@ -73,8 +75,9 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
-                                     <div className={styles.iconButton}>
+                        <div className={styles.iconButton}>
                         <Image
+                            className={styles.defaultIcon}
                             src="/icons/bt_SideNav_playerlist.svg"
                             alt="재생목록"
                             width={20}
@@ -120,6 +123,7 @@ export default function SidebarNav({
                                 <button onClick={handleCaptureTab}  className={styles.iconButton}>
 
                                 <Image
+                                        className={styles.defaultIcon}
                                         src="/icons/bt_edit_nav_capture.svg"
                                         alt="캡처"
                                         width={20}
@@ -130,6 +134,7 @@ export default function SidebarNav({
                                 </button>
                                 <button onClick={handleCaptureArea} className={styles.iconButton}>
                                 <Image
+                                        className={styles.defaultIcon}
                                         src="/icons/bt_edit_nav_partCapture.svg"
                                         alt="부분 캡처"
                                         width={20}
