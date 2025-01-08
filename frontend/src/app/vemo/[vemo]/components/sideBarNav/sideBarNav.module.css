@@ -116,3 +116,11 @@
 .footerButtons button:hover {
     background-color: #0056b3; /* 마우스 오버 시 색상 */
 }
+
+/* 아이콘 버튼 스타일 */
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
