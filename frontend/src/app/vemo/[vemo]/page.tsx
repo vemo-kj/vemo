@@ -49,14 +49,17 @@ export default function VemoPage() {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/home/memos/${videoId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include',
-            });
+            );
             console.log(response);
             if (!response.ok) {
                 const errorText = await response.text();
@@ -73,7 +76,6 @@ export default function VemoPage() {
             setVemoData(data);
             setMemosId(data.id);
             console.log('받은 메모 데이터 i  :', data.id);
-
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
