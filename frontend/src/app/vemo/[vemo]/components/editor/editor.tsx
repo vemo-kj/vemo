@@ -1,5 +1,5 @@
-import React, { useImperativeHandle, forwardRef, useState } from 'react';
-import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
+import React, { useImperativeHandle, forwardRef, useState, useCallback } from 'react';
+import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding, ContentState } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
@@ -342,8 +342,34 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         return 'not-handled';
     };
 
+    // 에디터에 스트를 추가하는 함수
+    const addTextToEditor = (text: string) => {
+        const contentState = editorState.getCurrentContent();
+        const selection = editorState.getSelection();
+        const newContent = ContentState.createFromText(text);
+
+        // 현재 내용과 새로운 텍스트를 합침
+        const blockMap = contentState.getBlockMap();
+        const newBlockMap = newContent.getBlockMap();
+        const combinedBlocks = blockMap.concat(newBlockMap);
+
+        const combinedContent = contentState.merge({
+            blockMap: combinedBlocks,
+            selectionAfter: selection
+        });
+
+        const newEditorState = EditorState.push(
+            editorState,
+            combinedContent as ContentState,
+            'insert-fragment'
+        );
+
+        setEditorState(newEditorState);
+        handleSave();
+    };
+
     return (
-        
+
         <div className={styles.container}>
             <div className={styles.displayArea}>
                 {sections.map(item => (
@@ -358,6 +384,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
+                        addTextToEditor={addTextToEditor}
                     />
                 ))}
             </div>

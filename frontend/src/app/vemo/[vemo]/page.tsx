@@ -11,7 +11,7 @@ import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../type
 import { toPng } from 'html-to-image';
 import CaptureButton from './components/Caputure/CaptureButton';
 
-// 동적 로드된 DraftEditor
+
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
