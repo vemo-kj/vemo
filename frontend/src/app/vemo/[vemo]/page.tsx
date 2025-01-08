@@ -205,7 +205,7 @@ export default function VemoPage() {
             case '내 메모 보기':
                 return (
                     <>
-                        <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                        {/* <p className={styles.noteTitle}>메모의 제목</p> */}
                         <EditorNoSSR
                             ref={editorRef}
                             getTimestamp={() => currentTimestamp}
