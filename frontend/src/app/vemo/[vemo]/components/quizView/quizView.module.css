@@ -1,64 +1,90 @@
 .container {
-  padding: 1rem;
+  padding: 1.5rem;
   height: 100%;
   overflow-y: auto;
+  background-color: #f8fafc;
 }
 
 .title {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
+  color: #1e293b;
   margin-bottom: 1.5rem;
-  color: #333;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .quizList {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .quizItem {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.quizItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .timestamp {
+  display: inline-block;
   font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
+  color: #3b82f6;
+  background-color: #eff6ff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.timestamp:hover {
+  background-color: #dbeafe;
 }
 
 .question {
   font-size: 1.125rem;
-  color: #1f2937;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  color: #334155;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .answerButtons {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin: 1rem 0;
+  margin: 1.5rem 0;
 }
 
 .answerButton {
   width: 4rem;
   height: 4rem;
   border-radius: 50%;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #e2e8f0;
   background: white;
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .answerButton:hover {
   border-color: #3b82f6;
+  color: #3b82f6;
 }
 
 .answerButton.selected {
@@ -72,6 +98,8 @@
   padding: 0.75rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .result.correct {
@@ -86,15 +114,16 @@
 
 .checkAnswerButton {
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 2rem;
   transition: background-color 0.2s;
+  margin-top: 1rem;
 }
 
 .checkAnswerButton:hover {
@@ -106,8 +135,23 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  color: #6b7280;
+  color: #64748b;
   font-size: 1rem;
   text-align: center;
   padding: 2rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  border: 2px dashed #e2e8f0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
