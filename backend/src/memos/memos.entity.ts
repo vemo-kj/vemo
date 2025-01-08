@@ -25,5 +25,5 @@ export class Memos {
     memo: Memo[];
 
     @OneToMany(() => Captures, capture => capture.memos, { cascade: true })
-    capture: Captures[];
+    captures: Captures[];
 }
