@@ -214,26 +214,18 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     throw new Error('[Capture Event] No image data');
                 }
 
-                // 이미지 데이터가 base64 형식인지 확인
-                if (!processedImageUrl.startsWith('data:image')) {
-                    console.log('[Capture Event] Adding image data prefix:', processedImageUrl.substring(0, 100));
-                    processedImageUrl = `data:image/png;base64,${processedImageUrl}`;
-                    console.log('[Capture Event] Image data prefix added:', processedImageUrl.substring(0, 100));
-                }
-
-                // 로컬 상태 업데이트
+                // S3 URL을 직접 사용
                 const newItem: Section = {
                     id: `capture-${data.id}`,
                     timestamp,
                     htmlContent: '',
-                    screenshot: processedImageUrl,
+                    screenshot: processedImageUrl,  // S3 URL을 직접 사용
                 };
 
                 console.log('[Capture Event] New section item created:', {
                     id: newItem.id,
                     timestamp: newItem.timestamp,
-                    screenshotLength: newItem.screenshot?.length || 0,
-                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot'
+                    screenshotUrl: newItem.screenshot
                 });
 
                 setSections(prev => [...prev, newItem]);

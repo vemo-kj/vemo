@@ -1,0 +1,27 @@
+.titleInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #333;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  background-color: #f8f9fa;
+}
+
+.titleInput:focus {
+  outline: none;
+  border-color: #007AFF;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+
+.titleInput::placeholder {
+  color: #adb5bd;
+  font-size: 15px;
+}
+
+.titleInput:hover {
+  border-color: #adb5bd;
+}

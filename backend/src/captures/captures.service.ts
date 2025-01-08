@@ -23,13 +23,13 @@ export class CapturesService {
         @Inject('S3')
         private readonly s3: S3,
         private readonly configService: ConfigService,
-    ) {}
+    ) { }
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
             const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
-            // captures.image = uploadUrl;
+            captures.image = uploadUrl;
 
             // 데이터베이스에 저장
             return await this.capturesRepository.save(captures);
@@ -120,7 +120,7 @@ export class CapturesService {
 
             const ext = base64.match(/data:image\/(\w+);base64/)?.[1] || 'png';
             const fileName = `${folder}/${uuidv4()}.${ext}`;
-
+            console.log(fileName);
             // S3 업로드
             const uploadResult = await this.s3
                 .upload({
