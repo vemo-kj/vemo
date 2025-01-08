@@ -4,7 +4,7 @@ import { Memo } from '../memo/memo.entity';
 import { Users } from '../users/users.entity';
 import { Captures } from '../captures/captures.entity';
 
-@Entity()
+@Entity('memos')
 export class Memos {
     @PrimaryGeneratedColumn()
     id: number;

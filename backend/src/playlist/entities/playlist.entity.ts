@@ -2,7 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColum
 import { Users } from '../../users/users.entity';
 import { Video } from '../../video/video.entity';
 
-@Entity()
+@Entity('playlist')
 export class Playlist {
     @PrimaryGeneratedColumn()
     id: number;
