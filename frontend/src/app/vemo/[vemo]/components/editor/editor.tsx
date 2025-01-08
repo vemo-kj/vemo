@@ -48,7 +48,7 @@ const validateBase64Image = (base64String: string) => {
         length: base64String?.length,
         startsWithData: base64String?.startsWith('data:'),
         containsBase64: base64String?.includes('base64'),
-        firstChars: base64String?.substring(0, 50) + '...'
+        firstChars: base64String?.substring(0, 50) + '...',
     });
 
     if (!base64String || typeof base64String !== 'string') {
@@ -120,7 +120,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     eventTimestamp: new Date().toISOString(),
                     hasToken: !!token,
                     timestamp,
-                    imageUrlValid: validateBase64Image(imageUrl)
+                    imageUrlValid: validateBase64Image(imageUrl),
                 });
 
                 if (props.onPauseVideo) {
@@ -130,7 +130,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: true
+                    [timestamp]: true,
                 }));
 
                 if (!imageUrl || typeof imageUrl !== 'string') {
@@ -138,21 +138,24 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 }
 
                 console.log('[Capture Event] Creating memo - videoId:', props.videoId);
-                const memosResponse = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                const memosResponse = await fetch(
+                    `http://localhost:5050/home/memos/${props.videoId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
                     },
-                    credentials: 'include'
-                });
+                );
 
                 if (!memosResponse.ok) {
                     const errorText = await memosResponse.text();
                     console.error('[Capture Event] Failed to create memo:', {
                         status: memosResponse.status,
                         statusText: memosResponse.statusText,
-                        body: errorText
+                        body: errorText,
                     });
                     throw new Error('[Capture Event] Failed to create memo');
                 }
@@ -169,7 +172,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 // 캡처 저장
                 console.log('[Capture Event] Saving capture:', {
                     timestamp: date,
-                    memosId: memosData.id
+                    memosId: memosData.id,
                 });
 
                 const compressedImage = await compressImage(imageUrl);
@@ -179,29 +182,29 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 const captureResponse = await fetch(`http://localhost:5050/captures`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         timestamp: date.toISOString(),
                         image: compressedImage,
-                        memos: { id: memosData.id }
-                    })
+                        memosId: memosData.id,
+                    }),
                 });
 
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: false
+                    [timestamp]: false,
                 }));
 
                 if (!captureResponse.ok) {
                     const errorText = await captureResponse.text();
-                    console.error('[Capture Event] Failed to save capture:', {
-                        status: captureResponse.status,
-                        statusText: captureResponse.statusText,
-                        body: errorText
-                    });
-                    throw new Error('[Capture Event] Failed to save capture');
+                    console.error(
+                        `[Capture Event] Failed to save capture: Status ${captureResponse.status}, ${captureResponse.statusText}, Body: ${errorText}`,
+                    );
+                    throw new Error(
+                        `[Capture Event] Failed to save capture: ${captureResponse.statusText}`,
+                    );
                 }
 
                 const data = await captureResponse.json();
@@ -219,24 +222,23 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     id: `capture-${data.id}`,
                     timestamp,
                     htmlContent: '',
-                    screenshot: processedImageUrl,  // S3 URL을 직접 사용
+                    screenshot: processedImageUrl, // S3 URL을 직접 사용
                 };
 
                 console.log('[Capture Event] New section item created:', {
                     id: newItem.id,
                     timestamp: newItem.timestamp,
-                    screenshotUrl: newItem.screenshot
+                    screenshotUrl: newItem.screenshot,
                 });
 
                 setSections(prev => [...prev, newItem]);
                 console.log('[Capture Event] Section update completed');
                 props.onMemoSaved?.();
-
             } catch (error) {
                 console.error('[Capture Event] Error in capture process:', error);
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: false
+                    [timestamp]: false,
                 }));
                 throw error;
             }
@@ -260,10 +262,10 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const response = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                credentials: 'include'
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -271,7 +273,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.error('서버 응답:', {
                     status: response.status,
                     statusText: response.statusText,
-                    body: errorText
+                    body: errorText,
                 });
                 throw new Error('메모 저장에 실패했습니다.');
             }
@@ -289,7 +291,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
             setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
-
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -334,7 +335,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
                         onTimestampClick={props.onTimestampClick}
-                        onChangeHTML={(newHTML) => handleChangeItem(item.id, newHTML)}
+                        onChangeHTML={newHTML => handleChangeItem(item.id, newHTML)}
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
@@ -350,7 +351,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 <div className={styles.toolbar}>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
                         }}
@@ -359,7 +360,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     </button>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('ITALIC') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('ITALIC');
                         }}
@@ -368,7 +369,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     </button>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('UNDERLINE') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('UNDERLINE');
                         }}

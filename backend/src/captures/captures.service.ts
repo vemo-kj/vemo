@@ -23,11 +23,12 @@ export class CapturesService {
         @Inject('S3')
         private readonly s3: S3,
         private readonly configService: ConfigService,
-    ) { }
+    ) {}
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
+            console.log(createCapturesDto.image);
             const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
             captures.image = uploadUrl;
 

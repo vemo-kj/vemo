@@ -50,7 +50,7 @@ describe('HomeService', () => {
                 {
                     provide: VideoService,
                     useValue: {
-                        getVideoData: jest.fn(),
+                        getVideoById: jest.fn(),
                         getAllVideos: jest.fn(),
                     },
                 },
@@ -104,13 +104,13 @@ describe('HomeService', () => {
             };
 
             playlistService.createPlaylist.mockResolvedValue(mockPlaylistResponse);
-            videoService.getVideoData.mockResolvedValue(mockVideo);
+            videoService.getVideoById.mockResolvedValue(mockVideo);
             memosService.createMemos.mockResolvedValue(mockMemos);
 
             const result = await service.createPlaylistWithMemos(userId, createPlaylistDto);
 
             expect(playlistService.createPlaylist).toHaveBeenCalledWith(createPlaylistDto, userId);
-            expect(videoService.getVideoData).toHaveBeenCalledWith(createPlaylistDto.videoIds[0]);
+            expect(videoService.getVideoById).toHaveBeenCalledWith(createPlaylistDto.videoIds[0]);
             expect(memosService.createMemos).toHaveBeenCalledWith(
                 mockVideo.title,
                 createPlaylistDto.videoIds[0],
@@ -129,13 +129,13 @@ describe('HomeService', () => {
 
         it('기존 메모가 없을 경우 새로운 메모를 생성해야 한다', async () => {
             memosService.getMemosByVideoAndUser.mockResolvedValue([]);
-            videoService.getVideoData.mockResolvedValue(mockVideo);
+            videoService.getVideoById.mockResolvedValue(mockVideo);
             memosService.createMemos.mockResolvedValue(mockMemos);
 
             const result = await service.createOrGetLatestMemos(userId, videoId);
 
             expect(memosService.getMemosByVideoAndUser).toHaveBeenCalledWith(videoId, userId);
-            expect(videoService.getVideoData).toHaveBeenCalledWith(videoId);
+            expect(videoService.getVideoById).toHaveBeenCalledWith(videoId);
             expect(memosService.createMemos).toHaveBeenCalledWith(mockVideo.title, videoId, userId);
             expect(result).toEqual({
                 id: mockMemos.id,
@@ -150,7 +150,7 @@ describe('HomeService', () => {
             const result = await service.createOrGetLatestMemos(userId, videoId);
 
             expect(memosService.getMemosByVideoAndUser).toHaveBeenCalledWith(videoId, userId);
-            expect(videoService.getVideoData).not.toHaveBeenCalled();
+            expect(videoService.getVideoById).not.toHaveBeenCalled();
             expect(memosService.createMemos).not.toHaveBeenCalled();
             expect(result).toEqual({
                 id: mockMemos.id,
@@ -161,7 +161,7 @@ describe('HomeService', () => {
 
         it('비디오를 찾을 수 없을 경우 NotFoundException을 던져야 한다', async () => {
             memosService.getMemosByVideoAndUser.mockResolvedValue([]);
-            videoService.getVideoData.mockRejectedValue(new NotFoundException());
+            videoService.getVideoById.mockRejectedValue(new NotFoundException());
 
             await expect(service.createOrGetLatestMemos(userId, videoId)).rejects.toThrow(
                 NotFoundException,
