@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'defaultSecret',
+            secretOrKey: process.env.JWT_SECRET,
         });
     }
 
@@ -33,6 +33,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!user) {
             throw new UnauthorizedException('인증이 필요합니다');
         }
-        return user;
+        return { ...payload, ...user };
     }
 }

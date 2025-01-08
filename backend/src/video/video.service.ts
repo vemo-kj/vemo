@@ -1,7 +1,14 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    Logger,
+    NotFoundException,
+    UnauthorizedException,
+    UseInterceptors,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChannelService } from '../channel/channel.service';
+import { YoutubeApiInterceptor } from '../youtubeauth/youtube-api.interceptor';
 import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { Video } from './video.entity';
 
@@ -37,9 +44,9 @@ export class VideoService {
         });
     }
 
-    private async fetchVideoFromYouTube(videoId: string): Promise<any> {
+    @UseInterceptors(YoutubeApiInterceptor)
+    async fetchVideoFromYouTube(videoId: string): Promise<any> {
         try {
-            await this.youtubeAuthService.ensureAuthenticated();
             const response = await this.youtubeAuthService.youtube.videos.list({
                 part: ['snippet', 'contentDetails', 'statistics'],
                 id: [videoId],
@@ -47,11 +54,8 @@ export class VideoService {
 
             return response.data.items?.[0] || null;
         } catch (error) {
-            this.logger.error(
-                `Failed to fetch video from YouTube for videoId: ${videoId}`,
-                error.stack,
-            );
-            throw new NotFoundException('Failed to fetch video data from YouTube');
+            this.logger.error(`Failed to fetch video from YouTube for videoId: ${videoId}`, error);
+            throw new UnauthorizedException('YouTube API 호출 실패');
         }
     }
 

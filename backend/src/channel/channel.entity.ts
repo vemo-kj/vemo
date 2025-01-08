@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Video } from '../video/video.entity';
 
-@Entity()
+@Entity('channel')
 export class Channel {
     @PrimaryColumn({ type: 'varchar', length: 24 })
     id: string;
