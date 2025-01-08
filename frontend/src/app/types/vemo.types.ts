@@ -2,12 +2,9 @@
 export interface CreateMemosResponseDto {
   id: number;
   title: string;
-  memo: MemoItem[];
-  capture: CaptureItem[];
   createdAt: Date;
-  updatedAt: Date;
-  userId: number;
-  videoId: string;
+  memo: MemoItem[];
+  captures: CaptureItem[];
 }
 
 // 메모 아이템 인터페이스

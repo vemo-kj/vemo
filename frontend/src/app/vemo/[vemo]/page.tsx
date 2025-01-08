@@ -16,20 +16,6 @@ const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
 
-// YouTube IFrame API 타입 �의
-declare global {
-    interface Window {
-        onYouTubeIframeAPIReady: () => void;
-        YT: {
-            Player: new (elementId: string, config: any) => any;
-            PlayerState: {
-                PLAYING: number;
-                PAUSED: number;
-            };
-        };
-    }
-}
-
 export default function VemoPage() {
     const router = useRouter();
     const params = useParams();
@@ -108,61 +94,47 @@ export default function VemoPage() {
             playerRef.current.destroy();
         }
 
-        // YouTube API 초기화
+        // YouTube Iframe API 로드
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-        // 시간 업데이트 인터벌 ID를 저장할 변수
-        let timeUpdateInterval: NodeJS.Timeout | null = null;
-
-        // 시간 업데이트 시작 함수
-        const startTimeUpdate = (player: any) => {
-            if (timeUpdateInterval) {
-                clearInterval(timeUpdateInterval);
-            }
-            timeUpdateInterval = setInterval(() => {
-                const currentTime = player.getCurrentTime();
-                const minutes = Math.floor(currentTime / 60);
-                const seconds = Math.floor(currentTime % 60);
-                setCurrentTimestamp(
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-                );
-            }, 1000);
-        };
-
-        // 시간 업데이트 중지 함수
-        const stopTimeUpdate = () => {
-            if (timeUpdateInterval) {
-                clearInterval(timeUpdateInterval);
-                timeUpdateInterval = null;
-            }
-        };
-
-        // YouTube 플레이어 준비
-        window.onYouTubeIframeAPIReady = () => {
-            new window.YT.Player('youtube-player', {
-                videoId,
+        // YouTube Player 초기화
+        (window as any).onYouTubeIframeAPIReady = () => {
+            playerRef.current = new (window as any).YT.Player('youtube-player', {
+                videoId: videoId,
                 events: {
-                    'onReady': (event: any) => {
-                        console.log('YouTube player is ready');
+                    onReady: () => {
+                        console.log('Player ready');
+                        // Player 준비되면 timestamp 업데이트 시작
+                        startTimestampUpdate();
                     },
-                    'onStateChange': (event: any) => {
-                        if (event.data === window.YT.PlayerState.PLAYING) {
-                            startTimeUpdate(event.target);
-                        } else if (event.data === window.YT.PlayerState.PAUSED) {
-                            stopTimeUpdate();
-                        }
-                    }
-                }
+                },
             });
         };
+    }, [videoId]);
 
-        return () => {
-            stopTimeUpdate();
-        };
-    }, [videoId]); // videoId가 변경될 때마다 플레이어 재초기화
+    // timestamp 업데이트 함수를 별도로 분리
+    const startTimestampUpdate = () => {
+        const interval = setInterval(() => {
+            if (playerRef.current?.getCurrentTime) {
+                const sec = playerRef.current.getCurrentTime();
+                const mm = Math.floor(sec / 60);
+                const ss = Math.floor(sec % 60);
+                setCurrentTimestamp(
+                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
+                );
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    };
+
+    // timestamp 업데이트 useEffect 수정
+    useEffect(() => {
+        if (editingItemId !== null) return;
+        return startTimestampUpdate();
+    }, [editingItemId]);
 
     // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
