@@ -1,5 +1,3 @@
-// memos/dto/get-memos-response.dto.ts
-
 import { Memo } from '../../memo/memo.entity';
 import { Captures } from '../../captures/captures.entity';
 

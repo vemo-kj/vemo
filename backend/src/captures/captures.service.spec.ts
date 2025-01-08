@@ -31,12 +31,12 @@ describe('CapturesService', () => {
         user: mockUser,
         video: mockVideo,
         memo: [],
-        capture: [],
+        captures: [],
     } as Memos;
 
     const mockCapture = {
         id: 1,
-        timestamp: new Date(),
+        timestamp: '12:34:56',
         image: 'test-image.jpg',
         memos: mockMemos,
     } as Captures;
@@ -65,7 +65,7 @@ describe('CapturesService', () => {
     describe('createCapture', () => {
         it('캡처를 성공적으로 생성해야 한다', async () => {
             const createCaptureDto: CreateCapturesDto = {
-                timestamp: new Date(),
+                timestamp: '12:34:56',
                 image: 'test-image.jpg',
                 memosId: 1,
             };
@@ -82,7 +82,7 @@ describe('CapturesService', () => {
 
         it('저장 중 에러가 발생하면 InternalServerErrorException을 던져야 한다', async () => {
             const createCaptureDto: CreateCapturesDto = {
-                timestamp: new Date(),
+                timestamp: '12:34:56',
                 image: 'test-image.jpg',
                 memosId: 1,
             };

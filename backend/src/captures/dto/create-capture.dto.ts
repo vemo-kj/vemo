@@ -1,12 +1,15 @@
-import { IsDate, IsString, IsObject } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateCapturesDto {
-    @IsDate()
-    timestamp: Date;
+    @IsNotEmpty()
+    @IsString()
+    timestamp: string;
 
+    @IsNotEmpty()
     @IsString()
     image: string;
 
-    @IsObject()
-    memos: { id: number };
+    @IsNotEmpty()
+    @IsNumber()
+    memosId: number;
 }

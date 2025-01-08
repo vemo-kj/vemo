@@ -3,7 +3,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
-import { json, urlencoded } from 'express';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -13,7 +12,10 @@ async function bootstrap() {
         DB_HOST: process.env.DB_HOST,
     });
     app.enableCors({
-        origin: 'http://localhost:3000',
+        origin: [
+            'http://vmemo.co.kr',
+            process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
+        ].filter(Boolean),
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -30,20 +32,19 @@ async function bootstrap() {
         }),
     );
 
-    app.use(json({ limit: '50mb' }));
-    app.use(urlencoded({ extended: true, limit: '50mb' }));
-
-    const config = new DocumentBuilder()
-        .setTitle('VEMO API')
-        .setDescription('VEMO 프로젝트 API 문서')
-        .setVersion('1.0')
-        .addTag('vemo')
-        .build();
-
     app.useGlobalGuards(new JwtAuthGuard(new Reflector()));
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+    if (process.env.NODE_ENV === 'development') {
+        const config = new DocumentBuilder()
+            .setTitle('VEMO API')
+            .setDescription('VEMO 프로젝트 API 문서')
+            .setVersion('1.0')
+            .addTag('vemo')
+            .build();
+
+        const document = SwaggerModule.createDocument(app, config);
+        SwaggerModule.setup('api', app, document);
+    }
 
     await app.listen(process.env.PORT ?? 5050);
 }
