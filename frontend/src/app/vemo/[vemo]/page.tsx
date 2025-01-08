@@ -8,7 +8,7 @@ import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import { CreateMemosResponseDto } from '../../types/vemo.types';
 
-// 동적 로드된 DraftEditor
+
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
