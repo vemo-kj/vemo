@@ -6,12 +6,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class PdfService {
-<<<<<<< HEAD
-    // Memo와 Capture PDF로 변환
-    constructor(private readonly httpService: HttpService) { }
-=======
     constructor(private readonly httpService: HttpService) {}
->>>>>>> 0219246c9f9663094ece87dbb6ecc496f0ea54f3
 
     async createMemoCapturePDF(
         title: string,
