@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { useSummary } from '../../context/SummaryContext';
-import styles from './summaryButton.module.css';
-
 
 export default function SummaryButton() {
     const [isSubmitting, setIsSubmitting] = useState(false);
