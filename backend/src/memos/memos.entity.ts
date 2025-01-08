@@ -24,6 +24,6 @@ export class Memos {
     @OneToMany(() => Memo, memo => memo.memos, { cascade: true })
     memo: Memo[];
 
-    @OneToMany(() => Captures, capture => capture.memos, { cascade: true })
+    @OneToMany(() => Captures, captures => captures.memos, { cascade: true })
     captures: Captures[];
 }
