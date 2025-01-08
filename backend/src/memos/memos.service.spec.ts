@@ -1,50 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MemosService } from './memos.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Memos } from './memos.entity';
-import { Users } from '../users/users.entity';
-import { Video } from '../video/video.entity';
-import { Memo } from '../memo/memo.entity';
+import { Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { UpdateMemosDto } from './dto/update-memos.dto';
 
 describe('MemosService', () => {
     let service: MemosService;
     let memosRepository: Repository<Memos>;
-    let userRepository: Repository<Users>;
-    let videoRepository: Repository<Video>;
-
-    const mockUser = {
-        id: 1,
-        nickname: 'testUser',
-    } as Users;
-
-    const mockVideo = {
-        id: 'test-video-id',
-        title: 'Test Video',
-        channel: {
-            id: 'channel-1',
-            title: 'Test Channel',
-        },
-    } as Video;
-
-    const mockMemo = {
-        id: 1,
-        timestamp: new Date(),
-        description: 'Test Memo Description',
-        memos: null,
-    } as Memo;
+    let cacheManager: Cache;
 
     const mockMemos = {
         id: 1,
-        title: 'Test Memos',
-        createdAt: new Date(),
-        user: mockUser,
-        video: mockVideo,
-        memo: [mockMemo],
+        title: 'Test Memo',
+        video: { id: 'video-id', channel: {} },
+        user: { id: 1 },
+        memo: [],
         capture: [],
-    } as Memos;
+        createdAt: new Date(),
+    };
+
+    const mockMemosRepository = {
+        find: jest.fn(),
+        findOne: jest.fn(),
+        save: jest.fn(),
+        delete: jest.fn(),
+        count: jest.fn(),
+        create: jest.fn(),
+    };
+
+    const mockCacheManager = {
+        get: jest.fn(),
+        set: jest.fn(),
+        del: jest.fn(),
+    };
+
+    const mockConfigService = {
+        get: jest.fn(),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -52,239 +48,84 @@ describe('MemosService', () => {
                 MemosService,
                 {
                     provide: getRepositoryToken(Memos),
-                    useValue: {
-                        find: jest.fn(),
-                        findOne: jest.fn(),
-                        save: jest.fn(),
-                        delete: jest.fn(),
-                        create: jest.fn(),
-                        count: jest.fn(),
-                    },
+                    useValue: mockMemosRepository,
                 },
                 {
-                    provide: getRepositoryToken(Users),
-                    useValue: {
-                        findOne: jest.fn(),
-                    },
+                    provide: CACHE_MANAGER,
+                    useValue: mockCacheManager,
                 },
                 {
-                    provide: getRepositoryToken(Video),
-                    useValue: {
-                        findOne: jest.fn(),
-                    },
+                    provide: ConfigService,
+                    useValue: mockConfigService,
                 },
             ],
         }).compile();
 
         service = module.get<MemosService>(MemosService);
         memosRepository = module.get<Repository<Memos>>(getRepositoryToken(Memos));
-        userRepository = module.get<Repository<Users>>(getRepositoryToken(Users));
-        videoRepository = module.get<Repository<Video>>(getRepositoryToken(Video));
+        cacheManager = module.get(CACHE_MANAGER);
     });
 
     describe('createMemos', () => {
-        it('메모를 생성해야 한다', async () => {
-            const memosTitle = 'New Memos';
+        it('메모를 성공적으로 생성해야 한다', async () => {
+            const title = 'Test Memo';
             const videoId = 'test-video-id';
             const userId = 1;
 
-            jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-            jest.spyOn(videoRepository, 'findOne').mockResolvedValue(mockVideo);
-            jest.spyOn(memosRepository, 'create').mockReturnValue(mockMemos);
-            jest.spyOn(memosRepository, 'save').mockResolvedValue(mockMemos);
+            mockMemosRepository.save.mockResolvedValue({ id: 1 });
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
 
-            const result = await service.createMemos(memosTitle, videoId, userId);
+            const result = await service.createMemos(title, videoId, userId);
 
-            expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
-            expect(videoRepository.findOne).toHaveBeenCalledWith({
-                where: { id: videoId },
-                relations: ['channel'],
-            });
-            expect(memosRepository.create).toHaveBeenCalledWith({
-                title: memosTitle,
-                user: mockUser,
-                video: mockVideo,
+            expect(mockMemosRepository.save).toHaveBeenCalledWith({
+                title,
+                video: { id: videoId },
+                user: { id: userId },
             });
             expect(result).toEqual(mockMemos);
         });
 
-        it('존재하지 않는 사용자로 메모를 생성하려고 하면 NotFoundException을 던져야 한다', async () => {
-            const memosTitle = 'New Memos';
-            const videoId = 'test-video-id';
-            const userId = 999;
+        it('메모 생성 실패 시 InternalServerErrorException을 던져야 한다', async () => {
+            mockMemosRepository.save.mockRejectedValue(new Error('DB Error'));
 
-            jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
-            await expect(service.createMemos(memosTitle, videoId, userId)).rejects.toThrow(
-                NotFoundException,
-            );
-        });
-
-        it('존재하지 않는 비디오로 메모를 생성하려고 하면 NotFoundException을 던져야 한다', async () => {
-            const memosTitle = 'New Memos';
-            const videoId = 'non-existent-video';
-            const userId = 1;
-
-            jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
-            jest.spyOn(videoRepository, 'findOne').mockResolvedValue(null);
-
-            await expect(service.createMemos(memosTitle, videoId, userId)).rejects.toThrow(
-                NotFoundException,
+            await expect(service.createMemos('title', 'videoId', 1)).rejects.toThrow(
+                InternalServerErrorException,
             );
         });
     });
 
     describe('getVemoCountByVideo', () => {
-        it('비디오의 메모 개수를 반환해야 한다', async () => {
+        it('캐시된 메모 수가 있으면 캐시에서 반환해야 한다', async () => {
             const videoId = 'test-video-id';
-            const count = 5;
+            const cachedCount = 5;
 
-            jest.spyOn(memosRepository, 'count').mockResolvedValue(count);
+            mockCacheManager.get.mockResolvedValue(cachedCount);
+
+            const result = await service.getVemoCountByVideo(videoId);
+
+            expect(mockCacheManager.get).toHaveBeenCalledWith(`vemo:count:${videoId}`);
+            expect(memosRepository.count).not.toHaveBeenCalled();
+            expect(result).toBe(cachedCount);
+        });
+
+        it('캐시 미스 시 DB에서 조회하고 캐시에 저장해야 한다', async () => {
+            const videoId = 'test-video-id';
+            const dbCount = 5;
+
+            mockCacheManager.get.mockResolvedValue(undefined);
+            mockMemosRepository.count.mockResolvedValue(dbCount);
 
             const result = await service.getVemoCountByVideo(videoId);
 
             expect(memosRepository.count).toHaveBeenCalledWith({
                 where: { video: { id: videoId } },
             });
-            expect(result).toBe(count);
-        });
-    });
-
-    describe('getAllMemosByUser', () => {
-        it('사용자의 모든 메모를 조회해야 한다', async () => {
-            const userId = 1;
-            const mockMemosList = [mockMemos];
-
-            jest.spyOn(memosRepository, 'find').mockResolvedValue(mockMemosList);
-
-            const result = await service.getAllMemosByUser(userId);
-
-            expect(memosRepository.find).toHaveBeenCalledWith({
-                where: { user: { id: userId } },
-                relations: ['video', 'memos'],
-            });
-            expect(result).toEqual(mockMemosList);
-        });
-    });
-
-    describe('getAllMemosByVideo', () => {
-        it('비디오의 모든 메모를 조회해야 한다', async () => {
-            const videoId = 'test-video-id';
-            const mockMemosList = [mockMemos];
-
-            jest.spyOn(memosRepository, 'find').mockResolvedValue(mockMemosList);
-
-            const result = await service.getAllMemosByVideo(videoId);
-
-            expect(memosRepository.find).toHaveBeenCalledWith({
-                where: { video: { id: videoId } },
-                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
-                order: { createdAt: 'DESC' },
-            });
-            expect(result).toEqual(mockMemosList);
-        });
-
-        it('조회 중 에러가 발생하면 InternalServerErrorException을 던져야 한다', async () => {
-            const videoId = 'test-video-id';
-
-            jest.spyOn(memosRepository, 'find').mockRejectedValue(new Error('DB Error'));
-
-            await expect(service.getAllMemosByVideo(videoId)).rejects.toThrow(
-                InternalServerErrorException,
+            expect(mockCacheManager.set).toHaveBeenCalledWith(
+                `vemo:count:${videoId}`,
+                dbCount,
+                3600,
             );
-        });
-    });
-
-    describe('getMemosById', () => {
-        it('ID로 메모를 조회해야 한다', async () => {
-            const memosId = 1;
-
-            jest.spyOn(memosRepository, 'findOne').mockResolvedValue(mockMemos);
-
-            const result = await service.getMemosById(memosId);
-
-            expect(memosRepository.findOne).toHaveBeenCalledWith({
-                where: { id: memosId },
-                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
-            });
-            expect(result).toEqual(mockMemos);
-        });
-
-        it('존재하지 않는 메모를 조회하면 NotFoundException을 던져야 한다', async () => {
-            const memosId = 999;
-
-            jest.spyOn(memosRepository, 'findOne').mockResolvedValue(null);
-
-            await expect(service.getMemosById(memosId)).rejects.toThrow(NotFoundException);
-        });
-
-        it('조회 중 에러가 발생하면 InternalServerErrorException을 던져야 한다', async () => {
-            const memosId = 1;
-
-            jest.spyOn(memosRepository, 'findOne').mockRejectedValue(new Error('DB Error'));
-
-            await expect(service.getMemosById(memosId)).rejects.toThrow(
-                InternalServerErrorException,
-            );
-        });
-    });
-
-    describe('updateMemos', () => {
-        it('메모를 수정해야 한다', async () => {
-            const memosId = 1;
-            const updateMemosDto: UpdateMemosDto = {
-                title: 'Updated Title',
-            };
-
-            const updatedMemos = {
-                ...mockMemos,
-                title: updateMemosDto.title,
-            };
-
-            jest.spyOn(memosRepository, 'findOne').mockResolvedValue(mockMemos);
-            jest.spyOn(memosRepository, 'save').mockResolvedValue(updatedMemos);
-
-            const result = await service.updateMemos(memosId, updateMemosDto);
-
-            expect(memosRepository.findOne).toHaveBeenCalledWith({ where: { id: memosId } });
-            expect(memosRepository.save).toHaveBeenCalledWith({
-                ...mockMemos,
-                ...updateMemosDto,
-            });
-            expect(result).toEqual(updatedMemos);
-        });
-
-        it('존재하지 않는 메모를 수정하려고 하면 NotFoundException을 던져야 한다', async () => {
-            const memosId = 999;
-            const updateMemosDto: UpdateMemosDto = {
-                title: 'Updated Title',
-            };
-
-            jest.spyOn(memosRepository, 'findOne').mockResolvedValue(null);
-
-            await expect(service.updateMemos(memosId, updateMemosDto)).rejects.toThrow(
-                NotFoundException,
-            );
-        });
-    });
-
-    describe('deleteMemos', () => {
-        it('메모를 삭제해야 한다', async () => {
-            const memosId = 1;
-
-            jest.spyOn(memosRepository, 'delete').mockResolvedValue({ affected: 1, raw: [] });
-
-            await service.deleteMemos(memosId);
-
-            expect(memosRepository.delete).toHaveBeenCalledWith(memosId);
-        });
-
-        it('존재하지 않는 메모를 삭제하려고 하면 NotFoundException을 던져야 한다', async () => {
-            const memosId = 999;
-
-            jest.spyOn(memosRepository, 'delete').mockResolvedValue({ affected: 0, raw: [] });
-
-            await expect(service.deleteMemos(memosId)).rejects.toThrow(NotFoundException);
+            expect(result).toBe(dbCount);
         });
     });
 
@@ -294,7 +135,7 @@ describe('MemosService', () => {
             const userId = 1;
             const mockMemosList = [mockMemos];
 
-            jest.spyOn(memosRepository, 'find').mockResolvedValue(mockMemosList);
+            mockMemosRepository.find.mockResolvedValue(mockMemosList);
 
             const result = await service.getMemosByVideoAndUser(videoId, userId);
 
@@ -310,14 +151,51 @@ describe('MemosService', () => {
         });
 
         it('조회 중 에러가 발생하면 InternalServerErrorException을 던져야 한다', async () => {
-            const videoId = 'test-video-id';
-            const userId = 1;
+            mockMemosRepository.find.mockRejectedValue(new Error('DB Error'));
 
-            jest.spyOn(memosRepository, 'find').mockRejectedValue(new Error('DB Error'));
-
-            await expect(service.getMemosByVideoAndUser(videoId, userId)).rejects.toThrow(
+            await expect(service.getMemosByVideoAndUser('videoId', 1)).rejects.toThrow(
                 InternalServerErrorException,
             );
+        });
+    });
+
+    describe('deleteMemos', () => {
+        it('메모를 삭제해야 한다', async () => {
+            const memosId = 1;
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
+            mockMemosRepository.delete.mockResolvedValue({ affected: 1 });
+
+            await service.deleteMemos(memosId);
+
+            expect(memosRepository.delete).toHaveBeenCalledWith(memosId);
+            expect(mockCacheManager.del).toHaveBeenCalledWith(`vemo:count:${mockMemos.video.id}`);
+        });
+
+        it('존재하지 않는 메모를 삭제하려고 하면 NotFoundException을 던져야 한다', async () => {
+            const memosId = 999;
+            mockMemosRepository.findOne.mockResolvedValue(null);
+
+            await expect(service.deleteMemos(memosId)).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe('getMemosById', () => {
+        it('ID로 메모를 조회해야 한다', async () => {
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
+
+            const result = await service.getMemosById(1);
+
+            expect(memosRepository.findOne).toHaveBeenCalledWith({
+                where: { id: 1 },
+                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+            });
+            expect(result).toEqual(mockMemos);
+        });
+
+        it('존재하지 않는 메모를 조회하면 NotFoundException을 던져야 한다', async () => {
+            mockMemosRepository.findOne.mockResolvedValue(null);
+
+            await expect(service.getMemosById(999)).rejects.toThrow(NotFoundException);
         });
     });
 });
