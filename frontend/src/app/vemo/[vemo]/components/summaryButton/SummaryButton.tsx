@@ -5,16 +5,68 @@ import { useSummary } from '../../context/SummaryContext';
 import styles from '../sideBarNav/sideBarNav.module.css';
 import Image from 'next/image';
 
-export default function SummaryButton() {
+interface SummaryButtonProps {
+    videoId: string;
+}
+
+export default function SummaryButton({ videoId }: SummaryButtonProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { setSummaryData, setQuizData } = useSummary();
+
+    const formatTimestamp = (timestamp: string | Date | null) => {
+        if (!timestamp) return '00:00';
+
+        // 이미 'MM:SS' 형식인 경우
+        if (typeof timestamp === 'string' && /^\d{1,2}:\d{2}$/.test(timestamp)) {
+            return timestamp;
+        }
+
+        try {
+            let minutes = 0;
+            let seconds = 0;
+
+            if (typeof timestamp === 'string') {
+                if (timestamp === 'NaN:NaN') {
+                    return '00:00';
+                }
+                // 'HH:MM:SS' 형식� 경우
+                if (timestamp.includes(':')) {
+                    const parts = timestamp.split(':').map(Number);
+                    if (parts.length === 3) {
+                        minutes = parts[1];
+                        seconds = parts[2];
+                    } else if (parts.length === 2) {
+                        minutes = parts[0];
+                        seconds = parts[1];
+                    }
+                } else {
+                    // 숫자 문자열� 경우 (초 단위)
+                    const totalSeconds = parseInt(timestamp, 10);
+                    minutes = Math.floor(totalSeconds / 60);
+                    seconds = totalSeconds % 60;
+                }
+            } else if (timestamp instanceof Date) {
+                minutes = timestamp.getMinutes();
+                seconds = timestamp.getSeconds();
+            }
+
+            // 유효한 숫자가 아닌 경우
+            if (isNaN(minutes) || isNaN(seconds)) {
+                return '00:00';
+            }
+
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        } catch (error) {
+            console.error('타임스탬�� 변환 오류:', error);
+            return '00:00';
+        }
+    };
 
     const handleClick = async () => {
         setIsSubmitting(true);
         setError(null);
 
-        const videoId = 'iNvYsGKelYs';
         try {
             // 첫 번째 요청: 타임스탬프와 디스크립션
             const timestampResponse = await fetch('http://localhost:5050/summarization', {
@@ -46,19 +98,19 @@ export default function SummaryButton() {
             const rawQuizData = await quizResponse.json();
             console.log('퀴즈 응답 데이터:', rawQuizData);
 
-            // Context에 데이터 저장
+            // Context에 데이터 저장 (타임스탬프 형식 변환 적용)
             setSummaryData({
                 summaryList: summaryList.map((item: any) => ({
                     id: item.id,
-                    timestamp: item.timestamp,
+                    timestamp: formatTimestamp(item.timestamp),
                     description: item.summary,
                 })),
             });
 
-            // 퀴즈 데이터 매핑 수정
+            // 퀴즈 데이터 매핑 수정 (타임스탬프 형식 변환 적용)
             const mappedQuizData = {
                 quizList: rawQuizData.map((quiz: any) => ({
-                    timestamp: quiz.timestamp,
+                    timestamp: formatTimestamp(quiz.timestamp),
                     question: quiz.question,
                     answer: quiz.answer,
                 })),
@@ -81,8 +133,8 @@ export default function SummaryButton() {
                 onClick={handleClick}
                 disabled={isSubmitting}
                 className={styles.iconButton}
-                >
-                            
+            >
+
                 <Image
                     className={styles.defaultIcon}
                     src="/icons/bt_edit_nav_AiSummery.svg"
@@ -90,10 +142,10 @@ export default function SummaryButton() {
                     width={20}
                     height={20}
                 />
-            
-            <span className={styles.iconButtonText}>
-                {isSubmitting ? '전송 중...' : '요약하기'}
-            </span>
+
+                <span className={styles.iconButtonText}>
+                    {isSubmitting ? '전송 중...' : '요약하기'}
+                </span>
             </button>
             {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>

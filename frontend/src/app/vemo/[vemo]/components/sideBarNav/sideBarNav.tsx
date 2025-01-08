@@ -11,7 +11,7 @@ import styles from './sideBarNav.module.css';
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
 
-interface SideBarNavProps {
+export interface SideBarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
     renderSectionContent: () => React.ReactNode;
@@ -20,6 +20,7 @@ interface SideBarNavProps {
     handleCaptureArea: () => void;
     editorRef: React.RefObject<any>;
     vemoData: CreateMemosResponseDto | null;
+    videoId: string;
 }
 
 export default function SidebarNav({
@@ -31,8 +32,9 @@ export default function SidebarNav({
     handleCaptureArea,
     editorRef,
     vemoData,
+    videoId,
 }: SideBarNavProps) {
-    const [activeTab, setActiveTab] = useState('write'); // 현재 활성화된 탭 상태 관리
+    const [activeTab, setActiveTab] = useState('write');
 
     return (
         <div className={styles.container}>
@@ -87,7 +89,7 @@ export default function SidebarNav({
                 </button>
             </div>
 
-            {/* (2) 탭 별 콘텐츠 영역 */}
+            {/* 오른쪽 콘텐츠 영역 */}
             <div className={styles.tabContent}>
                 {activeTab === 'write' && (
                     <>
@@ -97,7 +99,7 @@ export default function SidebarNav({
                                 <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                                 <h1 className={styles.notesHeaderText}>자바 스크립트 스터디</h1>
                             </div>
-                            
+
                             <div className={styles.dropdown}>
                                 <select
                                     value={selectedOption}
@@ -111,9 +113,33 @@ export default function SidebarNav({
                             </div>
                         </div>
                         {selectedOption === 'AI 요약 보기' ? (
-                            <SummaryView videoId={vemoData?.videoId ?? ''} />
+                            <SummaryView onTimestampClick={(timestamp) => {
+                                const [minutes, seconds] = timestamp.split(':').map(Number);
+                                const timeInSeconds = minutes * 60 + seconds;
+                                const player = document.querySelector('iframe');
+                                if (player) {
+                                    // @ts-ignore
+                                    player.contentWindow.postMessage(JSON.stringify({
+                                        event: 'command',
+                                        func: 'seekTo',
+                                        args: [timeInSeconds, true]
+                                    }), '*');
+                                }
+                            }} />
                         ) : selectedOption === '퀴즈 보기' ? (
-                            <QuizView />
+                            <QuizView onTimestampClick={(timestamp) => {
+                                const [minutes, seconds] = timestamp.split(':').map(Number);
+                                const timeInSeconds = minutes * 60 + seconds;
+                                const player = document.querySelector('iframe');
+                                if (player) {
+                                    // @ts-ignore
+                                    player.contentWindow.postMessage(JSON.stringify({
+                                        event: 'command',
+                                        func: 'seekTo',
+                                        args: [timeInSeconds, true]
+                                    }), '*');
+                                }
+                            }} />
                         ) : (
                             renderSectionContent()
                         )}
@@ -140,7 +166,7 @@ export default function SidebarNav({
                                     <span className={styles.iconButtonText}>부분캡처</span>
                                 </button>
 
-                                <SummaryButton />
+                                <SummaryButton videoId={videoId} />
                                 <ExportButton />
                             </div>
                         )}

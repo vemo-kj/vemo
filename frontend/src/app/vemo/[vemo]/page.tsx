@@ -16,6 +16,20 @@ const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
 
+// YouTube IFrame API 타입 �의
+declare global {
+    interface Window {
+        onYouTubeIframeAPIReady: () => void;
+        YT: {
+            Player: new (elementId: string, config: any) => any;
+            PlayerState: {
+                PLAYING: number;
+                PAUSED: number;
+            };
+        };
+    }
+}
+
 export default function VemoPage() {
     const router = useRouter();
     const params = useParams();
@@ -94,47 +108,61 @@ export default function VemoPage() {
             playerRef.current.destroy();
         }
 
-        // YouTube Iframe API 로드
+        // YouTube API 초기화
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-        // YouTube Player 초기화
-        (window as any).onYouTubeIframeAPIReady = () => {
-            playerRef.current = new (window as any).YT.Player('youtube-player', {
-                videoId: videoId,
+        // 시간 업데이트 인터벌 ID를 저장할 변수
+        let timeUpdateInterval: NodeJS.Timeout | null = null;
+
+        // 시간 업데이트 시작 함수
+        const startTimeUpdate = (player: any) => {
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+            }
+            timeUpdateInterval = setInterval(() => {
+                const currentTime = player.getCurrentTime();
+                const minutes = Math.floor(currentTime / 60);
+                const seconds = Math.floor(currentTime % 60);
+                setCurrentTimestamp(
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                );
+            }, 1000);
+        };
+
+        // 시간 업데이트 중지 함수
+        const stopTimeUpdate = () => {
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
+        };
+
+        // YouTube 플레이어 준비
+        window.onYouTubeIframeAPIReady = () => {
+            new window.YT.Player('youtube-player', {
+                videoId,
                 events: {
-                    onReady: () => {
-                        console.log('Player ready');
-                        // Player 준비되면 timestamp 업데이트 시작
-                        startTimestampUpdate();
+                    'onReady': (event: any) => {
+                        console.log('YouTube player is ready');
                     },
-                },
+                    'onStateChange': (event: any) => {
+                        if (event.data === window.YT.PlayerState.PLAYING) {
+                            startTimeUpdate(event.target);
+                        } else if (event.data === window.YT.PlayerState.PAUSED) {
+                            stopTimeUpdate();
+                        }
+                    }
+                }
             });
         };
-    }, [videoId]);
 
-    // timestamp 업데이트 함수를 별도로 분리
-    const startTimestampUpdate = () => {
-        const interval = setInterval(() => {
-            if (playerRef.current?.getCurrentTime) {
-                const sec = playerRef.current.getCurrentTime();
-                const mm = Math.floor(sec / 60);
-                const ss = Math.floor(sec % 60);
-                setCurrentTimestamp(
-                    `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`,
-                );
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    };
-
-    // timestamp 업데이트 useEffect 수정
-    useEffect(() => {
-        if (editingItemId !== null) return;
-        return startTimestampUpdate();
-    }, [editingItemId]);
+        return () => {
+            stopTimeUpdate();
+        };
+    }, [videoId]); // videoId가 변경될 때마다 플레이어 재초기화
 
     // 드롭다운 선택
     const handleOptionSelect = (option: string) => {
@@ -267,40 +295,43 @@ export default function VemoPage() {
     }
 
     return (
-        <div className={styles.container}>
-            {/* (1) 유튜브 영상 섹션 */}
-            <div className={styles.section1} style={{ position: 'relative' }}>
-                <Link href="/" passHref>
-                    <img
-                        src="/icons/Button_home.svg"
-                        alt="VEMO logo"
-                        className={styles.logoButton}
-                    />
-                </Link>
-                <div className={styles.videoWrapper}>
-                    <iframe
-                        id="youtube-player"
-                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
-                        title="YouTube Video Player"
-                        frameBorder="0"
-                        allowFullScreen
+        <SummaryProvider>
+            <div className={styles.container}>
+                <div className={styles.videoContainer}>
+                    {/* (1) 유튜브 영상 섹션 */}
+                    <div className={styles.section1} style={{ position: 'relative' }}>
+                        <Link href="/" passHref>
+                            <img
+                                src="/icons/Button_home.svg"
+                                alt="VEMO logo"
+                                className={styles.logoButton}
+                            />
+                        </Link>
+                        <div className={styles.videoWrapper}>
+                            <iframe
+                                id="youtube-player"
+                                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+                                title="YouTube Video Player"
+                                frameBorder="0"
+                                allowFullScreen
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className={styles.sidebarContainer}>
+                    <SideBarNav
+                        videoId={videoId || ''}
+                        selectedOption={selectedOption}
+                        onOptionSelect={handleOptionSelect}
+                        renderSectionContent={renderSectionContent}
+                        currentTimestamp={currentTimestamp}
+                        handleCaptureTab={handleCaptureTab}
+                        handleCaptureArea={handleCaptureArea}
+                        editorRef={editorRef}
+                        vemoData={vemoData}
                     />
                 </div>
             </div>
-
-            {/* (3) Sidebar */}
-            <div className={styles.section3}>
-                <SideBarNav
-                    selectedOption={selectedOption}
-                    onOptionSelect={handleOptionSelect}
-                    renderSectionContent={renderSectionContent}
-                    currentTimestamp={currentTimestamp}
-                    handleCaptureTab={handleCaptureTab}
-                    handleCaptureArea={handleCaptureArea}
-                    editorRef={editorRef}
-                    vemoData={vemoData}
-                />
-            </div>
-        </div>
+        </SummaryProvider>
     );
 }
