@@ -95,6 +95,8 @@ export class HomeService {
             id: memos.id,
             title: memos.title,
             createdAt: memos.createdAt,
+            memo: memos.memo,
+            captures: memos.captures,
         };
     }
 
@@ -108,7 +110,7 @@ export class HomeService {
         const videos = await this.videoService.getAllVideos(page, limit);
 
         if (!videos.length) {
-            throw new NotFoundException('비디오가 존재하지 않습니다.');
+            return { videos: [] };
         }
 
         // 각 비디오에 대해 메모 수를 계산

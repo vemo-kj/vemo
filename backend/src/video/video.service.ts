@@ -11,6 +11,7 @@ import { ChannelService } from '../channel/channel.service';
 import { YoutubeApiInterceptor } from '../youtubeauth/youtube-api.interceptor';
 import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
 import { Video } from './video.entity';
+
 @Injectable()
 export class VideoService {
     private readonly logger = new Logger(VideoService.name);

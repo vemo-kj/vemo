@@ -3,7 +3,7 @@ import { Channel } from '../channel/channel.entity';
 import { Memos } from '../memos/memos.entity';
 import { Playlist } from '../playlist/entities/playlist.entity';
 
-@Entity()
+@Entity('video')
 export class Video {
     @PrimaryColumn({ type: 'varchar', length: 11 })
     id: string;
