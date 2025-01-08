@@ -6,7 +6,7 @@ import { UpdateMemoDto } from './dto/update-memo.dto';
 @Controller('memo')
 export class MemoController {
     constructor(private readonly memoService: MemoService) {}
-
+    // TODO: Memos ID가 필요한거 아닌가? @Post(':memosId')
     @Post()
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
         return await this.memoService.createMemo(createMemoDto);

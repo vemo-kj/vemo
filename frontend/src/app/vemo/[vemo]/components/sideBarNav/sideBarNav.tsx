@@ -62,10 +62,11 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
+    memosId: initialMemosId,
     
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
-    const [memosId, setMemosId] = useState<number | null>(null);
+    const [memosId, setMemosId] = useState<number | null>(initialMemosId);
     
     
     // 토큰 가져오기
@@ -73,35 +74,7 @@ export default function SidebarNav({
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
     
-    // 메모 생성 API 호출 함수
-    const createMemo = async (videoId: string): Promise<MemosidResponse> => {
-        try {
-            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                credentials: 'include'
-            });
-            
-            const data = await response.json();
-            setMemosId(data.id);
-            console.log("생성된 메모 ID:", data.id);
-            
-            if (!response.ok) {
-                throw new Error('Failed to create memo');
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Error creating memo:', error);
-            throw error;
-        }
-    };
-
-
-    const getMemosById = async (memosId: string): Promise<MemoListResponse> => {
+        const getMemosById = async (memosId: string): Promise<MemoListResponse> => {
         try {
             const response = await fetch(`http://localhost:5050/memos/${memosId}`, {
                 method: 'Get',
@@ -137,13 +110,7 @@ export default function SidebarNav({
                 console.error('No videoId available');
                 return;
             }
-
-            const newMemo = await createMemo(videoId);
-            console.log('Created memos:', newMemo);
             console.log('handleWriteClick videoId:', videoId); // 클릭 시점의 videoId 값 확인
-            // const memos = await getMemosById(memosId);
-            // console.log('memos:', memos);
-            // setActiveTab('write');
             
         } catch (error) {
             console.error('Failed to create memo:', error);
@@ -156,7 +123,10 @@ export default function SidebarNav({
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('write')}
+                    onClick={() => {
+                        setActiveTab('write');
+                        handleWriteClick();
+                    }}
                 >
                     <div className={styles.iconButton}>
                         <Image

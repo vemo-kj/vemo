@@ -6,10 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
-import { SummaryProvider } from './context/SummaryContext';
 import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
-import { toPng } from 'html-to-image';
-import CaptureButton from './components/Caputure/CaptureButton';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -225,6 +222,7 @@ export default function VemoPage() {
                             videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
+                            memosId={memosId}
                         />
                     </>
                 );
