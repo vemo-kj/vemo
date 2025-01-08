@@ -23,11 +23,8 @@ export class MemosService {
 
     constructor(
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
-<<<<<<< HEAD
         @InjectRepository(Users) private readonly userRepository: Repository<Users>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-    ) { }
-=======
         @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
         private readonly configService: ConfigService,
     ) {
@@ -37,7 +34,6 @@ export class MemosService {
             password: this.configService.get<string>('REDIS_PASSWORD'),
         });
     }
->>>>>>> 0219246c9f9663094ece87dbb6ecc496f0ea54f3
 
     async createMemos(title: string, videoId: string, userId: number): Promise<Memos> {
         try {

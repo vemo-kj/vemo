@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { HttpService } from '@nestjs/axios';
-import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
+import { pdfMemoeDto, pdfCaptureDto } from './dto/pdf.dto';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
