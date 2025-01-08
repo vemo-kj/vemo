@@ -91,14 +91,13 @@ export default function SidebarNav({
             <div className={styles.tabContent}>
                 {activeTab === 'write' && (
                     <>
-                        <h1 className={styles.notesHeaderText}>나만의 노트</h1>
-                        <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
-
                         <div className={styles.headerContainer}>
+
                             <div className={styles.titleContainer}>
+                                <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
                                 <h1 className={styles.notesHeaderText}>자바 스크립트 스터디</h1>
                             </div>
-
+                            
                             <div className={styles.dropdown}>
                                 <select
                                     value={selectedOption}
