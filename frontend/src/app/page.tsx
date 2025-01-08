@@ -39,13 +39,12 @@ function SearchParamsComponent() {
             }
 
             const data = await response.json();
-            const videoArray = Array.isArray(data)
-                ? data
-                : Array.isArray(data.videos)
-                  ? data.videos
-                  : [];
 
-            const formattedData: MainCardProps[] = videoArray.map((video: any) => ({
+            if (!data || !Array.isArray(data.videos)) {
+                throw new Error('Invalid data format received from server');
+            }
+
+            const formattedData: MainCardProps[] = data.videos.map((video: any) => ({
                 id: String(video.id || ''),
                 title: String(video.title || '제목 없음'),
                 thumbnails: String(video.thumbnails || '/default-thumbnail.jpg'),
