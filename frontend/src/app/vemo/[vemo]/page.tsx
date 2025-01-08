@@ -77,7 +77,7 @@ export default function VemoPage() {
             }
 
             const data: CreateMemosResponseDto = await response.json();
-            console.log('받은 메모 데이터:', data);
+            console.log('받은 메모 데이터 :', data);
             setVemoData(data);
             setMemosId(data.id);
             
@@ -305,6 +305,7 @@ export default function VemoPage() {
     }
 
     return (
+<<<<<<< HEAD
         <div className={styles.container}>
             {/* (1) 유튜브 영상 섹션 */}
             <div className={styles.section1} style={{ position: 'relative' }}>
@@ -322,6 +323,43 @@ export default function VemoPage() {
                         title="YouTube Video Player"
                         frameBorder="0"
                         allowFullScreen
+=======
+        <SummaryProvider>
+            <div className={styles.container}>
+                <div className={styles.videoContainer}>
+                    {/* (1) 유튜브 영상 섹션 */}
+                    <div className={styles.section1} style={{ position: 'relative' }}>
+                        <Link href="/" passHref>
+                            <img
+                                src="/icons/Button_home.svg"
+                                alt="VEMO logo"
+                                className={styles.logoButton}
+                            />
+                        </Link>
+                        <div className={styles.videoWrapper}>
+                            <iframe
+                                id="youtube-player"
+                                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+                                title="YouTube Video Player"
+                                frameBorder="0"
+                                allowFullScreen
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className={styles.sidebarContainer}>
+                    <SideBarNav
+                        selectedOption={selectedOption}
+                        onOptionSelect={handleOptionSelect}
+                        renderSectionContent={renderSectionContent}
+                        currentTimestamp={currentTimestamp}
+                        handleCaptureTab={handleCaptureTab}
+                        handleCaptureArea={handleCaptureArea}
+                        editorRef={editorRef}
+                        vemoData={vemoData}
+                    videoId={videoId || ''}
+                    memosId={memosId}
+>>>>>>> 25cbe05 (fix: sideBarNav에서  memosId 값 못 받아오는 부분 수정)
                     />
                 </div>
             </div>
