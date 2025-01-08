@@ -31,7 +31,7 @@ describe('CapturesService', () => {
         user: mockUser,
         video: mockVideo,
         memo: [],
-        capture: [],
+        captures: [],
     } as Memos;
 
     const mockCapture = {
