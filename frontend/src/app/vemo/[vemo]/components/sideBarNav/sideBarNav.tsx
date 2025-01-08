@@ -21,8 +21,37 @@ export interface SideBarNavProps {
     editorRef: React.RefObject<any>;
     vemoData: CreateMemosResponseDto | null;
     videoId: string;
+    memosId: number | null;
 }
 
+// 응답 타입
+interface MemosidResponse {
+    id: number; // memosid
+    title: string; // 메모 제목
+    createdAt: Date; // 메모 생성 시간
+}
+
+interface Memo {
+    id: number;
+    timestamp: string;
+    description: string;
+}
+
+interface Captures {
+    id: number;
+    timestamp: string;
+    imageUrl: string;
+}
+
+interface MemoListResponse { // memos 테이블
+    id: number;
+    title: string;
+    createdAt: Date;
+    memo: Memo[];
+    captures: Captures[];
+}
+
+// 메모 생성 함수
 export default function SidebarNav({
     selectedOption,
     onOptionSelect,
@@ -33,8 +62,80 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
+    memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
+    
+    // 토큰 가져오기
+    const token = sessionStorage.getItem('token');
+    // videoId 값 확인
+    console.log('sideBarNav.tsx props videoId:', videoId);
+    console.log('sideBarNav.tsx props memosId:', memosId);
+    // 메모 생성 API 호출 함수
+
+
+    const getMemosById = async (memosId: string): Promise<MemoListResponse> => {
+        const token = sessionStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('인증 토�이 없습니다. 다시 로그인해주세요.');
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5050/memos/${memosId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // 토큰이 만료되었거나 유효하지 않은 경우
+                    sessionStorage.removeItem('token'); // 토� 제거
+                    throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+                }
+                throw new Error('메모를 가져오는데 실패했습니다.');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching memo:', error);
+            throw error;
+        }
+    };
+
+
+    // 버튼 클릭 핸들러
+    const handleWriteClick = async () => {
+        try {
+            if (!videoId) {
+                console.error('No videoId available');
+                return;
+            }
+
+            if (!memosId) {
+                console.error('No memosId available');
+                return;
+            }
+
+            const memos = await getMemosById(memosId.toString());
+            console.log('Retrieved memos:', memos);
+            setActiveTab('write');
+            
+        } catch (error) {
+            if (error instanceof Error) {
+                if (error.message.includes('다시 로그인')) {
+                    // 로그인 페이지로 리다이렉트
+                    window.location.href = '/login';
+                }
+                console.error('Failed to handle write click:', error.message);
+            }
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -42,7 +143,7 @@ export default function SidebarNav({
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('write')}
+                    onClick={handleWriteClick}
                 >
                     <div className={styles.iconButton}>
                         <Image
