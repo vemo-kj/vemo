@@ -489,7 +489,8 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         }
     };
 
-    const handleDeleteItem = async (id: string) => {
+    // 캡처 삭제를 �한 �로운 함수
+    const handleDeleteCapture = async (captureId: string) => {
         try {
             const token = sessionStorage.getItem('token');
             if (!token) {
@@ -497,10 +498,52 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 return;
             }
 
-            // id에서 숫자만 추출 (예: "memo-123" -> 123)
-            const memoId = parseInt(id.split('-')[1]);
+            const id = captureId.split('-')[1]; // 'capture-123' -> '123'
+            console.log('Deleting capture:', { captureId, id });
 
-            // 백엔드 요청
+            const response = await fetch(`http://localhost:5050/captures/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('캡처 삭제 실패:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    error: errorText
+                });
+                throw new Error('캡처 삭제에 실패했습니다.');
+            }
+
+            // 성공적으로 삭제되면 프론트엔드 상태 업데이트
+            setSections(prev => prev.filter(item => item.id !== captureId));
+
+        } catch (error) {
+            console.error('캡처 삭제 �� 오류 발생:', error);
+        }
+    };
+
+    // 기존 handleDeleteItem 함수 �정
+    const handleDeleteItem = async (id: string) => {
+        // 캡처인 경우 handleDeleteCapture 함수 호출
+        if (id.startsWith('capture-')) {
+            return handleDeleteCapture(id);
+        }
+
+        // 기존 메모 �제 로직
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.error('토큰이 없습니다.');
+                return;
+            }
+
+            const memoId = id.split('-')[1];
             const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
                 method: 'DELETE',
                 headers: {
@@ -520,9 +563,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 throw new Error('메모 삭제에 실패했습니다.');
             }
 
-            // 성공적으로 삭제되면 프론트엔드 상태 업데이트
-            const updatedSections = sections.filter(item => item.id !== id);
-            setSections(updatedSections);
+            setSections(prev => prev.filter(item => item.id !== id));
 
         } catch (error) {
             console.error('메모 삭제 중 오류 발생:', error);
