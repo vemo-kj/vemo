@@ -84,23 +84,25 @@ function SearchParamsComponent() {
     });
 
     return (
-        <main className={styles.main}>
-            <CategorySection
-                selectedCategory={selectedCategory}
-                onCategorySelect={setSelectedCategory}
-            />
-            {isLoading ? (
-                <div>Loading...</div>
-            ) : error ? (
-                <div>{error}</div>
-            ) : (
-                <div className={styles.cardContainer}>
-                    {filteredCards.map((card) => (
-                        <MainCard key={card.id} {...card} />
-                    ))}
-                </div>
-            )}
-        </main>
+        <div className={styles.mainContainer}>
+            <div className={styles.content}>
+                <CategorySection
+                    selectedCategory={selectedCategory}
+                    onCategorySelect={setSelectedCategory}
+                />
+                {isLoading ? (
+                    <div className={styles.loading}>Loading...</div>
+                ) : error ? (
+                    <div className={styles.error}>{error}</div>
+                ) : (
+                    <div className={styles.mainCardContainer}>
+                        {filteredCards.map((card) => (
+                            <MainCard key={card.id} {...card} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
 
