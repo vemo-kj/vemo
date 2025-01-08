@@ -13,9 +13,10 @@ interface MemoItemProps {
     onDelete: () => void;
     onPauseVideo?: () => void;
     isEditable?: boolean;
+    addTextToEditor?: (text: string) => void;
 }
 
-const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable }: MemoItemProps) => {
+const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClick, onChangeHTML, onDelete, onPauseVideo, isEditable, addTextToEditor }: MemoItemProps) => {
     console.log('MemoItem 렌더링:', {
         id,
         timestamp,
@@ -184,8 +185,10 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
     };
 
     const handleUseText = () => {
-        const newContent = htmlContent + '<p>' + extractedText + '</p>';
-        onChangeHTML(newContent);
+        // 추출된 텍스트를 에디터에 추가
+        if (addTextToEditor && extractedText) {
+            addTextToEditor(extractedText);
+        }
         setIsModalOpen(false);
         setExtractedText('');
     };

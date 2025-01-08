@@ -1,10 +1,10 @@
 // 메모 생성 응답 DTO
 export interface CreateMemosResponseDto {
-    id: number;
-    title: string;
-    createdAt: Date;
-    memo: MemoItem[];
-    capture: CaptureItem[];
+  id: number;
+  title: string;
+  createdAt: Date;
+  memo: MemoItem[];
+  captures: CaptureItem[];
 }
 
 // 메모 아이템 인터페이스

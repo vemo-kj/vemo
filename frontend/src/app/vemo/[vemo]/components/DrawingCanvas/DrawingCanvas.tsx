@@ -1,51 +1,90 @@
-// DrawingCanvas.tsx
-import React, { useRef, useEffect, useState } from 'react';
-import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
+// components/DrawingCanvas/DrawingCanvas.tsx
+import React, { useRef, useState, useEffect } from 'react';
 import styles from './DrawingCanvas.module.css';
+import { ReactSketchCanvasRef } from 'react-sketch-canvas';
+import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴포넌트 임포트
+
+// 브러시 타입 정의
+type BrushType = 'pen' | 'highlighter' | 'eraser' | 'rectangle' | 'circle';
 
 interface DrawingCanvasProps {
     onSave: (dataUrl: string) => void;
     onClose: () => void;
-    backgroundImage: string; // 추가된 부분
+    backgroundImage: string;
 }
 
-// ReactSketchCanvas를 위한 타입 정의 추가
-const Canvas = ReactSketchCanvas as unknown as React.ComponentType<{
-    ref: React.RefObject<ReactSketchCanvasRef>;
-    style: React.CSSProperties;
-    strokeColor: string;
-    strokeWidth: number;
-    className: string;
-    backgroundImage?: string;
-}>;
-
 export default function DrawingCanvas({ onSave, onClose, backgroundImage }: DrawingCanvasProps) {
-    const canvasRef = useRef<ReactSketchCanvasRef | null>(null);
-    const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number }>({
-        width: 800,
-        height: 500,
-    });
+    const canvasRef = useRef<ReactSketchCanvasRef>(null);
+    const [strokeColor, setStrokeColor] = useState('#000000');
+    const [strokeWidth, setStrokeWidth] = useState(3);
+    const [brushType, setBrushType] = useState<BrushType>('pen');
+    const [opacity, setOpacity] = useState(1);
+    const [scale, setScale] = useState(1);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isMovingMode, setIsMovingMode] = useState(false);
 
-    useEffect(() => {
-        if (backgroundImage) {
-            const img = new Image();
-            img.src = backgroundImage;
-            img.onload = () => {
-                setImageDimensions({ width: img.width, height: img.height });
-            };
-            img.onerror = err => {
-                console.error('이미지 로드 실패:', err);
-            };
+    const canvasWidth = 1280;
+    const canvasHeight = 720;
+
+    // 브러시 굵기 프리셋 정의
+    const widthPresets = [
+        { width: 2, icon: '•' },
+        { width: 5, icon: '⚪' },
+        { width: 10, icon: '⭕' },
+    ];
+
+    // 색상 프리셋 정의
+    const colorPresets = [
+        { color: '#000000', name: '검정' },
+        { color: '#FFFFFF', name: '하양' },
+        { color: '#4A90E2', name: '파랑' },
+        { color: '#7ED321', name: '초록' },
+        { color: '#FF5252', name: '빨강' },
+        { color: '#FFC107', name: '노랑' },
+    ];
+
+    // 브러시 프리셋 정의
+    const brushPresets = [
+        { type: 'pen', name: '펜', icon: '✏️', width: 3, opacity: 1 },
+        { type: 'highlighter', name: '형광펜', icon: '🖍️', width: 15, opacity: 0.5 },
+        { type: 'eraser', name: '지우개', icon: '🧽', width: 20, opacity: 1 },
+    ];
+
+    const getStrokeColor = () => {
+        if (brushType === 'eraser') {
+            return 'transparent';
         }
-    }, [backgroundImage]);
+        if (brushType === 'highlighter') {
+            // RGBA 색상으로 변환하여 투명도 적용
+            const r = parseInt(strokeColor.slice(1, 3), 16);
+            const g = parseInt(strokeColor.slice(3, 5), 16);
+            const b = parseInt(strokeColor.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        return strokeColor;
+    };
+
+    const handleBrushChange = (preset: (typeof brushPresets)[0]) => {
+        setBrushType(preset.type as BrushType);
+        setStrokeWidth(preset.width);
+
+        if (preset.type === 'eraser') {
+            canvasRef.current?.eraseMode(true); // eraseMode 활성화
+            setStrokeColor('transparent');
+        } else {
+            canvasRef.current?.eraseMode(false); // eraseMode 비활성화
+            setStrokeColor('#000000');
+            setOpacity(preset.opacity);
+        }
+    };
 
     const handleSave = async () => {
         if (canvasRef.current) {
             try {
-                // 캔버스 데이터를 Base64 이미지로 저장
                 const dataUrl = await canvasRef.current.exportImage('png');
-                console.log('그리기 결과:', dataUrl);
-                onSave(dataUrl); // 저장된 이미지를 상위 컴포넌트로 전달
+                onSave(dataUrl);
             } catch (error) {
                 console.error('이미지 저장 중 오류:', error);
             }
@@ -53,50 +92,198 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
         onClose();
     };
 
-    const handleClear = () => {
-        if (!canvasRef.current) {
-            console.error('Canvas reference is not available');
-            return;
-        }
-        canvasRef.current.clearCanvas();
+    // 확대/축소 핸들러
+    const handleZoom = (type: 'in' | 'out') => {
+        setScale(prevScale => {
+            const newScale = type === 'in' ? prevScale * 1.2 : prevScale / 1.2;
+            return Math.min(Math.max(newScale, 0.5), 3);
+        });
     };
 
-    const handleUndo = () => {
-        if (!canvasRef.current) {
-            console.error('Canvas reference is not available');
-            return;
+    // 마우스 이벤트 핸들러
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (isMovingMode && e.button === 0) {
+            // 이동 모드이고 왼쪽 버튼일 때
+            setIsDragging(true);
+            setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+            e.preventDefault(); // 그리기 방지
         }
-        canvasRef.current.undo();
     };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (isDragging && isMovingMode) {
+            setPosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y,
+            });
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    // 스페이스바 누를 때 이동 모드 활성화
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === 'Space') {
+                setIsMovingMode(true);
+                e.preventDefault(); // 페이지 스크롤 방지
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.code === 'Space') {
+                setIsMovingMode(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
 
     return (
         <div className={styles.drawingContainer}>
-            <h2>그리기</h2>
-            <Canvas
-                ref={canvasRef}
-                style={{
-                    border: '1px solid #000',
-                    width: `${imageDimensions.width}px`,
-                    height: `${imageDimensions.height}px`,
-                }}
-                strokeColor="#ff0000"
-                strokeWidth={3}
-                className={styles.canvasBox}
-                backgroundImage={backgroundImage}
-            />
-            <div className={styles.drawToolbar}>
-                <button onClick={handleUndo} className={styles.button}>
-                    되돌리기
+            <div className={styles.toolbar}>
+                {/* 브러시 굵기 프리셋 */}
+                <div className={styles.widthPresets}>
+                    {widthPresets.map((preset, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setStrokeWidth(preset.width)}
+                            className={`${styles.presetButton} ${
+                                strokeWidth === preset.width ? styles.active : ''
+                            }`}
+                            title={`${preset.width}px`}
+                        >
+                            {preset.icon}
+                        </button>
+                    ))}
+                </div>
+
+                {/* 색상 프리셋 */}
+                <div className={styles.colorPresets}>
+                    {colorPresets.map((preset, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setStrokeColor(preset.color)}
+                            className={`${styles.colorButton} ${
+                                strokeColor === preset.color ? styles.active : ''
+                            }`}
+                            style={{ backgroundColor: preset.color }}
+                            title={preset.name}
+                        />
+                    ))}
+                    <input
+                        type="color"
+                        value={strokeColor}
+                        onChange={e => setStrokeColor(e.target.value)}
+                        className={styles.colorPicker}
+                        title="커스텀 색상"
+                    />
+                </div>
+
+                {/* 브러시 프리셋 버튼들 */}
+                <div className={styles.brushPresets}>
+                    {brushPresets.map(preset => (
+                        <button
+                            key={preset.type}
+                            onClick={() => handleBrushChange(preset)}
+                            className={`${styles.presetButton} ${
+                                brushType === preset.type ? styles.active : ''
+                            }`}
+                            title={preset.name}
+                        >
+                            {preset.icon}
+                        </button>
+                    ))}
+                </div>
+
+                {/* 투명도 조절 (형광펜용) */}
+                {brushType === 'highlighter' && (
+                    <div className={styles.opacity}>
+                        <input
+                            type="range"
+                            min="0.1"
+                            max="1"
+                            step="0.1"
+                            value={opacity}
+                            onChange={e => setOpacity(Number(e.target.value))}
+                        />
+                    </div>
+                )}
+
+                {/* 확대/축소 컨트롤 */}
+                <div className={styles.zoomControls}>
+                    <button onClick={() => handleZoom('in')} title="확대">
+                        🔍+
+                    </button>
+                    <button onClick={() => handleZoom('out')} title="축소">
+                        🔍-
+                    </button>
+                    <span>{Math.round(scale * 100)}%</span>
+                    <div className={styles.moveInfo}>
+                        스페이스바를 누른 상태에서 드래그하여 이동
+                    </div>
+                </div>
+            </div>
+
+            <div
+                className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
+                <div
+                    style={{
+                        transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                        transformOrigin: '0 0',
+                        transition: isDragging ? 'none' : 'transform 0.3s ease',
+                        cursor: isMovingMode ? 'grab' : 'default',
+                    }}
+                >
+                    <DynamicReactSketchCanvas
+                        ref={canvasRef}
+                        width={`${canvasWidth}px`}
+                        height={`${canvasHeight}px`}
+                        strokeWidth={strokeWidth}
+                        strokeColor={getStrokeColor()}
+                        eraserWidth={brushType === 'eraser' ? strokeWidth : 0}
+                        style={{
+                            border: '1px solid #000',
+                            opacity: 1,
+                            pointerEvents: isMovingMode ? 'none' : 'auto', // 이동 모드일 때 그리기 비활성화
+                        }}
+                        backgroundImage={backgroundImage}
+                        preserveBackgroundImageAspectRatio="none"
+                        allowOnlyPointerType="all"
+                        canvasColor="transparent"
+                        exportWithBackgroundImage={true}
+                        withTimestamp={false}
+                    />
+                </div>
+            </div>
+
+            {/* 액션 버튼들 */}
+            <div className={styles.actions}>
+                <button onClick={() => canvasRef.current?.undo()}>undo</button>
+                <button onClick={() => canvasRef.current?.redo()}>redo</button>
+                <button
+                    onClick={() => {
+                        canvasRef.current?.clearCanvas();
+                        setStrokeColor('#000000');
+                    }}
+                >
+                    전체 지우기
                 </button>
-                <button onClick={handleClear} className={styles.button}>
-                    지우기
-                </button>
-                <button onClick={handleSave} className={styles.button}>
-                    저장하기
-                </button>
-                <button onClick={onClose} className={styles.button}>
-                    닫기
-                </button>
+                <button onClick={handleSave}>저장</button>
+                <button onClick={onClose}>닫기</button>
             </div>
         </div>
     );

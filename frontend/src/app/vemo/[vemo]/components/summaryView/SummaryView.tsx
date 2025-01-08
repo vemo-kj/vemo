@@ -1,23 +1,39 @@
 'use client';
 
-import { useSummary } from "@/app/vemo/[vemo]/context/SummaryContext";
+import { useSummary } from '../../context/SummaryContext';
+import styles from './summaryView.module.css';
 
+interface SummaryViewProps {
+    onTimestampClick?: (timestamp: string) => void;
+}
 
-export default function SummaryView() {
+export default function SummaryView({ onTimestampClick }: SummaryViewProps) {
     const { summaryData } = useSummary();
 
     if (!summaryData) {
-        return <div>요약 데이터가 없습니다.</div>;
+        return <div className={styles.noData}>요약 데이터가 없습니다. 요약하기 버튼을 눌러주세요.</div>;
     }
 
+    const handleTimestampClick = (timestamp: string) => {
+        if (onTimestampClick) {
+            onTimestampClick(timestamp);
+        }
+    };
+
     return (
-        <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">AI 요약</h2>
-            <div className="space-y-4">
-                {summaryData.summaryList.map(item => (
-                    <div key={item.id} className="border p-3 rounded-lg">
-                        <div className="font-semibold text-blue-600">{item.timestamp}</div>
-                        <p className="mt-1">{item.description}</p>
+        <div className={styles.container}>
+            <h2 className={styles.title}>영상 요약</h2>
+            <div className={styles.summaryList}>
+                {summaryData.summaryList.map((item, index) => (
+                    <div key={item.id || index} className={styles.summaryItem}>
+                        <div
+                            className={styles.timestamp}
+                            onClick={() => handleTimestampClick(item.timestamp)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {item.timestamp}
+                        </div>
+                        <div className={styles.description}>{item.description}</div>
                     </div>
                 ))}
             </div>

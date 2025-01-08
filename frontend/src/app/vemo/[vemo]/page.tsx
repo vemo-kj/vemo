@@ -16,7 +16,7 @@ const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
 export default function VemoPage() {
     const router = useRouter();
     const params = useParams();
-    const videoId = params.vemo as string;
+    const videoId = params?.vemo as string | null;
     const playerRef = useRef<any>(null);
     const editorRef = useRef<any>(null);
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
@@ -29,10 +29,14 @@ export default function VemoPage() {
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [memosId, setMemosId] = useState<number | null>(null);
 
     // Add capture status tracking
     const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
     const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
+
+    // videoId 값 확인
+    console.log('page.tsx videoId:', videoId);
 
     // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     const fetchVemoData = useCallback(async () => {
@@ -65,8 +69,11 @@ export default function VemoPage() {
             }
 
             const data: CreateMemosResponseDto = await response.json();
-            console.log('받은 메모 데이터:', data);
+            console.log('받은 메모 데이터 :', data);
             setVemoData(data);
+            setMemosId(data.id);
+            console.log('받은 메모 데이터 i  :', data.id);
+
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
@@ -205,7 +212,7 @@ export default function VemoPage() {
             case '내 메모 보기':
                 return (
                     <>
-                        <p className={styles.noteTitle}>내 메모 내용을 여기에 표시</p>
+                        {/* <p className={styles.noteTitle}>메모의 제목</p> */}
                         <EditorNoSSR
                             ref={editorRef}
                             getTimestamp={() => currentTimestamp}
@@ -218,7 +225,7 @@ export default function VemoPage() {
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
-                            videoId={videoId}
+                            videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
                         />
@@ -286,9 +293,6 @@ export default function VemoPage() {
                         allowFullScreen
                     />
                 </div>
-                <button onClick={() => changeVideo('새로운_비디오_ID')}>
-                    {/* 다른 영상으로 변경 */}
-                </button>
             </div>
 
             {/* (3) Sidebar */}
@@ -302,6 +306,8 @@ export default function VemoPage() {
                     handleCaptureArea={handleCaptureArea}
                     editorRef={editorRef}
                     vemoData={vemoData}
+                    videoId={videoId || ''}
+                    memosId={memosId}
                 />
             </div>
         </div>

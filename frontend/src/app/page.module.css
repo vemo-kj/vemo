@@ -17,6 +17,11 @@
   padding: 20px 0;
 }
 
+.mainCardContainer>* {
+  width: 100%;
+  max-width: 100%;
+}
+
 .error {
   text-align: center;
   color: #dc3545;

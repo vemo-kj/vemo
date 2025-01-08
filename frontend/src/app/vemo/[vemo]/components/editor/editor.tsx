@@ -1,5 +1,5 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { Editor as DraftEditor, EditorState, RichUtils } from 'draft-js';
+import React, { useImperativeHandle, forwardRef, useState } from 'react';
+import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
@@ -10,6 +10,9 @@ const Editor = DraftEditor as unknown as React.ComponentType<{
     editorState: EditorState;
     onChange: (state: EditorState) => void;
     placeholder?: string;
+    keybinding?: (e: any) => void;
+    handleKeyCommand?: (command: string) => 'handled' | 'not-handled';
+    keyBindingFn?: (e: any) => string | null;
 }>;
 
 interface Section {
@@ -139,7 +142,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 console.log('[Capture Event] Creating memo - videoId:', props.videoId);
                 const memosResponse = await fetch(
-                    `http://localhost:5050/home/memos/${props.videoId}`,
+                    `${process.env.NEXT_PUBLIC_BASE_URL}home/memos/${props.videoId}`,
                     {
                         method: 'POST',
                         headers: {
@@ -179,18 +182,21 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.log('Original size:', imageUrl.length);
                 console.log('Compressed size:', compressedImage.length);
 
-                const captureResponse = await fetch(`http://localhost:5050/captures`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
+                const captureResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            timestamp: date.toISOString(),
+                            image: compressedImage,
+                            memos: { id: memosData.id },
+                        }),
                     },
-                    body: JSON.stringify({
-                        timestamp: date.toISOString(),
-                        image: compressedImage,
-                        memosId: memosData.id,
-                    }),
-                });
+                );
 
                 setImageLoadingStates(prev => ({
                     ...prev,
@@ -273,26 +279,17 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const html = convertToHTML(contentState);
             const timestamp = props.getTimestamp();
 
-            const [minutes, seconds] = timestamp.split(':').map(Number);
-            const date = new Date();
-            date.setMinutes(minutes);
-            date.setSeconds(seconds);
-
-            const requestData = {
-                timestamp: date.toISOString(),
-                description: html,
-                memosId: 4, //TODO: props.memosId
-            };
-
-            const response = await fetch(`http://localhost:5050/memo/`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${props.videoId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include',
-                body: JSON.stringify(requestData),
-            });
+            );
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -350,6 +347,14 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         return editorState.getCurrentInlineStyle().has(style);
     };
 
+    const handleKeyCommand = (command: string) => {
+        if (command === 'split-block') {
+            handleSave();
+            return 'handled';
+        }
+        return 'not-handled';
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.displayArea}>
@@ -373,6 +378,13 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     editorState={editorState}
                     onChange={setEditorState}
                     placeholder="내용을 입력하세요..."
+                    handleKeyCommand={handleKeyCommand}
+                    keyBindingFn={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            return 'split-block';
+                        }
+                        return getDefaultKeyBinding(e);
+                    }}
                 />
                 <div className={styles.toolbar}>
                     <button
