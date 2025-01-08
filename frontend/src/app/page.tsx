@@ -25,10 +25,14 @@ function SearchParamsComponent() {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:5050/home', {
+            const response = await fetch('http://localhost:5050/home/cards', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
+            // const response = await fetch('http://43.203.85.223:5050/home', {
+            //     method: 'GET',
+            //     headers: { 'Content-Type': 'application/json' },
+            // });
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch main cards: ${response.status}`);
