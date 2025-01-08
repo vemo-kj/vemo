@@ -50,7 +50,7 @@ export default function VemoPage() {
             }
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/home/memos/${videoId}`,
+                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
                 {
                     method: 'POST',
                     headers: {
