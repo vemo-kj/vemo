@@ -230,6 +230,7 @@ export default function VemoPage() {
                             videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
+                            memosId={memosId}
                         />
                     </>
                 );

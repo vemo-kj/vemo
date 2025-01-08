@@ -10,10 +10,8 @@ import { CapturesModule } from './captures/captures.module';
 import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { HomeModule } from './home/home.module';
+import { MemoModule } from './memo/memo.module';
 import { MemosModule } from './memos/memos.module';
-import { PdfModule } from './pdf/pdf.module';
-import { PlaylistModule } from './playlist/playlist.module';
-import { QuizModule } from './quiz/quiz.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { SummarizationModule } from './summarization/summarization.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
@@ -23,7 +21,6 @@ import { VideoModule } from './video/video.module';
 import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
 // import { RedisConfigService } from './config/redis.config';
 // import { CacheModule } from '@nestjs/cache-manager';
-import { MemoModule } from './memo/memo.module';
 
 @Module({
     imports: [
@@ -57,6 +54,7 @@ import { MemoModule } from './memo/memo.module';
         SummarizationModule,
         TextExtractionModule,
         PdfModule,
+        MemoModule,
     ],
     controllers: [AppController],
     providers: [
