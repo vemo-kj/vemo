@@ -117,7 +117,7 @@ export default function SidebarNav({
                         </div>
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtons}>
-                                <button onClick={handleCaptureTab}  className={styles.iconButton}>캡처하기
+                                <button onClick={handleCaptureTab}  className={styles.iconButton}>
 
                                 <Image
                                         src="/icons/bt_edit_nav_capture.svg"
@@ -128,7 +128,7 @@ export default function SidebarNav({
                                     <span className={styles.iconButtonText}>캡처하기</span>
 
                                 </button>
-                                <button onClick={handleCaptureArea}>
+                                <button onClick={handleCaptureArea} className={styles.iconButton}>
                                 <Image
                                         src="/icons/bt_edit_nav_partCapture.svg"
                                         alt="부분 캡처"
@@ -138,12 +138,12 @@ export default function SidebarNav({
                                     <span className={styles.iconButtonText}>부분캡처</span>
 
                                 </button>
+                                
+                                <SummaryButton />
+                                <ExportButton />
                             </div>
                         )}
-                        <div className={styles.footerButtons}>
-                            <SummaryButton />
-                            <ExportButton />
-                        </div>
+
                     </>
                 )}
 
