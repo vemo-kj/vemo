@@ -11,7 +11,7 @@ import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../type
 import { toPng } from 'html-to-image';
 import CaptureButton from './components/Caputure/CaptureButton';
 
-
+// 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
@@ -273,44 +273,42 @@ export default function VemoPage() {
     }
 
     return (
-        <SummaryProvider>
-            <div className={styles.container}>
-                <div className={styles.videoContainer}>
-                    {/* (1) 유튜브 영상 섹션 */}
-                    <div className={styles.section1} style={{ position: 'relative' }}>
-                        <Link href="/" passHref>
-                            <img
-                                src="/icons/Button_home.svg"
-                                alt="VEMO logo"
-                                className={styles.logoButton}
-                            />
-                        </Link>
-                        <div className={styles.videoWrapper}>
-                            <iframe
-                                id="youtube-player"
-                                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
-                                title="YouTube Video Player"
-                                frameBorder="0"
-                                allowFullScreen
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.sidebarContainer}>
-                    <SideBarNav
-                        selectedOption={selectedOption}
-                        onOptionSelect={handleOptionSelect}
-                        renderSectionContent={renderSectionContent}
-                        currentTimestamp={currentTimestamp}
-                        handleCaptureTab={handleCaptureTab}
-                        handleCaptureArea={handleCaptureArea}
-                        editorRef={editorRef}
-                        vemoData={vemoData}
-                    videoId={videoId || ''}
-                    memosId={memosId}
+        <div className={styles.container}>
+            {/* (1) 유튜브 영상 섹션 */}
+            <div className={styles.section1} style={{ position: 'relative' }}>
+                <Link href="/" passHref>
+                    <img
+                        src="/icons/Button_home.svg"
+                        alt="VEMO logo"
+                        className={styles.logoButton}
+                    />
+                </Link>
+                <div className={styles.videoWrapper}>
+                    <iframe
+                        id="youtube-player"
+                        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+                        title="YouTube Video Player"
+                        frameBorder="0"
+                        allowFullScreen
                     />
                 </div>
             </div>
-        </SummaryProvider>
+
+            {/* (3) Sidebar */}
+            <div className={styles.section3}>
+                <SideBarNav
+                    selectedOption={selectedOption}
+                    onOptionSelect={handleOptionSelect}
+                    renderSectionContent={renderSectionContent}
+                    currentTimestamp={currentTimestamp}
+                    handleCaptureTab={handleCaptureTab}
+                    handleCaptureArea={handleCaptureArea}
+                    editorRef={editorRef}
+                    vemoData={vemoData}
+                    videoId={videoId || ''}
+                    memosId={memosId}
+                />
+            </div>
+        </div>
     );
 }
