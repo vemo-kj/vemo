@@ -95,6 +95,8 @@ export class HomeService {
             id: memos.id,
             title: memos.title,
             createdAt: memos.createdAt,
+            memo: memos.memo,
+            captures: memos.captures,
         };
     }
 
