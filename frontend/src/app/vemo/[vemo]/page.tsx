@@ -11,7 +11,6 @@ import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../type
 import { toPng } from 'html-to-image';
 import CaptureButton from './components/Caputure/CaptureButton';
 
-
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
     ssr: false,
 });
@@ -65,10 +64,10 @@ export default function VemoPage() {
             const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                credentials: 'include'
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -76,7 +75,7 @@ export default function VemoPage() {
                 console.error('서버 응답:', {
                     status: response.status,
                     statusText: response.statusText,
-                    body: errorText
+                    body: errorText,
                 });
                 throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
             }
@@ -84,7 +83,6 @@ export default function VemoPage() {
             const data: CreateMemosResponseDto = await response.json();
             console.log('받은 메모 데이터:', data);
             setVemoData(data);
-
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
@@ -127,7 +125,7 @@ export default function VemoPage() {
                 const minutes = Math.floor(currentTime / 60);
                 const seconds = Math.floor(currentTime % 60);
                 setCurrentTimestamp(
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
                 );
             }, 1000);
         };
@@ -145,17 +143,17 @@ export default function VemoPage() {
             new window.YT.Player('youtube-player', {
                 videoId,
                 events: {
-                    'onReady': (event: any) => {
+                    onReady: (event: any) => {
                         console.log('YouTube player is ready');
                     },
-                    'onStateChange': (event: any) => {
+                    onStateChange: (event: any) => {
                         if (event.data === window.YT.PlayerState.PLAYING) {
                             startTimeUpdate(event.target);
                         } else if (event.data === window.YT.PlayerState.PAUSED) {
                             stopTimeUpdate();
                         }
-                    }
-                }
+                    },
+                },
             });
         };
 
@@ -204,9 +202,12 @@ export default function VemoPage() {
 
         try {
             console.log('전체 캡처 요청 전송');
-            window.postMessage({
-                type: 'CAPTURE_TAB'
-            }, '*');
+            window.postMessage(
+                {
+                    type: 'CAPTURE_TAB',
+                },
+                '*',
+            );
         } catch (error) {
             console.error('캡처 요청 실패:', error);
         }
@@ -217,9 +218,12 @@ export default function VemoPage() {
 
         try {
             console.log('부분 캡처 요청 전송');
-            window.postMessage({
-                type: 'CAPTURE_AREA'
-            }, '*');
+            window.postMessage(
+                {
+                    type: 'CAPTURE_AREA',
+                },
+                '*',
+            );
         } catch (error) {
             console.error('부분 캡처 요청 실패:', error);
         }
@@ -287,9 +291,7 @@ export default function VemoPage() {
             <div className={styles.errorContainer}>
                 <h3>오류가 발생했습니다</h3>
                 <p>{error}</p>
-                <button onClick={() => window.location.reload()}>
-                    다시 시도
-                </button>
+                <button onClick={() => window.location.reload()}>다시 시도</button>
             </div>
         );
     }
