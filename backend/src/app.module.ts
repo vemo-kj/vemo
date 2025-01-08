@@ -21,6 +21,8 @@ import { UsersModule } from './users/users.module';
 import { VemoModule } from './vemo/vemo.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
+// import { RedisConfigService } from './config/redis.config';
+// import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
     imports: [
@@ -33,6 +35,11 @@ import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
+        // CacheModule.registerAsync({
+        //     imports: [ConfigModule],
+        //     useClass: RedisConfigService,
+        //     isGlobal: true,
+        // }),
         // CacheModule.registerAsync({
         //     imports: [ConfigModule],
         //     useClass: RedisConfigService,
