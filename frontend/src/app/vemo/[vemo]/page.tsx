@@ -48,18 +48,17 @@ export default function VemoPage() {
                 router.push('/login');
                 return;
             }
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL; // 환경 변수에서 API URL 가져오기
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/home/memos/${videoId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
+            const response = await fetch(`${apiUrl}/home/memos/${videoId}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-            );
+                credentials: 'include',
+            });
+
             console.log(response);
             if (!response.ok) {
                 const errorText = await response.text();
@@ -243,9 +242,9 @@ export default function VemoPage() {
         }
     };
 
-    // const changeVideo = (newVideoId: string) => {
-    //     router.push(`/vemo/${newVideoId}`);
-    // };
+    const changeVideo = (newVideoId: string) => {
+        router.push(`/vemo/${newVideoId}`);
+    };
 
     // 데모 저장 후 데이터 갱신을 위한 핸들러
     const handleMemoSaved = useCallback(() => {
