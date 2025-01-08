@@ -25,7 +25,7 @@ function SearchParamsComponent() {
             setIsLoading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:5050/home/cards', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home/cards`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -55,6 +55,9 @@ function SearchParamsComponent() {
                     thumbnails: String(
                         video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
                     ),
+                    thumbnails: String(
+                        video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
+                    ),
                     title: String(video.channel?.title || '채널명 없음'),
                 },
                 vemoCount: Number(video.vemoCount || 0),
@@ -81,9 +84,11 @@ function SearchParamsComponent() {
     }, [categoryParam]);
 
     const filteredCards = mainCards.filter(card => {
+    const filteredCards = mainCards.filter(card => {
         const matchesCategory =
             selectedCategory === 'All' ||
             card.category.toLowerCase() === selectedCategory.toLowerCase();
+        const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         return matchesCategory && matchesSearch;
     });
@@ -101,6 +106,7 @@ function SearchParamsComponent() {
                     <div className={styles.error}>{error}</div>
                 ) : (
                     <div className={styles.mainCardContainer}>
+                        {filteredCards.map(card => (
                         {filteredCards.map(card => (
                             <MainCard key={card.id} {...card} />
                         ))}

@@ -69,11 +69,14 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
 
         try {
             // 첫 번째 요청: 타임스탬프와 디스크립션
-            const timestampResponse = await fetch('http://localhost:5050/summarization', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ videoId }),
-            });
+            const timestampResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/summarization`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoId }),
+                },
+            );
 
             if (!timestampResponse.ok) {
                 const errorData = await timestampResponse.json();
@@ -84,7 +87,7 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
             console.log('타임스탬프 응답 데이터:', summaryList);
 
             // 두 번째 요청: 퀴즈와 퀴즈타임스탬프 및 정답
-            const quizResponse = await fetch('http://localhost:5050/quiz', {
+            const quizResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ videoId }),
@@ -129,12 +132,7 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
 
     return (
         <div>
-            <button
-                onClick={handleClick}
-                disabled={isSubmitting}
-                className={styles.iconButton}
-            >
-
+            <button onClick={handleClick} disabled={isSubmitting} className={styles.iconButton}>
                 <Image
                     className={styles.defaultIcon}
                     src="/icons/bt_edit_nav_AiSummery.svg"
