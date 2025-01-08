@@ -8,8 +8,9 @@ import {
     Put,
     Query,
 } from '@nestjs/common';
-import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
+import { MemosService } from './memos.service';
+// import { GetMemosResponseDto } from './dto/get-memos-response.dto';
 import { GetMemosResponseDto } from './dto/get-memos-response.dto';
 
 @Controller('memos')
@@ -39,7 +40,7 @@ export class MemosController {
             title: memos.title,
             createdAt: memos.createdAt,
             memo: memos.memo,
-            captures: memos.captures,
+            captures: memos.capture,
         };
     }
 
