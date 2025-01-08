@@ -8,7 +8,7 @@
 /* 노트(메모) 리스트 감싸는 영역 - 빨간 박스, 고정 높이, 스크롤 */
 .noteListContainer {
     width: 100%;
-    max-height: 300px;
+    max-height: 420px;
     /* 원하는 고정 높이 */
     overflow-y: auto;
     /* 내용 넘치면 스크롤 */
@@ -116,9 +116,9 @@
 
 /* 메모 노트 영역 */
 .displayArea {
-    height: 520px;
+    height: 600px;
     /* 3) 스크롤 제한 */
-    max-height: 530px;
+    max-height: 600px;
     /* 3) 스크롤 제한 */
     overflow-y: auto;
 }
