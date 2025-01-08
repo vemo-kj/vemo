@@ -62,77 +62,76 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
-    
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
     const [memosId, setMemosId] = useState<number | null>(null);
-    
-    
+
     // 토큰 가져오기
     const token = sessionStorage.getItem('token');
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
-    
+
     // 메모 생성 API 호출 함수
     const createMemo = async (videoId: string): Promise<MemosidResponse> => {
         try {
-            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include'
-            });
-            
+            );
+
             const data = await response.json();
             setMemosId(data.id);
-            console.log("생성된 메모 ID:", data.id);
-            
+            console.log('생성된 메모 ID:', data.id);
+
             if (!response.ok) {
                 throw new Error('Failed to create memo');
             }
-            
+
             return data;
         } catch (error) {
             console.error('Error creating memo:', error);
             throw error;
         }
     };
-
 
     const getMemosById = async (memosId: string): Promise<MemoListResponse> => {
         try {
-            const response = await fetch(`http://localhost:5050/memos/${memosId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memosId}`, {
                 method: 'Get',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
-                credentials: 'include'
+                credentials: 'include',
             });
-            
+
             const data = await response.json();
             setMemosId(data.id);
-            console.log("생성된 메모 ID:", data);
-            
+            console.log('생성된 메모 ID:', data);
+
             if (!response.ok) {
                 throw new Error('Failed to create memo');
             }
-            
+
             return data;
         } catch (error) {
             console.error('Error creating memo:', error);
             throw error;
         }
     };
-
 
     // 버튼 클릭 핸들러
     const handleWriteClick = async () => {
         try {
             console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
-            
+
             if (!videoId) {
                 console.error('No videoId available');
                 return;
@@ -144,7 +143,6 @@ export default function SidebarNav({
             // const memos = await getMemosById(memosId);
             // console.log('memos:', memos);
             // setActiveTab('write');
-            
         } catch (error) {
             console.error('Failed to create memo:', error);
         }
@@ -208,9 +206,10 @@ export default function SidebarNav({
                 {activeTab === 'write' && (
                     <>
                         <div className={styles.headerContainer}>
-
                             <div className={styles.titleContainer}>
-                                <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
+                                <p className={styles.notesSubHeader}>
+                                    자바 스크립트 스터디 재생목록
+                                </p>
                                 <h1 className={styles.notesHeaderText}>자바 스크립트 스터디</h1>
                             </div>
 
@@ -227,33 +226,43 @@ export default function SidebarNav({
                             </div>
                         </div>
                         {selectedOption === 'AI 요약 보기' ? (
-                            <SummaryView onTimestampClick={(timestamp) => {
-                                const [minutes, seconds] = timestamp.split(':').map(Number);
-                                const timeInSeconds = minutes * 60 + seconds;
-                                const player = document.querySelector('iframe');
-                                if (player) {
-                                    // @ts-ignore
-                                    player.contentWindow.postMessage(JSON.stringify({
-                                        event: 'command',
-                                        func: 'seekTo',
-                                        args: [timeInSeconds, true]
-                                    }), '*');
-                                }
-                            }} />
+                            <SummaryView
+                                onTimestampClick={timestamp => {
+                                    const [minutes, seconds] = timestamp.split(':').map(Number);
+                                    const timeInSeconds = minutes * 60 + seconds;
+                                    const player = document.querySelector('iframe');
+                                    if (player) {
+                                        // @ts-ignore
+                                        player.contentWindow.postMessage(
+                                            JSON.stringify({
+                                                event: 'command',
+                                                func: 'seekTo',
+                                                args: [timeInSeconds, true],
+                                            }),
+                                            '*',
+                                        );
+                                    }
+                                }}
+                            />
                         ) : selectedOption === '퀴즈 보기' ? (
-                            <QuizView onTimestampClick={(timestamp) => {
-                                const [minutes, seconds] = timestamp.split(':').map(Number);
-                                const timeInSeconds = minutes * 60 + seconds;
-                                const player = document.querySelector('iframe');
-                                if (player) {
-                                    // @ts-ignore
-                                    player.contentWindow.postMessage(JSON.stringify({
-                                        event: 'command',
-                                        func: 'seekTo',
-                                        args: [timeInSeconds, true]
-                                    }), '*');
-                                }
-                            }} />
+                            <QuizView
+                                onTimestampClick={timestamp => {
+                                    const [minutes, seconds] = timestamp.split(':').map(Number);
+                                    const timeInSeconds = minutes * 60 + seconds;
+                                    const player = document.querySelector('iframe');
+                                    if (player) {
+                                        // @ts-ignore
+                                        player.contentWindow.postMessage(
+                                            JSON.stringify({
+                                                event: 'command',
+                                                func: 'seekTo',
+                                                args: [timeInSeconds, true],
+                                            }),
+                                            '*',
+                                        );
+                                    }
+                                }}
+                            />
                         ) : (
                             renderSectionContent()
                         )}

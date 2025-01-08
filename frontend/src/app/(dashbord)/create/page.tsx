@@ -60,7 +60,7 @@ export default function CreatePage() {
             setIsLoading(true);
             console.log('전송하는 데이터:', data);
 
-            const response = await fetch('http://localhost:5050/home/memos', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home/memos`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

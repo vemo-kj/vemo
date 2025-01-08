@@ -20,7 +20,7 @@ export default function LoginPage() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5050/users/login', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

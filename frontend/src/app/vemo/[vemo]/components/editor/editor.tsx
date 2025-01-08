@@ -362,7 +362,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
     };
 
     return (
-        
         <div className={styles.container}>
             <div className={styles.displayArea}>
                 {sections.map(item => (
