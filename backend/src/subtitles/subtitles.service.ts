@@ -63,7 +63,6 @@ export class SubtitlesService {
         }
     }
 
-
     // yt-dlp 명령어 생성
     private buildYtDlpCommand(videoId: string): string {
         return `yt-dlp \
