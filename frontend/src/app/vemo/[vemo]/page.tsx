@@ -48,17 +48,18 @@ export default function VemoPage() {
                 router.push('/login');
                 return;
             }
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL; // 환경 변수에서 API URL 가져오기
 
-            const response = await fetch(`${apiUrl}/home/memos/${videoId}`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include',
-            });
-
+            );
             console.log(response);
             if (!response.ok) {
                 const errorText = await response.text();
