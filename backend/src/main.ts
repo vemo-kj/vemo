@@ -13,7 +13,7 @@ async function bootstrap() {
     });
     app.enableCors({
         origin: [
-            'https://vmemo.co.kr',
+            'http://vmemo.co.kr',
             process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '',
         ].filter(Boolean),
         credentials: true,
