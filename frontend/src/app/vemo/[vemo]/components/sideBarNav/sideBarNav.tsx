@@ -11,7 +11,6 @@ import styles from './sideBarNav.module.css';
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
 
-
 interface SideBarNavProps {
     selectedOption: string;
     onOptionSelect: (option: string) => void;
@@ -59,7 +58,7 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'community' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('community')}
                 >
-                        <div className={styles.iconButton}>
+                    <div className={styles.iconButton}>
                         <Image
                             className={styles.defaultIcon}
                             src="/icons/bt_SideNav_Community.svg"
@@ -75,7 +74,7 @@ export default function SidebarNav({
                     className={`${styles.tab} ${activeTab === 'playlist' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('playlist')}
                 >
-                        <div className={styles.iconButton}>
+                    <div className={styles.iconButton}>
                         <Image
                             className={styles.defaultIcon}
                             src="/icons/bt_SideNav_playerlist.svg"
@@ -92,37 +91,37 @@ export default function SidebarNav({
             <div className={styles.tabContent}>
                 {activeTab === 'write' && (
                     <>
-                        <h1 className={styles.notesHeader}>나만의 노트</h1>
-
-                        {/* 재생목록 이름이 들어감 */}
+                        <h1 className={styles.notesHeaderText}>나만의 노트</h1>
                         <p className={styles.notesSubHeader}>자바 스크립트 스터디 재생목록</p>
-                        <div className={styles.notesContent}>
-                            <div className={styles.noteActions}>
-                                <div className={styles.dropdown}>
-                                    <select
-                                        value={selectedOption}
-                                        onChange={e => onOptionSelect(e.target.value)}
-                                        className={styles.dropdownSelect}
-                                    >
-                                        <option value="내 메모 보기">내 메모 보기</option>
-                                        <option value="AI 요약 보기">AI 요약 보기</option>
-                                        <option value="퀴즈 보기">퀴즈 보기</option>
-                                    </select>
-                                </div>
+
+                        <div className={styles.headerContainer}>
+                            <div className={styles.titleContainer}>
+                                <h1 className={styles.notesHeaderText}>자바 스크립트 스터디</h1>
                             </div>
-                            {selectedOption === 'AI 요약 보기' ? (
-                                <SummaryView videoId={vemoData?.videoId ?? ''} />
-                            ) : selectedOption === '퀴즈 보기' ? (
-                                <QuizView />
-                            ) : (
-                                renderSectionContent()
-                            )}
+
+                            <div className={styles.dropdown}>
+                                <select
+                                    value={selectedOption}
+                                    onChange={e => onOptionSelect(e.target.value)}
+                                    className={styles.dropdownSelect}
+                                >
+                                    <option value="내 메모 보기">내 메모 보기</option>
+                                    <option value="AI 요약 보기">AI 요약 보기</option>
+                                    <option value="퀴즈 보기">퀴즈 보기</option>
+                                </select>
+                            </div>
                         </div>
+                        {selectedOption === 'AI 요약 보기' ? (
+                            <SummaryView videoId={vemoData?.videoId ?? ''} />
+                        ) : selectedOption === '퀴즈 보기' ? (
+                            <QuizView />
+                        ) : (
+                            renderSectionContent()
+                        )}
                         {selectedOption === '내 메모 보기' && (
                             <div className={styles.footerButtons}>
-                                <button onClick={handleCaptureTab}  className={styles.iconButton}>
-
-                                <Image
+                                <button onClick={handleCaptureTab} className={styles.iconButton}>
+                                    <Image
                                         className={styles.defaultIcon}
                                         src="/icons/bt_edit_nav_capture.svg"
                                         alt="캡처"
@@ -130,10 +129,9 @@ export default function SidebarNav({
                                         height={20}
                                     />
                                     <span className={styles.iconButtonText}>캡처하기</span>
-
                                 </button>
                                 <button onClick={handleCaptureArea} className={styles.iconButton}>
-                                <Image
+                                    <Image
                                         className={styles.defaultIcon}
                                         src="/icons/bt_edit_nav_partCapture.svg"
                                         alt="부분 캡처"
@@ -141,14 +139,12 @@ export default function SidebarNav({
                                         height={20}
                                     />
                                     <span className={styles.iconButtonText}>부분캡처</span>
-
                                 </button>
-                                
+
                                 <SummaryButton />
                                 <ExportButton />
                             </div>
                         )}
-
                     </>
                 )}
 
