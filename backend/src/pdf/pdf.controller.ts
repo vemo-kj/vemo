@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Res } from '@nestjs/common';
+import { Controller, Get, Param, Res } from '@nestjs/common';
 import { MemosService } from 'src/memos/memos.service';
 import { Response } from 'express'; // 추가
 import { PdfService } from 'src/pdf/pdf.service';
@@ -16,9 +16,9 @@ export class PdfController {
     async downloadPDF(@Param('memosId') memosId: number, @Res() res: Response) {
         // memosId에 맞춰 title,memo,capture DB에 추출
         const memos = await this.memosService.getMemosById(memosId);
-        const { title, memo, capture } = memos;
+        const { title, memo, captures } = memos;
 
-        const pdfBuffer = await this.pdfService.createMemoCapturePDF(title, memo, capture);
+        const pdfBuffer = await this.pdfService.createMemoCapturePDF(title, memo, captures);
 
         const safeTitle = encodeURIComponent(title);
 
