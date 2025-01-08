@@ -9,7 +9,7 @@ export class MemoController {
     private readonly logger = new Logger(MemosController.name);
 
     constructor(private readonly memoService: MemoService) {}
-
+    // TODO: Memos ID가 필요한거 아닌가? @Post(':memosId')
     @Post()
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
         this.logger.log('------memo 생성(컨트롤러)');

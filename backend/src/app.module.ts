@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './auth/jwt/jwt.guard';
 import { ChannelModule } from './channel/channel.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { MemosModule } from './memos/memos.module';
+import { MemoModule } from './memo/memo.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { UsersModule } from './users/users.module';
 import { VideoModule } from './video/video.module';
@@ -57,6 +58,7 @@ import { MemoModule } from './memo/memo.module';
         SummarizationModule,
         TextExtractionModule,
         PdfModule,
+        MemoModule, 
     ],
     controllers: [AppController],
     providers: [
