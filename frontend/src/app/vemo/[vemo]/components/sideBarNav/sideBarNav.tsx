@@ -136,13 +136,8 @@ export default function SidebarNav({
                 console.error('No videoId available');
                 return;
             }
-
-            const newMemo = await createMemo(videoId);
-            console.log('Created memos:', newMemo);
             console.log('handleWriteClick videoId:', videoId); // 클릭 시점의 videoId 값 확인
-            // const memos = await getMemosById(memosId);
-            // console.log('memos:', memos);
-            // setActiveTab('write');
+            
         } catch (error) {
             console.error('Failed to create memo:', error);
         }
@@ -154,7 +149,10 @@ export default function SidebarNav({
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('write')}
+                    onClick={() => {
+                        setActiveTab('write');
+                        handleWriteClick();
+                    }}
                 >
                     <div className={styles.iconButton}>
                         <Image
