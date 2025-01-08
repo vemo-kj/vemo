@@ -1,278 +1,209 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { Channel } from '../channel/channel.entity';
-// import { CreateMemosDto } from '../memos/dto/create-memos.dto';
-// import { Memos } from '../memos/memos.entity';
-// import { MemosService } from '../memos/memos.service';
-// import { Users } from '../users/users.entity';
-// import { Video } from '../video/video.entity';
-// import { VideoService } from '../video/video.service';
-// import { CreateMemosForVideoResponseDto } from './dto/create-memos-for-video-response.dto';
-// import { HomeResponseDto } from './dto/home-response.dto';
-// import { HomeService } from './home.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
+import { HomeService } from './home.service';
+import { VideoService } from '../video/video.service';
+import { MemosService } from '../memos/memos.service';
+import { PlaylistService } from '../playlist/playlist.service';
+import { Video } from '../video/video.entity';
+import { Channel } from '../channel/channel.entity';
+import { Memos } from '../memos/memos.entity';
+import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto';
+import { PlaylistResponseDto } from '../playlist/dto/playlist-response.dto';
 
-// // 공통 Mock 데이터 생성 함수
-// const createMockUser = (overrides?: Partial<Users>): Users => ({
-//     id: 1,
-//     name: 'User Name',
-//     email: 'user@example.com',
-//     password: 'hashedpassword',
-//     birth: new Date('1990-01-01'),
-//     gender: 'Male',
-//     nickname: 'Nickname', // 필수 속성 추가
-//     profileImage: 'http://example.com/profile.jpg', // 필수 속성 추가
-//     introduction: 'This is a user introduction.', // 필수 속성 추가
-//     memos: [],
-//     playlists: [],
-//     ...overrides,
-// });
+describe('HomeService', () => {
+    let service: HomeService;
+    let videoService: jest.Mocked<VideoService>;
+    let memosService: jest.Mocked<MemosService>;
+    let playlistService: jest.Mocked<PlaylistService>;
 
-// const createMockChannel = (overrides?: Partial<Channel>): Channel => ({
-//     id: 'channel1-id',
-//     thumbnails: 'http://example.com/channel1.jpg',
-//     title: 'Channel One',
-//     videos: [],
-//     ...overrides,
-// });
+    const mockChannel: Channel = {
+        id: 'channel1',
+        title: 'Test Channel',
+        thumbnails: 'channel-thumbnail.jpg',
+        videos: [],
+    };
 
-// const createMockVideo = (overrides?: Partial<Video>): Video => ({
-//     id: 'abcd1234efg',
-//     title: 'Sample Video',
-//     thumbnails: 'http://example.com/thumb.jpg',
-//     duration: '00:05:30',
-//     category: 'Education',
-//     channel: createMockChannel(),
-//     memos: [],
-//     ...overrides,
-// });
+    const mockVideo: Video = {
+        id: 'video1',
+        title: 'Test Video',
+        thumbnails: 'video-thumbnail.jpg',
+        duration: '01:30:00',
+        category: 'Education',
+        channel: mockChannel,
+        playlists: [],
+    };
 
-// const createMockMemos = (overrides?: Partial<Memos>): Memos => ({
-//     id: 1,
-//     title: 'Sample Memo',
-//     description: 'This is a sample memo.',
-//     createdAt: new Date(),
-//     updatedAt: null,
-//     user: createMockUser(),
-//     video: createMockVideo(),
-//     memo: [],
-//     ...overrides,
-// });
+    const mockMemos: Memos = {
+        id: 1,
+        title: 'Test Memo',
+        createdAt: new Date(),
+        user: null,
+        video: mockVideo,
+        memo: [],
+        capture: null,
+    };
 
-// describe('HomeService', () => {
-//     let service: HomeService;
-//     let memosService: MemosService;
-//     let videoService: VideoService;
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                HomeService,
+                {
+                    provide: VideoService,
+                    useValue: {
+                        getVideoData: jest.fn(),
+                        getAllVideos: jest.fn(),
+                    },
+                },
+                {
+                    provide: MemosService,
+                    useValue: {
+                        createMemos: jest.fn(),
+                        getMemosByVideoAndUser: jest.fn(),
+                        getVemoCountByVideo: jest.fn(),
+                    },
+                },
+                {
+                    provide: PlaylistService,
+                    useValue: {
+                        createPlaylist: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
 
-//     // Mock 데이터 정의
-//     const mockVideo: Video = createMockVideo();
+        service = module.get<HomeService>(HomeService);
+        videoService = module.get(VideoService);
+        memosService = module.get(MemosService);
+        playlistService = module.get(PlaylistService);
+    });
 
-//     const mockCreateMemoForVideoResponseDto: CreateMemosForVideoResponseDto = {
-//         video: {
-//             id: mockVideo.id,
-//             title: mockVideo.title,
-//             thumbnails: mockVideo.thumbnails,
-//             channel: {
-//                 id: mockVideo.channel.id, // string 타입
-//                 thumbnails: mockVideo.channel.thumbnails,
-//                 title: mockVideo.channel.title,
-//             },
-//             duration: mockVideo.duration,
-//             category: mockVideo.category,
-//         },
-//         vemoCount: 5,
-//     };
+    describe('createPlaylistWithMemos', () => {
+        it('플레이리스트와 첫 번째 비디오에 대한 메모를 생성해야 한다', async () => {
+            const userId = 1;
+            const createPlaylistDto: CreatePlaylistWithMemosDto = {
+                name: 'Test Playlist',
+                videoIds: ['video1', 'video2'],
+            };
 
-//     // Mock 서비스 정의
-//     const mockMemosService = {
-//         createMemos: jest.fn(),
-//         getVemoCountByVideo: jest.fn(),
-//     };
+            const mockPlaylistResponse: PlaylistResponseDto = {
+                id: 1,
+                name: createPlaylistDto.name,
+                userId: userId,
+                videos: [mockVideo].map(video => ({
+                    id: video.id,
+                    title: video.title,
+                    thumbnails: video.thumbnails,
+                    duration: video.duration,
+                    channel: {
+                        id: video.channel.id,
+                        title: video.channel.title,
+                        thumbnails: video.channel.thumbnails,
+                    },
+                    category: video.category,
+                })),
+            };
 
-//     const mockVideoService = {
-//         getVideoById: jest.fn(),
-//         getAllVideos: jest.fn(),
-//     };
+            playlistService.createPlaylist.mockResolvedValue(mockPlaylistResponse);
+            videoService.getVideoData.mockResolvedValue(mockVideo);
+            memosService.createMemos.mockResolvedValue(mockMemos);
 
-//     beforeEach(async () => {
-//         const module: TestingModule = await Test.createTestingModule({
-//             providers: [
-//                 HomeService,
-//                 {
-//                     provide: MemosService,
-//                     useValue: mockMemosService,
-//                 },
-//                 {
-//                     provide: VideoService,
-//                     useValue: mockVideoService,
-//                 },
-//             ],
-//         }).compile();
+            const result = await service.createPlaylistWithMemos(userId, createPlaylistDto);
 
-//         service = module.get<HomeService>(HomeService);
-//         memosService = module.get<MemosService>(MemosService);
-//         videoService = module.get<VideoService>(VideoService);
-//     });
+            expect(playlistService.createPlaylist).toHaveBeenCalledWith(createPlaylistDto, userId);
+            expect(videoService.getVideoData).toHaveBeenCalledWith(createPlaylistDto.videoIds[0]);
+            expect(memosService.createMemos).toHaveBeenCalledWith(
+                mockVideo.title,
+                createPlaylistDto.videoIds[0],
+                userId,
+            );
+            expect(result).toEqual({
+                playlistId: mockPlaylistResponse.id,
+                videoId: mockVideo.id,
+            });
+        });
+    });
 
-//     afterEach(() => {
-//         jest.clearAllMocks();
-//     });
+    describe('createOrGetLatestMemos', () => {
+        const userId = 1;
+        const videoId = 'video1';
 
-//     describe('createMemosForVideo', () => {
-//         it('비디오가 존재하고, 메모가 성공적으로 생성되어야 한다', async () => {
-//             const videoId = 'abcd1234efg';
-//             const createMemosDto: CreateMemosDto = {
-//                 title: 'New Memo',
-//                 description: 'This is a new memo.',
-//                 userId: 1,
-//                 videoId: videoId, // string 타입
-//             };
+        it('기존 메모가 없을 경우 새로운 메모를 생성해야 한다', async () => {
+            memosService.getMemosByVideoAndUser.mockResolvedValue([]);
+            videoService.getVideoData.mockResolvedValue(mockVideo);
+            memosService.createMemos.mockResolvedValue(mockMemos);
 
-//             // Mock VideoService의 getVideoById 설정
-//             mockVideoService.getVideoById.mockResolvedValue(mockVideo);
+            const result = await service.createOrGetLatestMemos(userId, videoId);
 
-//             // Mock MemosService의 createMemos 설정
-//             const createdMemo: Memos = createMockMemos({
-//                 id: 1,
-//                 title: createMemosDto.title,
-//                 description: createMemosDto.description,
-//                 user: createMockUser({
-//                     id: createMemosDto.userId,
-//                     name: 'User Name',
-//                     email: 'user@example.com',
-//                     password: 'hashedpassword',
-//                     birth: new Date('1990-01-01'),
-//                     gender: 'Male',
-//                     nickname: 'Nickname',
-//                     profileImage: 'http://example.com/profile.jpg',
-//                     introduction: 'This is a user introduction.',
-//                 }),
-//                 video: mockVideo,
-//             });
+            expect(memosService.getMemosByVideoAndUser).toHaveBeenCalledWith(videoId, userId);
+            expect(videoService.getVideoData).toHaveBeenCalledWith(videoId);
+            expect(memosService.createMemos).toHaveBeenCalledWith(mockVideo.title, videoId, userId);
+            expect(result).toEqual({
+                id: mockMemos.id,
+                title: mockMemos.title,
+                createdAt: mockMemos.createdAt,
+            });
+        });
 
-//             mockMemosService.createMemos.mockResolvedValue(createdMemo);
+        it('기존 메모가 있을 경우 최신 메모를 반환해야 한다', async () => {
+            memosService.getMemosByVideoAndUser.mockResolvedValue([mockMemos]);
 
-//             // Mock MemosService의 getVemoCountByVideo 설정
-//             mockMemosService.getVemoCountByVideo.mockResolvedValue(5);
+            const result = await service.createOrGetLatestMemos(userId, videoId);
 
-//             const result = await service.createMemosForVideo(videoId, createMemosDto);
+            expect(memosService.getMemosByVideoAndUser).toHaveBeenCalledWith(videoId, userId);
+            expect(videoService.getVideoData).not.toHaveBeenCalled();
+            expect(memosService.createMemos).not.toHaveBeenCalled();
+            expect(result).toEqual({
+                id: mockMemos.id,
+                title: mockMemos.title,
+                createdAt: mockMemos.createdAt,
+            });
+        });
 
-//             expect(videoService.getVideoById).toHaveBeenCalledWith(videoId);
-//             expect(memosService.createMemos).toHaveBeenCalledWith(createMemosDto, videoId);
-//             expect(memosService.getVemoCountByVideo).toHaveBeenCalledWith(videoId);
-//             expect(result).toEqual(mockCreateMemoForVideoResponseDto);
-//         });
+        it('비디오를 찾을 수 없을 경우 NotFoundException을 던져야 한다', async () => {
+            memosService.getMemosByVideoAndUser.mockResolvedValue([]);
+            videoService.getVideoData.mockRejectedValue(new NotFoundException());
 
-//         it('비디오가 존재하지 않을 경우 NotFoundException을 던져야 한다', async () => {
-//             const videoId = 'nonexistent-video-id';
-//             const createMemosDto: CreateMemosDto = {
-//                 title: 'New Memo',
-//                 description: 'This is a new memo.',
-//                 userId: 1,
-//                 videoId: videoId, // string 타입
-//             };
+            await expect(service.createOrGetLatestMemos(userId, videoId)).rejects.toThrow(
+                NotFoundException,
+            );
+        });
+    });
 
-//             // Mock VideoService의 getVideoById 설정
-//             mockVideoService.getVideoById.mockResolvedValue(null);
+    describe('getAllVideos', () => {
+        it('비디오 목록과 각 비디오의 메모 수를 반환해야 한다', async () => {
+            const mockVideos = [mockVideo];
+            const mockVemoCount = 5;
 
-//             await expect(service.createMemosForVideo(videoId, createMemosDto)).rejects.toThrow(
-//                 `Video with ID ${videoId} not found`,
-//             );
+            videoService.getAllVideos.mockResolvedValue(mockVideos);
+            memosService.getVemoCountByVideo.mockResolvedValue(mockVemoCount);
 
-//             expect(videoService.getVideoById).toHaveBeenCalledWith(videoId);
-//             expect(memosService.createMemos).not.toHaveBeenCalled();
-//             expect(memosService.getVemoCountByVideo).not.toHaveBeenCalled();
-//         });
-//     });
+            const result = await service.getAllVideos(1, 10);
 
-//     describe('getAllVideos', () => {
-//         it('비디오가 존재하고, 메모 수와 함께 비디오 리스트를 반환해야 한다', async () => {
-//             const page = 1;
-//             const limit = 10;
-//             const videos: Video[] = [
-//                 createMockVideo({
-//                     id: 'video1',
-//                     title: 'Video 1',
-//                     thumbnails: 'http://example.com/video1.jpg',
-//                     duration: '00:10:00',
-//                     category: 'Education',
-//                     channel: createMockChannel({
-//                         id: 'channel1-id',
-//                         thumbnails: 'http://example.com/channel1.jpg',
-//                         title: 'Channel One',
-//                     }),
-//                 }),
-//                 createMockVideo({
-//                     id: 'video2',
-//                     title: 'Video 2',
-//                     thumbnails: 'http://example.com/video2.jpg',
-//                     duration: '00:15:00',
-//                     category: 'Entertainment',
-//                     channel: createMockChannel({
-//                         id: 'channel2-id',
-//                         thumbnails: 'http://example.com/channel2.jpg',
-//                         title: 'Channel Two',
-//                     }),
-//                 }),
-//             ];
+            expect(videoService.getAllVideos).toHaveBeenCalledWith(1, 10);
+            expect(memosService.getVemoCountByVideo).toHaveBeenCalledWith(mockVideo.id);
+            expect(result).toEqual({
+                videos: [
+                    {
+                        id: mockVideo.id,
+                        title: mockVideo.title,
+                        thumbnails: mockVideo.thumbnails,
+                        duration: mockVideo.duration,
+                        category: mockVideo.category,
+                        channel: {
+                            id: mockVideo.channel.id,
+                            thumbnails: mockVideo.channel.thumbnails,
+                            title: mockVideo.channel.title,
+                        },
+                        vemoCount: mockVemoCount,
+                    },
+                ],
+            });
+        });
 
-//             // Mock VideoService의 getAllVideos 설정
-//             mockVideoService.getAllVideos.mockResolvedValue(videos);
+        it('비디오가 없을 경우 NotFoundException을 던져야 한다', async () => {
+            videoService.getAllVideos.mockResolvedValue([]);
 
-//             // Mock MemosService의 getVemoCountByVideo 설정
-//             mockMemosService.getVemoCountByVideo.mockResolvedValueOnce(3).mockResolvedValueOnce(5);
-
-//             const expectedResponse: HomeResponseDto = {
-//                 videos: [
-//                     {
-//                         id: 'video1',
-//                         title: 'Video 1',
-//                         thumbnails: 'http://example.com/video1.jpg',
-//                         duration: '00:10:00',
-//                         category: 'Education',
-//                         channel: {
-//                             id: 'channel1-id',
-//                             thumbnails: 'http://example.com/channel1.jpg',
-//                             title: 'Channel One',
-//                         },
-//                         vemoCount: 3,
-//                     },
-//                     {
-//                         id: 'video2',
-//                         title: 'Video 2',
-//                         thumbnails: 'http://example.com/video2.jpg',
-//                         duration: '00:15:00',
-//                         category: 'Entertainment',
-//                         channel: {
-//                             id: 'channel2-id',
-//                             thumbnails: 'http://example.com/channel2.jpg',
-//                             title: 'Channel Two',
-//                         },
-//                         vemoCount: 5,
-//                     },
-//                 ],
-//             };
-
-//             const result = await service.getAllVideos(page, limit);
-
-//             expect(videoService.getAllVideos).toHaveBeenCalledWith(page, limit);
-//             expect(memosService.getVemoCountByVideo).toHaveBeenCalledTimes(videos.length);
-//             expect(memosService.getVemoCountByVideo).toHaveBeenNthCalledWith(1, 'video1');
-//             expect(memosService.getVemoCountByVideo).toHaveBeenNthCalledWith(2, 'video2');
-//             expect(result).toEqual(expectedResponse);
-//         });
-
-//         it('비디오가 존재하지 않을 경우 NotFoundException을 던져야 한다', async () => {
-//             const page = 1;
-//             const limit = 10;
-
-//             // Mock VideoService의 getAllVideos 설정
-//             mockVideoService.getAllVideos.mockResolvedValue([]);
-
-//             await expect(service.getAllVideos(page, limit)).rejects.toThrow(
-//                 '비디오가 존재하지 않습니다.',
-//             );
-
-//             expect(videoService.getAllVideos).toHaveBeenCalledWith(page, limit);
-//             expect(memosService.getVemoCountByVideo).not.toHaveBeenCalled();
-//         });
-//     });
-// });
+            await expect(service.getAllVideos(1, 10)).rejects.toThrow(NotFoundException);
+        });
+    });
+});

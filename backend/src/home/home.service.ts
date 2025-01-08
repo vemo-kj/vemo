@@ -25,7 +25,7 @@ export class HomeService {
 
         const playlist = await this.playlistService.createPlaylist({ name, videoIds }, userId);
 
-        const firstVideo = await this.videoService.getVideoById(videoIds[0]);
+        const firstVideo = await this.videoService.getVideoData(videoIds[0]);
         await this.memosService.createMemos(firstVideo.title, firstVideo.id, userId);
 
         return {
@@ -72,7 +72,7 @@ export class HomeService {
      */
     private async createInitialMemos(userId: number, videoId: string): Promise<Memos> {
         try {
-            const video = await this.videoService.getVideoById(videoId);
+            const video = await this.videoService.getVideoData(videoId);
             return await this.memosService.createMemos(video.title, videoId, userId);
         } catch (error) {
             if (error instanceof NotFoundException) {
@@ -108,7 +108,7 @@ export class HomeService {
         const videos = await this.videoService.getAllVideos(page, limit);
 
         if (!videos.length) {
-            throw new NotFoundException('비디오가 존재하지 않습니다.');
+            return { videos: [] };
         }
 
         // 각 비디오에 대해 메모 수를 계산

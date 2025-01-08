@@ -1,323 +1,201 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { MemosService } from './memos.service';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { Memos } from './memos.entity';
-// import { Repository } from 'typeorm';
-// import { CreateMemosDto } from './dto/create-memos.dto';
-// import { UpdateMemosDto } from './dto/update-memos.dto';
-// import { Users } from '../users/users.entity';
-// import { Video } from '../video/video.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { MemosService } from './memos.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Memos } from './memos.entity';
+import { Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 
-// type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+describe('MemosService', () => {
+    let service: MemosService;
+    let memosRepository: Repository<Memos>;
+    let cacheManager: Cache;
 
-// const createMockRepository = <T = any>(): MockRepository<T> => ({
-//     find: jest.fn(),
-//     findOne: jest.fn(),
-//     create: jest.fn(),
-//     save: jest.fn(),
-//     delete: jest.fn(),
-// });
+    const mockMemos = {
+        id: 1,
+        title: 'Test Memo',
+        video: { id: 'video-id', channel: {} },
+        user: { id: 1 },
+        memo: [],
+        capture: [],
+        createdAt: new Date(),
+    };
 
-// describe('MemosService', () => {
-//     let service: MemosService;
-//     let memosRepository: MockRepository<Memos>;
-//     let userRepository: MockRepository<Users>;
-//     let videoRepository: MockRepository<Video>;
+    const mockMemosRepository = {
+        find: jest.fn(),
+        findOne: jest.fn(),
+        save: jest.fn(),
+        delete: jest.fn(),
+        count: jest.fn(),
+        create: jest.fn(),
+    };
 
-//     beforeEach(async () => {
-//         const module: TestingModule = await Test.createTestingModule({
-//             providers: [
-//                 MemosService,
-//                 {
-//                     provide: getRepositoryToken(Memos),
-//                     useValue: createMockRepository(),
-//                 },
-//                 {
-//                     provide: getRepositoryToken(Users),
-//                     useValue: createMockRepository(),
-//                 },
-//                 {
-//                     provide: getRepositoryToken(Video),
-//                     useValue: createMockRepository(),
-//                 },
-//             ],
-//         }).compile();
+    const mockCacheManager = {
+        get: jest.fn(),
+        set: jest.fn(),
+        del: jest.fn(),
+    };
 
-//         service = module.get<MemosService>(MemosService);
-//         memosRepository = module.get<MockRepository<Memos>>(getRepositoryToken(Memos));
-//         userRepository = module.get<MockRepository<Users>>(getRepositoryToken(Users));
-//         videoRepository = module.get<MockRepository<Video>>(getRepositoryToken(Video));
-//     });
+    const mockConfigService = {
+        get: jest.fn(),
+    };
 
-//     describe('메모 생성', () => {
-//         it('새로운 메모를 성공적으로 생성해야 한다', async () => {
-//             const createMemosDto: CreateMemosDto = {
-//                 title: '테스트 메모',
-//                 description: '메모 설명',
-//                 userId: 1,
-//             };
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                MemosService,
+                {
+                    provide: getRepositoryToken(Memos),
+                    useValue: mockMemosRepository,
+                },
+                {
+                    provide: CACHE_MANAGER,
+                    useValue: mockCacheManager,
+                },
+                {
+                    provide: ConfigService,
+                    useValue: mockConfigService,
+                },
+            ],
+        }).compile();
 
-//             const videoId = 'video_id'; // 별도로 전달할 videoId
+        service = module.get<MemosService>(MemosService);
+        memosRepository = module.get<Repository<Memos>>(getRepositoryToken(Memos));
+        cacheManager = module.get(CACHE_MANAGER);
+    });
 
-//             const user: Users = { id: 1 } as Users;
-//             const video: Video = { id: videoId } as Video;
+    describe('createMemos', () => {
+        it('메모를 성공적으로 생성해야 한다', async () => {
+            const title = 'Test Memo';
+            const videoId = 'test-video-id';
+            const userId = 1;
 
-//             const createdMemos: Memos = {
-//                 id: 1,
-//                 title: createMemosDto.title,
-//                 description: createMemosDto.description,
-//                 createdAt: new Date(),
-//                 updatedAt: null,
-//                 user: user,
-//                 video: video,
-//                 memo: [],
-//             };
+            mockMemosRepository.save.mockResolvedValue({ id: 1 });
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
 
-//             // 모킹된 리포지토리의 메서드 동작 정의
-//             userRepository.findOne.mockResolvedValue(user);
-//             videoRepository.findOne.mockResolvedValue(video);
-//             memosRepository.create.mockReturnValue(createdMemos);
-//             memosRepository.save.mockResolvedValue(createdMemos);
+            const result = await service.createMemos(title, videoId, userId);
 
-//             // 서비스 메서드 호출 시, CreateMemosDto와 videoId를 함께 전달
-//             const result = await service.createMemos({ ...createMemosDto, videoId });
+            expect(mockMemosRepository.save).toHaveBeenCalledWith({
+                title,
+                video: { id: videoId },
+                user: { id: userId },
+            });
+            expect(result).toEqual(mockMemos);
+        });
 
-//             // 호출된 메서드 검증
-//             expect(userRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: createMemosDto.userId },
-//             });
-//             expect(videoRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: videoId },
-//             });
-//             expect(memosRepository.create).toHaveBeenCalledWith({
-//                 title: createMemosDto.title,
-//                 description: createMemosDto.description,
-//                 user: user,
-//                 video: video,
-//             });
-//             expect(memosRepository.save).toHaveBeenCalledWith(createdMemos);
+        it('메모 생성 실패 시 InternalServerErrorException을 던져야 한다', async () => {
+            mockMemosRepository.save.mockRejectedValue(new Error('DB Error'));
 
-//             // 결과 검증
-//             expect(result).toEqual(createdMemos);
-//         });
+            await expect(service.createMemos('title', 'videoId', 1)).rejects.toThrow(
+                InternalServerErrorException,
+            );
+        });
+    });
 
-//         it('존재하지 않는 사용자 ID로 메모를 생성하려 할 때 예외를 던져야 한다', async () => {
-//             const createMemosDto: CreateMemosDto = {
-//                 title: '테스트 메모',
-//                 description: '메모 설명',
-//                 userId: 999,
-//             };
+    describe('getVemoCountByVideo', () => {
+        it('캐시된 메모 수가 있으면 캐시에서 반환해야 한다', async () => {
+            const videoId = 'test-video-id';
+            const cachedCount = 5;
 
-//             const videoId = 'video_id';
+            mockCacheManager.get.mockResolvedValue(cachedCount);
 
-//             userRepository.findOne.mockResolvedValue(undefined);
+            const result = await service.getVemoCountByVideo(videoId);
 
-//             await expect(service.createMemos({ ...createMemosDto, videoId })).rejects.toThrow(
-//                 `User with ID ${createMemosDto.userId} not found`,
-//             );
-//             expect(userRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: createMemosDto.userId },
-//             });
-//         });
+            expect(mockCacheManager.get).toHaveBeenCalledWith(`vemo:count:${videoId}`);
+            expect(memosRepository.count).not.toHaveBeenCalled();
+            expect(result).toBe(cachedCount);
+        });
 
-//         it('존재하지 않는 비디오 ID로 메모를 생성하려 할 때 예외를 던져야 한다', async () => {
-//             const createMemosDto: CreateMemosDto = {
-//                 title: '테스트 메모',
-//                 description: '메모 설명',
-//                 userId: 1,
-//             };
+        it('캐시 미스 시 DB에서 조회하고 캐시에 저장해야 한다', async () => {
+            const videoId = 'test-video-id';
+            const dbCount = 5;
 
-//             const videoId = 'non-existent-video-id';
+            mockCacheManager.get.mockResolvedValue(undefined);
+            mockMemosRepository.count.mockResolvedValue(dbCount);
 
-//             const user: Users = { id: 1 } as Users;
-//             userRepository.findOne.mockResolvedValue(user);
-//             videoRepository.findOne.mockResolvedValue(undefined);
+            const result = await service.getVemoCountByVideo(videoId);
 
-//             await expect(service.createMemos({ ...createMemosDto, videoId })).rejects.toThrow(
-//                 `Video with ID ${videoId} not found`,
-//             );
-//             expect(userRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: createMemosDto.userId },
-//             });
-//             expect(videoRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: videoId },
-//             });
-//         });
-//     });
+            expect(memosRepository.count).toHaveBeenCalledWith({
+                where: { video: { id: videoId } },
+            });
+            expect(mockCacheManager.set).toHaveBeenCalledWith(
+                `vemo:count:${videoId}`,
+                dbCount,
+                3600,
+            );
+            expect(result).toBe(dbCount);
+        });
+    });
 
-//     describe('사용자별 메모 조회', () => {
-//         it('특정 사용자의 모든 메모를 성공적으로 조회해야 한다', async () => {
-//             const userId = 1;
-//             const memosList: Memos[] = [
-//                 {
-//                     id: 1,
-//                     title: '메모1',
-//                     description: '설명1',
-//                     createdAt: new Date(),
-//                     updatedAt: null,
-//                     user: { id: userId } as Users,
-//                     video: { id: 'video-1' } as Video,
-//                     memo: [],
-//                 },
-//                 {
-//                     id: 2,
-//                     title: '메모2',
-//                     description: '설명2',
-//                     createdAt: new Date(),
-//                     updatedAt: null,
-//                     user: { id: userId } as Users,
-//                     video: { id: 'video-2' } as Video,
-//                     memo: [],
-//                 },
-//             ];
+    describe('getMemosByVideoAndUser', () => {
+        it('특정 비디오와 사용자의 메모를 조회해야 한다', async () => {
+            const videoId = 'test-video-id';
+            const userId = 1;
+            const mockMemosList = [mockMemos];
 
-//             memosRepository.find.mockResolvedValue(memosList);
+            mockMemosRepository.find.mockResolvedValue(mockMemosList);
 
-//             const result = await service.getAllMemosByUser(userId);
-//             expect(memosRepository.find).toHaveBeenCalledWith({
-//                 where: { user: { id: userId } },
-//                 relations: ['video', 'memos'],
-//             });
-//             expect(result).toEqual(memosList);
-//         });
-//     });
+            const result = await service.getMemosByVideoAndUser(videoId, userId);
 
-//     describe('비디오별 메모 조회', () => {
-//         it('특정 비디오의 모든 메모를 성공적으로 조회해야 한다', async () => {
-//             const videoId = 'video-uuid';
-//             const memosList: Memos[] = [
-//                 {
-//                     id: 1,
-//                     title: '메모1',
-//                     description: '설명1',
-//                     createdAt: new Date(),
-//                     updatedAt: null,
-//                     user: { id: 1 } as Users,
-//                     video: { id: videoId } as Video,
-//                     memo: [],
-//                 },
-//             ];
+            expect(memosRepository.find).toHaveBeenCalledWith({
+                where: {
+                    video: { id: videoId },
+                    user: { id: userId },
+                },
+                relations: ['user', 'video', 'video.channel', 'memo', 'capture'],
+                order: { createdAt: 'DESC' },
+            });
+            expect(result).toEqual(mockMemosList);
+        });
 
-//             memosRepository.find.mockResolvedValue(memosList);
+        it('조회 중 에러가 발생하면 InternalServerErrorException을 던져야 한다', async () => {
+            mockMemosRepository.find.mockRejectedValue(new Error('DB Error'));
 
-//             const result = await service.getAllMemosByVideo(videoId);
-//             expect(memosRepository.find).toHaveBeenCalledWith({
-//                 where: { video: { id: videoId } },
-//                 relations: ['user', 'video', 'memos'],
-//             });
-//             expect(result).toEqual(memosList);
-//         });
-//     });
+            await expect(service.getMemosByVideoAndUser('videoId', 1)).rejects.toThrow(
+                InternalServerErrorException,
+            );
+        });
+    });
 
-//     describe('메모 ID로 조회', () => {
-//         it('존재하는 메모 ID로 메모를 성공적으로 조회해야 한다', async () => {
-//             const memosId = 1;
-//             const memos: Memos = {
-//                 id: memosId,
-//                 title: '메모1',
-//                 description: '설명1',
-//                 createdAt: new Date(),
-//                 updatedAt: null,
-//                 user: { id: 1 } as Users,
-//                 video: { id: 'video-uuid' } as Video,
-//                 memo: [],
-//             };
+    describe('deleteMemos', () => {
+        it('메모를 삭제해야 한다', async () => {
+            const memosId = 1;
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
+            mockMemosRepository.delete.mockResolvedValue({ affected: 1 });
 
-//             memosRepository.findOne.mockResolvedValue(memos);
+            await service.deleteMemos(memosId);
 
-//             const result = await service.getMemosById(memosId);
-//             expect(memosRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: memosId },
-//                 relations: ['user', 'video', 'memos'],
-//             });
-//             expect(result).toEqual(memos);
-//         });
+            expect(memosRepository.delete).toHaveBeenCalledWith(memosId);
+            expect(mockCacheManager.del).toHaveBeenCalledWith(`vemo:count:${mockMemos.video.id}`);
+        });
 
-//         it('존재하지 않는 메모 ID로 조회 시 예외를 던져야 한다', async () => {
-//             const memosId = 999;
-//             memosRepository.findOne.mockResolvedValue(undefined);
+        it('존재하지 않는 메모를 삭제하려고 하면 NotFoundException을 던져야 한다', async () => {
+            const memosId = 999;
+            mockMemosRepository.findOne.mockResolvedValue(null);
 
-//             await expect(service.getMemosById(memosId)).rejects.toThrow(
-//                 `Memos with ID ${memosId} not found`,
-//             );
-//             expect(memosRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: memosId },
-//                 relations: ['user', 'video', 'memos'],
-//             });
-//         });
-//     });
+            await expect(service.deleteMemos(memosId)).rejects.toThrow(NotFoundException);
+        });
+    });
 
-//     describe('메모 업데이트', () => {
-//         it('존재하는 메모를 성공적으로 업데이트해야 한다', async () => {
-//             const memosId = 1;
-//             const updateMemosDto: UpdateMemosDto = {
-//                 title: '업데이트된 제목',
-//                 description: '업데이트된 설명',
-//             };
+    describe('getMemosById', () => {
+        it('ID로 메모를 조회해야 한다', async () => {
+            mockMemosRepository.findOne.mockResolvedValue(mockMemos);
 
-//             const existingMemos: Memos = {
-//                 id: memosId,
-//                 title: '기존 제목',
-//                 description: '기존 설명',
-//                 createdAt: new Date(),
-//                 updatedAt: null,
-//                 user: { id: 1 } as Users,
-//                 video: { id: 'video-uuid' } as Video,
-//                 memo: [],
-//             };
+            const result = await service.getMemosById(1);
 
-//             const updatedMemos: Memos = {
-//                 ...existingMemos,
-//                 ...updateMemosDto,
-//                 updatedAt: new Date(),
-//             };
+            expect(memosRepository.findOne).toHaveBeenCalledWith({
+                where: { id: 1 },
+                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+            });
+            expect(result).toEqual(mockMemos);
+        });
 
-//             memosRepository.findOne.mockResolvedValue(existingMemos);
-//             memosRepository.save.mockResolvedValue(updatedMemos);
+        it('존재하지 않는 메모를 조회하면 NotFoundException을 던져야 한다', async () => {
+            mockMemosRepository.findOne.mockResolvedValue(null);
 
-//             const result = await service.updateMemos(memosId, updateMemosDto);
-//             expect(memosRepository.findOne).toHaveBeenCalledWith({ where: { id: memosId } });
-//             expect(Object.assign(existingMemos, updateMemosDto)).toEqual({
-//                 ...existingMemos,
-//                 ...updateMemosDto,
-//             });
-//             expect(memosRepository.save).toHaveBeenCalledWith(existingMemos);
-//             expect(result).toEqual(updatedMemos);
-//         });
-
-//         it('존재하지 않는 메모를 업데이트하려 할 때 예외를 던져야 한다', async () => {
-//             const memosId = 999;
-//             const updateMemosDto: UpdateMemosDto = {
-//                 title: '업데이트된 제목',
-//                 description: '업데이트된 설명',
-//             };
-
-//             memosRepository.findOne.mockResolvedValue(undefined);
-
-//             await expect(service.updateMemos(memosId, updateMemosDto)).rejects.toThrow(
-//                 `Memos with ID ${memosId} not found`,
-//             );
-//             expect(memosRepository.findOne).toHaveBeenCalledWith({ where: { id: memosId } });
-//         });
-//     });
-
-//     describe('메모 삭제', () => {
-//         it('존재하는 메모를 성공적으로 삭제해야 한다', async () => {
-//             const memosId = 1;
-//             memosRepository.delete.mockResolvedValue({ affected: 1 });
-
-//             await service.deleteMemos(memosId);
-//             expect(memosRepository.delete).toHaveBeenCalledWith(memosId);
-//         });
-
-//         it('존재하지 않는 메모를 삭제하려 할 때 예외를 던져야 한다', async () => {
-//             const memosId = 999;
-//             memosRepository.delete.mockResolvedValue({ affected: 0 });
-
-//             await expect(service.deleteMemos(memosId)).rejects.toThrow(
-//                 `Memos with ID ${memosId} not found`,
-//             );
-//             expect(memosRepository.delete).toHaveBeenCalledWith(memosId);
-//         });
-//     });
-// });
+            await expect(service.getMemosById(999)).rejects.toThrow(NotFoundException);
+        });
+    });
+});

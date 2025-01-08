@@ -1,179 +1,214 @@
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { getRepositoryToken } from '@nestjs/typeorm';
-// import { NotFoundException } from '@nestjs/common';
-// import { Repository } from 'typeorm';
-// import { VideoService } from './video.service';
-// import { ChannelService } from '../channel/channel.service';
-// import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
-// import { Video } from './video.entity';
-// import { Channel } from '../channel/channel.entity';
+import { Test, TestingModule } from '@nestjs/testing';
+import { VideoService } from './video.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Video } from './video.entity';
+import { Repository } from 'typeorm';
+import { YoutubeAuthService } from '../youtubeauth/youtube-auth.service';
+import { ChannelService } from '../channel/channel.service';
+import { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
+import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
-// const mockVideoRepository = {
-//     findOne: jest.fn(),
-//     create: jest.fn(),
-//     save: jest.fn(),
-//     find: jest.fn(),
-// };
+describe('VideoService', () => {
+    let service: VideoService;
+    let videoRepository: Repository<Video>;
+    let channelService: ChannelService;
+    let cacheManager: Cache;
+    let mockRedisClient: any;
 
-// const mockYoutubeauthService = {
-//     ensureAuthenticated: jest.fn(),
-//     youtube: {
-//         videos: {
-//             list: jest.fn(),
-//         },
-//     },
-// };
+    beforeEach(async () => {
+        mockRedisClient = {
+            zscore: jest.fn().mockImplementation(() => Promise.resolve('5')),
+            zadd: jest.fn().mockImplementation(() => Promise.resolve('1')),
+            zrevrange: jest.fn().mockImplementation(() => Promise.resolve([])),
+        };
 
-// const mockChannelService = {
-//     getChannel: jest.fn(),
-// };
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                VideoService,
+                {
+                    provide: getRepositoryToken(Video),
+                    useValue: {
+                        findOne: jest.fn(),
+                        create: jest.fn(),
+                        save: jest.fn(),
+                    },
+                },
+                {
+                    provide: YoutubeAuthService,
+                    useValue: {
+                        youtube: {
+                            videos: {
+                                list: jest.fn(),
+                            },
+                        },
+                    },
+                },
+                {
+                    provide: ChannelService,
+                    useValue: {
+                        getChannel: jest.fn(),
+                    },
+                },
+                {
+                    provide: CACHE_MANAGER,
+                    useValue: {
+                        get: jest.fn(),
+                        set: jest.fn(),
+                    },
+                },
+                {
+                    provide: ConfigService,
+                    useValue: {
+                        get: jest.fn(),
+                    },
+                },
+            ],
+        }).compile();
 
-// describe('VideoService', () => {
-//     let service: VideoService;
-//     let videoRepository: jest.Mocked<Repository<Video>>;
-//     let youtubeauthService: typeof mockYoutubeauthService;
-//     let channelService: typeof mockChannelService;
+        service = module.get<VideoService>(VideoService);
+        videoRepository = module.get<Repository<Video>>(getRepositoryToken(Video));
+        channelService = module.get<ChannelService>(ChannelService);
+        cacheManager = module.get(CACHE_MANAGER);
 
-//     beforeEach(async () => {
-//         const module: TestingModule = await Test.createTestingModule({
-//             providers: [
-//                 VideoService,
-//                 { provide: getRepositoryToken(Video), useValue: mockVideoRepository },
-//                 { provide: YoutubeAuthService, useValue: mockYoutubeauthService },
-//                 { provide: ChannelService, useValue: mockChannelService },
-//             ],
-//         }).compile();
+        // Redis 클라이언트 설정
+        Object.defineProperty(service, 'redisClient', {
+            value: mockRedisClient,
+            writable: true,
+            configurable: true,
+        });
+    });
 
-//         service = module.get<VideoService>(VideoService);
-//         videoRepository = module.get(getRepositoryToken(Video));
-//         youtubeauthService = module.get(YoutubeAuthService);
-//         channelService = module.get(ChannelService);
-//     });
+    describe('비디오 요청 카운트 증가', () => {
+        it('비디오 요청 시 카운트가 증가해야 한다', async () => {
+            const videoId = 'test-video-id';
+            mockRedisClient.zscore.mockImplementation(() => Promise.resolve('5'));
+            mockRedisClient.zadd.mockImplementation(() => Promise.resolve('1'));
 
-//     afterEach(() => {
-//         jest.clearAllMocks();
-//     });
+            await service.incrementVideoRequestCount(videoId);
 
-//     describe('getVideoById', () => {
-//         it('DB에 비디오가 존재하면 해당 비디오를 반환해야 한다', async () => {
-//             const mockChannel: Channel = {
-//                 id: '456',
-//                 thumbnails: 'channel-thumbnail',
-//                 title: 'Test Channel',
-//                 videos: [],
-//             };
+            expect(mockRedisClient.zscore).toHaveBeenCalledWith('video:requestCounts', videoId);
+            expect(mockRedisClient.zadd).toHaveBeenCalledWith('video:requestCounts', 6, videoId);
+        });
 
-//             const mockVideo: Video = {
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '00:10:00',
-//                 category: 'Test Category',
-//                 playlists: [],
-//                 channel: mockChannel,
-//             };
-//             videoRepository.findOne.mockResolvedValue(mockVideo);
+        it('Redis 오류 발생 시 서버 에러를 반환해야 한다', async () => {
+            const videoId = 'test-video-id';
+            mockRedisClient.zscore.mockImplementation(() =>
+                Promise.reject(new Error('Redis Error')),
+            );
 
-//             const result = await service.getVideoById('123');
+            await expect(service.incrementVideoRequestCount(videoId)).rejects.toThrow(
+                InternalServerErrorException,
+            );
+        });
+    });
 
-//             expect(result).toEqual(mockVideo);
-//             expect(videoRepository.findOne).toHaveBeenCalledWith({
-//                 where: { id: '123' },
-//                 relations: ['channel'],
-//             });
-//         });
+    describe('비디오 데이터 조회', () => {
+        it('캐시된 데이터가 있으면 캐시에서 반환해야 한다', async () => {
+            const videoId = 'cached-video';
+            const cachedData = { id: videoId, title: '캐시된 비디오' };
+            jest.spyOn(cacheManager, 'get').mockImplementation(() => Promise.resolve(cachedData));
 
-//         it('DB에 비디오가 없을 경우 YouTube에서 데이터를 가져와야 한다', async () => {
-//             videoRepository.findOne.mockResolvedValue(null);
-//             youtubeauthService.youtube.videos.list.mockResolvedValue({
-//                 data: {
-//                     items: [
-//                         {
-//                             id: '123',
-//                             snippet: {
-//                                 title: 'Test Video',
-//                                 channelId: '456',
-//                                 thumbnails: { high: { url: 'test-thumbnail' } },
-//                                 categoryId: '789',
-//                             },
-//                             contentDetails: {
-//                                 duration: 'PT1H2M3S',
-//                             },
-//                         },
-//                     ],
-//                 },
-//             });
-//             channelService.getChannel.mockResolvedValue({
-//                 id: '456',
-//                 thumbnails: 'channel-thumbnail',
-//                 title: 'Test Channel',
-//             });
-//             videoRepository.create.mockReturnValue({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             } as Video);
-//             videoRepository.save.mockResolvedValue({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             } as Video);
+            const result = await service.getVideoData(videoId);
 
-//             const result = await service.getVideoById('123');
+            expect(result).toEqual(cachedData);
+            expect(videoRepository.findOne).not.toHaveBeenCalled();
+        });
 
-//             expect(result).toEqual({
-//                 id: '123',
-//                 title: 'Test Video',
-//                 thumbnails: 'test-thumbnail',
-//                 duration: '01:02:03',
-//                 category: '789',
-//                 playlists: [],
-//                 channel: {
-//                     id: '456',
-//                     thumbnails: 'channel-thumbnail',
-//                     title: 'Test Channel',
-//                 },
-//             });
-//             expect(youtubeauthService.youtube.videos.list).toHaveBeenCalledWith({
-//                 part: ['snippet', 'contentDetails', 'statistics'],
-//                 id: ['123'],
-//             });
-//             expect(videoRepository.save).toHaveBeenCalled();
-//         });
+        it('캐시 미스 시 DB에서 조회하고 캐시에 저장해야 한다', async () => {
+            const videoId = 'non-cached-video';
+            const dbVideo = { id: videoId, title: 'DB 비디오' };
 
-//         it('YouTube에서 비디오를 찾을 수 없을 경우 예외를 발생시켜야 한다', async () => {
-//             videoRepository.findOne.mockResolvedValue(null);
-//             youtubeauthService.youtube.videos.list.mockResolvedValue({ data: { items: [] } });
+            jest.spyOn(cacheManager, 'get').mockImplementation(() => Promise.resolve(null));
+            jest.spyOn(service as any, 'findVideoInDatabase').mockImplementation(() =>
+                Promise.resolve(dbVideo),
+            );
 
-//             await expect(service.getVideoById('123')).rejects.toThrow(NotFoundException);
-//         });
-//     });
+            const result = await service.getVideoData(videoId);
 
-//     describe('parseDuration', () => {
-//         it('ISO 8601 형식의 duration을 올바르게 파싱해야 한다', () => {
-//             const result = service['parseDuration']('PT1H2M3S');
-//             expect(result).toEqual('01:02:03');
-//         });
+            expect(result.id).toEqual(videoId);
+            expect(cacheManager.set).toHaveBeenCalled();
+        });
 
-//         it('누락된 시간 단위를 처리할 수 있어야 한다', () => {
-//             const result = service['parseDuration']('PT45M');
-//             expect(result).toEqual('00:45:00');
-//         });
-//     });
-// });
+        it('DB에 없는 비디오는 YouTube API에서 가져와야 한다', async () => {
+            const videoId = 'youtube-video';
+            const youtubeData = {
+                id: videoId,
+                snippet: { title: 'YouTube 비디오' },
+                contentDetails: { duration: 'PT1H' },
+            };
+            const savedVideo = { id: videoId, title: 'YouTube 비디오' };
+
+            jest.spyOn(cacheManager, 'get').mockImplementation(() => Promise.resolve(null));
+            jest.spyOn(service as any, 'findVideoInDatabase').mockImplementation(() =>
+                Promise.resolve(null),
+            );
+            jest.spyOn(service as any, 'fetchVideoFromYouTube').mockImplementation(() =>
+                Promise.resolve(youtubeData),
+            );
+            jest.spyOn(service as any, 'createAndSaveVideo').mockImplementation(() =>
+                Promise.resolve(savedVideo),
+            );
+
+            const result = await service.getVideoData(videoId);
+
+            expect(result).toEqual(savedVideo);
+            expect(service['fetchVideoFromYouTube']).toHaveBeenCalledWith(videoId);
+            expect(service['createAndSaveVideo']).toHaveBeenCalledWith(youtubeData);
+        });
+
+        it('존재하지 않는 비디오 ID로 요청 시 NotFoundException을 던져야 한다', async () => {
+            const videoId = 'non-existent';
+            jest.spyOn(cacheManager, 'get').mockImplementation(() => Promise.resolve(null));
+            jest.spyOn(service as any, 'findVideoInDatabase').mockImplementation(() =>
+                Promise.resolve(null),
+            );
+            jest.spyOn(service as any, 'fetchVideoFromYouTube').mockImplementation(() =>
+                Promise.resolve(null),
+            );
+
+            await expect(service.getVideoData(videoId)).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe('인기 비디오 조회', () => {
+        it('가장 많이 요청된 상위 비디오를 반환해야 한다', async () => {
+            const topVideos = ['video1', 'video2', 'video3'];
+            mockRedisClient.zrevrange.mockImplementation(() => Promise.resolve(topVideos));
+
+            const result = await service.getTopRequestedVideos(3);
+
+            expect(result).toEqual(topVideos);
+            expect(mockRedisClient.zrevrange).toHaveBeenCalledWith('video:requestCounts', 0, 2);
+        });
+
+        it('Redis 오류 발생 시 서버 에러를 반환해야 한다', async () => {
+            mockRedisClient.zrevrange.mockImplementation(() =>
+                Promise.reject(new Error('Redis Error')),
+            );
+
+            await expect(service.getTopRequestedVideos(3)).rejects.toThrow(
+                InternalServerErrorException,
+            );
+        });
+    });
+
+    describe('캐시 갱신', () => {
+        it('상위 요청된 비디오들의 캐시를 갱신해야 한다', async () => {
+            const topVideos = ['video1', 'video2'];
+            const videoData = { id: 'video1', title: '인기 비디오' };
+
+            mockRedisClient.zrevrange.mockImplementation(() => Promise.resolve(topVideos));
+            jest.spyOn(service, 'getVideoData').mockImplementation(() =>
+                Promise.resolve(videoData),
+            );
+
+            await service.cacheTopRequestedVideos();
+
+            expect(service.getVideoData).toHaveBeenCalledTimes(topVideos.length);
+            expect(service.getVideoData).toHaveBeenCalledWith(topVideos[0]);
+        });
+    });
+});

@@ -6,8 +6,8 @@ export class Captures {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('datetime')
-    timestamp: Date;
+    @Column('time')
+    timestamp: string;
 
     @Column({ nullable: true }) // 업로드된 이미지 URL 저장
     image: string;
