@@ -1,5 +1,5 @@
 // components/DrawingCanvas/DrawingCanvas.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styles from './DrawingCanvas.module.css';
 import { ReactSketchCanvasRef } from 'react-sketch-canvas';
 import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴포넌트 임포트
@@ -29,6 +29,11 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [brushType, setBrushType] = useState<BrushType>('pen');
   const [opacity, setOpacity] = useState(1);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isMovingMode, setIsMovingMode] = useState(false);
 
   const canvasWidth = 1280;
   const canvasHeight = 720;
@@ -57,13 +62,31 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     { type: 'eraser', name: '지우개', icon: '🧽', width: 20, opacity: 1 },
   ];
 
+  const getStrokeColor = () => {
+    if (brushType === 'eraser') {
+      return 'transparent';
+    }
+    if (brushType === 'highlighter') {
+      // RGBA 색상으로 변환하여 투명도 적용
+      const r = parseInt(strokeColor.slice(1, 3), 16);
+      const g = parseInt(strokeColor.slice(3, 5), 16);
+      const b = parseInt(strokeColor.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return strokeColor;
+  };
+
   const handleBrushChange = (preset: typeof brushPresets[0]) => {
     setBrushType(preset.type as BrushType);
     setStrokeWidth(preset.width);
-    setOpacity(preset.opacity);
-
+    
     if (preset.type === 'eraser') {
-      setStrokeColor('#FFFFFF'); // 지우개일 때 색상을 흰색으로 설정
+      canvasRef.current?.eraseMode(true); // eraseMode 활성화
+      setStrokeColor('transparent');
+    } else {
+      canvasRef.current?.eraseMode(false); // eraseMode 비활성화
+      setStrokeColor('#000000');
+      setOpacity(preset.opacity);
     }
   };
 
@@ -78,6 +101,60 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     }
     onClose();
   };
+
+  // 확대/축소 핸들러
+  const handleZoom = (type: 'in' | 'out') => {
+    setScale(prevScale => {
+      const newScale = type === 'in' ? prevScale * 1.2 : prevScale / 1.2;
+      return Math.min(Math.max(newScale, 0.5), 3);
+    });
+  };
+
+  // 마우스 이벤트 핸들러
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMovingMode && e.button === 0) { // 이동 모드이고 왼쪽 버튼일 때
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+      e.preventDefault(); // 그리기 방지
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && isMovingMode) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // 스페이스바 누를 때 이동 모드 활성화
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsMovingMode(true);
+        e.preventDefault(); // 페이지 스크롤 방지
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsMovingMode(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
     return (
         <div className={styles.drawingContainer}>
