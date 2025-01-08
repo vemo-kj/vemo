@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, forwardRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { Editor as DraftEditor, EditorState, RichUtils } from 'draft-js';
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
@@ -48,7 +48,7 @@ const validateBase64Image = (base64String: string) => {
         length: base64String?.length,
         startsWithData: base64String?.startsWith('data:'),
         containsBase64: base64String?.includes('base64'),
-        firstChars: base64String?.substring(0, 50) + '...'
+        firstChars: base64String?.substring(0, 50) + '...',
     });
 
     if (!base64String || typeof base64String !== 'string') {
@@ -120,7 +120,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     eventTimestamp: new Date().toISOString(),
                     hasToken: !!token,
                     timestamp,
-                    imageUrlValid: validateBase64Image(imageUrl)
+                    imageUrlValid: validateBase64Image(imageUrl),
                 });
 
                 if (props.onPauseVideo) {
@@ -130,7 +130,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: true
+                    [timestamp]: true,
                 }));
 
                 if (!imageUrl || typeof imageUrl !== 'string') {
@@ -138,21 +138,24 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 }
 
                 console.log('[Capture Event] Creating memo - videoId:', props.videoId);
-                const memosResponse = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                const memosResponse = await fetch(
+                    `http://localhost:5050/home/memos/${props.videoId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
                     },
-                    credentials: 'include'
-                });
+                );
 
                 if (!memosResponse.ok) {
                     const errorText = await memosResponse.text();
                     console.error('[Capture Event] Failed to create memo:', {
                         status: memosResponse.status,
                         statusText: memosResponse.statusText,
-                        body: errorText
+                        body: errorText,
                     });
                     throw new Error('[Capture Event] Failed to create memo');
                 }
@@ -169,7 +172,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 // 캡처 저장
                 console.log('[Capture Event] Saving capture:', {
                     timestamp: date,
-                    memosId: memosData.id
+                    memosId: memosData.id,
                 });
 
                 const compressedImage = await compressImage(imageUrl);
@@ -179,19 +182,19 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 const captureResponse = await fetch(`http://localhost:5050/captures`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         timestamp: date.toISOString(),
                         image: compressedImage,
-                        memos: { id: memosData.id }
-                    })
+                        memosId: memosData.id,
+                    }),
                 });
 
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: false
+                    [timestamp]: false,
                 }));
 
                 if (!captureResponse.ok) {
@@ -199,7 +202,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     console.error('[Capture Event] Failed to save capture:', {
                         status: captureResponse.status,
                         statusText: captureResponse.statusText,
-                        body: errorText
+                        body: errorText,
                     });
                     throw new Error('[Capture Event] Failed to save capture');
                 }
@@ -216,9 +219,15 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 // 이미지 데이터가 base64 형식인지 확인
                 if (!processedImageUrl.startsWith('data:image')) {
-                    console.log('[Capture Event] Adding image data prefix:', processedImageUrl.substring(0, 100));
+                    console.log(
+                        '[Capture Event] Adding image data prefix:',
+                        processedImageUrl.substring(0, 100),
+                    );
                     processedImageUrl = `data:image/png;base64,${processedImageUrl}`;
-                    console.log('[Capture Event] Image data prefix added:', processedImageUrl.substring(0, 100));
+                    console.log(
+                        '[Capture Event] Image data prefix added:',
+                        processedImageUrl.substring(0, 100),
+                    );
                 }
 
                 // 로컬 상태 업데이트
@@ -233,18 +242,17 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     id: newItem.id,
                     timestamp: newItem.timestamp,
                     screenshotLength: newItem.screenshot?.length || 0,
-                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot'
+                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot',
                 });
 
                 setSections(prev => [...prev, newItem]);
                 console.log('[Capture Event] Section update completed');
                 props.onMemoSaved?.();
-
             } catch (error) {
                 console.error('[Capture Event] Error in capture process:', error);
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: false
+                    [timestamp]: false,
                 }));
                 throw error;
             }
@@ -265,13 +273,25 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const html = convertToHTML(contentState);
             const timestamp = props.getTimestamp();
 
-            const response = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
+            const [minutes, seconds] = timestamp.split(':').map(Number);
+            const date = new Date();
+            date.setMinutes(minutes);
+            date.setSeconds(seconds);
+
+            const requestData = {
+                timestamp: date.toISOString(),
+                description: html,
+                memosId: 4, //TODO: props.memosId
+            };
+
+            const response = await fetch(`http://localhost:5050/memo/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                credentials: 'include'
+                credentials: 'include',
+                body: JSON.stringify(requestData),
             });
 
             if (!response.ok) {
@@ -279,7 +299,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.error('서버 응답:', {
                     status: response.status,
                     statusText: response.statusText,
-                    body: errorText
+                    body: errorText,
                 });
                 throw new Error('메모 저장에 실패했습니다.');
             }
@@ -297,7 +317,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
             setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
-
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -342,7 +361,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         htmlContent={item.htmlContent}
                         screenshot={item.screenshot}
                         onTimestampClick={props.onTimestampClick}
-                        onChangeHTML={(newHTML) => handleChangeItem(item.id, newHTML)}
+                        onChangeHTML={newHTML => handleChangeItem(item.id, newHTML)}
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
@@ -358,7 +377,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 <div className={styles.toolbar}>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
                         }}
@@ -367,7 +386,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     </button>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('ITALIC') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('ITALIC');
                         }}
@@ -376,7 +395,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     </button>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('UNDERLINE') ? styles.activeButton : ''}`}
-                        onMouseDown={(e) => {
+                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('UNDERLINE');
                         }}

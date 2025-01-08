@@ -23,6 +23,7 @@ import { VideoModule } from './video/video.module';
 import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
 // import { RedisConfigService } from './config/redis.config';
 // import { CacheModule } from '@nestjs/cache-manager';
+import { MemoModule } from './memo/memo.module';
 
 @Module({
     imports: [
@@ -40,11 +41,7 @@ import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
         //     useClass: RedisConfigService,
         //     isGlobal: true,
         // }),
-        // CacheModule.registerAsync({
-        //     imports: [ConfigModule],
-        //     useClass: RedisConfigService,
-        //     isGlobal: true,
-        // }),
+        MemoModule,
         MemosModule,
         VideoModule,
         ChannelModule,
