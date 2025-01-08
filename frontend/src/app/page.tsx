@@ -1,25 +1,23 @@
 'use client';
 
-//style
-//component
-//type
-import { MainCardProps } from './types/MainCardProps';
-//next
 import { useSearchParams } from 'next/navigation';
-import router from 'next/router';
+import { Suspense, useEffect, useState } from 'react';
+import Header from './components/Layout/Header';
+import { CategorySection } from './components/category/CategorySection';
+import MainCard from './components/mainCard/MainCard';
+import styles from './page.module.css';
+import { MainCardProps } from './types/MainCardProps';
+import { Category, isValidCategory } from './types/category';
 
-// categories 배열을 컴포넌트 외부로 이동
-const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
-
-// SearchParams를 사용하는 컴포넌트를 분리
 function SearchParamsComponent() {
     const searchParams = useSearchParams();
     const search = searchParams?.get('q') ?? '';
-    const category = searchParams?.get('category') ?? 'All';
+    const categoryParam = searchParams?.get('category') ?? 'All';
+
     const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState<Category>('All');
 
     // API
     const fetchMainCards = async () => {
@@ -42,25 +40,21 @@ function SearchParamsComponent() {
                 throw new Error('Invalid data format received from server');
             }
 
-            // 데이터 매핑
-            const formattedData: MainCardProps[] = data.videos.map((video: any) => {
-                // channel 객체가 없는 경우 기본값 설정
-                const channel = video.channel || {};
-
-                return {
-                    id: String(video.id || ''), // 문자열로 변환
-                    title: String(video.title || '제목 없음'),
-                    thumbnails: String(video.thumbnails || '/default-thumbnail.jpg'),
-                    duration: String(video.duration || '00:00'),
-                    category: String(video.category || 'Uncategorized'),
-                    channel: {
-                        id: String(channel.id || ''),
-                        thumbnails: String(channel.thumbnails || '/default-channel-thumbnail.jpg'),
-                        title: String(channel.title || '채널명 없음'),
-                    },
-                    vemoCount: Number(video.vemoCount || 0), // 숫자로 변환
-                };
-            });
+            const formattedData: MainCardProps[] = data.videos.map((video: any) => ({
+                id: String(video.id || ''),
+                title: String(video.title || '제목 없음'),
+                thumbnails: String(video.thumbnails || '/default-thumbnail.jpg'),
+                duration: String(video.duration || '00:00'),
+                category: String(video.category || 'Uncategorized'),
+                channel: {
+                    id: String(video.channel?.id || ''),
+                    thumbnails: String(
+                        video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
+                    ),
+                    title: String(video.channel?.title || '채널명 없음'),
+                },
+                vemoCount: Number(video.vemoCount || 0),
+            }));
 
             setMainCards(formattedData);
         } catch (error) {
@@ -77,30 +71,25 @@ function SearchParamsComponent() {
     }, []);
 
     useEffect(() => {
-        setSelectedCategory(category);
-    }, [category]);
-
-    const handleCategoryClick = (category: string) => {
-        try {
-            if (category === 'All') {
-                router.push('/');
-            } else {
-                router.push(`/?category=${encodeURIComponent(category)}`);
-            }
-        } catch (error) {
-            console.error('Navigation error:', error);
+        if (isValidCategory(categoryParam)) {
+            setSelectedCategory(categoryParam);
         }
-    };
+    }, [categoryParam]);
 
     const filteredCards = mainCards.filter(card => {
-        const matchesCategory = selectedCategory === 'All' || card.category === selectedCategory;
+        const matchesCategory =
+            selectedCategory === 'All' ||
+            card.category.toLowerCase() === selectedCategory.toLowerCase();
         const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
     return (
         <main className={styles.main}>
-            <Category categories={categories} onCategoryClick={handleCategoryClick} />
+            <CategorySection
+                selectedCategory={selectedCategory}
+                onCategorySelect={setSelectedCategory}
+            />
             {isLoading ? (
                 <div>Loading...</div>
             ) : error ? (
@@ -116,7 +105,6 @@ function SearchParamsComponent() {
     );
 }
 
-// Home page
 export default function Home() {
     return (
         <>
