@@ -1,20 +1,22 @@
 'use client';
+import React from 'react';
 import styles from './Category.module.css';
+import { Category as CategoryType } from '@/app/types/category';
 
-type CategoryProps = {
-  categories: string[];
-  onCategorySelect: (category: string) => void;
-};
+interface CategoryProps {
+  categories: readonly CategoryType[];
+  onCategoryClick: (category: CategoryType) => void;
+}
 
-export default function Category({ categories, onCategorySelect }: CategoryProps) {
+const Category: React.FC<CategoryProps> = ({ categories, onCategoryClick }) => {
   return (
     <div className={styles.mainCategory}>
       <h2>Category</h2>
       <div className={styles.mainCategoryButtonContainer}>
-        {categories.map((category, index) => (
+        {categories.map((category) => (
           <button
-            key={index}
-            onClick={() => onCategorySelect(category)}
+            key={category}
+            onClick={() => onCategoryClick(category)}
             className={styles.mainCategoryButton}
           >
             {category}
@@ -23,5 +25,7 @@ export default function Category({ categories, onCategorySelect }: CategoryProps
       </div>
     </div>
   );
-}
+};
+
+export default Category;
 

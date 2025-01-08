@@ -31,7 +31,12 @@ interface SummaryContextType {
 }
 
 // Context 생성
-const SummaryContext = createContext<SummaryContextType | undefined>(undefined);
+const SummaryContext = createContext<SummaryContextType>({
+    summaryData: null,
+    quizData: null,
+    setSummaryData: () => { },
+    setQuizData: () => { },
+});
 
 // Provider 컴포넌트 생성
 export const SummaryProvider = ({ children }: { children: ReactNode }) => {
@@ -54,9 +59,25 @@ export const SummaryProvider = ({ children }: { children: ReactNode }) => {
 
 // Context를 쉽게 사용할 수 있는 Hook 생성
 export const useSummary = () => {
-    const context = useContext(SummaryContext);
-    if (!context) {
-        throw new Error('useSummary must be used within a SummaryProvider');
+    try {
+        const context = useContext(SummaryContext);
+        if (!context) {
+            console.warn('useSummary was called outside of SummaryProvider');
+            return {
+                summaryData: null,
+                quizData: null,
+                setSummaryData: () => { },
+                setQuizData: () => { },
+            };
+        }
+        return context;
+    } catch (error) {
+        console.warn('Error using SummaryContext:', error);
+        return {
+            summaryData: null,
+            quizData: null,
+            setSummaryData: () => { },
+            setQuizData: () => { },
+        };
     }
-    return context;
 };

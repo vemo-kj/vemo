@@ -10,11 +10,12 @@ export class CapturesService {
     constructor(
         @InjectRepository(Captures)
         private capturesRepository: Repository<Captures>,
-    ) {}
+    ) { }
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
+
             return await this.capturesRepository.save(captures);
         } catch (error) {
             throw new InternalServerErrorException('Failed to create capture', {
@@ -25,6 +26,7 @@ export class CapturesService {
 
     async getCaptures(): Promise<Captures[]> {
         try {
+
             return await this.capturesRepository.find({
                 relations: ['memos'],
                 order: {

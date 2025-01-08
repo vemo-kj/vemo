@@ -63,11 +63,9 @@ export class SubtitlesService {
         }
     }
 
-
     // yt-dlp 명령어 생성
     private buildYtDlpCommand(videoId: string): string {
         return `yt-dlp \
-            --proxy socks5://172.17.0.1:9051 \
             --write-auto-sub \
             --sub-lang ko \
             --skip-download \

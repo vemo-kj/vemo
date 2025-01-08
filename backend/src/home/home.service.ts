@@ -15,7 +15,7 @@ export class HomeService {
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
-    ) {}
+    ) { }
 
     async createPlaylistWithMemos(
         userId: number,
@@ -106,7 +106,7 @@ export class HomeService {
      * @param limit 페이지당 비디오 수 (기본값: 10)
      * @returns HomeResponseDto
      */
-    async getAllVideos(page: number = 1, limit: number = 8): Promise<HomeResponseDto> {
+    async getAllVideos(page: number = 1, limit: number = 100): Promise<HomeResponseDto> {
         const videos = await this.videoService.getAllVideos(page, limit);
 
         if (!videos.length) {

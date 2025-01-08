@@ -9,7 +9,7 @@ export class PdfController {
     constructor(
         private readonly memosService: MemosService,
         private readonly pdfService: PdfService,
-    ) {}
+    ) { }
 
     @Public()
     @Get('download/:memosId')

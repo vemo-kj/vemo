@@ -12,7 +12,7 @@ export class MemosService {
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
         @InjectRepository(Users) private readonly userRepository: Repository<Users>,
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
-    ) {}
+    ) { }
 
     async createMemos(memosTitle: string, videoId: string, userId: number): Promise<Memos> {
         try {

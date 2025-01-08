@@ -13,7 +13,7 @@ export class VemoService {
     constructor(
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
-    ) {}
+    ) { }
 
     /**
      * 커뮤니티 메모 조회
