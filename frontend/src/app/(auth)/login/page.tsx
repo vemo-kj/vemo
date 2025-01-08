@@ -38,7 +38,7 @@ export default function LoginPage() {
             const data = await response.json();
             console.log('로그인 성공 데이터:', data);
 
-            // 데이터 구조 확인
+            // 데이터 구조
             if (!data.access_token) {
                 console.error('토큰 없음: 응답 데이터', data);
                 setError('토큰을 받을 수 없습니다.');
