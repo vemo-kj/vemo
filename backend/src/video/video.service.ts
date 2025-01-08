@@ -159,7 +159,7 @@ export class VideoService {
         }
     }
 
-    protected async createAndSaveVideo(videoData: any): Promise<Video> {
+    async createAndSaveVideo(videoData: any): Promise<Video> {
         const snippet = videoData.snippet || {};
         const contentDetails = videoData.contentDetails || {};
 
