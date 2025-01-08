@@ -14,6 +14,8 @@ WORKDIR /usr/src/app
 
 # 패키지 파일 복사 및 의존성 설치
 COPY package*.json ./
+
+RUN npm install puppeteer
 RUN npm install
 
 # TypeScript 설정 파일 복사
