@@ -1,6 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotFoundException,
+    Param,
+    Put,
+    Query,
+} from '@nestjs/common';
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
+// import { GetMemosResponseDto } from './dto/get-memos-response.dto';
+import { GetMemosResponseDto } from './dto/get-memos-response.dto';
 
 @Controller('memos')
 export class MemosController {
@@ -17,8 +28,20 @@ export class MemosController {
     }
 
     @Get('/:memosId')
-    async getMemosById(@Param('memosId') memosId: number) {
-        return this.memosService.getMemosById(memosId);
+    async getMemosById(@Param('memosId') memosId: number): Promise<GetMemosResponseDto> {
+        const memos = await this.memosService.getMemosById(memosId);
+
+        if (!memos) {
+            throw new NotFoundException('메모를 찾을 수 없습니다.');
+        }
+
+        return {
+            id: memos.id,
+            title: memos.title,
+            createdAt: memos.createdAt,
+            memo: memos.memo,
+            captures: memos.capture,
+        };
     }
 
     @Put('/:id')

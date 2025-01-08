@@ -32,10 +32,14 @@ export default function VemoPage() {
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [memosId, setMemosId] = useState<number | null>(null);
 
     // Add capture status tracking
     const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
     const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
+
+    // videoId 값 확인
+    console.log('page.tsx videoId:', videoId);
 
     // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     const fetchVemoData = useCallback(async () => {
@@ -68,8 +72,10 @@ export default function VemoPage() {
             }
 
             const data: CreateMemosResponseDto = await response.json();
-            console.log('받은 메모 데이터:', data);
+            console.log('받은 메모 데이터 :', data);
             setVemoData(data);
+            setMemosId(data.id);
+            console.log('받은 메모 데이터 i  :', data.id);
 
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
@@ -292,7 +298,6 @@ export default function VemoPage() {
                 </div>
                 <div className={styles.sidebarContainer}>
                     <SideBarNav
-                        videoId={videoId || ''}
                         selectedOption={selectedOption}
                         onOptionSelect={handleOptionSelect}
                         renderSectionContent={renderSectionContent}
@@ -301,6 +306,8 @@ export default function VemoPage() {
                         handleCaptureArea={handleCaptureArea}
                         editorRef={editorRef}
                         vemoData={vemoData}
+                    videoId={videoId || ''}
+                    memosId={memosId}
                     />
                 </div>
             </div>
