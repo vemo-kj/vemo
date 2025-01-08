@@ -243,9 +243,9 @@ export default function VemoPage() {
         }
     };
 
-    const changeVideo = (newVideoId: string) => {
-        router.push(`/vemo/${newVideoId}`);
-    };
+    // const changeVideo = (newVideoId: string) => {
+    //     router.push(`/vemo/${newVideoId}`);
+    // };
 
     // 데모 저장 후 데이터 갱신을 위한 핸들러
     const handleMemoSaved = useCallback(() => {
