@@ -24,8 +24,8 @@ function SearchParamsComponent() {
         try {
             setIsLoading(true);
             setError(null);
-            
-            const response = await fetch('http://localhost:5050/home/cards', {
+
+            const response = await fetch('http://localhost:5050/home', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
