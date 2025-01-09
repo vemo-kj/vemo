@@ -19,19 +19,24 @@ export class MemoService {
 
     async updateMemo(dto: UpdateMemoDto): Promise<Memo> {
         const { id, description } = dto;
-        const memo = await this.memoRepository.findOne({ where: { id } });
+        const memo = await this.memoRepository.findOne({
+            where: { id },
+            relations: ['memos'],
+        });
 
         if (!memo) {
             throw new Error('Memo not found');
         }
 
         memo.description = description;
-
         return await this.memoRepository.save(memo);
     }
 
     async deleteMemo(id: number): Promise<void> {
-        const memo = await this.memoRepository.findOne({ where: { id } });
+        const memo = await this.memoRepository.findOne({
+            where: { id },
+            relations: ['memos'],
+        });
 
         if (!memo) {
             throw new Error('Memo not found');

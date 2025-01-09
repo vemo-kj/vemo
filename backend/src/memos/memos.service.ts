@@ -58,7 +58,7 @@ export class MemosService {
     async getAllMemosByUser(userId: number): Promise<Memos[]> {
         return await this.memosRepository.find({
             where: { user: { id: userId } },
-            relations: ['video', 'memos'],
+            relations: ['video', 'memo', 'captures'],
         });
     }
 
@@ -101,7 +101,10 @@ export class MemosService {
     }
 
     async updateMemos(id: number, updateMemosDto: UpdateMemosDto): Promise<Memos> {
-        const memos = await this.memosRepository.findOne({ where: { id } });
+        const memos = await this.memosRepository.findOne({
+            where: { id },
+            relations: ['user', 'video', 'memo', 'captures', 'video.channel'],
+        });
         if (!memos) throw new NotFoundException(`Memos with ID ${id} not found`);
 
         Object.assign(memos, updateMemosDto);

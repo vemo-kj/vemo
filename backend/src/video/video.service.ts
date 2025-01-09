@@ -40,7 +40,7 @@ export class VideoService {
     async findVideoInDatabase(videoId: string): Promise<Video | null> {
         return await this.videoRepository.findOne({
             where: { id: videoId },
-            relations: ['channel'],
+            relations: ['channel', 'memos'],
         });
     }
 
@@ -90,7 +90,7 @@ export class VideoService {
      */
     async getAllVideos(page: number = 1, limit: number = 10): Promise<Video[]> {
         return this.videoRepository.find({
-            relations: ['channel'],
+            relations: ['channel', 'memos'],
             order: { id: 'DESC' },
             skip: (page - 1) * limit,
             take: limit,
