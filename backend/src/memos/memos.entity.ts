@@ -15,10 +15,10 @@ export class Memos {
     @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
-    @ManyToOne(() => Users, user => user.memos, { eager: true })
+    @ManyToOne(() => Users, user => user.memos, { eager: true, onDelete: 'CASCADE' })
     user: Users;
 
-    @ManyToOne(() => Video, video => video.memos)
+    @ManyToOne(() => Video, video => video.memos, { onDelete: 'CASCADE' })
     video: Video;
 
     @OneToMany(() => Memo, memo => memo.memos, { cascade: true })

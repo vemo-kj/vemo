@@ -33,9 +33,9 @@ export class Users {
     @Column({ length: 255, nullable: true })
     introduction?: string;
 
-    @OneToMany(() => Memos, memos => memos.user)
+    @OneToMany(() => Memos, memos => memos.user, { cascade: true })
     memos: Memos[];
 
-    @OneToMany(() => Playlist, playlist => playlist.user)
+    @OneToMany(() => Playlist, playlist => playlist.user, { cascade: true })
     playlists: Playlist[];
 }

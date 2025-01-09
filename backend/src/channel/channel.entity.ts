@@ -12,6 +12,6 @@ export class Channel {
     @Column({ length: 100 })
     title: string;
 
-    @OneToMany(() => Video, video => video.channel, { lazy: true })
+    @OneToMany(() => Video, video => video.channel, { cascade: true })
     videos?: Video[];
 }

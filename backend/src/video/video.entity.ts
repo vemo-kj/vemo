@@ -20,12 +20,12 @@ export class Video {
     @Column({ length: 50 })
     category: string;
 
-    @ManyToOne(() => Channel, channel => channel.videos)
+    @ManyToOne(() => Channel, channel => channel.videos, { onDelete: 'CASCADE' })
     channel: Channel;
 
-    @OneToMany(() => Memos, memos => memos.video)
+    @OneToMany(() => Memos, memos => memos.video, { cascade: true })
     memos?: Memos[];
 
-    @ManyToMany(() => Playlist, playlist => playlist.videos)
+    @ManyToMany(() => Playlist, playlist => playlist.videos, { onDelete: 'CASCADE' })
     playlists: Playlist[];
 }

@@ -13,7 +13,7 @@ export class Playlist {
     @ManyToOne(() => Users, user => user.playlists, { onDelete: 'CASCADE' })
     user: Users;
 
-    @ManyToMany(() => Video, video => video.playlists)
+    @ManyToMany(() => Video, video => video.playlists, { cascade: true })
     @JoinTable({
         name: 'playlist_video',
         joinColumn: { name: 'playlistId', referencedColumnName: 'id' },
