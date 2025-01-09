@@ -15,4 +15,5 @@ export class Memo {
     @ManyToOne(() => Memos, memos => memos.memo, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'memosId' })
     memos: Memos;
+    content: any;
 }

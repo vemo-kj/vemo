@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
 import PlayList from '../playList/PlayList';
@@ -67,10 +67,20 @@ export default function SidebarNav({
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
     const [memosId, setMemosId] = useState<number | null>(initialMemosId);
-    
-    
-    // 토큰 가져오기
-    const token = sessionStorage.getItem('token');
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedToken = sessionStorage.getItem('token');
+        setToken(storedToken);
+    }, []);
+
+    useEffect(() => {
+        if (!token) return;
+        
+        // 여기에 token을 사용하는 로직 구현
+        // ...
+    }, [token]);
+
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
     

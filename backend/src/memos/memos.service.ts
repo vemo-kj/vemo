@@ -14,7 +14,7 @@ export class MemosService {
         @InjectRepository(Video) private readonly videoRepository: Repository<Video>,
     ) { }
 
-    async createMemos(memosTitle: string, videoId: string, userId: number): Promise<Memos> {
+    async createMemos(title: string, videoId: string, userId: number): Promise<Memos> {
         try {
             const user = await this.userRepository.findOne({ where: { id: userId } });
             if (!user) {
@@ -30,7 +30,7 @@ export class MemosService {
             }
 
             const memos = this.memosRepository.create({
-                title: memosTitle,
+                title: title,
                 user: user,
                 video: video,
             });
@@ -82,15 +82,17 @@ export class MemosService {
         try {
             const memos = await this.memosRepository.findOne({
                 where: { id: memosId },
-                relations: ['user', 'video', 'memo', 'capture', 'video.channel'],
+                relations: ['user', 'video']
             });
 
             if (!memos) {
                 throw new NotFoundException(`Memos with ID ${memosId} not found`);
             }
 
+            console.log('Found memos:', memos);
             return memos;
         } catch (error) {
+            console.error('Error in getMemosById:', error);
             if (error instanceof NotFoundException) {
                 throw error;
             }

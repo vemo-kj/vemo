@@ -8,6 +8,8 @@ import { CreatePlaylistWithMemosDto } from './dto/create-playlist-with-memos.dto
 import { PlaylistService } from '../playlist/playlist.service';
 import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
 import { Memos } from '../memos/memos.entity';
+import { Repository, EntityRepository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class HomeService {
@@ -15,6 +17,7 @@ export class HomeService {
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
+        @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
     ) { }
 
     async createPlaylistWithMemos(
@@ -42,23 +45,44 @@ export class HomeService {
      */
     async createOrGetLatestMemos(userId: number, videoId: string): Promise<CreateMemosResponseDto> {
         try {
-            // 사용자의 해당 비디오에 대한 메모 조회
-            const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
+            // TypeORM을 사용한 쿼리
+            const existingMemos = await this.memosRepository.find({
+                where: { 
+                    video: { id: videoId },
+                    user: { id: userId }
+                },
+                relations: ['user', 'video'],
+                order: { createdAt: 'DESC' },
+                take: 1
+            });
 
-            // 메모가 없으면 새로 생성
-            if (!userMemos || userMemos.length === 0) {
-                const newMemos = await this.createInitialMemos(userId, videoId);
-                return this.mapMemosToDto(newMemos);
+            // 쿼리 결과 로깅
+            console.log('메모 조회 결과:', {
+                userId,
+                videoId,
+                existingMemos
+            });
+
+            // 기존 메모가 있으면 반환
+            if (existingMemos.length > 0) {
+                return this.mapMemosToDto(existingMemos[0]);
             }
 
-            // 메모가 있으면 가장 최신 메모 반환
-            return this.mapMemosToDto(userMemos[0]); // getMemosByVideoAndUser가 createdAt DESC로 정렬되어 있음
+            // 기존 메모가 없으면 새로운 메모 생성
+            const newMemo = await this.createInitialMemos(userId, videoId);
+            
+            return {
+                id: newMemo.id,
+                title: newMemo.title,
+                createdAt: newMemo.createdAt,
+                memo: [],      // 새로운 메모이므로 빈 배열
+                captures: []   // 새로운 메모이므로 빈 배열
+            };
+            
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
+            console.error('메모 조회/생성 중 에러:', error);
             throw new InternalServerErrorException('Failed to create or get memos', {
-                cause: error,
+                cause: error
             });
         }
     }
@@ -95,6 +119,18 @@ export class HomeService {
             id: memos.id,
             title: memos.title,
             createdAt: memos.createdAt,
+            memo: Array.isArray(memos.memo) ? memos.memo.map(m => ({
+                id: m.id,
+                content: m.content,
+                memosId: memos.id,
+                timestamp: m.timestamp
+            })) : [],
+            captures: Array.isArray(memos.capture) ? memos.capture.map(c => ({
+                id: c.id,
+                imageUrl: c.imageUrl,
+                memosId: memos.id,
+                timestamp: c.timestamp
+            })) : [],
         };
     }
 

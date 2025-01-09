@@ -135,152 +135,73 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
+    const [memoIdCounter, setMemoIdCounter] = useState(1);
+    const [captureIdCounter, setCaptureIdCounter] = useState(1);
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
+                /* 백엔드 연동 부분 주석 처리
                 const token = sessionStorage.getItem('token');
-                console.log('[Capture Event] Starting capture process:', {
-                    eventTimestamp: new Date().toISOString(),
-                    hasToken: !!token,
-                    timestamp,
-                    imageUrlValid: validateBase64Image(imageUrl)
-                });
-
-                if (props.onPauseVideo) {
-                    console.log('[Capture Event] Pausing video');
-                    props.onPauseVideo();
+                if (!token || !props.memosId) {
+                    console.error('토큰 또는 memosId가 없습니다.');
+                    return;
                 }
 
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: true
-                }));
-
-                if (!imageUrl || typeof imageUrl !== 'string') {
-                    throw new Error('[Capture Event] Invalid image URL format');
+                // 이미지 데이터 검증 및 압축
+                if (!validateBase64Image(imageUrl)) {
+                    console.error('유효하지 않은 이미지 데이터');
+                    return;
                 }
-
-                console.log('[Capture Event] Creating memo - videoId:', props.videoId);
-                const memosResponse = await fetch(`http://localhost:5050/home/memos/${props.videoId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include'
-                });
-
-                if (!memosResponse.ok) {
-                    const errorText = await memosResponse.text();
-                    console.error('[Capture Event] Failed to create memo:', {
-                        status: memosResponse.status,
-                        statusText: memosResponse.statusText,
-                        body: errorText
-                    });
-                    throw new Error('[Capture Event] Failed to create memo');
-                }
-
-                const memosData = await memosResponse.json();
-                console.log('[Capture Event] Memo created successfully:', memosData);
-
-                // timestamp를 Date 형식으로 변환
-                const [minutes, seconds] = timestamp.split(':').map(Number);
-                const date = new Date();
-                date.setMinutes(minutes);
-                date.setSeconds(seconds);
-
-                // 캡처 저장
-                console.log('[Capture Event] Saving capture:', {
-                    timestamp: date,
-                    memosId: memosData.id
-                });
 
                 const compressedImage = await compressImage(imageUrl);
-                console.log('Original size:', imageUrl.length);
-                console.log('Compressed size:', compressedImage.length);
 
-                const captureResponse = await fetch(`http://localhost:5050/captures`, {
+                const response = await fetch('http://localhost:5050/captures', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        timestamp: date.toISOString(),
-                        image: compressedImage,
-                        memos: { id: memosData.id }
+                        timestamp: timestamp,
+                        imageUrl: compressedImage,
+                        memosId: props.memosId
                     })
                 });
 
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: false
-                }));
-
-                if (!captureResponse.ok) {
-                    const errorText = await captureResponse.text();
-                    console.error('[Capture Event] Failed to save capture:', {
-                        status: captureResponse.status,
-                        statusText: captureResponse.statusText,
-                        body: errorText
-                    });
-                    throw new Error('[Capture Event] Failed to save capture');
+                if (!response.ok) {
+                    throw new Error('캡처 저장에 실패했습니다.');
                 }
 
-                const data = await captureResponse.json();
-                console.log('[Capture Event] Server response data:', data);
+                const savedCapture = await response.json();
+                */
 
-                // 이미지 데이터 처리
-                let processedImageUrl = data.image;
-                if (!processedImageUrl) {
-                    console.error('[Capture Event] No image data in server response:', data);
-                    throw new Error('[Capture Event] No image data');
-                }
-
-                // 이미지 데이터가 base64 형식인지 확인
-                if (!processedImageUrl.startsWith('data:image')) {
-                    console.log('[Capture Event] Adding image data prefix:', processedImageUrl.substring(0, 100));
-                    processedImageUrl = `data:image/png;base64,${processedImageUrl}`;
-                    console.log('[Capture Event] Image data prefix added:', processedImageUrl.substring(0, 100));
-                }
-
-                // 로컬 상태 업데이트
-                const newItem: Section = {
-                    id: `capture-${data.id}`,
-                    timestamp,
+                // 로컬에서만 캡처 저장
+                const newCapture = {
+                    id: `capture-${captureIdCounter}`,
+                    timestamp: timestamp,
                     htmlContent: '',
-                    screenshot: processedImageUrl,
+                    screenshot: imageUrl
                 };
 
-                console.log('[Capture Event] New section item created:', {
-                    id: newItem.id,
-                    timestamp: newItem.timestamp,
-                    screenshotLength: newItem.screenshot?.length || 0,
-                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot'
-                });
+                console.log('새로운 캡처:', newCapture);
 
-                setSections(prev => [...prev, newItem]);
-                console.log('[Capture Event] Section update completed');
-                props.onMemoSaved?.();
+                setSections(prev => [...prev, newCapture]);
+                setCaptureIdCounter(prev => prev + 1);
 
             } catch (error) {
-                console.error('[Capture Event] Error in capture process:', error);
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: false
-                }));
-                throw error;
+                console.error('캡처 저장 중 오류 발생:', error);
             }
-        },
+        }
     }));
 
     useEffect(() => {
+        /* 메 조회 기능 임시 주석 처리
         const fetchMemos = async () => {
             try {
                 const token = sessionStorage.getItem('token');
-                console.log('Current memosId:', props.memosId); // memosId 값 확인
-                console.log('Token exists:', !!token); // 토큰 존재 여부 확인
+                console.log('Current memosId:', props.memosId);
+                console.log('Token exists:', !!token);
 
                 if (!token || !props.memosId) {
                     console.log('Token or memosId is missing:', { token: !!token, memosId: props.memosId });
@@ -288,7 +209,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 }
 
                 const url = `http://localhost:5050/memos/${props.memosId}`;
-                console.log('Fetching from URL:', url); // 요청 URL 확인
+                console.log('Fetching from URL:', url);
 
                 const response = await fetch(url, {
                     headers: {
@@ -297,7 +218,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     credentials: 'include'
                 });
 
-                console.log('Response status:', response.status); // 응답 상태 확인
+                console.log('Response status:', response.status);
 
                 if (!response.ok) {
                     console.error('Response status:', response.status);
@@ -305,165 +226,116 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 }
 
                 const memosData = await response.json();
-                console.log('Received 마어람널앙ㅁㄴ러만ㅇ러만어만ㅇ럼ㄹ나ㅓㅁㄴ아ㅓ러 data:', memosData); // 데이터 확인용 로그
+                console.log('Received data:', memosData);
 
-                // memo와 captures 데이터를 sections 형식으로 변환
                 const formattedSections = [
-                    // memo 데이터 변환
-                    ...memosData.memo.map((memo: any) => {
-                        // timestamp를 MM:SS 형식으로 변환
-                        const date = new Date(memo.timestamp);
-                        const minutes = date.getMinutes().toString().padStart(2, '0');
-                        const seconds = date.getSeconds().toString().padStart(2, '0');
-                        const formattedTimestamp = `${minutes}:${seconds}`;
-
-                        return {
-                            id: `memo-${memo.id}`,
-                            timestamp: formattedTimestamp,
-                            htmlContent: memo.description,
-                            screenshot: null
-                        };
-                    }),
-                    // captures 데이터 변환
-                    ...memosData.captures.map((capture: any) => {
-                        const date = new Date(capture.timestamp);
-                        const minutes = date.getMinutes().toString().padStart(2, '0');
-                        const seconds = date.getSeconds().toString().padStart(2, '0');
-                        const formattedTimestamp = `${minutes}:${seconds}`;
-
-                        return {
-                            id: `capture-${capture.id}`,
-                            timestamp: formattedTimestamp,
-                            htmlContent: '',
-                            screenshot: capture.image
-                        };
-                    })
-                ].sort((a, b) => {
-                    // timestamp를 기준으로 정렬
-                    const [aMin, aSec] = a.timestamp.split(':').map(Number);
-                    const [bMin, bSec] = b.timestamp.split(':').map(Number);
-                    return (aMin * 60 + aSec) - (bMin * 60 + bSec);
-                });
+                    ...memosData.memo.map((memo: any) => ({
+                        id: `memo-${memo.id}`,
+                        timestamp: memo.timestamp,
+                        htmlContent: memo.description,
+                    })),
+                    ...memosData.captures.map((capture: any) => ({
+                        id: `capture-${capture.id}`,
+                        timestamp: capture.timestamp,
+                        htmlContent: '',
+                        screenshot: capture.imageUrl,
+                    }))
+                ].sort((a, b) => parseTimeToSeconds(a.timestamp) - parseTimeToSeconds(b.timestamp));
 
                 setSections(formattedSections);
-                console.log('Loaded sections:', formattedSections);
-                
+
             } catch (error) {
-                console.error('메모 목� 불러오기 실패:', error);
+                console.error('Error fetching memos:', error);
             }
         };
 
-        fetchMemos();
-    }, [props.memosId]); // props.memosId가 변경될 때마다 실행
+        if (props.memosId) {
+            fetchMemos();
+        }
+        */
+    }, [props.memosId]);
 
     const handleSave = async () => {
-        const contentState = editorState.getCurrentContent();
-        if (!contentState.hasText()) return;
-
         try {
-            const token = sessionStorage.getItem('token');
-            if (!token || !props.memosId) {
-                console.error('토큰 또는 memosId가 없습니다.');
-                return;
-            }
-
-            const html = convertToHTML(contentState);
-            const timestamp = props.getTimestamp();
+            const contentState = editorState.getCurrentContent();
+            const htmlContent = convertToHTML(contentState);
+            const currentTimestamp = props.getTimestamp();
             
-            // timestamp 형식 변환 추가
-            const [minutes, seconds] = timestamp.split(':').map(Number);
-            const date = new Date();
-            date.setMinutes(minutes);
-            date.setSeconds(seconds);
-            
-            const requestData = {
-                timestamp: date.toISOString(), // ISO 문자열로 변환
-                description: html,
-                memosId: Number(props.memosId)
+            // 로컬에서만 메모 저장
+            const newMemo = {
+                id: `memo-${memoIdCounter}`,
+                timestamp: currentTimestamp,
+                htmlContent: htmlContent
             };
+            
+            console.log('새로운 메모:', newMemo);
 
-            console.log('Sending memo data:', requestData);
+            // sections에 새 메모 추가
+            setSections(prev => [...prev, newMemo]);
+            
+            // ID 카운터 증가
+            setMemoIdCounter(prev => prev + 1);
 
-            const response = await fetch(`http://localhost:5050/memo/`, {
+            // 에디터 초기화
+            setEditorState(EditorState.createEmpty());
+            props.onMemoSaved?.();
+
+            /* 백엔드 연동 부분 주석 처리
+            const response = await fetch('http://localhost:5050/memo', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
                 body: JSON.stringify(requestData)
             });
-
-            // 자세한 에러 로깅
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API 요청 실패:', {
-                    url: response.url,
-                    status: response.status,
-                    statusText: response.statusText,
-                    requestData,
-                    errorResponse: errorText
-                });
-                throw new Error(`메모 저장 실패: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            console.log('메모 저장 성공:', data);
-
-            const newItem: Section = {
-                id: `memo-${data.id}`,
-                timestamp,
-                htmlContent: html,
-            };
-
-            setSections(prev => [...prev, newItem]);
-            setEditorState(EditorState.createEmpty());
-            props.onMemoSaved?.();
+            */
 
         } catch (error) {
-            console.error('메모 저장 실패:', error);
+            console.error('메모 저장 중 오류 발생:', error);
         }
     };
 
-    
-    const handleChangeItem = async (id: string, newHTML: string)=> {
+    // 메모 삭제 함수
+    const handleDeleteItem = async (id: string) => {
+        // 캡처인 경우 handleDeleteCapture 함수 호출
+        if (id.startsWith('capture-')) {
+            return handleDeleteCapture(id);
+        }
+
         try {
+            // 로컬에서만 메모 삭제
+            setSections(prev => prev.filter(item => item.id !== id));
+            console.log(`메모 삭제됨: ${id}`);
+
+            /* 백엔드 연동 부분 주석 처리
             const token = sessionStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
             }
 
-            // id에서 숫자만 추출 (예: "memo-123" -> 123)
             const memoId = parseInt(id.split('-')[1]);
-            console.log('memoId:', memoId);
             
-            // 백엔드 요청
             const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
-                method: 'PUT',
+                method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    id: memoId,
-                    description: newHTML
-                })
+                }
             });
+            */
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('메모 수정 실패:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    error: errorText
-                });
-                throw new Error('메모 수정에 실패했습니다.');
-            }
+        } catch (error) {
+            console.error('메모 삭제 중 오류 발생:', error);
+        }
+    };
 
-            // 프론트엔드 상태 업데이트
-            const updatedSections = sections.map(item => {
+    // 메모 수정 함수
+    const handleChangeItem = async (id: string, newHTML: string) => {
+        try {
+            // 로컬에서만 메모 수정
+            setSections(prev => prev.map(item => {
                 if (item.id === id) {
                     return {
                         ...item,
@@ -471,26 +343,51 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     };
                 }
                 return item;
-            });
-            setSections(updatedSections);
+            }));
+            console.log(`메모 수정됨: ${id}`);
 
-        } catch (error) {
-            console.error('메모 수정 중 오류 발생:', error);
-        }
-    };
-
-    // 캡처 삭제를 �한 �로운 함수
-    const handleDeleteCapture = async (captureId: string) => {
-        try {
+            /* 백엔드 연동 부분 주석 처리
             const token = sessionStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
             }
 
-            const id = captureId.split('-')[1]; // 'capture-123' -> '123'
-            console.log('Deleting capture:', { captureId, id });
+            const memoId = parseInt(id.split('-')[1]);
+            
+            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: memoId,
+                    description: newHTML
+                })
+            });
+            */
 
+        } catch (error) {
+            console.error('메모 수정 중 오류 발생:', error);
+        }
+    };
+
+    // 캡처 삭제 함수
+    const handleDeleteCapture = async (captureId: string) => {
+        try {
+            // 로컬에서만 캡처 삭제
+            setSections(prev => prev.filter(item => item.id !== captureId));
+            console.log(`캡처 삭제됨: ${captureId}`);
+
+            /* 백엔드 연동 부분 주석 처리
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                console.error('토큰이 없습니다.');
+                return;
+            }
+
+            const id = captureId.split('-')[1];
             const response = await fetch(`http://localhost:5050/captures/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -509,57 +406,12 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 });
                 throw new Error('캡처 삭제에 실패했습니다.');
             }
-
-            // 성공적으로 삭제되면 프론트엔드 상태 업데이트
-            setSections(prev => prev.filter(item => item.id !== captureId));
+            */
 
         } catch (error) {
-            console.error('캡처 삭제 �� 오류 발생:', error);
+            console.error('캡처 삭제 중 오류 발생:', error);
         }
     };
-
-    // 기존 handleDeleteItem 함수 �정
-    const handleDeleteItem = async (id: string) => {
-        // 캡처인 경우 handleDeleteCapture 함수 호출
-        if (id.startsWith('capture-')) {
-            return handleDeleteCapture(id);
-        }
-
-        // 기존 메모 �제 로직
-        try {
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                console.error('토큰이 없습니다.');
-                return;
-            }
-
-            const memoId = id.split('-')[1];
-            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('메모 삭제 실패:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    error: errorText
-                });
-                throw new Error('메모 삭제에 실패했습니다.');
-            }
-
-            setSections(prev => prev.filter(item => item.id !== id));
-
-        } catch (error) {
-            console.error('메모 삭제 중 오류 발생:', error);
-        }
-    };
-
 
     // 인라인 스타일 토글 함수 추가
     const toggleInlineStyle = (style: string) => {

@@ -49,7 +49,7 @@ export default function VemoPage() {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5050/home/memos/EdGOWiTn5RI`, {
+            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -80,7 +80,7 @@ export default function VemoPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [router]);
+    }, [videoId, router]);
 
     // 초기 데이터 로드를 위한 useEffect
     useEffect(() => {

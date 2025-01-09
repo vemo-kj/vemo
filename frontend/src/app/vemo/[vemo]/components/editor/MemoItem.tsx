@@ -57,14 +57,15 @@ const MemoItem = memo(({ id, timestamp, htmlContent, screenshot, onTimestampClic
 
     // 초기 내용 설정
     useEffect(() => {
-        if (contentRef.current && !isEditing) {
-            contentRef.current.innerHTML = htmlContent;
+        if (contentRef.current) {
+            contentRef.current.innerHTML = htmlContent || ''; // 빈 문자열 fallback 추가
         }
-    }, [htmlContent, isEditing]);
+    }, [htmlContent]);
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         if (!isComposing) {
             const newContent = e.currentTarget.innerHTML;
+            debouncedOnChangeHTML(newContent);
         }
     };
 

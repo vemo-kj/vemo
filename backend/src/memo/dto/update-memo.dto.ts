@@ -8,3 +8,4 @@ export class UpdateMemoDto {
     @Length(0, 500)
     description?: string;
 }
+``

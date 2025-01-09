@@ -15,4 +15,5 @@ export class Captures {
     @ManyToOne(() => Memos)
     @JoinColumn({ name: 'memosId' })
     memos: Memos;
+    imageUrl: any;
 }

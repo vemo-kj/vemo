@@ -7,11 +7,13 @@ import {
     Param,
     Put,
     Query,
+    Post,
 } from '@nestjs/common';
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 // import { GetMemosResponseDto } from './dto/get-memos-response.dto';
 import { GetMemosResponseDto } from './dto/get-memos-response.dto';
+import { CreateMemosDto } from './dto/create-memos.dto';
 
 @Controller('memos')
 export class MemosController {
@@ -52,5 +54,11 @@ export class MemosController {
     @Delete('/:id')
     async deleteMemos(@Param('id') id: number) {
         return this.memosService.deleteMemos(id);
+    }
+
+    @Post()
+    async createMemos(@Body() createMemosDto: CreateMemosDto) {
+        const { title, videoId, userId } = createMemosDto;
+        return this.memosService.createMemos(title, videoId, userId);
     }
 }
