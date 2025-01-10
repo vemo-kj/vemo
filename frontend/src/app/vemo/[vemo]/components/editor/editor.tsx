@@ -128,7 +128,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
 
-    
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
@@ -184,8 +183,17 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     screenshot: imageUrl
                 };
 
-                setSections(prev => [...prev, newItem]);
-                props.onMemoSaved?.();
+                setSections(prev => [...prev, newSection].sort((a, b) => {
+                    const aSeconds = parseTimeToSeconds(a.timestamp);
+                    const bSeconds = parseTimeToSeconds(b.timestamp);
+                    return aSeconds - bSeconds;
+                }));
+
+                setImageLoadingStates(prev => ({
+                    ...prev,
+                    [timestamp]: false,
+                }));
+
             } catch (error) {
                 console.error('캡처 저장 실패:', error);
                 setImageLoadingStates(prev => ({
@@ -326,6 +334,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 memosId: Number(props.memosId),
             };
 
+            console.log('0000000000000:', timestamp);
             console.log('Sending memo data:', requestData);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/`, {
