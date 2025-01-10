@@ -6,6 +6,7 @@ import styles from './ExtractButton.module.css';
 interface ExtractButtonProps {
     imageUrl: string;
     onExtracted: (text: string) => void;
+    onDelete: () => void;
 }
 
 const ResultModal = ({ text, onUse, onCancel, isOpen }: {
@@ -36,13 +37,14 @@ const ResultModal = ({ text, onUse, onCancel, isOpen }: {
     );
 };
 
-export default function ExtractButton({ imageUrl, onExtracted }: ExtractButtonProps) {
+export default function ExtractButton({ imageUrl, onExtracted, onDelete }: ExtractButtonProps) {
     const [isExtracting, setIsExtracting] = useState(false);
     const [extractedText, setExtractedText] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleExtractText = async () => {
         try {
+            console.log('Extract button clicked, imageUrl:', imageUrl);
             setIsExtracting(true);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/text-extraction`, {
@@ -50,10 +52,16 @@ export default function ExtractButton({ imageUrl, onExtracted }: ExtractButtonPr
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ imageBase64: imageUrl }),
+                body: JSON.stringify({ imageUrl }),
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Response data:', data);
+
             if (data.success) {
                 setExtractedText(data.text);
                 setIsModalOpen(true);
@@ -70,6 +78,7 @@ export default function ExtractButton({ imageUrl, onExtracted }: ExtractButtonPr
 
     const handleUseText = () => {
         onExtracted(extractedText);
+        onDelete();
         setIsModalOpen(false);
         setExtractedText('');
     };
@@ -85,6 +94,7 @@ export default function ExtractButton({ imageUrl, onExtracted }: ExtractButtonPr
                 className={styles.extractBtn}
                 onClick={handleExtractText}
                 disabled={isExtracting}
+                style={{ cursor: isExtracting ? 'not-allowed' : 'pointer' }}
             >
                 {isExtracting ? '추출 중...' : '추출하기'}
             </button>
