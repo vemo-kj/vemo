@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Users } from '../users/users.entity';
 import { Video } from '../video/video.entity';
 import { UpdateMemosDto } from './dto/update-memos.dto';
+import { Memos } from './memos.entity';
 
 @Injectable()
 export class MemosService {
