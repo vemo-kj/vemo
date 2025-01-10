@@ -16,6 +16,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 RUN npm install puppeteer
+RUN npm install aws-sdk
 RUN npm install
 
 # TypeScript 설정 파일 복사
