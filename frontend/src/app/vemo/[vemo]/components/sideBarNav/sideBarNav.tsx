@@ -62,9 +62,29 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
+    memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // 토큰 가져오기
+    const token = sessionStorage.getItem('token');
+    // videoId 값 확인
+    console.log('sideBarNav.tsx props videoId:', videoId);
+
+    // 메튼 클릭 핸들러
+    const handleWriteClick = async () => {
+        try {
+            console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
+
+            if (!videoId) {
+                console.error('No videoId available');
+                return;
+            }
+            console.log('handleWriteClick videoId:', videoId);
+        } catch (error) {
+            console.error('Failed to handle write click:', error);
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -208,7 +228,7 @@ export default function SidebarNav({
                                 </button>
 
                                 <SummaryButton videoId={videoId} />
-                                <ExportButton />
+                                {memosId && <ExportButton memosId={memosId} />}
                             </div>
                         )}
                     </>

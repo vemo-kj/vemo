@@ -233,17 +233,12 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         const fetchMemos = async () => {
             try {
                 const token = sessionStorage.getItem('token');
-                console.log('Current memosId:', props.memosId); // memosId 값 확인
-                console.log('Token exists:', !!token); // 토큰 존재 여부 확인
-
                 if (!token || !props.memosId) {
-                    console.log('Token or memosId is missing:', { token: !!token, memosId: props.memosId });
+                    console.log('Token or memosId is missing');
                     return;
                 }
 
-                const url = `http://localhost:5050/memos/${props.memosId}`;
-                console.log('Fetching from URL:', url); // 요청 URL 확인
-
+                const url = `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${props.memosId}`;
                 const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -251,15 +246,11 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     credentials: 'include'
                 });
 
-                console.log('Response status:', response.status); // 응답 상태 확인
-
                 if (!response.ok) {
-                    console.error('Response status:', response.status);
                     throw new Error('메모를 불러오는데 실패했습니다.');
                 }
 
                 const memosData = await response.json();
-                console.log('Received 마어람널앙ㅁㄴ러만ㅇ러만어만ㅇ럼ㄹ나ㅓㅁㄴ아ㅓ러 data:', memosData); // 데이터 확인용 로그
 
                 // memo와 captures 데이터를 sections 형식으로 변환
                 const formattedSections = [
@@ -303,12 +294,12 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.log('Loaded sections:', formattedSections);
 
             } catch (error) {
-                console.error('메모 목� 불러오기 실패:', error);
+                console.error('메모 목록 불러오기 실패:', error);
             }
         };
 
         fetchMemos();
-    }, [props.memosId]); // props.memosId가 변경될 때마다 실행
+    }, [props.memosId]);
 
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
@@ -432,7 +423,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         }
     };
 
-    // 캡처 삭제를한로운 함수
+    // 캡처 삭제를 위한 새로운 함수
     const handleDeleteCapture = async (captureId: string) => {
         try {
             const token = sessionStorage.getItem('token');
@@ -471,14 +462,14 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         }
     };
 
-    // 기존 handleDeleteItem 함수정
+    // 기존 handleDeleteItem 함수 정의
     const handleDeleteItem = async (id: string) => {
         // 캡처인 경우 handleDeleteCapture 함수 호출
         if (id.startsWith('capture-')) {
             return handleDeleteCapture(id);
         }
 
-        // 기존 메모제 로직
+        // 기존 메모 삭제 로직
         try {
             const token = sessionStorage.getItem('token');
             if (!token) {
