@@ -60,25 +60,34 @@ export default function VemoPage() {
                     credentials: 'include',
                 },
             );
-            console.log(response);
+
+            // 응답 타입 확인
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`잘못된 응답 타입: ${contentType}`);
+            }
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('서버 응답:', {
                     status: response.status,
                     statusText: response.statusText,
+                    contentType,
                     body: errorText,
                 });
                 throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
             }
 
             const data: CreateMemosResponseDto = await response.json();
-            console.log('받은 메모 데이터 :', data);
+            console.log('받은 메모 데이터:', data);
             setVemoData(data);
             setMemosId(data.id);
-            console.log('받은 메모 데이터 i  :', data.id);
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
+            if (error instanceof Error && error.message.includes('로그인이 필요한 서비스입니다.')) {
+                router.push('/login');
+            }
         } finally {
             setIsLoading(false);
         }
