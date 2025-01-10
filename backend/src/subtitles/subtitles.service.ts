@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
-
 import * as path from 'path';
 import * as fs from 'fs';
 import { Subtitle } from './subtitle.interface';
@@ -10,13 +9,12 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class SubtitlesService {
     private readonly tempDir: string;
-    private readonly residential_proxy: string;
-    private configService: ConfigService;
+    private readonly residentialProxy: string;
 
     // tempDir 경로 설정  (추후 aws s3로 변경)
-    constructor() {
+    constructor(private readonly configService: ConfigService) {
         this.tempDir = path.join(__dirname, '../..', 'temp');
-        this.residential_proxy = this.configService.get<string>('RESIDENTIAL_PROXY');
+        this.residentialProxy = this.configService.get<string>('RESIDENTIAL_PROXY') || '';
     }
 
     // subtitle service 로직 구현
@@ -70,8 +68,9 @@ export class SubtitlesService {
 
     // yt-dlp 명령어 생성
     private buildYtDlpCommand(videoId: string): string {
+        const proxyOption = this.residentialProxy ? `--proxy ${this.residentialProxy}` : '';
         return `yt-dlp \
-            ${this.residential_proxy}
+            ${proxyOption} \
             --write-auto-sub \
             --sub-lang ko \
             --skip-download \
