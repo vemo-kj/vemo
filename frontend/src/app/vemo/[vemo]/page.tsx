@@ -21,9 +21,7 @@ export default function VemoPage() {
     const editorRef = useRef<any>(null);
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
-    const [isEditing, setIsEditing] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
-    // const [videoId, setVideoId] = useState('pEt89CrE-6A');
 
     // 새로 추가되는 상태들
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
@@ -260,7 +258,7 @@ export default function VemoPage() {
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
-
+                            vemoData={vemoData}
                         />
                     </>
                 );
@@ -346,7 +344,8 @@ export default function VemoPage() {
                             videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
-                            memosId={memosId}
+                            memosId={memosId}      
+                            vemoData={vemoData}
                         />
                     )}
                     currentTimestamp={currentTimestamp}

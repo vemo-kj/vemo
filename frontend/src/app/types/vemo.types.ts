@@ -5,6 +5,7 @@ export interface CreateMemosResponseDto {
     createdAt: Date;
     memo: MemoItem[];
     captures: Captures[];
+ 
 }
 
 // 메모 아이템 인터페이스
