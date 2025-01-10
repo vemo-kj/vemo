@@ -82,6 +82,29 @@ export default function VemoPage() {
             console.log('받은 메모 데이터:', data);
             setVemoData(data);
             setMemosId(data.id);
+            
+            // memosId가 있으면 메모 데이터도 함께 조회
+            if (data.id) {
+                const memosResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${data.id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        credentials: 'include'
+                    }
+                );
+                const memosData = await memosResponse.json();
+                // memosData를 필요한 컴포넌트에 전달하기 위해 상태 저장
+                setVemoData(prevData => ({
+                    id: prevData?.id ?? 0,
+                    title: prevData?.title ?? '',
+                    createdAt: prevData?.createdAt ?? new Date(),
+                    memo: prevData?.memo ?? [],
+                    captures: prevData?.captures ?? [],
+                    memos: memosData
+                }));
+            }
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
@@ -228,11 +251,7 @@ export default function VemoPage() {
                         <EditorNoSSR
                             ref={editorRef}
                             getTimestamp={() => currentTimestamp}
-                            onTimestampClick={(timestamp: string) => {
-                                const [m, s] = timestamp.split(':').map(Number);
-                                const total = (m || 0) * 60 + (s || 0);
-                                playerRef.current?.seekTo(total, true);
-                            }}
+                            onTimestampClick={handleSeekToTime}
                             isEditable={true}
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
@@ -241,6 +260,7 @@ export default function VemoPage() {
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
+                          
                         />
                     </>
                 );
@@ -313,12 +333,25 @@ export default function VemoPage() {
                 <SideBarNav
                     selectedOption={selectedOption}
                     onOptionSelect={handleOptionSelect}
-                    renderSectionContent={renderSectionContent}
+                    renderSectionContent={() => (
+                        <EditorNoSSR
+                            ref={editorRef}
+                            getTimestamp={() => currentTimestamp}
+                            onTimestampClick={handleSeekToTime}
+                            isEditable={true}
+                            editingItemId={editingItemId}
+                            onEditStart={(itemId: string) => setEditingItemId(itemId)}
+                            onEditEnd={() => setEditingItemId(null)}
+                            videoId={videoId || ''}
+                            onPauseVideo={() => playerRef.current?.pauseVideo()}
+                            onMemoSaved={handleMemoSaved}
+                            memosId={memosId}        
+                        />
+                    )}
                     currentTimestamp={currentTimestamp}
                     handleCaptureTab={handleCaptureTab}
                     handleCaptureArea={handleCaptureArea}
                     editorRef={editorRef}
-                    vemoData={vemoData}
                     videoId={videoId || ''}
                     memosId={memosId}
                 />
