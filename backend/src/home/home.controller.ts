@@ -71,7 +71,6 @@ export class HomeController {
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
         @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
     ): Promise<HomeResponseDto> {
-        this.logger.log('card');
         return this.homeService.getAllVideos(page, limit);
     }
 }
