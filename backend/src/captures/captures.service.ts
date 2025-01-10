@@ -1,20 +1,37 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+    Inject,
+    Injectable,
+    InternalServerErrorException,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { Captures } from './captures.entity';
 import { CreateCapturesDto } from './dto/create-capture.dto';
 import { UpdateCapturesDto } from './dto/update-capture.dto';
+import { S3 } from 'aws-sdk';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CapturesService {
+    private readonly bucketName: string;
     constructor(
         @InjectRepository(Captures)
         private capturesRepository: Repository<Captures>,
-    ) { }
+
+        @Inject('S3')
+        private readonly s3: S3,
+        private readonly configService: ConfigService,
+    ) {
+        this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
+    }
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const captures = this.capturesRepository.create(createCapturesDto);
+            const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
+            captures.image = uploadUrl;
 
             return await this.capturesRepository.save(captures);
         } catch (error) {
@@ -26,7 +43,6 @@ export class CapturesService {
 
     async getCaptures(): Promise<Captures[]> {
         try {
-
             return await this.capturesRepository.find({
                 relations: ['memos'],
                 order: {
@@ -96,5 +112,29 @@ export class CapturesService {
             });
         }
         await this.capturesRepository.delete(id);
+    }
+
+    async uploadBase64ToS3(base64: string, folder: string): Promise<string> {
+        try {
+            const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
+            const buffer = Buffer.from(base64Data, 'base64');
+            const ext = base64.match(/data:image\/(\w+);base64/)?.[1] || 'png';
+            const fileName = `${folder}/${uuidv4()}.${ext}`;
+            // S3 업로드
+            const uploadResult = await this.s3
+                .upload({
+                    Bucket: 'vemo-data-bucket',
+                    Key: fileName,
+                    Body: buffer,
+                    ContentEncoding: 'base64',
+                    ContentType: `image/${ext}`,
+                })
+                .promise();
+            return uploadResult.Location;
+        } catch (error) {
+            throw new InternalServerErrorException('S3 업로드에 실패했습니다.', {
+                cause: error,
+            });
+        }
     }
 }
