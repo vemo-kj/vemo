@@ -104,8 +104,34 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
             const rawQuizData = await quizResponse.json();
             console.log('퀴즈 응답 데이터:', rawQuizData);
 
+            // 퀴즈 데이터 형식 변환
+            console.log('Raw Quiz Data before formatting:', rawQuizData);
+
+            const formattedQuizData = {
+                quizList: rawQuizData.map((quiz: any) => {
+                    // 배열인 경우
+                    if (Array.isArray(quiz)) {
+                        const [timestamp, question, answer] = quiz;
+                        return {
+                            timestamp: formatTimestamp(timestamp),
+                            question: question,
+                            answer: answer as 'O' | 'X'
+                        };
+                    }
+                    // 객체인 경우
+                    return {
+                        timestamp: formatTimestamp(quiz.timestamp),
+                        question: quiz.question,
+                        answer: quiz.answer as 'O' | 'X'
+                    };
+                })
+            };
+
+            console.log('Final formatted quiz data:', formattedQuizData);
+
             // 두 데이터가 모두 설정되었는지 확인
             if (summaryList && rawQuizData) {
+                // 요약 데이터 설정
                 setSummaryData({
                     summaryList: summaryList.map((item: any) => ({
                         id: item.id,
@@ -113,7 +139,13 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
                         description: item.summary,
                     })),
                 });
-                setQuizData({ quizList: rawQuizData });
+
+                // 퀴즈 데이터 설정
+                if (formattedQuizData.quizList.length > 0) {
+                    setQuizData(formattedQuizData);
+                } else {
+                    console.warn('No quiz data to display');
+                }
 
                 alert('요약 및 퀴즈 데이터가 저장되었습니다.');
             }
