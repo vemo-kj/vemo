@@ -500,7 +500,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
-                        addTextToEditor={addTextToEditor}
                     />
                 ))}
             </div>
