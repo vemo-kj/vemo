@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useState } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
@@ -8,8 +9,6 @@ import QuizView from '../quizView/QuizView';
 import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
-import { CreateMemosResponseDto } from '@/app/types/vemo.types';
-import Image from 'next/image';
 
 export interface SideBarNavProps {
     selectedOption: string;
@@ -19,7 +18,6 @@ export interface SideBarNavProps {
     handleCaptureTab: () => void;
     handleCaptureArea: () => void;
     editorRef: React.RefObject<any>;
-    vemoData: CreateMemosResponseDto | null;
     videoId: string;
     memosId: number | null;
 }
@@ -60,11 +58,28 @@ export default function SidebarNav({
     handleCaptureTab,
     handleCaptureArea,
     editorRef,
-    vemoData,
     videoId,
+    memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // 토큰 가져오기
+    const token = sessionStorage.getItem('token');
+    // videoId 값 확인
+    console.log('sideBarNav.tsx props videoId:', videoId);
+
+    // 메튼 클릭 핸들러
+    const handleWriteClick = async () => {
+        try {
+            if (!videoId) {
+                console.error('No videoId available');
+                return;
+            }
+            console.log('handleWriteClick videoId:', videoId);
+        } catch (error) {
+            console.error('Failed to handle write click:', error);
+        }
+    };
 
     return (
         <div className={styles.container}>
