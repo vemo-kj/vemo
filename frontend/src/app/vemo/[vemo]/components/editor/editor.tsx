@@ -5,6 +5,8 @@ import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 import { useSummary } from '../../context/SummaryContext';
+import { CreateMemosResponseDto } from '@/app/types/vemo.types';
+
 
 // DraftEditor를 위한 타입 정의 추가
 const Editor = DraftEditor as unknown as React.ComponentType<{
@@ -54,6 +56,7 @@ interface CustomEditorProps {
     videoId: string;
     onMemoSaved?: () => void;
     memosId: number | null;
+    vemoData: CreateMemosResponseDto | null;
 }
 
 // ref 타입 정의
@@ -230,6 +233,8 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             }
         },
     }));
+    console.log('Editor.tsx의 memosId:', props.memosId);
+    console.log('Editor.tsx의 vemoData:', props.vemoData);
 
     useEffect(() => {
         const fetchMemos = async () => {
@@ -239,6 +244,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     console.log('Token or memosId is missing');
                     return;
                 }
+                
 
                 const url = `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${props.memosId}`;
                 const response = await fetch(url, {
