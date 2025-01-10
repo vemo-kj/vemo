@@ -82,7 +82,7 @@ export default function VemoPage() {
             console.log('받은 메모 데이터:', data);
             setVemoData(data);
             setMemosId(data.id);
-            
+
             // memosId가 있으면 메모 데이터도 함께 조회
             if (data.id) {
                 const memosResponse = await fetch(
@@ -150,7 +150,7 @@ export default function VemoPage() {
                 },
             });
         };
-        
+
     }, [videoId]);
 
     // timestamp 업데이트 함수를 별도로 분리
@@ -260,7 +260,7 @@ export default function VemoPage() {
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
-                          
+
                         />
                     </>
                 );
@@ -346,7 +346,7 @@ export default function VemoPage() {
                             videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
-                            memosId={memosId}        
+                            memosId={memosId}
                         />
                     )}
                     currentTimestamp={currentTimestamp}
