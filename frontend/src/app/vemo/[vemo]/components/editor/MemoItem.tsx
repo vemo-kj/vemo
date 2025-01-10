@@ -12,6 +12,13 @@ import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import { debounce } from 'lodash';
 import ExtractButton from '../extractButton/ExtractButton';
 
+
+// 타임스탬프 유효성 검사
+function validateTimestamp(timestamp: string): string {
+    const isValid = /^\d{2}:\d{2}$/.test(timestamp); // MM:SS 형식 확인
+    return isValid ? timestamp : '00:00'; // 유효하지 않으면 기본값 "00:00" 반환
+}
+
 interface MemoItemProps {
     id: string;
     timestamp: string;
@@ -44,6 +51,9 @@ const MemoItem = memo(
             hasScreenshot: !!screenshot,
             screenshotLength: screenshot?.length,
         });
+
+        // 타임스탬프 유효성 검사
+        const validatedTimestamp = validateTimestamp(timestamp);
 
         // ====== (1) 그리기 영역 ======
         const [isDrawingOpen, setIsDrawingOpen] = useState(false);
@@ -111,7 +121,7 @@ const MemoItem = memo(
         };
 
         const handleTimestampClick = () => {
-            onTimestampClick?.(timestamp);
+            onTimestampClick?.(validatedTimestamp); // === 수정된 부분 ===
         };
 
         // debounce를 적용하여 잦은 상태 업데이트 방지
@@ -183,9 +193,9 @@ const MemoItem = memo(
                 <div className={styles.memoHeader}>
                     <button
                         className={styles.timestampBtn}
-                        onClick={() => onTimestampClick?.(timestamp)}
+                        onClick={handleTimestampClick} // === 수정된 부분 ===
                     >
-                        {timestamp}
+                        {validatedTimestamp} {/* === 수정된 부분 === */}
                     </button>
                 </div>
 

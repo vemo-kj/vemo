@@ -142,102 +142,43 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
                 const token = sessionStorage.getItem('token');
-                console.log('[Capture Event] Starting capture process');
-
-                if (props.onPauseVideo) {
-                    props.onPauseVideo();
+                if (!props.vemoData?.id) {
+                    throw new Error('No memos ID available');
                 }
-
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: true,
-                }));
-
+                
                 // 1. 이미지 압축
                 const compressedImage = await compressImage(imageUrl);
-                console.log('Image compressed:', {
-                    originalSize: imageUrl.length,
-                    compressedSize: compressedImage.length
-                });
 
-                // 2. 메모 생성
-                const memosResponse = await fetch(
-                    `http://localhost:5050/home/memos/${props.videoId}`,
+                // 2. timestamp를 Date 형식으로 변환
+                const [minutes, seconds] = timestamp.split(':').map(Number);
+                const date = new Date();
+                date.setMinutes(minutes);
+                date.setSeconds(seconds);
+
+                // 3. 캡처 저장 API 호출 (vemoData.id 사용)
+                const captureResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
                         method: 'POST',
                         headers: {
                             Authorization: `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
-                        credentials: 'include',
+                        body: JSON.stringify({
+                            timestamp: date.toISOString(),
+                            image: compressedImage,
+                            memosId: props.vemoData.id
+                        }),
                     },
                 );
-
-                if (!memosResponse.ok) {
-                    throw new Error('Failed to create memo');
-                }
-
-                const memosData = await memosResponse.json();
-
-                // 3. timestamp를 Date 형식으로 변환
-                const [minutes, seconds] = timestamp.split(':').map(Number);
-                const date = new Date();
-                date.setMinutes(minutes);
-                date.setSeconds(seconds);
-
-                // 캡처 저장
-                console.log('[Capture Event] Saving capture:', {
-                    timestamp: date,
-                    memosId: memosData.id,
-                });
-
-                const compressedImage = await compressImage(imageUrl);
-                console.log('Original size:', imageUrl.length);
-                console.log('Compressed size:', compressedImage.length);
-
-                const captureResponse = await fetch(`http://localhost:5050/captures`, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        timestamp: date.toISOString(),
-                        image: compressedImage,
-                        memosId: memosData.id,
-                    }),
-                });
-
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: false,
-                }));
 
                 if (!captureResponse.ok) {
                     throw new Error('Failed to save capture');
                 }
 
-                const captureData = await captureResponse.json();
-
-                // 5. 새로운 캡처 아이템 추가
-                const newItem: Section = {
-                    id: `capture-${captureData.id}`,
-                    timestamp,
-                    htmlContent: '',
-                    screenshot: captureData.image // S3 URL이 반환됨
-                };
-
-                setSections(prev => [...prev, newItem]);
-                props.onMemoSaved?.();
-
+                props.onMemoSaved?.(); // 캡처 저장 후 데이터 갱신
             } catch (error) {
                 console.error('[Capture Event] Error:', error);
-                throw error;
-            } finally {
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: false,
-                }));
             }
         },
     }));
