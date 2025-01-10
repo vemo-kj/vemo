@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client';
 
 interface VideoPlayerProps {
     videoId: string;
@@ -48,7 +48,6 @@ export default function VideoPlayer({ videoId }: VideoPlayerProps) {
         try {
             console.log('소켓 연결 시도 중...');
             socketRef.current = io('http://localhost:5050/video', {
-                withCredentials: true,
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000,
