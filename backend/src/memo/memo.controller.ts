@@ -12,7 +12,7 @@ export class MemoController {
     // TODO: Memos ID가 필요한거 아닌가? @Post(':memosId')
     @Post()
     async createMemo(@Body() createMemoDto: CreateMemoDto) {
-        this.logger.log('------memo 생성(컨트롤러)');
+        this.logger.log('memo 생성(컨트롤러)');
         return await this.memoService.createMemo(createMemoDto);
     }
 
