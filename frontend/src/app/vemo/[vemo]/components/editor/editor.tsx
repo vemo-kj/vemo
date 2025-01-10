@@ -140,30 +140,25 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
                 const token = sessionStorage.getItem('token');
-                console.log('[Capture Event] Starting capture process:', {
-                    eventTimestamp: new Date().toISOString(),
-                    hasToken: !!token,
-                    timestamp,
-                    imageUrlValid: validateBase64Image(imageUrl),
-                    imageUrlValid: validateBase64Image(imageUrl),
-                });
+                console.log('[Capture Event] Starting capture process');
 
                 if (props.onPauseVideo) {
-                    console.log('[Capture Event] Pausing video');
                     props.onPauseVideo();
                 }
 
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: true,
-                    [timestamp]: true,
                 }));
 
-                if (!imageUrl || typeof imageUrl !== 'string') {
-                    throw new Error('[Capture Event] Invalid image URL format');
-                }
+                // 1. 이미지 압축
+                const compressedImage = await compressImage(imageUrl);
+                console.log('Image compressed:', {
+                    originalSize: imageUrl.length,
+                    compressedSize: compressedImage.length
+                });
 
-                console.log('[Capture Event] Creating memo - videoId:', props.videoId);
+                // 2. 메모 생성
                 const memosResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${props.videoId}`,
                     {
@@ -177,36 +172,18 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 );
 
                 if (!memosResponse.ok) {
-                    const errorText = await memosResponse.text();
-                    console.error('[Capture Event] Failed to create memo:', {
-                        status: memosResponse.status,
-                        statusText: memosResponse.statusText,
-                        body: errorText,
-                        body: errorText,
-                    });
-                    throw new Error('[Capture Event] Failed to create memo');
+                    throw new Error('Failed to create memo');
                 }
 
                 const memosData = await memosResponse.json();
-                console.log('[Capture Event] Memo created successfully:', memosData);
 
-                // timestamp를 Date 형식으로 변환
+                // 3. timestamp를 Date 형식으로 변환
                 const [minutes, seconds] = timestamp.split(':').map(Number);
                 const date = new Date();
                 date.setMinutes(minutes);
                 date.setSeconds(seconds);
 
-                // 캡처 저장
-                console.log('[Capture Event] Saving capture:', {
-                    timestamp: date,
-                    memosId: memosData.id,
-                    memosId: memosData.id,
-                });
-
-                const compressedImage = await compressImage(imageUrl);
-                console.log('Original size:', imageUrl.length);
-                console.log('Compressed size:', compressedImage.length);
-
+                // 4. 캡처 저장 요청
                 const captureResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
@@ -218,86 +195,37 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         body: JSON.stringify({
                             timestamp: date.toISOString(),
                             image: compressedImage,
-                            memos: { id: memosData.id },
+                            memosId: memosData.id
                         }),
                     },
                 );
 
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: false,
-                    [timestamp]: false,
-                }));
-
                 if (!captureResponse.ok) {
-                    const errorText = await captureResponse.text();
-                    console.error('[Capture Event] Failed to save capture:', {
-                        status: captureResponse.status,
-                        statusText: captureResponse.statusText,
-                        body: errorText,
-                        body: errorText,
-                    });
-                    throw new Error('[Capture Event] Failed to save capture');
+                    throw new Error('Failed to save capture');
                 }
 
-                const data = await captureResponse.json();
-                console.log('[Capture Event] Server response data:', data);
+                const captureData = await captureResponse.json();
 
-                // 이미지 데이터 처리
-                let processedImageUrl = data.image;
-                if (!processedImageUrl) {
-                    console.error('[Capture Event] No image data in server response:', data);
-                    throw new Error('[Capture Event] No image data');
-                }
-
-                // 이미지 데이터가 base64 형식인지 확인
-                if (!processedImageUrl.startsWith('data:image')) {
-                    console.log(
-                        '[Capture Event] Adding image data prefix:',
-                        processedImageUrl.substring(0, 100),
-                    );
-                    console.log(
-                        '[Capture Event] Adding image data prefix:',
-                        processedImageUrl.substring(0, 100),
-                    );
-                    processedImageUrl = `data:image/png;base64,${processedImageUrl}`;
-                    console.log(
-                        '[Capture Event] Image data prefix added:',
-                        processedImageUrl.substring(0, 100),
-                    );
-                    console.log(
-                        '[Capture Event] Image data prefix added:',
-                        processedImageUrl.substring(0, 100),
-                    );
-                }
-
-                // 로컬 상태 업데이트
+                // 5. 새로운 캡처 아이템 추가
                 const newItem: Section = {
-                    id: `capture-${data.id}`,
+                    id: `capture-${captureData.id}`,
                     timestamp,
                     htmlContent: '',
-                    screenshot: processedImageUrl,
+                    screenshot: captureData.image // S3 URL이 반환됨
                 };
 
-                console.log('[Capture Event] New section item created:', {
-                    id: newItem.id,
-                    timestamp: newItem.timestamp,
-                    screenshotLength: newItem.screenshot?.length || 0,
-                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot',
-                    screenshotStart: newItem.screenshot?.substring(0, 100) || 'No screenshot',
-                });
-
                 setSections(prev => [...prev, newItem]);
-                console.log('[Capture Event] Section update completed');
                 props.onMemoSaved?.();
+
             } catch (error) {
-                console.error('[Capture Event] Error in capture process:', error);
+                console.error('[Capture Event] Error:', error);
+                throw error;
+            } finally {
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
                     [timestamp]: false,
                 }));
-                throw error;
             }
         },
     }));
