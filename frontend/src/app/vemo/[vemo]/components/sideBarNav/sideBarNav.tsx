@@ -21,6 +21,7 @@ export interface SideBarNavProps {
     editorRef: React.RefObject<any>;
     vemoData: CreateMemosResponseDto | null;
     videoId: string;
+    memosId: number | null;
 }
 
 // 응답 타입
@@ -61,9 +62,11 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
+    
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
     const [memosId, setMemosId] = useState<number | null>(null);
+    
     
     // 토큰 가져오기
     const token = sessionStorage.getItem('token');
@@ -153,7 +156,7 @@ export default function SidebarNav({
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'write' ? styles.activeTab : ''}`}
-                    onClick={handleWriteClick}
+                    onClick={() => setActiveTab('write')}
                 >
                     <div className={styles.iconButton}>
                         <Image
