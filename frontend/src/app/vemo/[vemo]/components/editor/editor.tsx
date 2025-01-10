@@ -148,6 +148,42 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 
                 // 1. 이미지 압축
                 const compressedImage = await compressImage(imageUrl);
+                console.log('[Capture Event] Starting capture process');
+
+                if (props.onPauseVideo) {
+                    props.onPauseVideo();
+                }
+
+                setImageLoadingStates(prev => ({
+                    ...prev,
+                    [timestamp]: true,
+                }));
+
+                // 1. 이미지 압축
+                const compressedImage = await compressImage(imageUrl);
+                console.log('Image compressed:', {
+                    originalSize: imageUrl.length,
+                    compressedSize: compressedImage.length
+                });
+
+                // 2. 메모 생성
+                const memosResponse = await fetch(
+                    `http://localhost:5050/home/memos/${props.videoId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                    },
+                );
+
+                if (!memosResponse.ok) {
+                    throw new Error('Failed to create memo');
+                }
+
+                const memosData = await memosResponse.json();
 
                 // 2. timestamp를 Date 형식으로 변환
                 const [minutes, seconds] = timestamp.split(':').map(Number);
