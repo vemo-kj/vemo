@@ -15,7 +15,6 @@ import { useSummary } from '../../context/SummaryContext';
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 
 
-
 // DraftEditor를 위한 타입 정의 추가
 const Editor = DraftEditor as unknown as React.ComponentType<{
     editorState: EditorState;
@@ -31,26 +30,6 @@ interface Section {
     timestamp: string;
     htmlContent: string;
     screenshot?: string;
-}
-
-interface Memo {
-    id: number;
-    timestamp: string;
-    description: string;
-}
-
-interface Captures {
-    id: number;
-    createdAt: Date;
-    imageUrl: string;
-}
-
-interface MemoListResponse {
-    id: number;
-    title: string;
-    createdAt: Date;
-    memo: Memo[];
-    captures: Captures[];
 }
 
 interface CustomEditorProps {
@@ -154,6 +133,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             try {
                 const token = sessionStorage.getItem('token');
                 console.log('[Capture Event] Starting capture process');
+                console.log('Current timestamp:', timestamp);
 
                 if (props.onPauseVideo) {
                     props.onPauseVideo();
@@ -166,37 +146,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
                 // 1. 이미지 압축
                 const compressedImage = await compressImage(imageUrl);
-                console.log('Image compressed:', {
-                    originalSize: imageUrl.length,
-                    compressedSize: compressedImage.length,
-                });
 
-                // 2. 메모 생성
-                const memosResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${props.videoId}`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                    },
-                );
-
-                if (!memosResponse.ok) {
-                    throw new Error('Failed to create memo');
-                }
-
-                const memosData = await memosResponse.json();
-
-                // 3. timestamp를 Date 형식으로 변환
+                // 2. timestamp를 초 단위로 변환
                 const [minutes, seconds] = timestamp.split(':').map(Number);
-                const date = new Date();
-                date.setMinutes(minutes);
-                date.setSeconds(seconds);
+                const totalSeconds = minutes * 60 + seconds;
 
-                // 4. 캡처 저장 요청
+                // 3. 캡처 저장 요청
                 const captureResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
@@ -206,9 +161,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            timestamp: date.toISOString(),
+                            timestamp: totalSeconds,
                             image: compressedImage,
-                            memosId: memosData.id,
+                            memosId: props.memosId
                         }),
                     },
                 );
@@ -218,21 +173,20 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 }
 
                 const captureData = await captureResponse.json();
+                console.log('Capture saved successfully:', captureData);
 
-                // 5. 새로운 캡처 아이템 추가
-                const newItem: Section = {
+                // 4. 섹션에 추가
+                const newSection: Section = {
                     id: `capture-${captureData.id}`,
-                    timestamp,
+                    timestamp: timestamp,
                     htmlContent: '',
-                    screenshot: captureData.image, // S3 URL이 반환됨
+                    screenshot: imageUrl
                 };
 
                 setSections(prev => [...prev, newItem]);
                 props.onMemoSaved?.();
             } catch (error) {
-                console.error('[Capture Event] Error:', error);
-                throw error;
-            } finally {
+                console.error('캡처 저장 실패:', error);
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
@@ -270,11 +224,26 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 const formattedSections = [
                     // memo 데이터 변환
                     ...memosData.memo.map((memo: any) => {
-                        // timestamp를 MM:SS 형식으로 변환
-                        const date = new Date(memo.timestamp);
-                        const minutes = date.getMinutes().toString().padStart(2, '0');
-                        const seconds = date.getSeconds().toString().padStart(2, '0');
+                        console.log('Memo timestamp before conversion:', memo.timestamp);
+                        
+                        // timestamp가 숫자(초)로 들어온다고 가정하고 변환
+                        let minutes = '00';
+                        let seconds = '00';
+                        
+                        if (memo.timestamp) {
+                            if (typeof memo.timestamp === 'string' && memo.timestamp.includes(':')) {
+                                // MM:SS 형식인 경우
+                                [minutes, seconds] = memo.timestamp.split(':');
+                            } else {
+                                // 초 단위 숫자나 다른 형식인 경우
+                                const totalSeconds = Math.floor(Number(memo.timestamp));
+                                minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                                seconds = (totalSeconds % 60).toString().padStart(2, '0');
+                            }
+                        }
+
                         const formattedTimestamp = `${minutes}:${seconds}`;
+                        console.log('Memo timestamp after conversion:', formattedTimestamp);
 
                         return {
                             id: `memo-${memo.id}`,
@@ -283,12 +252,25 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                             screenshot: null,
                         };
                     }),
-                    // captures 데이터 변환
+                    // captures 데이터 변환 (기존 방식 유지)
                     ...memosData.captures.map((capture: any) => {
-                        const date = new Date(capture.timestamp);
-                        const minutes = date.getMinutes().toString().padStart(2, '0');
-                        const seconds = date.getSeconds().toString().padStart(2, '0');
+                        console.log('Capture timestamp before conversion:', capture.timestamp);
+                        
+                        let minutes = '00';
+                        let seconds = '00';
+                        
+                        if (capture.timestamp) {
+                            if (typeof capture.timestamp === 'string' && capture.timestamp.includes(':')) {
+                                [minutes, seconds] = capture.timestamp.split(':');
+                            } else {
+                                const totalSeconds = Math.floor(Number(capture.timestamp));
+                                minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                                seconds = (totalSeconds % 60).toString().padStart(2, '0');
+                            }
+                        }
+
                         const formattedTimestamp = `${minutes}:${seconds}`;
+                        console.log('Capture timestamp after conversion:', formattedTimestamp);
 
                         return {
                             id: `capture-${capture.id}`,
@@ -303,6 +285,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     const [bMin, bSec] = b.timestamp.split(':').map(Number);
                     return aMin * 60 + aSec - (bMin * 60 + bSec);
                 });
+                console.log('memosData.memo:', memosData.memo);
 
                 setSections(formattedSections);
                 console.log('Loaded sections:', formattedSections);
@@ -334,12 +317,15 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             date.setMinutes(minutes);
             date.setSeconds(seconds);
 
+          
+
             const requestData = {
-                timestamp: date.toISOString(), // ISO 문자열로 변환
+                timestamp: timestamp, // ISO 문자열로 변환
                 description: html,
                 memosId: Number(props.memosId),
             };
 
+            console.log('0000000000000:', timestamp);
             console.log('Sending memo data:', requestData);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/`, {
