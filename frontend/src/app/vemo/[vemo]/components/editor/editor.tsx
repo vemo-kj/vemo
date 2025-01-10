@@ -1,4 +1,3 @@
-import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import { convertToHTML } from 'draft-convert';
 import {
     Editor as DraftEditor,
