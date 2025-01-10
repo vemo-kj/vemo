@@ -11,9 +11,8 @@ import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'rea
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 
-import { useSummary } from '../../context/SummaryContext';
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
-
+import { useSummary } from '../../context/SummaryContext';
 
 // DraftEditor를 위한 타입 정의 추가
 const Editor = DraftEditor as unknown as React.ComponentType<{
@@ -163,7 +162,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                         body: JSON.stringify({
                             timestamp: props.getTimestamp(),
                             image: compressedImage,
-                            memosId: props.memosId
+                            memosId: props.memosId,
                         }),
                     },
                 );
@@ -180,20 +179,21 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     id: `capture-${captureData.id}`,
                     timestamp: timestamp,
                     htmlContent: '',
-                    screenshot: imageUrl
+                    screenshot: imageUrl,
                 };
 
-                setSections(prev => [...prev, newSection].sort((a, b) => {
-                    const aSeconds = parseTimeToSeconds(a.timestamp);
-                    const bSeconds = parseTimeToSeconds(b.timestamp);
-                    return aSeconds - bSeconds;
-                }));
+                setSections(prev =>
+                    [...prev, newSection].sort((a, b) => {
+                        const aSeconds = parseTimeToSeconds(a.timestamp);
+                        const bSeconds = parseTimeToSeconds(b.timestamp);
+                        return aSeconds - bSeconds;
+                    }),
+                );
 
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
                 }));
-
             } catch (error) {
                 console.error('캡처 저장 실패:', error);
                 setImageLoadingStates(prev => ({
@@ -234,19 +234,24 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     // memo 데이터 변환
                     ...memosData.memo.map((memo: any) => {
                         console.log('Memo timestamp before conversion:', memo.timestamp);
-                        
+
                         // timestamp가 숫자(초)로 들어온다고 가정하고 변환
                         let minutes = '00';
                         let seconds = '00';
-                        
+
                         if (memo.timestamp) {
-                            if (typeof memo.timestamp === 'string' && memo.timestamp.includes(':')) {
+                            if (
+                                typeof memo.timestamp === 'string' &&
+                                memo.timestamp.includes(':')
+                            ) {
                                 // MM:SS 형식인 경우
                                 [minutes, seconds] = memo.timestamp.split(':');
                             } else {
                                 // 초 단위 숫자나 다른 형식인 경우
                                 const totalSeconds = Math.floor(Number(memo.timestamp));
-                                minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                                minutes = Math.floor(totalSeconds / 60)
+                                    .toString()
+                                    .padStart(2, '0');
                                 seconds = (totalSeconds % 60).toString().padStart(2, '0');
                             }
                         }
@@ -264,16 +269,21 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     // captures 데이터 변환 (기존 방식 유지)
                     ...memosData.captures.map((capture: any) => {
                         console.log('Capture timestamp before conversion:', capture.timestamp);
-                        
+
                         let minutes = '00';
                         let seconds = '00';
-                        
+
                         if (capture.timestamp) {
-                            if (typeof capture.timestamp === 'string' && capture.timestamp.includes(':')) {
+                            if (
+                                typeof capture.timestamp === 'string' &&
+                                capture.timestamp.includes(':')
+                            ) {
                                 [minutes, seconds] = capture.timestamp.split(':');
                             } else {
                                 const totalSeconds = Math.floor(Number(capture.timestamp));
-                                minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                                minutes = Math.floor(totalSeconds / 60)
+                                    .toString()
+                                    .padStart(2, '0');
                                 seconds = (totalSeconds % 60).toString().padStart(2, '0');
                             }
                         }
@@ -325,8 +335,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             const date = new Date();
             date.setMinutes(minutes);
             date.setSeconds(seconds);
-
-          
 
             const requestData = {
                 timestamp: timestamp, // ISO 문자열로 변환
@@ -389,7 +397,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             console.log('memoId:', memoId);
 
             // 백엔드 요청
-            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/${memoId}`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -440,7 +448,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             const id = captureId.split('-')[1]; // 'capture-123' -> '123'
             console.log('Deleting capture:', { captureId, id });
 
-            const response = await fetch(`http://localhost:5050/captures/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -482,7 +490,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             }
 
             const memoId = id.split('-')[1];
-            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/${memoId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -524,7 +532,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
         return 'not-handled';
     };
-
 
     // 메모카드 변경 감지
     useEffect(() => {
