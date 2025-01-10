@@ -9,7 +9,7 @@ export class Captures {
     @Column('time')
     timestamp: string;
 
-    @Column('text')
+    @Column({ nullable: true })
     image: string;
 
     @ManyToOne(() => Memos)
