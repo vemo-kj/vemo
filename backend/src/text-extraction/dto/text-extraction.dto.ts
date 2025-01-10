@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export class ExtractTextDto {
-    @IsNotEmpty()
     @IsString()
-    imageBase64: string;
+    @IsNotEmpty()
+    @IsUrl()
+    imageUrl: string;
 }

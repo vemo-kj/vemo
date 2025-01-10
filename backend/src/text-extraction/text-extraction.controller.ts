@@ -5,13 +5,13 @@ import { Public } from '../public.decorator';
 
 @Controller('text-extraction')
 export class TextExtractionController {
-    constructor(private readonly textExtractionService: TextExtractionService) {}
+    constructor(private readonly textExtractionService: TextExtractionService) { }
 
     @Public()
     @Post()
-    async extractText(@Body() { imageBase64 }: ExtractTextDto) {
+    async extractText(@Body() { imageUrl }: ExtractTextDto) {
         try {
-            const text = await this.textExtractionService.extractTextFromBase64(imageBase64);
+            const text = await this.textExtractionService.extractTextFromUrl(imageUrl);
             return { success: true, text };
         } catch (error) {
             return { success: false, error: error.message };
