@@ -12,6 +12,9 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { HomeModule } from './home/home.module';
 import { MemoModule } from './memo/memo.module';
 import { MemosModule } from './memos/memos.module';
+import { PlaylistModule } from './playlist/playlist.module';
+import { QuizModule } from './quiz/quiz.module';
+import { S3Module } from './s3/s3.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
 import { SummarizationModule } from './summarization/summarization.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
@@ -19,6 +22,7 @@ import { UsersModule } from './users/users.module';
 import { VemoModule } from './vemo/vemo.module';
 import { VideoModule } from './video/video.module';
 import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
+
 // import { RedisConfigService } from './config/redis.config';
 // import { CacheModule } from '@nestjs/cache-manager';
 
@@ -55,6 +59,7 @@ import { YoutubeAuthModule } from './youtubeauth/youtube-auth.module';
         TextExtractionModule,
         PdfModule,
         MemoModule,
+        S3Module,
     ],
     controllers: [AppController],
     providers: [
