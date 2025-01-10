@@ -20,6 +20,8 @@ import { VemoModule } from './vemo/vemo.module';
 import { HomeModule } from './home/home.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { TextExtractionModule } from './text-extraction/text-extraction.module';
+import { S3Module } from './s3/s3.module';
+
 // import { RedisConfigService } from './config/redis.config';
 // import { CacheModule } from '@nestjs/cache-manager';
 import { PdfModule } from './pdf/pdf.module';
@@ -57,7 +59,8 @@ import { MemoModule } from './memo/memo.module';
         SummarizationModule,
         TextExtractionModule,
         PdfModule,
-        MemoModule, 
+        MemoModule,
+        S3Module,
     ],
     controllers: [AppController],
     providers: [
