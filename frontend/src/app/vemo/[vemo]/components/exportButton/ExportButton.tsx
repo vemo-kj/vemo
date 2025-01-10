@@ -2,10 +2,7 @@
 import styles from '../sideBarNav/sideBarNav.module.css';
 import Image from 'next/image';
 
-export default function ExportButton() {
-    // TODO: 메모 아이디 받아오기
-    const memosId = 46; // 다른 ID로 테스트
-
+export default function ExportButton({ memosId }: { memosId: number }) {
     const handleDownloadPDF = async () => {
         try {
             console.log('PDF 다운로드 요청 시작:', memosId);
