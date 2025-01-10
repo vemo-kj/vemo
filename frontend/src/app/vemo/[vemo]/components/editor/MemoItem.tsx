@@ -254,9 +254,12 @@ const MemoItem = memo(
                             <ExtractButton
                                 imageUrl={screenshot}
                                 onExtracted={(text) => {
-                                    const newContent = htmlContent + '<p>' + text + '</p>';
-                                    onChangeHTML(newContent);
+                                    if (addTextToEditor) {
+                                        console.log('Adding text to editor input:', text);
+                                        addTextToEditor(text);
+                                    }
                                 }}
+                                onDelete={onDelete}
                             />
                         </>
                     )}

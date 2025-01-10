@@ -1,4 +1,5 @@
-import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js';
+import { convertToHTML } from 'draft-convert';
+import { Editor as DraftEditor, EditorState, getDefaultKeyBinding, Modifier, RichUtils } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import styles from './editor.module.css';
@@ -552,6 +553,28 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
+                        addTextToEditor={(text) => {
+                            // 현재 컨텐츠 상태 가져오기
+                            const contentState = editorState.getCurrentContent();
+                            const selection = editorState.getSelection();
+
+                            // 새 텍스트 삽입
+                            const newContent = Modifier.insertText(
+                                contentState,
+                                selection,
+                                text
+                            );
+
+                            // 새로운 EditorState 생성
+                            const newEditorState = EditorState.push(
+                                editorState,
+                                newContent,
+                                'insert-characters'
+                            );
+
+                            // 에디터 상태 업데이트
+                            setEditorState(newEditorState);
+                        }}
                     />
                 ))}
             </div>
