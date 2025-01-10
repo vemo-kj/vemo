@@ -1,5 +1,11 @@
 import { convertToHTML } from 'draft-convert';
-import { Editor as DraftEditor, EditorState, getDefaultKeyBinding, Modifier, RichUtils } from 'draft-js';
+import {
+    Editor as DraftEditor,
+    EditorState,
+    getDefaultKeyBinding,
+    Modifier,
+    RichUtils,
+} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import styles from './editor.module.css';
@@ -72,7 +78,6 @@ const validateBase64Image = (base64String: string) => {
         length: base64String?.length,
         startsWithData: base64String?.startsWith('data:'),
         containsBase64: base64String?.includes('base64'),
-        firstChars: base64String?.substring(0, 50) + '...',
         firstChars: base64String?.substring(0, 50) + '...',
     });
 
@@ -156,7 +161,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 const compressedImage = await compressImage(imageUrl);
                 console.log('Image compressed:', {
                     originalSize: imageUrl.length,
-                    compressedSize: compressedImage.length
+                    compressedSize: compressedImage.length,
                 });
 
                 // 2. 메모 생성
@@ -196,7 +201,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         body: JSON.stringify({
                             timestamp: date.toISOString(),
                             image: compressedImage,
-                            memosId: memosData.id
+                            memosId: memosData.id,
                         }),
                     },
                 );
@@ -212,19 +217,17 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     id: `capture-${captureData.id}`,
                     timestamp,
                     htmlContent: '',
-                    screenshot: captureData.image // S3 URL이 반환됨
+                    screenshot: captureData.image, // S3 URL이 반환됨
                 };
 
                 setSections(prev => [...prev, newItem]);
                 props.onMemoSaved?.();
-
             } catch (error) {
                 console.error('[Capture Event] Error:', error);
                 throw error;
             } finally {
                 setImageLoadingStates(prev => ({
                     ...prev,
-                    [timestamp]: false,
                     [timestamp]: false,
                 }));
             }
@@ -243,9 +246,9 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 const url = `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${props.memosId}`;
                 const response = await fetch(url, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                     },
-                    credentials: 'include'
+                    credentials: 'include',
                 });
 
                 if (!response.ok) {
@@ -268,7 +271,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                             id: `memo-${memo.id}`,
                             timestamp: formattedTimestamp,
                             htmlContent: memo.description,
-                            screenshot: null
+                            screenshot: null,
                         };
                     }),
                     // captures 데이터 변환
@@ -282,19 +285,18 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                             id: `capture-${capture.id}`,
                             timestamp: formattedTimestamp,
                             htmlContent: '',
-                            screenshot: capture.image
+                            screenshot: capture.image,
                         };
-                    })
+                    }),
                 ].sort((a, b) => {
                     // timestamp를 기준으로 정렬
                     const [aMin, aSec] = a.timestamp.split(':').map(Number);
                     const [bMin, bSec] = b.timestamp.split(':').map(Number);
-                    return (aMin * 60 + aSec) - (bMin * 60 + bSec);
+                    return aMin * 60 + aSec - (bMin * 60 + bSec);
                 });
 
                 setSections(formattedSections);
                 console.log('Loaded sections:', formattedSections);
-
             } catch (error) {
                 console.error('메모 목록 불러오기 실패:', error);
             }
@@ -326,7 +328,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const requestData = {
                 timestamp: date.toISOString(), // ISO 문자열로 변환
                 description: html,
-                memosId: Number(props.memosId)
+                memosId: Number(props.memosId),
             };
 
             console.log('Sending memo data:', requestData);
@@ -334,11 +336,11 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const response = await fetch(`http://localhost:5050/memo/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
             });
 
             // 자세한 에러 로깅
@@ -348,7 +350,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     url: response.url,
                     status: response.status,
                     statusText: response.statusText,
-                    body: errorText,
                     body: errorText,
                 });
                 throw new Error(`메모 저장 실패: ${response.status} ${response.statusText}`);
@@ -366,12 +367,10 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
-
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
     };
-
 
     const handleChangeItem = async (id: string, newHTML: string) => {
         try {
@@ -389,14 +388,14 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
                 credentials: 'include',
                 body: JSON.stringify({
                     id: memoId,
-                    description: newHTML
-                })
+                    description: newHTML,
+                }),
             });
 
             if (!response.ok) {
@@ -404,7 +403,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.error('메모 수정 실패:', {
                     status: response.status,
                     statusText: response.statusText,
-                    error: errorText
+                    error: errorText,
                 });
                 throw new Error('메모 수정에 실패했습니다.');
             }
@@ -420,7 +419,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 return item;
             });
             setSections(updatedSections);
-
         } catch (error) {
             console.error('메모 수정 중 오류 발생:', error);
         }
@@ -441,10 +439,10 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const response = await fetch(`http://localhost:5050/captures/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                credentials: 'include'
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -452,14 +450,13 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.error('캡처 삭제 실패:', {
                     status: response.status,
                     statusText: response.statusText,
-                    error: errorText
+                    error: errorText,
                 });
                 throw new Error('캡처 삭제에 실패했습니다.');
             }
 
             // 성공적으로 삭제되면 프론트엔드 상태 업데이트
             setSections(prev => prev.filter(item => item.id !== captureId));
-
         } catch (error) {
             console.error('캡처 삭제 중 오류 발생:', error);
         }
@@ -484,10 +481,10 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                credentials: 'include'
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -495,18 +492,16 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 console.error('메모 삭제 실패:', {
                     status: response.status,
                     statusText: response.statusText,
-                    error: errorText
+                    error: errorText,
                 });
                 throw new Error('메모 삭제에 실패했습니다.');
             }
 
             setSections(prev => prev.filter(item => item.id !== id));
-
         } catch (error) {
             console.error('메모 삭제 중 오류 발생:', error);
         }
     };
-
 
     // 인라인 스타일 토글 함수 추가
     const toggleInlineStyle = (style: string) => {
@@ -526,8 +521,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         return 'not-handled';
     };
 
-
-
     return (
         <div className={styles.container}>
             <div className={styles.displayArea}>
@@ -540,27 +533,22 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                         screenshot={item.screenshot}
                         onTimestampClick={props.onTimestampClick}
                         onChangeHTML={newHTML => handleChangeItem(item.id, newHTML)}
-                        onChangeHTML={newHTML => handleChangeItem(item.id, newHTML)}
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
-                        addTextToEditor={(text) => {
+                        addTextToEditor={text => {
                             // 현재 컨텐츠 상태 가져오기
                             const contentState = editorState.getCurrentContent();
                             const selection = editorState.getSelection();
 
                             // 새 텍스트 삽입
-                            const newContent = Modifier.insertText(
-                                contentState,
-                                selection,
-                                text
-                            );
+                            const newContent = Modifier.insertText(contentState, selection, text);
 
                             // 새로운 EditorState 생성
                             const newEditorState = EditorState.push(
                                 editorState,
                                 newContent,
-                                'insert-characters'
+                                'insert-characters',
                             );
 
                             // 에디터 상태 업데이트
@@ -586,7 +574,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
                         onMouseDown={e => {
-                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('BOLD');
                         }}
@@ -596,7 +583,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     <button
                         className={`${styles.styleButton} ${isStyleActive('ITALIC') ? styles.activeButton : ''}`}
                         onMouseDown={e => {
-                        onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('ITALIC');
                         }}
@@ -605,7 +591,6 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     </button>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('UNDERLINE') ? styles.activeButton : ''}`}
-                        onMouseDown={e => {
                         onMouseDown={e => {
                             e.preventDefault();
                             toggleInlineStyle('UNDERLINE');

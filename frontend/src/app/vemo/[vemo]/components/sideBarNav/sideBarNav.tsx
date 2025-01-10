@@ -1,5 +1,5 @@
 'use client';
-
+import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
 import React, { useState } from 'react';
 import Community from '../community/Community';

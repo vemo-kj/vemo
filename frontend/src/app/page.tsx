@@ -24,7 +24,7 @@ function SearchParamsComponent() {
         try {
             setIsLoading(true);
             setError(null);
-            
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
@@ -38,7 +38,6 @@ function SearchParamsComponent() {
             //     method: 'GET',
             //     headers: { 'Content-Type': 'application/json' },
             // });
-            
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch main cards: ${response.status}`);
@@ -58,9 +57,6 @@ function SearchParamsComponent() {
                 category: String(video.category || 'Uncategorized'),
                 channel: {
                     id: String(video.channel?.id || ''),
-                    thumbnails: String(
-                        video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
-                    ),
                     thumbnails: String(
                         video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
                     ),
@@ -90,11 +86,9 @@ function SearchParamsComponent() {
     }, [categoryParam]);
 
     const filteredCards = mainCards.filter(card => {
-    const filteredCards = mainCards.filter(card => {
         const matchesCategory =
             selectedCategory === 'All' ||
             card.category.toLowerCase() === selectedCategory.toLowerCase();
-        const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
         return matchesCategory && matchesSearch;
     });
@@ -112,7 +106,6 @@ function SearchParamsComponent() {
                     <div className={styles.error}>{error}</div>
                 ) : (
                     <div className={styles.mainCardContainer}>
-                        {filteredCards.map(card => (
                         {filteredCards.map(card => (
                             <MainCard key={card.id} {...card} />
                         ))}
