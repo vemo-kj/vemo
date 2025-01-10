@@ -1,16 +1,8 @@
-import React, {
-    memo,
-    useRef,
-    useState,
-    useEffect,
-    ChangeEvent,
-    FocusEvent,
-    useCallback,
-} from 'react';
-import styles from './editor.module.css';
-import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import { debounce } from 'lodash';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import ExtractButton from '../extractButton/ExtractButton';
+import styles from './editor.module.css';
 
 interface MemoItemProps {
     id: string;
@@ -38,13 +30,6 @@ const MemoItem = memo(
         isEditable,
         addTextToEditor,
     }: MemoItemProps) => {
-        console.log('MemoItem 렌더링:', {
-            id,
-            timestamp,
-            hasScreenshot: !!screenshot,
-            screenshotLength: screenshot?.length,
-        });
-
         // ====== (1) 그리기 영역 ======
         const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
@@ -253,7 +238,7 @@ const MemoItem = memo(
                             </button>
                             <ExtractButton
                                 imageUrl={screenshot}
-                                onExtracted={(text) => {
+                                onExtracted={text => {
                                     if (addTextToEditor) {
                                         console.log('Adding text to editor input:', text);
                                         addTextToEditor(text);

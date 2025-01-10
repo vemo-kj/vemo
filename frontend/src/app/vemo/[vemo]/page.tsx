@@ -3,10 +3,10 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
-import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -89,8 +89,8 @@ export default function VemoPage() {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
-                        credentials: 'include'
-                    }
+                        credentials: 'include',
+                    },
                 );
                 const memosData = await memosResponse.json();
                 // memosData를 필요한 컴포넌트에 전달하기 위해 상태 저장
@@ -100,7 +100,7 @@ export default function VemoPage() {
                     createdAt: prevData?.createdAt ?? new Date(),
                     memo: prevData?.memo ?? [],
                     captures: prevData?.captures ?? [],
-                    memos: memosData
+                    memos: memosData,
                 }));
             }
         } catch (error) {
@@ -148,7 +148,6 @@ export default function VemoPage() {
                 },
             });
         };
-
     }, [videoId]);
 
     // timestamp 업데이트 함수를 별도로 분리
@@ -191,7 +190,6 @@ export default function VemoPage() {
         const handleMessage = (e: MessageEvent) => {
             if (e.source !== window) return; // 보안상 체크
 
-            console.log('메시지 수신:', e.data);
             if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
                 console.log('전체 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
@@ -344,7 +342,7 @@ export default function VemoPage() {
                             videoId={videoId || ''}
                             onPauseVideo={() => playerRef.current?.pauseVideo()}
                             onMemoSaved={handleMemoSaved}
-                            memosId={memosId}      
+                            memosId={memosId}
                             vemoData={vemoData}
                         />
                     )}
