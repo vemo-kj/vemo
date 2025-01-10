@@ -1,5 +1,6 @@
 import {
     Body,
+    ClassSerializerInterceptor,
     Controller,
     Delete,
     Get,
@@ -7,12 +8,15 @@ import {
     Param,
     Put,
     Query,
+    UseInterceptors,
 } from '@nestjs/common';
 import { MemosService } from './memos.service';
 import { UpdateMemosDto } from './dto/update-memos.dto';
 import { GetMemosResponseDto } from './dto/get-memos-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('memos')
+@UseInterceptors(ClassSerializerInterceptor)
 export class MemosController {
     constructor(private readonly memosService: MemosService) {}
 
@@ -29,18 +33,19 @@ export class MemosController {
     @Get('/:memosId')
     async getMemosById(@Param('memosId') memosId: number): Promise<GetMemosResponseDto> {
         const memos = await this.memosService.getMemosById(memosId);
-
         if (!memos) {
             throw new NotFoundException('메모를 찾을 수 없습니다.');
         }
 
-        return {
+        const response = plainToInstance(GetMemosResponseDto, {
             id: memos.id,
             title: memos.title,
             createdAt: memos.createdAt,
             memo: memos.memo,
             captures: memos.captures,
-        };
+        });
+
+        return response;
     }
 
     @Put('/:id')
