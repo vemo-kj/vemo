@@ -163,7 +163,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 console.log('[Capture Event] Creating memo - videoId:', props.videoId);
                 const memosResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_BASE_URL}home/memos/${props.videoId}`,
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${props.videoId}`,
                     {
                         method: 'POST',
                         headers: {
@@ -358,7 +358,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
                 setSections(formattedSections);
                 console.log('Loaded sections:', formattedSections);
-                
+
             } catch (error) {
                 console.error('메모 목� 불러오기 실패:', error);
             }
@@ -380,13 +380,13 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
 
             const html = convertToHTML(contentState);
             const timestamp = props.getTimestamp();
-            
+
             // timestamp 형식 변환 추가
             const [minutes, seconds] = timestamp.split(':').map(Number);
             const date = new Date();
             date.setMinutes(minutes);
             date.setSeconds(seconds);
-            
+
             const requestData = {
                 timestamp: date.toISOString(), // ISO 문자열로 변환
                 description: html,
@@ -435,8 +435,8 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         }
     };
 
-    
-    const handleChangeItem = async (id: string, newHTML: string)=> {
+
+    const handleChangeItem = async (id: string, newHTML: string) => {
         try {
             const token = sessionStorage.getItem('token');
             if (!token) {
@@ -447,7 +447,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             // id에서 숫자만 추출 (예: "memo-123" -> 123)
             const memoId = parseInt(id.split('-')[1]);
             console.log('memoId:', memoId);
-            
+
             // 백엔드 요청
             const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
                 method: 'PUT',
