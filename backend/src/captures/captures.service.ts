@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { Captures } from './captures.entity';
 import { CreateCapturesDto } from './dto/create-capture.dto';
+import { Memos } from 'src/memos/memos.entity';
 import { UpdateCapturesDto } from './dto/update-capture.dto';
 import { S3 } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,8 +18,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class CapturesService {
     private readonly bucketName: string;
     constructor(
-        @InjectRepository(Captures)
-        private capturesRepository: Repository<Captures>,
+        @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
+        @InjectRepository(Captures) private capturesRepository: Repository<Captures>,
 
         @Inject('S3')
         private readonly s3: S3,
@@ -29,7 +30,16 @@ export class CapturesService {
 
     async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
-            const captures = this.capturesRepository.create(createCapturesDto);
+            const { memosId, ...rest } = createCapturesDto;
+            const memos = await this.memosRepository.findOne({
+                where: { id: memosId },
+            });
+
+            const captures = this.capturesRepository.create({
+                ...rest,
+                memos,
+            });
+
             const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
             captures.image = uploadUrl;
 
