@@ -15,4 +15,4 @@ export class S3Service {
         await this.s3.upload(params).promise();
         return `https://${bucket}.s3.amazonaws.com/${key}`; // 업로드된 파일의 URL 반환
     }
-} 
+}
