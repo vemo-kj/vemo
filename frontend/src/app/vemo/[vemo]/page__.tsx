@@ -3,10 +3,10 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { CreateMemosResponseDto } from '../../types/vemo.types';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
+import { CreateMemosResponseDto, CustomEditorProps, PageProps } from '../../types/vemo.types';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -49,24 +49,21 @@ export default function VemoPage() {
                 return;
             }
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
+            const response = await fetch(`http://localhost:5050/home/memos/${videoId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
-            );
-            console.log(response);
+                credentials: 'include'
+            });
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('서버 응답:', {
                     status: response.status,
                     statusText: response.statusText,
-                    body: errorText,
+                    body: errorText
                 });
                 throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
             }
@@ -76,6 +73,7 @@ export default function VemoPage() {
             setVemoData(data);
             setMemosId(data.id);
             console.log('받은 메모 데이터 i  :', data.id);
+
         } catch (error) {
             console.error('데이터 로딩 실패:', error);
             setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
@@ -182,12 +180,9 @@ export default function VemoPage() {
 
         try {
             console.log('전체 캡처 요청 전송');
-            window.postMessage(
-                {
-                    type: 'CAPTURE_TAB',
-                },
-                '*',
-            );
+            window.postMessage({
+                type: 'CAPTURE_TAB'
+            }, '*');
         } catch (error) {
             console.error('캡처 요청 실패:', error);
         }
@@ -198,12 +193,9 @@ export default function VemoPage() {
 
         try {
             console.log('부분 캡처 요청 전송');
-            window.postMessage(
-                {
-                    type: 'CAPTURE_AREA',
-                },
-                '*',
-            );
+            window.postMessage({
+                type: 'CAPTURE_AREA'
+            }, '*');
         } catch (error) {
             console.error('부분 캡처 요청 실패:', error);
         }
@@ -272,7 +264,9 @@ export default function VemoPage() {
             <div className={styles.errorContainer}>
                 <h3>오류가 발생했습니다</h3>
                 <p>{error}</p>
-                <button onClick={() => window.location.reload()}>다시 시도</button>
+                <button onClick={() => window.location.reload()}>
+                    다시 시도
+                </button>
             </div>
         );
     }
@@ -317,3 +311,4 @@ export default function VemoPage() {
         </div>
     );
 }
+
