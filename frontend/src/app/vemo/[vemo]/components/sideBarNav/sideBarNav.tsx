@@ -62,72 +62,16 @@ export default function SidebarNav({
     editorRef,
     vemoData,
     videoId,
+    memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
-    const [memosId, setMemosId] = useState<number | null>(null);
 
     // 토큰 가져오기
     const token = sessionStorage.getItem('token');
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
 
-    // 메모 생성 API 호출 함수
-    const createMemo = async (videoId: string): Promise<MemosidResponse> => {
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    credentials: 'include',
-                },
-            );
-
-            const data = await response.json();
-            setMemosId(data.id);
-            console.log('생성된 메모 ID:', data.id);
-
-            if (!response.ok) {
-                throw new Error('Failed to create memo');
-            }
-
-            return data;
-        } catch (error) {
-            console.error('Error creating memo:', error);
-            throw error;
-        }
-    };
-
-    const getMemosById = async (memosId: string): Promise<MemoListResponse> => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memosId}`, {
-                method: 'Get',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                credentials: 'include',
-            });
-
-            const data = await response.json();
-            setMemosId(data.id);
-            console.log('생성된 메모 ID:', data);
-
-            if (!response.ok) {
-                throw new Error('Failed to create memo');
-            }
-
-            return data;
-        } catch (error) {
-            console.error('Error creating memo:', error);
-            throw error;
-        }
-    };
-
-    // 버튼 클릭 핸들러
+    // 메튼 클릭 핸들러
     const handleWriteClick = async () => {
         try {
             console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
@@ -136,10 +80,9 @@ export default function SidebarNav({
                 console.error('No videoId available');
                 return;
             }
-            console.log('handleWriteClick videoId:', videoId); // 클릭 시점의 videoId 값 확인
-            
+            console.log('handleWriteClick videoId:', videoId);
         } catch (error) {
-            console.error('Failed to create memo:', error);
+            console.error('Failed to handle write click:', error);
         }
     };
 
@@ -288,7 +231,7 @@ export default function SidebarNav({
                                 </button>
 
                                 <SummaryButton videoId={videoId} />
-                                <ExportButton />
+                                {memosId && <ExportButton memosId={memosId} />}
                             </div>
                         )}
                     </>
