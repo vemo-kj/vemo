@@ -17,6 +17,92 @@ interface CommunityResponse {
     memos: Memos[];
 }
 
+interface ConfirmModalProps {
+    isOpen: boolean;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const ConfirmModal = ({ isOpen, message, onConfirm, onCancel }: ConfirmModalProps) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+                <p className={styles.modalMessage}>{message}</p>
+                <div className={styles.modalButtons}>
+                    <button onClick={onConfirm} className={styles.confirmButton}>네</button>
+                    <button onClick={onCancel} className={styles.cancelButton}>아니요</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DetailView = ({ memo, onBack, viewMode }: {
+    memo: Memos;
+    onBack: () => void;
+    viewMode: 'all' | 'mine';
+}) => {
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const handleShare = () => {
+        setIsShareModalOpen(true);
+    };
+
+    const handleEdit = () => {
+        setIsEditModalOpen(true);
+    };
+
+    return (
+        <div className={styles.detailView}>
+            <div className={styles.detailHeader}>
+                <button className={styles.backButton} onClick={onBack}>
+                    뒤로가기
+                </button>
+                {viewMode === 'all' ? (
+                    <button className={styles.shareButton} onClick={handleShare}>퍼가기</button>
+                ) : (
+                    <button className={styles.editButton} onClick={handleEdit}>작성하기</button>
+                )}
+            </div>
+            <div className={styles.detailContent}>
+                <h3 className={styles.detailTitle}>{memo.title}</h3>
+                <div className={styles.detailInfo}>
+                    <span className={styles.author}>{memo.user.nickname}</span>
+                    <div className={styles.dateInfo}>
+                        <span className={styles.date}>
+                            작성: {new Date(memo.created_at).toLocaleDateString()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <ConfirmModal
+                isOpen={isShareModalOpen}
+                message="해당 메모를 기반으로 학습을 시작하겠습니까?"
+                onConfirm={() => {
+                    setIsShareModalOpen(false);
+                    // 퍼가기 로직 구현
+                }}
+                onCancel={() => setIsShareModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={isEditModalOpen}
+                message="해당 메모를 이어서 작성 하시겠습니까?"
+                onConfirm={() => {
+                    setIsEditModalOpen(false);
+                    // 작성하기 로직 구현
+                }}
+                onCancel={() => setIsEditModalOpen(false)}
+            />
+        </div>
+    );
+};
+
 export default function Community() {
     const [memos, setMemos] = useState<Memos[]>([]);
     const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
@@ -156,25 +242,11 @@ export default function Community() {
                     )}
                 </div>
             ) : (
-                <div className={styles.detailView}>
-                    <div className={styles.detailHeader}>
-                        <button className={styles.backButton} onClick={() => setSelectedCard(null)}>
-                            뒤로가기
-                        </button>
-                        <button className={styles.shareButton}>퍼가기</button>
-                    </div>
-                    <div className={styles.detailContent}>
-                        <h3 className={styles.detailTitle}>{selectedCard.title}</h3>
-                        <div className={styles.detailInfo}>
-                            <span className={styles.author}>{selectedCard.user.nickname}</span>
-                            <div className={styles.dateInfo}>
-                                <span className={styles.date}>
-                                    작성: {new Date(selectedCard.created_at).toLocaleDateString()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DetailView
+                    memo={selectedCard}
+                    onBack={() => setSelectedCard(null)}
+                    viewMode={viewMode}
+                />
             )}
         </div>
     );

@@ -8,7 +8,7 @@ export class SummarizationController {
     constructor(
         private readonly subtitlesService: SubtitlesService,
         private readonly summarizationService: SummarizationService,
-    ) {}
+    ) { }
 
     @Public()
     @Post()
