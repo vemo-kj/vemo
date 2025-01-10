@@ -432,7 +432,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         }
     };
 
-    // 캡처 삭제를 �한 �로운 함수
+    // 캡처 삭제를한로운 함수
     const handleDeleteCapture = async (captureId: string) => {
         try {
             const token = sessionStorage.getItem('token');
@@ -467,18 +467,18 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
             setSections(prev => prev.filter(item => item.id !== captureId));
 
         } catch (error) {
-            console.error('캡처 삭제 �� 오류 발생:', error);
+            console.error('캡처 삭제 중 오류 발생:', error);
         }
     };
 
-    // 기존 handleDeleteItem 함수 �정
+    // 기존 handleDeleteItem 함수정
     const handleDeleteItem = async (id: string) => {
         // 캡처인 경우 handleDeleteCapture 함수 호출
         if (id.startsWith('capture-')) {
             return handleDeleteCapture(id);
         }
 
-        // 기존 메모 �제 로직
+        // 기존 메모제 로직
         try {
             const token = sessionStorage.getItem('token');
             if (!token) {
