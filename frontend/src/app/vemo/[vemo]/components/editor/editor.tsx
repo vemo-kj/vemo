@@ -153,12 +153,7 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                 if (props.onPauseVideo) {
                     props.onPauseVideo();
                 }
-
-                setImageLoadingStates(prev => ({
-                    ...prev,
-                    [timestamp]: true,
-                }));
-
+                
                 // 1. 이미지 압축
                 const compressedImage = await compressImage(imageUrl);
                 console.log('Image compressed:', {
