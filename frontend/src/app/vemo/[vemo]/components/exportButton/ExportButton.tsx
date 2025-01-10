@@ -1,18 +1,58 @@
-export default function ExportButton() {
-  const handleDownloadPDF = async () => {
-    const response = await fetch("/api/download", {
-      method: "GET",
-    });
+'use client';
+import styles from '../sideBarNav/sideBarNav.module.css';
+import Image from 'next/image';
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sample.pdf"; // 다운로드할 파일이름이 들어갈수 있도록 설정
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+export default function ExportButton({ memosId }: { memosId: number }) {
+    const handleDownloadPDF = async () => {
+        try {
+            console.log('PDF 다운로드 요청 시작:', memosId);
 
-  return <button onClick={handleDownloadPDF}>내보내기</button>;
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/pdf/download/${memosId}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/pdf',
+                    },
+                },
+            );
+
+            // 서버 응답 상태 확인
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('서버 에러:', {
+                    status: response.status,
+                    text: errorText,
+                });
+                throw new Error(`서버 에러: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vemo_${memosId}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            console.log('PDF 다운로드 완료');
+        } catch (error) {
+            console.error('PDF 다운로드 실패:', error);
+            alert('PDF 다운로드에 실패했습니다.');
+        }
+    };
+
+    return (
+        <button onClick={handleDownloadPDF} className={styles.iconButton}>
+            <Image
+                className={styles.defaultIcon}
+                src="/icons/bt_edit_nav_export.svg"
+                alt="내보내기"
+                width={20}
+                height={20}
+            />
+
+            <span className={styles.iconButtonText}>내보내기</span>
+        </button>
+    );
 }
-

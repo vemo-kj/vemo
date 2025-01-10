@@ -49,7 +49,7 @@ export default function SignUpPage() {
                 birth: new Date(formData.birth).toISOString(),
             };
 
-            const response = await fetch('http://localhost:5050/users/signup', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // JSON 형식으로 전송

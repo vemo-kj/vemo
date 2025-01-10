@@ -1,12 +1,4 @@
-
 /* 전체 컨테이너 스타일 */
-.container {
-    display: flex;
-    height: 100%;
-    background-color: #ffffff;
-    overflow: hidden;
-    position: relative; /* 탭을 오른쪽에 고정하기 위해 필요 */
-}
 
 /* 탭 버튼 영역 (오른쪽 배치) */
 .tabs {
@@ -15,9 +7,8 @@
     justify-content: flex-start;
     align-items: flex-start;
     width: 120px; /* 오른쪽 탭 너비 */
-    background-color: #f9f9f9;
     padding: 16px;
-    border-left: 1px solid #e0e0e0; /* 경계선 */
+    /* border-left: 1px solid #e0e0e0; 경계선 */
     position: absolute; /* 오른쪽 고정 */
     right: 0;
     top: 0;
@@ -27,49 +18,78 @@
 
 /* 탭 버튼 스타일 */
 .tab {
-    width: 100%; /* 버튼 너비를 부모에 맞춤 */
-    padding: 12px 16px;
-    margin-bottom: 8px;
+    width: 86px; /* iconButton과 동일한 너비 */
+    height: 86px; /* iconButton과 동일한 높이 */
+    padding: 0; /* 패딩 제거 */
+    margin: 8px auto; /* 가운데 정렬을 위한 마진 */
     font-size: 14px;
     font-weight: bold;
-    text-align: left; /* 텍스트 왼쪽 정렬 */
-    background-color: #eaeaea;
+    text-align: center;
+    background-color: transparent;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
 }
 
-.tab:hover {
-    background-color: #d4d4d4; /* 마우스 오버 효과 */
+/* iconButton 스타일 수정 */
+.iconButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* 부모 요소인 tab의 크기에 맞춤 */
+    height: 100%; /* 부모 요소인 tab의 크기에 맞춤 */
+    background-color: transparent;
+    border: none;
+    padding: 16px; /* 내부 여백 추가 */
 }
 
-.activeTab {
-    background-color: #007bff; /* 활성화된 탭 색상 */
-    color: #fff; /* 텍스트 색상 */
+/* activeTab 스타일 수정 */
+.tab.activeTab {
+    background-color: #286be8;
+}
+
+.tab.activeTab .iconButton {
+    background-color: transparent; /* 중복 배경색 제거 */
+}
+
+.tab.activeTab .defaultIcon {
+    filter: brightness(0) invert(1);
+}
+
+.tab.activeTab .iconButtonText {
+    color: white;
 }
 
 /* 콘텐츠 영역 */
 .tabContent {
     flex: 1; /* 나머지 공간을 차지 */
-    padding: 16px;
+    padding: 36px;
     overflow-y: auto;
     margin-right: 120px; /* 오른쪽 탭과 콘텐츠 간의 여백 확보 */
 }
 
 /* 노트 제목 */
 .notesHeader {
-    font-size: 18px;
     font-weight: bold;
-    margin-bottom: 8px;
-    color: #333;
+    color: #286be8; /* 파란색으로 변경 */
+}
+
+.notesHeaderText {
+    font-size: 32px; /* 크기 증가 */
+    font-weight: bold;
+
+    color: #286be8; /* 파란색으로 변경 */
 }
 
 /* 노트 부제목 */
 .notesSubHeader {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 16px;
+    font-size: 24px; /* 크기 증가 */
+    color: #333333; /* 더 진한 색상으로 변경 */
+    margin: 0;
+    font-weight: bold; /* 볼드 처리 */
+    display: flex;
 }
 
 /* 노트 콘텐츠 */
@@ -81,38 +101,203 @@
     padding: 12px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 콘텐츠 카드 효과 */
+    height: 80%;
 }
 
 /* 드롭다운 스타일 */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    min-width: 200px;  /* 너비 증가 */
+}
+
 .dropdownSelect {
     width: 100%;
-    padding: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: white;
     font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #286BE8;
+    white-space: nowrap;  /* 텍스트 줄바꿈 방지 */
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    margin-top: 4px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 4px 0;
+    z-index: 1000;
+    white-space: nowrap;  /* 텍스트 줄바꿈 방지 */
+}
+
+.dropdownItem {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;  /* 텍스트 줄바꿈 방지 */
+}
+
+.dropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.selected {
+    background-color: #f0f0f0;
+    color: #286BE8;
+}
+
+.dropdownArrow {
+    width: 16px !important;
+    height: 16px !important;
+    transition: transform 0.2s ease;
+}
+
+.dropdownSelect:focus {
+    outline: none;
+    border-color: #286be8;
 }
 
 /* 하단 버튼 영역 */
 .footerButtons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
+    justify-content: center;
+    gap: 16px;
+    margin: 16px auto;
+    padding: 8px;
+    width: calc(100% - 48px);
+    border-radius: 8px;
+
+    box-shadow: 0 0px 3px rgba(0, 0, 0, 0.25);
+    max-width: 560px;
 }
 
 .footerButtons button {
     flex: 1; /* 버튼 너비를 균등하게 분배 */
-    margin: 0 4px;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
-    background-color: #007bff;
+    display: flex;
+    flex-direction: column; /* 아이콘과 텍스트를 세로로 정렬 */
+    align-items: center; /* 가운데 정렬 */
+    justify-content: center;
+    padding: 16px; /* 패딩 통일 */
+
     border: none;
-    border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
+    color: rgb(0, 0, 0);
+    min-width: 86px; /* 최소 너비 설정 */
+    max-width: 86px; /* 최대 너비도 동일하게 설정 */
+    border-radius: 8px;
+    /* box-shadow: 0 0px 3px rgba(0, 0, 0, 0.25); */
 }
 
 .footerButtons button:hover {
-    background-color: #0056b3; /* 마우스 오버 시 색상 */
+    background-color: #286be8; /* 마우스 오버 시 색상 */
+    color: rgb(255, 255, 255);
+}
+
+/* 아이콘 버튼 스타일 */
+.iconButton {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 86px;
+    max-width: 86px;
+    padding: 16px;
+    background-color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.defaultIcon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 4px;
+}
+
+.iconButtonText {
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.iconButton svg path {
+    fill: #286be8;
+}
+
+/* hover 스타일 */
+.iconButton:hover {
+    background-color: #286be8;
+    color: white;
+}
+
+.iconButton:hover .defaultIcon {
+    filter: brightness(0) invert(1);
+}
+
+.iconButton:hover .iconButtonText {
+    color: white;
+}
+
+.iconButton:hover svg path {
+    fill: #ffffff;
+}
+
+/* 헤더 컨테이너 */
+.headerContainer {
+    display: flex;
+    justify-content: space-between;  /* 양쪽 정렬 */
+    align-items: center;  /* 수직 중앙 정렬 */
+    margin-bottom: 24px;
+}
+
+/* 제목 영역 컨테이너 */
+.titleContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 상단 작은 제목 */
+.notesSubHeader {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 메인 제목 */
+.notesHeaderText {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 드롭다운 스타일 */
+.dropdown {
+    min-width: 160px;  /* 드롭다운 최소 너비 */
+}
+
+.dropdownSelect {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }

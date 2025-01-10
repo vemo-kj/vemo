@@ -1,64 +1,76 @@
 'use client';
 
-//style
 import styles from './page.module.css';
-//component
-import Category from './components/category/Category';
 import Header from './components/Layout/Header';
 import MainCard from './components/mainCard/MainCard';
-//type
+import { CategorySection } from './components/category/CategorySection';
 import { MainCardProps } from './types/MainCardProps';
-//next
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Category, isValidCategory } from './types/category';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-
-// Home page
-export default function Home() {
-    const categories = ['All', 'Education', 'Travel', 'Technology', 'Lifestyle'];
-
-    const [selectedCategory, setSelectedCategory] = useState('All');
+function SearchParamsComponent() {
+    const searchParams = useSearchParams();
+    const search = searchParams?.get('q') ?? '';
+    const categoryParam = searchParams?.get('category') ?? 'All';
 
     const [mainCards, setMainCards] = useState<MainCardProps[]>([]);
-
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const search = searchParams.get('q') || '';
-
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<Category>('All');
 
     // API
     const fetchMainCards = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('http://localhost:5050/home', {
+            setError(null);
+            
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
-            console.log(response);
-            if (!response.ok) throw new Error('Failed to fetch main cards');
+
+            // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home/cards`, {
+            //     method: 'GET',
+            //     headers: { 'Content-Type': 'application/json' },
+            // });
+            // const response = await fetch('http://43.203.85.223:5050/home', {
+            //     method: 'GET',
+            //     headers: { 'Content-Type': 'application/json' },
+            // });
             
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch main cards: ${response.status}`);
+            }
+
             const data = await response.json();
 
-            // 데이터 매핑
+            if (!data || !Array.isArray(data.videos)) {
+                throw new Error('Invalid data format received from server');
+            }
+
             const formattedData: MainCardProps[] = data.videos.map((video: any) => ({
-                id: video.id,
-                title: video.title,
-                thumbnails: video.thumbnails,
-                duration: video.duration,
-                category: video.category,
+                id: String(video.id || ''),
+                title: String(video.title || '제목 없음'),
+                thumbnails: String(video.thumbnails || '/default-thumbnail.jpg'),
+                duration: String(video.duration || '00:00'),
+                category: String(video.category || 'Uncategorized'),
                 channel: {
-                    id: video.channel.id,
-                    thumbnails: video.channel.thumbnails,
-                    title: video.channel.title,
+                    id: String(video.channel?.id || ''),
+                    thumbnails: String(
+                        video.channel?.thumbnails || '/default-channel-thumbnail.jpg',
+                    ),
+                    title: String(video.channel?.title || '채널명 없음'),
                 },
-                vemoCount: video.vemoCount,
+                vemoCount: Number(video.vemoCount || 0),
             }));
+
             setMainCards(formattedData);
         } catch (error) {
-            setError('데이터를 불러오는데 실패했습니다.');
             console.error('Error fetching main cards:', error);
+            setError('데이터를 불러오는데 실패했습니다.');
+            setMainCards([]);
         } finally {
             setIsLoading(false);
         }
@@ -68,45 +80,50 @@ export default function Home() {
         fetchMainCards();
     }, []);
 
-    const handleCategoryClick = (category: string) => {
-        setSelectedCategory(category);
-
-        if (category === 'All') {
-            router.push('/');
-        } else {
-            router.push(`/?category=${encodeURIComponent(category)}`);
+    useEffect(() => {
+        if (isValidCategory(categoryParam)) {
+            setSelectedCategory(categoryParam);
         }
-    };
+    }, [categoryParam]);
 
-    const filteredCards = mainCards.filter((card) => {
+    const filteredCards = mainCards.filter(card => {
         const matchesCategory =
-            selectedCategory === 'All' || card.category === selectedCategory;
-
-        const matchesSearch =
-            search !== '' ? card.title.includes(search) : true;
-
-        if (search !== '') {
-            return matchesSearch;
-        } else {
-            return matchesCategory;
-        }
+            selectedCategory === 'All' ||
+            card.category.toLowerCase() === selectedCategory.toLowerCase();
+        const matchesSearch = !search || card.title.toLowerCase().includes(search.toLowerCase());
+        return matchesCategory && matchesSearch;
     });
 
     return (
-        <main>
+        <div className={styles.mainContainer}>
+            <div className={styles.content}>
+                <CategorySection
+                    selectedCategory={selectedCategory}
+                    onCategorySelect={setSelectedCategory}
+                />
+                {isLoading ? (
+                    <div className={styles.loading}>Loading...</div>
+                ) : error ? (
+                    <div className={styles.error}>{error}</div>
+                ) : (
+                    <div className={styles.mainCardContainer}>
+                        {filteredCards.map(card => (
+                            <MainCard key={card.id} {...card} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default function Home() {
+    return (
+        <>
             <Header />
-            <Category categories={categories} onCategorySelect={handleCategoryClick} />
-            {error ? (
-                <div>{error}</div>
-            ) : isLoading ? (
-                <div>로딩 중</div>
-            ) : (
-                <div className={styles.mainCardContainer}>
-                    {filteredCards.map((mainCard, index) => (
-                        <MainCard key={index} {...mainCard} />
-                    ))}
-                </div>
-            )}
-        </main>
+            <Suspense fallback={<div>Loading...</div>}>
+                <SearchParamsComponent />
+            </Suspense>
+        </>
     );
 }

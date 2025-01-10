@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
 import { VideoService } from '../video/video.service';
 import { MemosService } from '../memos/memos.service';
 import { HomeResponseDto } from './dto/home-response.dto';
@@ -11,6 +16,8 @@ import { Memos } from '../memos/memos.entity';
 
 @Injectable()
 export class HomeService {
+    private readonly logger = new Logger(HomeService.name);
+
     constructor(
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
@@ -42,18 +49,28 @@ export class HomeService {
      */
     async createOrGetLatestMemos(userId: number, videoId: string): Promise<CreateMemosResponseDto> {
         try {
+            this.logger.log('service');
             // 사용자의 해당 비디오에 대한 메모 조회
             const userMemos = await this.memosService.getMemosByVideoAndUser(videoId, userId);
 
-            // 메모가 없으면 새로 생성
-            if (!userMemos || userMemos.length === 0) {
+            // null, undefined, 빈 배열 모두 체크
+            if (!userMemos || !Array.isArray(userMemos) || userMemos.length === 0) {
                 const newMemos = await this.createInitialMemos(userId, videoId);
+                // newMemos도 null 체크
+                if (!newMemos) {
+                    throw new InternalServerErrorException('Failed to create initial memos');
+                }
                 return this.mapMemosToDto(newMemos);
             }
 
-            // 메모가 있으면 가장 최신 메모 반환
-            return this.mapMemosToDto(userMemos[0]); // getMemosByVideoAndUser가 createdAt DESC로 정렬되어 있음
+            // userMemos[0]가 null이 아닌지 확인
+            if (!userMemos[0]) {
+                throw new InternalServerErrorException('Invalid memos data');
+            }
+
+            return this.mapMemosToDto(userMemos[0]);
         } catch (error) {
+            this.logger.error('Error in createOrGetLatestMemos:', error);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -106,7 +123,7 @@ export class HomeService {
      * @param limit 페이지당 비디오 수 (기본값: 10)
      * @returns HomeResponseDto
      */
-    async getAllVideos(page: number = 1, limit: number = 8): Promise<HomeResponseDto> {
+    async getAllVideos(page: number = 1, limit: number = 100): Promise<HomeResponseDto> {
         const videos = await this.videoService.getAllVideos(page, limit);
 
         if (!videos.length) {

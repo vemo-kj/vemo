@@ -53,4 +53,13 @@ export class TextExtractionService {
             throw new Error(`Text extraction failed: ${errorMessage}`);
         }
     }
+
+    async extractTextFromUrl(imageUrl: string): Promise<string> {
+        // 1. 백엔드에서 S3 이미지 다운로드
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const base64Image = Buffer.from(response.data).toString('base64');
+
+        // 2. Vision API 호출
+        return this.extractTextFromBase64(base64Image);
+    }
 }

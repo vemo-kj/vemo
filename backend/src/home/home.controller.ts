@@ -5,11 +5,12 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Logger,
+    Param,
     ParseIntPipe,
     Post,
     Query,
     Req,
-    Param,
 } from '@nestjs/common';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 import { Public } from '../public.decorator';
@@ -21,6 +22,8 @@ import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
 
 @Controller('home')
 export class HomeController {
+    private readonly logger = new Logger(HomeController.name);
+
     constructor(private readonly homeService: HomeService) {}
 
     /**
@@ -52,6 +55,7 @@ export class HomeController {
         @Req() req: RequestWithUserInterface,
     ): Promise<CreateMemosResponseDto> {
         const userId = req.user.id;
+        this.logger.log('userId', userId);
         return await this.homeService.createOrGetLatestMemos(userId, videoId);
     }
 
@@ -62,10 +66,10 @@ export class HomeController {
      * @returns HomeResponseDto
      */
     @Public()
-    @Get('/cards')
+    @Get()
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-        @Query('limit', new DefaultValuePipe(8), ParseIntPipe) limit: number,
+        @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
     ): Promise<HomeResponseDto> {
         return this.homeService.getAllVideos(page, limit);
     }

@@ -1,23 +1,32 @@
-import Link from "next/link";
 import React from 'react';
+import { VideoResponse } from '@/app/types/VideoResponse';
+import styles from './CreateButton.module.css';
 
 type CreateButtonProps = {
-  onSave: () => void;
+  onSave: () => Promise<void>;
   isLoading: boolean;
 };
 
 const CreateButton: React.FC<CreateButtonProps> = ({ onSave, isLoading }) => {
+  const handleClick = async () => {
+    try {
+      await onSave();
+    } catch (error) {
+      console.error('저장 중 오류 발생:', error);
+    }
+  };
+
   return (
-    <Link href="/">
+    <div className={styles.createButtonContainer}>
       <button
-        onClick={onSave}
+        className={styles.createButton}
+        onClick={handleClick}
         disabled={isLoading}
       >
-        저장
+        {isLoading ? "저장 중..." : "저장"}
       </button>
-    </Link>
+    </div>
   );
 };
 
 export default CreateButton;
-
