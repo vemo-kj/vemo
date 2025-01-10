@@ -333,6 +333,7 @@ export default function VemoPage() {
                 <SideBarNav
                     selectedOption={selectedOption}
                     onOptionSelect={handleOptionSelect}
+                    vemoData={vemoData}
                     renderSectionContent={() => (
                         <EditorNoSSR
                             ref={editorRef}

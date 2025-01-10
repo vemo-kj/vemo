@@ -19,6 +19,7 @@ export interface SideBarNavProps {
     handleCaptureTab: () => void;
     handleCaptureArea: () => void;
     editorRef: React.RefObject<any>;
+    vemoData: CreateMemosResponseDto | null;
     videoId: string;
     memosId: number | null;
 }
@@ -59,6 +60,7 @@ export default function SidebarNav({
     handleCaptureTab,
     handleCaptureArea,
     editorRef,
+    vemoData,
     videoId,
     memosId,
 }: SideBarNavProps) {
@@ -72,6 +74,8 @@ export default function SidebarNav({
     // 메튼 클릭 핸들러
     const handleWriteClick = async () => {
         try {
+            console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
+
             if (!videoId) {
                 console.error('No videoId available');
                 return;
@@ -227,7 +231,7 @@ export default function SidebarNav({
                                 </button>
 
                                 <SummaryButton videoId={videoId} />
-                                <ExportButton />
+                                {memosId && <ExportButton memosId={memosId} />}
                             </div>
                         )}
                     </>
