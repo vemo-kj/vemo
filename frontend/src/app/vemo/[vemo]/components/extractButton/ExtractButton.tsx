@@ -3,14 +3,17 @@
 import { useState } from 'react';
 import styles from './ExtractButton.module.css';
 
-interface ResultModalProps {
+interface ExtractButtonProps {
+    imageUrl: string;
+    onExtracted: (text: string) => void;
+}
+
+const ResultModal = ({ text, onUse, onCancel, isOpen }: {
     text: string;
     onUse: () => void;
     onCancel: () => void;
     isOpen: boolean;
-}
-
-const ResultModal = ({ text, onUse, onCancel, isOpen }: ResultModalProps) => {
+}) => {
     if (!isOpen) return null;
 
     return (
@@ -33,70 +36,40 @@ const ResultModal = ({ text, onUse, onCancel, isOpen }: ResultModalProps) => {
     );
 };
 
-export default function ExtractButton() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [extractedText, setExtractedText] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
+export default function ExtractButton({ imageUrl, onExtracted }: ExtractButtonProps) {
+    const [isExtracting, setIsExtracting] = useState(false);
+    const [extractedText, setExtractedText] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleExtractText = async (imageBase64: string) => {
+    const handleExtractText = async () => {
         try {
-            setIsLoading(true);
-            setError(null);
+            setIsExtracting(true);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/text-extraction`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ imageBase64 }),
+                body: JSON.stringify({ imageBase64: imageUrl }),
             });
 
             const data = await response.json();
-
-            if (!data.success) {
+            if (data.success) {
+                setExtractedText(data.text);
+                setIsModalOpen(true);
+            } else {
                 throw new Error(data.error || '텍스트 추출에 실패했습니다.');
             }
-
-            setExtractedText(data.text);
-            setIsModalOpen(true); // 추출 성공시 모달 열기
-        } catch (err) {
-            setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+        } catch (error) {
+            console.error('텍스트 추출 실패:', error);
+            alert('텍스트 추출에 실패했습니다.');
         } finally {
-            setIsLoading(false);
+            setIsExtracting(false);
         }
-    };
-
-    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        try {
-            const base64 = await convertImageToBase64(file);
-            await handleExtractText(base64);
-        } catch (err) {
-            setError('이미지 처리 중 오류가 발생했습니다.');
-        }
-    };
-
-    const convertImageToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (typeof reader.result === 'string') {
-                    resolve(reader.result);
-                } else {
-                    reject(new Error('이미지 변환에 실패했습니다.'));
-                }
-            };
-            reader.onerror = () => reject(new Error('이미지 읽기에 실패했습니다.'));
-            reader.readAsDataURL(file);
-        });
     };
 
     const handleUseText = () => {
-        // TODO: 추출된 텍스트를 사용하는 로직 구현
-        // 예: 에디터에 텍스트 추가
+        onExtracted(extractedText);
         setIsModalOpen(false);
         setExtractedText('');
     };
@@ -107,19 +80,14 @@ export default function ExtractButton() {
     };
 
     return (
-        <div className={styles.container}>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-                id="image-upload"
-            />
-            <label htmlFor="image-upload" className={styles.button}>
-                {isLoading ? '처리 중...' : '추출하기'}
-            </label>
-
-            {error && <div className={styles.error}>{error}</div>}
+        <>
+            <button
+                className={styles.extractBtn}
+                onClick={handleExtractText}
+                disabled={isExtracting}
+            >
+                {isExtracting ? '추출 중...' : '추출하기'}
+            </button>
 
             <ResultModal
                 text={extractedText}
@@ -127,6 +95,6 @@ export default function ExtractButton() {
                 onCancel={handleCancel}
                 isOpen={isModalOpen}
             />
-        </div>
+        </>
     );
 }

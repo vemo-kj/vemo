@@ -10,6 +10,7 @@ import React, {
 import styles from './editor.module.css';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import { debounce } from 'lodash';
+import ExtractButton from '../extractButton/ExtractButton';
 
 interface MemoItemProps {
     id: string;
@@ -121,102 +122,6 @@ const MemoItem = memo(
             [onChangeHTML],
         );
 
-        const [isModalOpen, setIsModalOpen] = useState(false);
-        const [extractedText, setExtractedText] = useState('');
-        const [isExtracting, setIsExtracting] = useState(false);
-
-        const handleExtractText = async () => {
-            if (!screenshot) return;
-
-            try {
-                setIsExtracting(true);
-
-                // 이미지 압축 처리
-                const compressedImage = await compressImageBeforeSend(screenshot);
-
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/text-extraction`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ imageBase64: compressedImage }),
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    setExtractedText(data.text);
-                    setIsModalOpen(true);
-                } else {
-                    throw new Error(data.error || '텍스트 추출에 실패했습니다.');
-                }
-
-                // 추출된 텍스트를 HTML 컨텐츠에 추가
-                const newContent = htmlContent + '<p>' + data.text + '</p>';
-                onChangeHTML(newContent);
-            } catch (error) {
-                console.error('텍스트 추출 실패:', error);
-                alert('텍스트 추출에 실패했습니다.');
-            } finally {
-                setIsExtracting(false);
-            }
-        };
-
-        // 이미지 압축 유틸리티 함수
-        const compressImageBeforeSend = async (base64String: string): Promise<string> => {
-            // Base64 헤더 분리
-            const [header, base64Image] = base64String.split(',');
-
-            // Canvas 생성
-            const img = new Image();
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            return new Promise(resolve => {
-                img.onload = () => {
-                    // 최대 너비/높이 설정 (예: 800px)
-                    const maxDimension = 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    // 비율 유지하면서 크기 조정
-                    if (width > height && width > maxDimension) {
-                        height = (height * maxDimension) / width;
-                        width = maxDimension;
-                    } else if (height > maxDimension) {
-                        width = (width * maxDimension) / height;
-                        height = maxDimension;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // 이미지 그리기
-                    ctx?.drawImage(img, 0, 0, width, height);
-
-                    // 압축된 Base64 생성 (품질 0.7)
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    resolve(compressedBase64);
-                };
-
-                // 원본 이미지 로드
-                img.src = base64String;
-            });
-        };
-
-        const handleUseText = () => {
-            // 추출된 텍스트를 에디터에 추가
-            if (addTextToEditor && extractedText) {
-                addTextToEditor(extractedText);
-            }
-            setIsModalOpen(false);
-            setExtractedText('');
-        };
-
-        const handleCancelExtract = () => {
-            setIsModalOpen(false);
-            setExtractedText('');
-        };
-
         const [imageLoading, setImageLoading] = useState(false);
         const [imageError, setImageError] = useState(false);
 
@@ -306,43 +211,19 @@ const MemoItem = memo(
                                 </button>
                             </div>
                         )}
-                        <div
-                            className={styles.captureImageWrapper}
-                            style={{
-                                width: '100%',
-                                minHeight: '200px',
-                                position: 'relative',
-                                backgroundColor: '#f5f5f5',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                            }}
-                        >
+                        <div className={styles.captureImageWrapper}>
                             <img
                                 ref={imgRef}
                                 id={`capture-${id}`}
                                 src={screenshot}
                                 alt="capture"
                                 className={styles.captureImage}
-                                style={{
-                                    display: 'block',
-                                    width: '100%',
-                                    height: 'auto',
-                                    position: 'relative',
-                                    zIndex: 1,
-                                }}
-                                onLoad={e => {
-                                    console.log('이미지 로드 완료:', {
-                                        naturalWidth: (e.target as HTMLImageElement).naturalWidth,
-                                        naturalHeight: (e.target as HTMLImageElement).naturalHeight,
-                                    });
+                                onLoad={() => {
                                     setImageLoading(false);
                                     setImageError(false);
                                 }}
                                 onError={() => {
-                                    console.error('이미지 로드 실패:', {
-                                        id,
-                                        screenshotLength: screenshot.length,
-                                    });
+                                    console.error('이미지 로드 실패:', { id, url: screenshot });
                                     setImageLoading(false);
                                     setImageError(true);
                                 }}
@@ -370,13 +251,13 @@ const MemoItem = memo(
                             <button className={styles.drawBtn} onClick={handleOpenDrawing}>
                                 그리기
                             </button>
-                            <button
-                                className={styles.extractBtn}
-                                onClick={handleExtractText}
-                                disabled={isExtracting}
-                            >
-                                {isExtracting ? '추출 중...' : '추출하기'}
-                            </button>
+                            <ExtractButton
+                                imageUrl={screenshot}
+                                onExtracted={(text) => {
+                                    const newContent = htmlContent + '<p>' + text + '</p>';
+                                    onChangeHTML(newContent);
+                                }}
+                            />
                         </>
                     )}
                     <button className={styles.deleteBtn} onClick={onDelete}>
@@ -394,29 +275,6 @@ const MemoItem = memo(
                                 onClose={handleCloseDrawing}
                                 backgroundImage={screenshot} // 배경 이미지 전달
                             />
-                        </div>
-                    </div>
-                )}
-
-                {/* 추출 결과 모달 */}
-                {isModalOpen && (
-                    <div className={styles.modalOverlay}>
-                        <div className={styles.modal}>
-                            <h2>추출된 텍스트</h2>
-                            <div className={styles.modalContent}>
-                                <p>{extractedText}</p>
-                            </div>
-                            <div className={styles.modalActions}>
-                                <button onClick={handleUseText} className={styles.useButton}>
-                                    사용하기
-                                </button>
-                                <button
-                                    onClick={handleCancelExtract}
-                                    className={styles.cancelButton}
-                                >
-                                    삭제
-                                </button>
-                            </div>
                         </div>
                     </div>
                 )}
