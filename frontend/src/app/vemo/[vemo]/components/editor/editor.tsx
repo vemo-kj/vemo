@@ -128,6 +128,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
 
+    
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
@@ -161,7 +162,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            timestamp: totalSeconds,
+                            timestamp: props.getTimestamp(),
                             image: compressedImage,
                             memosId: props.memosId
                         }),
@@ -325,7 +326,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 memosId: Number(props.memosId),
             };
 
-            console.log('0000000000000:', timestamp);
             console.log('Sending memo data:', requestData);
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/`, {
