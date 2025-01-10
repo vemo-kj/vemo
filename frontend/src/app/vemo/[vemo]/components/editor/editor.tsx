@@ -172,6 +172,9 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
                     },
                 );
 
+                console.log('captureResponse 확인:', captureResponse);
+                
+                
                 if (!captureResponse.ok) {
                     throw new Error('Failed to save capture');
                 }
