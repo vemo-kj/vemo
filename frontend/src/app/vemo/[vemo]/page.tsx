@@ -66,6 +66,13 @@ export default function VemoPage() {
                 throw new Error(`잘못된 응답 타입: ${contentType}`);
             }
 
+
+            // 응답 타입 확인
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`잘못된 응답 타입: ${contentType}`);
+            }
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('서버 응답:', {
@@ -78,8 +85,9 @@ export default function VemoPage() {
             }
 
             const data: CreateMemosResponseDto = await response.json();
-            console.log('받은 메모 데이터 :', data);
+            console.log('받은 메모 데이터:', data);
             setVemoData(data);
+            setMemosId(data.id);
             setMemosId(data.id);
             
             // memosId가 있으면 메모 데이터도 함께 조회
