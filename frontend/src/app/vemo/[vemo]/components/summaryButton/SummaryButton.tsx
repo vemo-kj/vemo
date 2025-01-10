@@ -12,7 +12,7 @@ interface SummaryButtonProps {
 export default function SummaryButton({ videoId }: SummaryButtonProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { setSummaryData, setQuizData } = useSummary();
+    const { setSummaryData, setQuizData, resetData } = useSummary();
 
     const formatTimestamp = (timestamp: string | Date | null) => {
         if (!timestamp) return '00:00';
@@ -68,6 +68,9 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
         setError(null);
 
         try {
+            // 요청 전에 이전 데이터 초기화
+            resetData();
+
             // 첫 번째 요청: 타임스탬프와 디스크립션
             const timestampResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_BASE_URL}/summarization`,
@@ -101,27 +104,19 @@ export default function SummaryButton({ videoId }: SummaryButtonProps) {
             const rawQuizData = await quizResponse.json();
             console.log('퀴즈 응답 데이터:', rawQuizData);
 
-            // Context에 데이터 저장 (타임스탬프 형식 변환 적용)
-            setSummaryData({
-                summaryList: summaryList.map((item: any) => ({
-                    id: item.id,
-                    timestamp: formatTimestamp(item.timestamp),
-                    description: item.summary,
-                })),
-            });
+            // 두 데이터가 모두 설정되었는지 확인
+            if (summaryList && rawQuizData) {
+                setSummaryData({
+                    summaryList: summaryList.map((item: any) => ({
+                        id: item.id,
+                        timestamp: formatTimestamp(item.timestamp),
+                        description: item.summary,
+                    })),
+                });
+                setQuizData({ quizList: rawQuizData });
 
-            // 퀴즈 데이터 매핑 수정 (타임스탬프 형식 변환 적용)
-            const mappedQuizData = {
-                quizList: rawQuizData.map((quiz: any) => ({
-                    timestamp: formatTimestamp(quiz.timestamp),
-                    question: quiz.question,
-                    answer: quiz.answer,
-                })),
-            };
-            console.log('매핑된 퀴즈 데이터:', mappedQuizData);
-            setQuizData(mappedQuizData);
-
-            alert('요약 및 퀴즈 데이터가 저장되었습니다.');
+                alert('요약 및 퀴즈 데이터가 저장되었습니다.');
+            }
         } catch (err) {
             console.error('요청 오류:', err);
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');

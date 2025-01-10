@@ -4,6 +4,7 @@ import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
+import { useSummary } from '../../context/SummaryContext';
 
 // DraftEditor를 위한 타입 정의 추가
 const Editor = DraftEditor as unknown as React.ComponentType<{
@@ -131,7 +132,8 @@ const compressImage = async (base64Image: string): Promise<string> => {
     });
 };
 
-const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((props, ref) => {
+const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
+    const { resetData } = useSummary();
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
@@ -523,7 +525,10 @@ const CustomEditor = forwardRef<EditorRef, Omit<CustomEditorProps, 'ref'>>((prop
         return 'not-handled';
     };
 
-
+    // 메모카드 변경 감지
+    useEffect(() => {
+        resetData();
+    }, [props.editingItemId]);
 
     return (
         <div className={styles.container}>
