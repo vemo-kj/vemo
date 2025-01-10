@@ -14,7 +14,7 @@ interface DrawingCanvasProps {
 }
 
 // ReactSketchCanvas를 위한 타입 정의 추가
-const Canvas = ReactSketchCanvas as unknown as React.ComponentType<{
+const Canvas = DynamicReactSketchCanvas as unknown as React.ComponentType<{
     ref: React.RefObject<ReactSketchCanvasRef>;
     style: React.CSSProperties;
     strokeColor: string;

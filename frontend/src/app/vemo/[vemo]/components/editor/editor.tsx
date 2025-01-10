@@ -1,5 +1,5 @@
 import { Editor as DraftEditor, EditorState, RichUtils, getDefaultKeyBinding} from 'draft-js';
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { convertToHTML } from 'draft-convert';
 import 'draft-js/dist/Draft.css';
 import styles from './editor.module.css';
