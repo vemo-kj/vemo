@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Memo } from './memo.entity';
+import { Memos } from 'src/memos/memos.entity';
 import { Repository } from 'typeorm';
 import { CreateMemoDto } from './dto/create-memo.dto';
 import { UpdateMemoDto } from './dto/update-memo.dto';
@@ -8,12 +9,21 @@ import { UpdateMemoDto } from './dto/update-memo.dto';
 @Injectable()
 export class MemoService {
     constructor(
-        @InjectRepository(Memo)
-        private memoRepository: Repository<Memo>,
+        @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
+        @InjectRepository(Memo) private readonly memoRepository: Repository<Memo>,
     ) {}
 
     async createMemo(createMemoDto: CreateMemoDto): Promise<Memo> {
-        const memo = this.memoRepository.create(createMemoDto);
+        const { memosId, ...rest } = createMemoDto;
+        const memos = await this.memosRepository.findOne({
+            where: { id: memosId },
+        });
+
+        const memo = this.memoRepository.create({
+            ...rest,
+            memos,
+        });
+
         return await this.memoRepository.save(memo);
     }
 
