@@ -138,15 +138,20 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: props.getTimestamp(),
                     memosId: props.memosId,
                     imageDataLength: processedImage.length
-                    
                 });
 
                 const requestBody = {
                     timestamp: props.getTimestamp(),
                     image: processedImage,
                     memosId: props.memosId
+                    memosId: props.memosId
                     
                 };
+
+                // 요청 데이터 검증
+                if (typeof requestBody.image !== 'string') {
+                    throw new Error('Image data must be a string');
+                }
 
                 // 요청 데이터 검증
                 if (typeof requestBody.image !== 'string') {
@@ -176,13 +181,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     console.error('[Capture Event] Server response:', {
                         status: captureResponse.status,
                         body: errorText
-                        
                     });
-                    throw new Error(`Failed to save capture: ${captureResponse.status} ${errorText}`);
                     throw new Error(`Failed to save capture: ${captureResponse.status} ${errorText}`);
                 }
 
                 const captureData = await captureResponse.json();
+                console.log('[Capture Event] Capture saved:', captureData);
                 console.log('[Capture Event] Capture saved:', captureData);
                 console.log('[Capture Event] Capture saved:', captureData);
                 console.log('[Capture Event] Capture saved:', captureData);
@@ -191,6 +195,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     id: `capture-${captureData.id}`,
                     timestamp: timestamp,
                     htmlContent: '',
+                    screenshot: captureData.image
                     screenshot: captureData.image
                     
                 };
@@ -228,6 +233,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     [timestamp]: false,
                 }));
             }
+        }
         }
     }));
 
