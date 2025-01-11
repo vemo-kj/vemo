@@ -710,7 +710,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     >
                         U
                     </button>
-
+                    
                     <button onClick={handleSave} className={styles.saveButton}>
                         저장
                     </button>
@@ -719,6 +719,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         </div>
     );
 });
+
 
 CustomEditor.displayName = 'CustomEditor';
 
