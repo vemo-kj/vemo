@@ -294,6 +294,7 @@ export default function Community() {
     }, [viewMode]);
 
     const handleViewModeChange = (mode: 'all' | 'mine') => {
+        setSelectedCard(null);
         setViewMode(mode);
     };
 
