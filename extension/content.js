@@ -11,16 +11,23 @@ window.addEventListener('message', event => {
 
     if (type === 'CAPTURE_TAB') {
         console.log('[Vemo Extension] 전체 캡처 시작');
-        // "전체 캡처" 버튼 → 실제로는 유튜브 플레이어 영역만 잘라서 반환
         captureYouTubePlayer();
     } else if (type === 'CAPTURE_AREA') {
         console.log('[Vemo Extension] 부분 캡처 시작');
         // "영역 선택" 버튼
-        chrome.runtime.sendMessage({ action: 'startSelection' }, resp => {
-            if (resp && resp.started) {
-                activateSelectionOverlay();
-            }
-        });
+        try {
+            chrome.runtime.sendMessage({ action: 'startSelection' }, function(response) {
+                if (chrome.runtime.lastError) {
+                    console.error('[Vemo Extension] Chrome runtime error:', chrome.runtime.lastError);
+                    return;
+                }
+                if (response && response.started) {
+                    activateSelectionOverlay();
+                }
+            });
+        } catch (error) {
+            console.error('[Vemo Extension] Error sending message:', error);
+        }
     }
 });
 
@@ -175,18 +182,30 @@ function activateSelectionOverlay() {
 }
 
 function removeSelectionOverlay() {
-    if (overlay) {
-        overlay.removeEventListener('mousedown', onMouseDown, true);
-        overlay.removeEventListener('mousemove', onMouseMove, true);
-        overlay.removeEventListener('mouseup', onMouseUp, true);
-        overlay.remove();
-        overlay = null;
+    try {
+        if (overlay) {
+            overlay.removeEventListener('mousedown', onMouseDown, true);
+            overlay.removeEventListener('mousemove', onMouseMove, true);
+            overlay.removeEventListener('mouseup', onMouseUp, true);
+            overlay.remove();
+            overlay = null;
+        }
+        if (selectionBox) {
+            selectionBox.remove();
+            selectionBox = null;
+        }
+        isSelecting = false;
+        
+        // 클린업을 위한 추가 작업
+        document.body.style.userSelect = 'auto';
+        document.body.style.cursor = 'default';
+        
+        // 남아있을 수 있는 모든 관련 요소 제거
+        const existingOverlays = document.querySelectorAll('#vemo-selection-overlay, #vemo-selection-box');
+        existingOverlays.forEach(el => el.remove());
+    } catch (error) {
+        console.error('[Vemo Extension] 오버레이 제거 중 오류:', error);
     }
-    if (selectionBox) {
-        selectionBox.remove();
-        selectionBox = null;
-    }
-    isSelecting = false;
 }
 
 function onMouseDown(e) {
@@ -212,60 +231,69 @@ function onMouseMove(e) {
 
 function onMouseUp(e) {
     if (!isSelecting) return;
-    endX = e.clientX;
-    endY = e.clientY;
-    updateSelectionBox();
+    
+    try {
+        endX = e.clientX;
+        endY = e.clientY;
+        updateSelectionBox();
 
-    const width = Math.abs(endX - startX);
-    const height = Math.abs(endY - startY);
+        const width = Math.abs(endX - startX);
+        const height = Math.abs(endY - startY);
 
-    if (width > 5 && height > 5) {
-        const scale = window.devicePixelRatio || 1;
+        if (width > 5 && height > 5) {
+            const scale = window.devicePixelRatio || 1;
+            const left = Math.min(startX, endX);
+            const top = Math.min(startY, endY);
+            const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-        // 선택 영역의 정확한 위치 계산
-        const left = Math.min(startX, endX);
-        const top = Math.min(startY, endY);
+            const captureArea = {
+                x: Math.round((left + scrollLeft) * scale),
+                y: Math.round((top + scrollTop) * scale),
+                width: Math.round(width * scale),
+                height: Math.round(height * scale),
+            };
 
-        // 스크롤 위치 고려
-        const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            // 오버레이 즉시 제거
+            removeSelectionOverlay();
 
-        // 최종 캡처 영역 계산 (스케일링 적용)
-        const captureArea = {
-            x: Math.round((left + scrollLeft) * scale),
-            y: Math.round((top + scrollTop) * scale),
-            width: Math.round(width * scale),
-            height: Math.round(height * scale),
-        };
+            // 캡처 실행
+            chrome.runtime.sendMessage({ action: 'captureTab' }, response => {
+                if (chrome.runtime.lastError) {
+                    console.error('[Vemo Extension] Chrome runtime error:', chrome.runtime.lastError);
+                    postMessageToPage('CAPTURE_TAB_RESPONSE', null);
+                    return;
+                }
 
-        // 캡처를 위해 선택 오버레이를 임시로 숨김
-        overlay.style.opacity = '0';
-        selectionBox.style.opacity = '0';
-
-        // 약간의 지연을 주어 오버레이가 완전히 숨겨지도록 함
-        setTimeout(() => {
-            // 전체 탭 캡처 후 크롭
-            chrome.runtime.sendMessage({ action: 'captureTab' }, resp => {
-                if (resp && resp.dataUrl) {
+                if (response && response.dataUrl) {
                     cropImage(
-                        resp.dataUrl,
+                        response.dataUrl,
                         captureArea.x,
                         captureArea.y,
                         captureArea.width,
                         captureArea.height,
                         croppedUrl => {
-                            // 캡처 완료 후 하이라이트 표시
-                            showCaptureHighlight(left, top, width, height);
-                            postMessageToPage('CAPTURE_TAB_RESPONSE', croppedUrl);
-                            // 캡처 완료 후 선택 오버레이 제거
-                            removeSelectionOverlay();
+                            if (croppedUrl) {
+                                // 캡처 데이터 바로 전송 (하이라이트 제거)
+                                postMessageToPage('CAPTURE_TAB_RESPONSE', croppedUrl);
+                            } else {
+                                console.error('[Vemo Extension] 크롭 실패');
+                                postMessageToPage('CAPTURE_TAB_RESPONSE', null);
+                            }
                         },
                     );
+                } else {
+                    console.error('[Vemo Extension] 캡처 실패');
+                    postMessageToPage('CAPTURE_TAB_RESPONSE', null);
                 }
             });
-        }, 50); // 50ms 지연
-    } else {
+        } else {
+            removeSelectionOverlay();
+        }
+    } catch (error) {
+        console.error('[Vemo Extension] 캡처 처리 중 오류:', error);
         removeSelectionOverlay();
+        postMessageToPage('CAPTURE_TAB_RESPONSE', null);
     }
 
     e.preventDefault();
@@ -289,22 +317,75 @@ function updateSelectionBox() {
 // -----------------------------------------------------------
 // 3) 공통: 이미지 크롭 함수 (Canvas 사용)
 // -----------------------------------------------------------
+async function compressImage(base64String) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // 최대 크기 제한 (예: 1024px)
+            const MAX_SIZE = 1024;
+            if (width > height) {
+                if (width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                }
+            } else {
+                if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 압축된 이미지 생성 (품질 0.7 = 70%)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            resolve(compressedBase64);
+        };
+        img.onerror = reject;
+        img.src = base64String;
+    });
+}
+
+// 이미지 데이터 정제 함수 추가
+function sanitizeImageData(base64String) {
+    // base64 문자열에서 데이터 URI 스키마 제거
+    const base64Data = base64String.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+    return base64Data;
+}
+
+// cropImage 함수 수정
 function cropImage(dataUrl, cropX, cropY, cropW, cropH, callback) {
     if (!dataUrl) {
+        console.error('[Vemo Extension] No data URL provided for cropping');
         callback(null);
         return;
     }
 
     const img = new Image();
-    img.onerror = () => callback(null);
-    img.onload = () => {
+    img.crossOrigin = "anonymous";
+    
+    img.onerror = (error) => {
+        console.error('[Vemo Extension] Image load error:', error);
+        callback(null);
+    };
+    
+    img.onload = async () => {
         try {
             const canvas = document.createElement('canvas');
             canvas.width = cropW;
             canvas.height = cropH;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (!ctx) {
+                console.error('[Vemo Extension] Failed to get canvas context');
                 callback(null);
                 return;
             }
@@ -312,43 +393,51 @@ function cropImage(dataUrl, cropX, cropY, cropW, cropH, callback) {
             ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-            const croppedUrl = canvas.toDataURL('image/png', 1.0);
-            callback(croppedUrl);
+            // 품롭된 이미지를 압축
+            const croppedUrl = canvas.toDataURL('image/jpeg', 0.8);
+            try {
+                const compressedUrl = await compressImage(croppedUrl);
+                // 이미지 데이터 정제
+                const sanitizedData = sanitizeImageData(compressedUrl);
+                console.log('[Vemo Extension] Image processed successfully');
+                callback(sanitizedData); // 정제된 데이터 전달
+            } catch (error) {
+                console.error('[Vemo Extension] Image processing failed:', error);
+                callback(null);
+            }
+
         } catch (error) {
             console.error('[Vemo Extension] 이미지 크롭 실패:', error);
             callback(null);
         }
     };
+
+    console.log('[Vemo Extension] Starting to load original image');
     img.src = dataUrl;
 }
 
+// postMessageToPage 함수 수정
 function postMessageToPage(type, dataUrl) {
-    console.log('[Vemo Extension] 캡처 완료, 웹으로 전송:', type);
+    console.log('[Vemo Extension] 캡처 완료, 웹으로 전송 준비:', type);
+    
+    let processedData = dataUrl;
+    if (dataUrl && dataUrl.startsWith('data:image/')) {
+        processedData = sanitizeImageData(dataUrl);
+    }
+
     const response = {
         type,
-        ok: dataUrl !== null, // dataUrl이 있으면 true, 없으면 false
-        dataUrl,
+        ok: processedData !== null,
+        dataUrl: processedData,
+        format: 'jpeg', // 이미지 형식 명시
+        timestamp: new Date().getTime()
     };
-    console.log('[Vemo Extension] 전송할 응답:', response);
+
     window.postMessage(response, '*');
 }
 
 // 캡처 완료 후 하이라이트 표시 함수
-function showCaptureHighlight(left, top, width, height) {
-    const highlight = document.createElement('div');
-    highlight.className = 'capture-highlight';
-    highlight.style.cssText = `
-    left: ${left}px;
-    top: ${top}px;
-    width: ${width}px;
-    height: ${height}px;
-  `;
-
-    document.body.appendChild(highlight);
-
-    // 1초 후 페이드 아웃
-    setTimeout(() => {
-        highlight.style.opacity = '0';
-        setTimeout(() => highlight.remove(), 300);
-    }, 300);
+function showCaptureHighlight() {
+    // 하이라이트 표시 제거
+    return;
 }
