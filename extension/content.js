@@ -101,8 +101,8 @@ function captureYouTubePlayer() {
                     const overlay = document.createElement('div');
                     overlay.style.cssText = `
                         position: fixed;
-                        border: 2px solid #ff0000;
-                        background: rgba(255, 0, 0, 0.2);
+                        border: 2px solid #000000;
+                        background: rgba(0, 0, 0, 0.2);
                         pointer-events: none;
                         z-index: 999999;
                         left: ${rect.left}px;
