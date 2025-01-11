@@ -129,6 +129,7 @@ function captureYouTubePlayer() {
 let overlay = null;
 let selectionBox = null;
 let isSelecting = false;
+let isDragging = false;
 let startX = 0;
 let startY = 0;
 let endX = 0;
@@ -137,25 +138,26 @@ let endY = 0;
 function addSelectionStyles() {
     const style = document.createElement('style');
     style.textContent = `
-      #vemo-selection-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.2);
-          cursor: crosshair;
-          z-index: 999999;
-      }
+        #vemo-selection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: crosshair;
+            z-index: 999999;
+        }
 
-      #vemo-selection-box {
-          position: fixed;
-          border: 2px solid #1a73e8;
-          background: rgba(26, 115, 232, 0.1);
-          display: none;
-          z-index: 999999;
-      }
-  `;
+        #vemo-selection-box {
+            position: fixed;
+            border: 2px solid #1a73e8;
+            background: rgba(26, 115, 232, 0.1);
+            pointer-events: none;
+            z-index: 999999;
+            display: none;
+        }
+    `;
     document.head.appendChild(style);
 }
 
@@ -163,171 +165,127 @@ function activateSelectionOverlay() {
     addSelectionStyles();
     removeSelectionOverlay();
 
-    // 1) 전체 화면 덮는 오버레이 생성
     overlay = document.createElement('div');
     overlay.id = 'vemo-selection-overlay';
     document.body.appendChild(overlay);
 
-    // 2) 드래그 영역 박스
     selectionBox = document.createElement('div');
     selectionBox.id = 'vemo-selection-box';
     document.body.appendChild(selectionBox);
 
-    // 마우스 이벤트 연결
-    overlay.addEventListener('mousedown', onMouseDown, true);
-    overlay.addEventListener('mousemove', onMouseMove, true);
-    overlay.addEventListener('mouseup', onMouseUp, true);
+    overlay.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
 
     isSelecting = true;
 }
 
 function removeSelectionOverlay() {
-    try {
-        if (overlay) {
-            overlay.removeEventListener('mousedown', onMouseDown, true);
-            overlay.removeEventListener('mousemove', onMouseMove, true);
-            overlay.removeEventListener('mouseup', onMouseUp, true);
-            overlay.remove();
-            overlay = null;
-        }
-        if (selectionBox) {
-            selectionBox.remove();
-            selectionBox = null;
-        }
-        isSelecting = false;
-        
-        // 클린업을 위한 추가 작업
-        document.body.style.userSelect = 'auto';
-        document.body.style.cursor = 'default';
-        
-        // 남아있을 수 있는 모든 관련 요소 제거
-        const existingOverlays = document.querySelectorAll('#vemo-selection-overlay, #vemo-selection-box');
-        existingOverlays.forEach(el => el.remove());
-    } catch (error) {
-        console.error('[Vemo Extension] 오버레이 제거 중 오류:', error);
+    if (overlay) {
+        overlay.removeEventListener('mousedown', onMouseDown);
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        overlay.remove();
+        overlay = null;
     }
+    if (selectionBox) {
+        selectionBox.remove();
+        selectionBox = null;
+    }
+    isSelecting = false;
+    isDragging = false;
+    document.body.style.cursor = 'default';
 }
 
 function onMouseDown(e) {
     if (!isSelecting) return;
     
-    // 시작 위치 저장
+    isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
     endX = startX;
     endY = startY;
 
-    // 선택 박스 초기화
     selectionBox.style.display = 'block';
     updateSelectionBox();
-    
-    // 선택 중임을 표시
-    document.body.style.cursor = 'crosshair';
+
+    e.preventDefault();
 }
 
 function onMouseMove(e) {
-    if (!isSelecting || !selectionBox) return;
-    
-    // 현재 마우스 위치 업데이트
+    if (!isSelecting || !isDragging) return;
+
     endX = e.clientX;
     endY = e.clientY;
-    
-    // 선택 박스 업데이트
     updateSelectionBox();
-    
-    // 선택 중임을 표시
-    document.body.style.cursor = 'crosshair';
+
+    e.preventDefault();
 }
 
 function onMouseUp(e) {
-    if (!isSelecting) return;
+    if (!isSelecting || !isDragging) return;
+
+    isDragging = false;
+    endX = e.clientX;
+    endY = e.clientY;
     
-    try {
-        endX = e.clientX;
-        endY = e.clientY;
-        updateSelectionBox();
+    const width = Math.abs(endX - startX);
+    const height = Math.abs(endY - startY);
 
-        const width = Math.abs(endX - startX);
-        const height = Math.abs(endY - startY);
+    if (width > 5 && height > 5) {
+        const scale = window.devicePixelRatio || 1;
+        const left = Math.min(startX, endX);
+        const top = Math.min(startY, endY);
+        const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-        if (width > 5 && height > 5) {
-            const scale = window.devicePixelRatio || 1;
-            const left = Math.min(startX, endX);
-            const top = Math.min(startY, endY);
-            const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const captureArea = {
+            x: Math.round((left + scrollLeft) * scale),
+            y: Math.round((top + scrollTop) * scale),
+            width: Math.round(width * scale),
+            height: Math.round(height * scale),
+        };
 
-            const captureArea = {
-                x: Math.round((left + scrollLeft) * scale),
-                y: Math.round((top + scrollTop) * scale),
-                width: Math.round(width * scale),
-                height: Math.round(height * scale),
-            };
+        // 캡처 전에 선택 요소들 숨김
+        overlay.style.display = 'none';
+        selectionBox.style.display = 'none';
 
-            // 오버레이 즉시 제거
-            removeSelectionOverlay();
-
-            // 캡처 실행
-            chrome.runtime.sendMessage({ action: 'captureTab' }, response => {
-                if (chrome.runtime.lastError) {
-                    console.error('[Vemo Extension] Chrome runtime error:', chrome.runtime.lastError);
-                    postMessageToPage('CAPTURE_TAB_RESPONSE', null);
-                    return;
-                }
-
-                if (response && response.dataUrl) {
+        setTimeout(() => {
+            chrome.runtime.sendMessage({ action: 'captureTab' }, resp => {
+                if (resp && resp.dataUrl) {
                     cropImage(
-                        response.dataUrl,
+                        resp.dataUrl,
                         captureArea.x,
                         captureArea.y,
                         captureArea.width,
                         captureArea.height,
                         croppedUrl => {
-                            if (croppedUrl) {
-                                // 캡처 데이터 바로 전송 (하이라이트 제거)
-                                postMessageToPage('CAPTURE_TAB_RESPONSE', croppedUrl);
-                            } else {
-                                console.error('[Vemo Extension] 크롭 실패');
-                                postMessageToPage('CAPTURE_TAB_RESPONSE', null);
-                            }
+                            postMessageToPage('CAPTURE_TAB_RESPONSE', croppedUrl);
+                            removeSelectionOverlay();
                         },
                     );
-                } else {
-                    console.error('[Vemo Extension] 캡처 실패');
-                    postMessageToPage('CAPTURE_TAB_RESPONSE', null);
                 }
             });
-        } else {
-            removeSelectionOverlay();
-        }
-    } catch (error) {
-        console.error('[Vemo Extension] 캡처 처리 중 오류:', error);
+        }, 50);
+    } else {
         removeSelectionOverlay();
-        postMessageToPage('CAPTURE_TAB_RESPONSE', null);
     }
 
     e.preventDefault();
-    e.stopPropagation();
 }
 
 function updateSelectionBox() {
-    if (!selectionBox) return;
+    if (!selectionBox || !isDragging) return;
 
-    // 시작점과 현재 위치 중 작은/큰 값을 찾아서 적용
     const left = Math.min(startX, endX);
     const top = Math.min(startY, endY);
     const width = Math.abs(endX - startX);
     const height = Math.abs(endY - startY);
 
-    // 음수 값이 발생하지 않도록 보정
-    const adjustedWidth = Math.max(0, width);
-    const adjustedHeight = Math.max(0, height);
-
-    // 선택 박스 스타일 업데이트
     selectionBox.style.left = `${left}px`;
     selectionBox.style.top = `${top}px`;
-    selectionBox.style.width = `${adjustedWidth}px`;
-    selectionBox.style.height = `${adjustedHeight}px`;
+    selectionBox.style.width = `${width}px`;
+    selectionBox.style.height = `${height}px`;
 }
 
 // -----------------------------------------------------------
