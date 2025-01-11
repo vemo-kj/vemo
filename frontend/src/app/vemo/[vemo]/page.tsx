@@ -29,12 +29,13 @@ export default function VemoPage() {
     const [error, setError] = useState<string | null>(null);
     const [memosId, setMemosId] = useState<number | null>(null);
 
-    // Add capture status tracking
+    //  capture status tracking
     const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
     const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
 
     // videoId 값 확인
     console.log('page.tsx videoId:', videoId);
+
 
     // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     const fetchVemoData = useCallback(async () => {
