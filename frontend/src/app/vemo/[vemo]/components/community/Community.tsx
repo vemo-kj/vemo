@@ -67,11 +67,29 @@ const ConfirmModal = ({ isOpen, message, onConfirm, onCancel }: ConfirmModalProp
     );
 };
 
-const DetailView = ({ memo, onBack, viewMode }: {
+const DetailView = ({ memo, onBack, viewMode, onDelete }: {
     memo: DetailedMemos;
     onBack: () => void;
     viewMode: 'all' | 'mine';
+    onDelete: (memoId: number) => Promise<void>;
 }) => {
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const handleDeleteClick = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            await onDelete(memo.id);
+            onBack();
+        } catch (error) {
+            console.error('메모 삭제 실패:', error);
+        } finally {
+            setIsDeleteModalOpen(false);
+        }
+    };
+
     if (!memo) {
         return (
             <div className={styles.detailView}>
@@ -108,10 +126,18 @@ const DetailView = ({ memo, onBack, viewMode }: {
                 <button className={styles.backButton} onClick={onBack}>
                     뒤로가기
                 </button>
-                {viewMode === 'all' ? (
-                    <button className={styles.shareButton} onClick={() => { }}>퍼가기</button>
-                ) : (
-                    <button className={styles.editButton} onClick={() => { }}>작성하기</button>
+                {viewMode === 'mine' && (
+                    <div className={styles.buttonGroup}>
+                        <button className={styles.editButton} onClick={() => { }}>
+                            작성하기
+                        </button>
+                        <button
+                            className={styles.deleteButton}
+                            onClick={handleDeleteClick}
+                        >
+                            삭제
+                        </button>
+                    </div>
                 )}
             </div>
             <div className={styles.detailContent}>
@@ -158,6 +184,13 @@ const DetailView = ({ memo, onBack, viewMode }: {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                message="정말 삭제하시겠습니까?"
+                onConfirm={handleDeleteConfirm}
+                onCancel={() => setIsDeleteModalOpen(false)}
+            />
         </div>
     );
 };
@@ -285,6 +318,36 @@ export default function Community() {
         }
     };
 
+    const handleDeleteMemo = async (memoId: number) => {
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                throw new Error('인증 토큰이 없습니다.');
+            }
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memoId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    credentials: 'include',
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('메모 삭제에 실패했습니다.');
+            }
+
+            // 메모 목록 새로고침
+            await fetchMemos(viewMode);
+        } catch (error) {
+            console.error('메모 삭제 실패:', error);
+            setError(error instanceof Error ? error.message : '메모 삭제에 실패했습니다.');
+        }
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -341,6 +404,7 @@ export default function Community() {
                     memo={selectedCard}
                     onBack={() => setSelectedCard(null)}
                     viewMode={viewMode}
+                    onDelete={handleDeleteMemo}
                 />
             )}
         </div>
