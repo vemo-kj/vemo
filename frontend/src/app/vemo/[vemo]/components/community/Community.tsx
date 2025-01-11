@@ -82,7 +82,7 @@ const DetailView = ({ memo, onBack, viewMode }: {
 
             <ConfirmModal
                 isOpen={isShareModalOpen}
-                message="해당 메모를 기반으로 학습을 시작하겠습니까?"
+                message="해당 메모를 기반으로 작성을 시작하겠습니까?"
                 onConfirm={() => {
                     setIsShareModalOpen(false);
                     // 퍼가기 로직 구현
