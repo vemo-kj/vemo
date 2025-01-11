@@ -131,8 +131,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
                 const token = sessionStorage.getItem('token');
-                console.log('[Capture Event] Starting capture process');
-                console.log('Current timestamp:', timestamp);
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
 
                 if (props.onPauseVideo) {
                     props.onPauseVideo();
@@ -143,14 +144,42 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     [timestamp]: true,
                 }));
 
-                // 1. 이미지 압축
-                const compressedImage = await compressImage(imageUrl);
+                // 이미지 데이터 검증 및 처리
+                if (!imageUrl) {
+                    throw new Error('Image data is required');
+                }
 
-                // 2. timestamp를 초 단위로 변환
-                const [minutes, seconds] = timestamp.split(':').map(Number);
-                const totalSeconds = minutes * 60 + seconds;
+                // base64 데이터 정제
+                let processedImage = imageUrl;
+                if (imageUrl.includes('base64')) {
+                    const base64Match = imageUrl.match(/base64,(.+)/);
+                    if (base64Match) {
+                        processedImage = base64Match[1];
+                    }
+                }
 
-                // 3. 캡처 저장 요청
+                // 데이터 유효성 검사
+                if (!processedImage) {
+                    throw new Error('Failed to process image data');
+                }
+
+                console.log('[Capture Event] Sending capture request:', {
+                    timestamp: props.getTimestamp(),
+                    memosId: props.memosId,
+                    imageDataLength: processedImage.length,
+                });
+
+                const requestBody = {
+                    timestamp: props.getTimestamp(),
+                    image: processedImage,
+                    memosId: props.memosId,
+                };
+
+                // 요청 데이터 검증
+                if (typeof requestBody.image !== 'string') {
+                    throw new Error('Image data must be a string');
+                }
+
                 const captureResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
@@ -159,27 +188,29 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                             Authorization: `Bearer ${token}`,
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            timestamp: props.getTimestamp(),
-                            image: compressedImage,
-                            memosId: props.memosId,
-                        }),
+                        body: JSON.stringify(requestBody),
                     },
                 );
 
                 if (!captureResponse.ok) {
-                    throw new Error('Failed to save capture');
+                    const errorText = await captureResponse.text();
+                    console.error('[Capture Event] Server response:', {
+                        status: captureResponse.status,
+                        body: errorText,
+                    });
+                    throw new Error(
+                        `Failed to save capture: ${captureResponse.status} ${errorText}`,
+                    );
                 }
 
                 const captureData = await captureResponse.json();
-                console.log('Capture saved successfully:', captureData);
+                console.log('[Capture Event] Capture saved:', captureData);
 
-                // 4. 섹션에 추가
                 const newSection: Section = {
                     id: `capture-${captureData.id}`,
                     timestamp: timestamp,
                     htmlContent: '',
-                    screenshot: imageUrl,
+                    screenshot: captureData.image,
                 };
 
                 setSections(prev =>
@@ -194,8 +225,17 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     ...prev,
                     [timestamp]: false,
                 }));
+
+                if (props.onMemoSaved) {
+                    props.onMemoSaved();
+                }
             } catch (error) {
-                console.error('캡처 저장 실패:', error);
+                console.error('[Capture Event] Error:', {
+                    message: error instanceof Error ? error.message : 'Unknown error',
+                    type: typeof error,
+                    error,
+                });
+
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
@@ -615,6 +655,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     >
                         U
                     </button>
+
                     <button onClick={handleSave} className={styles.saveButton}>
                         저장
                     </button>
