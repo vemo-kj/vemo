@@ -56,10 +56,17 @@ export default function VemoPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [memosId, setMemosId] = useState<number | null>(null);
+
+    //  capture status tracking
     const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
     const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
     const [isPlayerReady, setIsPlayerReady] = useState(false);
 
+    // videoId 값 확인
+    console.log('page.tsx videoId:', videoId);
+
+
+    // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     // fetchVemoData 함수를 먼저 선언
     const fetchVemoData = useCallback(async () => {
         try {
