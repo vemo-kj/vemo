@@ -437,7 +437,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             console.log('memoId:', memoId);
 
             // 백엔드 요청
-            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/${memoId}`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -488,7 +488,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             const id = captureId.split('-')[1]; // 'capture-123' -> '123'
             console.log('Deleting capture:', { captureId, id });
 
-            const response = await fetch(`http://localhost:5050/captures/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -530,7 +530,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             }
 
             const memoId = id.split('-')[1];
-            const response = await fetch(`http://localhost:5050/memo/${memoId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/${memoId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`,
