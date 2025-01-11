@@ -13,6 +13,33 @@ interface Memos {
     created_at: Date;
 }
 
+interface DetailedMemos {
+    id: number;
+    title: string;
+    createdAt: Date;
+    user: {
+        id: number;
+        nickname: string;
+    };
+    video: {
+        id: string;
+        title: string;
+        channel: {
+            name: string;
+        }
+    };
+    memo: Array<{
+        id: number;
+        timestamp: string;
+        description: string;
+    }>;
+    captures: Array<{
+        id: number;
+        timestamp: string;
+        image: string;
+    }>;
+}
+
 interface CommunityResponse {
     memos: Memos[];
 }
@@ -41,20 +68,39 @@ const ConfirmModal = ({ isOpen, message, onConfirm, onCancel }: ConfirmModalProp
 };
 
 const DetailView = ({ memo, onBack, viewMode }: {
-    memo: Memos;
+    memo: DetailedMemos;
     onBack: () => void;
     viewMode: 'all' | 'mine';
 }) => {
-    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    if (!memo) {
+        return (
+            <div className={styles.detailView}>
+                <div className={styles.detailHeader}>
+                    <button className={styles.backButton} onClick={onBack}>
+                        뒤로가기
+                    </button>
+                </div>
+                <div className={styles.loading}>데이터를 불러오는 중...</div>
+            </div>
+        );
+    }
 
-    const handleShare = () => {
-        setIsShareModalOpen(true);
-    };
+    // 메모와 캡처 데이터를 시간 기준으로 역순 정렬
+    const sortedMemos = memo.memo?.slice().sort((a, b) => {
+        const timeA = a.timestamp.split(':').map(Number);
+        const timeB = b.timestamp.split(':').map(Number);
+        const secondsA = timeA[0] * 60 + timeA[1];
+        const secondsB = timeB[0] * 60 + timeB[1];
+        return secondsB - secondsA;  // 역순 정렬
+    });
 
-    const handleEdit = () => {
-        setIsEditModalOpen(true);
-    };
+    const sortedCaptures = memo.captures?.slice().sort((a, b) => {
+        const timeA = a.timestamp.split(':').map(Number);
+        const timeB = b.timestamp.split(':').map(Number);
+        const secondsA = timeA[0] * 60 + timeA[1];
+        const secondsB = timeB[0] * 60 + timeB[1];
+        return secondsB - secondsA;  // 역순 정렬
+    });
 
     return (
         <div className={styles.detailView}>
@@ -63,42 +109,55 @@ const DetailView = ({ memo, onBack, viewMode }: {
                     뒤로가기
                 </button>
                 {viewMode === 'all' ? (
-                    <button className={styles.shareButton} onClick={handleShare}>퍼가기</button>
+                    <button className={styles.shareButton} onClick={() => { }}>퍼가기</button>
                 ) : (
-                    <button className={styles.editButton} onClick={handleEdit}>작성하기</button>
+                    <button className={styles.editButton} onClick={() => { }}>작성하기</button>
                 )}
             </div>
             <div className={styles.detailContent}>
                 <h3 className={styles.detailTitle}>{memo.title}</h3>
                 <div className={styles.detailInfo}>
-                    <span className={styles.author}>{memo.user.nickname}</span>
-                    <div className={styles.dateInfo}>
-                        <span className={styles.date}>
-                            작성: {new Date(memo.created_at).toLocaleDateString()}
-                        </span>
-                    </div>
+                    <span className={styles.author}>
+                        {memo.user?.nickname || '사용자 없음'}
+                    </span>
+                    <span className={styles.date}>
+                        작성: {new Date(memo.createdAt).toLocaleDateString()}
+                    </span>
                 </div>
+
+                {sortedMemos?.length > 0 && (
+                    <div className={styles.memoList}>
+                        {sortedMemos.map(item => (
+                            <div key={item.id} className={styles.memoItem}>
+                                <span className={styles.timestamp}>{item.timestamp}</span>
+                                <div
+                                    className={styles.description}
+                                    dangerouslySetInnerHTML={{
+                                        __html: item.description || ''
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {sortedCaptures?.length > 0 && (
+                    <div className={styles.captureList}>
+                        {sortedCaptures.map(capture => (
+                            <div key={capture.id} className={styles.captureItem}>
+                                <span className={styles.timestamp}>
+                                    {capture.timestamp}
+                                </span>
+                                <img
+                                    src={capture.image}
+                                    alt={`Capture at ${capture.timestamp}`}
+                                    className={styles.captureImage}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
-
-            <ConfirmModal
-                isOpen={isShareModalOpen}
-                message="해당 메모를 기반으로 작성을 시작하겠습니까?"
-                onConfirm={() => {
-                    setIsShareModalOpen(false);
-                    // 퍼가기 로직 구현
-                }}
-                onCancel={() => setIsShareModalOpen(false)}
-            />
-
-            <ConfirmModal
-                isOpen={isEditModalOpen}
-                message="해당 메모를 이어서 작성 하시겠습니까?"
-                onConfirm={() => {
-                    setIsEditModalOpen(false);
-                    // 작성하기 로직 구현
-                }}
-                onCancel={() => setIsEditModalOpen(false)}
-            />
         </div>
     );
 };
@@ -106,7 +165,7 @@ const DetailView = ({ memo, onBack, viewMode }: {
 export default function Community() {
     const [memos, setMemos] = useState<Memos[]>([]);
     const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
-    const [selectedCard, setSelectedCard] = useState<Memos | null>(null);
+    const [selectedCard, setSelectedCard] = useState<DetailedMemos | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -186,8 +245,44 @@ export default function Community() {
         setViewMode(mode);
     };
 
-    const handleCardSelect = (memo: Memos) => {
-        setSelectedCard(memo);
+    const handleCardSelect = async (memo: Memos) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+                throw new Error('인증 토큰이 없습니다.');
+            }
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memo.id}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || '메모 상세 정보를 불러오는데 실패했습니다.');
+            }
+
+            // 데이터 형식 검증
+            console.log('받은 상세 데이터:', data);
+
+            setSelectedCard(data);
+        } catch (error) {
+            console.error('메모 상세 조회 실패:', error);
+            setError(error instanceof Error ? error.message : '메모를 불러오는데 실패했습니다.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
