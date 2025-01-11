@@ -50,10 +50,30 @@ interface EditorRef {
     addCaptureItem: (timestamp: string, imageUrl: string, captureId?: string) => void;
 }
 
-function parseTimeToSeconds(timestamp: string): number {
-    const [mm, ss] = timestamp.split(':').map(Number);
-    return (mm || 0) * 60 + (ss || 0);
-}
+// 시간 변환 유틸리티 함수들
+const formatVideoTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+};
+
+const parseTimeToSeconds = (timestamp: string): number => {
+    const parts = timestamp.split(':').map(Number);
+    if (parts.length === 2) {
+        const [minutes, seconds] = parts;
+        return (minutes * 60) + seconds;
+    }
+    return 0;
+};
+
+// 정렬 함수 수정
+const sortByTimestamp = (sections: Section[]) => {
+    return [...sections].sort((a, b) => {
+        const aSeconds = parseTimeToSeconds(a.timestamp);
+        const bSeconds = parseTimeToSeconds(b.timestamp);
+        return aSeconds - bSeconds;
+    });
+};
 
 // base64 이미지 데이터 검증 함수
 const validateBase64Image = (base64String: string) => {
@@ -160,6 +180,11 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     throw new Error('Image data must be a string');
                 }
 
+                // 요청 데이터 검증
+                if (typeof requestBody.image !== 'string') {
+                    throw new Error('Image data must be a string');
+                }
+
                 const captureResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
@@ -209,10 +234,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (props.onMemoSaved) {
                     props.onMemoSaved();
                 }
-
-                // 캡처 추가 후 스크롤 이동
-                setTimeout(scrollToBottom, 100);
-
             } catch (error) {
                 console.error('[Capture Event] Error:', {
                     message: error instanceof Error ? error.message : 'Unknown error',
@@ -364,55 +385,33 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
     };
 
-    // handleSave 수정
+    // handleSave 함수 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
         try {
-            const token = localStorage.getItem('token');
-            if (!token || !props.memosId) {
-                console.error('토큰 또는 memosId가 없습니다.');
-                return;
-            }
+            // 현재 영상 시간을 초 단위로 받아서 MM:SS 형식으로 변환
+            const currentTimeInSeconds = Number(props.getTimestamp());
+            const timestamp = formatVideoTime(currentTimeInSeconds);
 
             const html = convertToHTML(contentState);
-            // 저장 시 메모 시작 시점의 타임스탬프 사용
-            const timestamp = memoStartTimestamp || props.getTimestamp();
-
             const requestData = {
                 timestamp,
                 description: html,
                 memosId: Number(props.memosId),
             };
 
-            console.log('0000000000000:', timestamp);
-            console.log('Sending memo data:', requestData);
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memo`, {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
-                credentials: 'include',
                 body: JSON.stringify(requestData),
             });
 
-            // 자세한 에러 로깅
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API 요청 실패:', {
-                    url: response.url,
-                    status: response.status,
-                    statusText: response.statusText,
-                    body: errorText,
-                });
-                throw new Error(`메모 저장 실패: ${response.status} ${response.statusText}`);
-            }
-
             const data = await response.json();
-            console.log('메모 저장 성공:', data);
 
             const newItem: Section = {
                 id: `memo-${data.id}`,
@@ -420,9 +419,8 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 htmlContent: html,
             };
 
-            setSections(prev => [...prev, newItem]);
+            setSections(prev => sortByTimestamp([...prev, newItem]));
             setEditorState(EditorState.createEmpty());
-            setMemoStartTimestamp(null);
             props.onMemoSaved?.();
 
 
@@ -627,31 +625,13 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
                         onDrawingStart={props.onDrawingStart}
-                        addTextToEditor={text => {
-                            // 현재 컨텐츠 상태 가져오기
-                            const contentState = editorState.getCurrentContent();
-                            const selection = editorState.getSelection();
-
-                            // 새 텍스트 삽입
-                            const newContent = Modifier.insertText(contentState, selection, text);
-
-                            // 새로운 EditorState 생성
-                            const newEditorState = EditorState.push(
-                                editorState,
-                                newContent,
-                                'insert-characters',
-                            );
-
-                            // 에디터 상태 업데이트
-                            setEditorState(newEditorState);
-                        }}
                     />
                 ))}
             </div>
             <div className={styles.editorArea}>
                 <Editor
                     editorState={editorState}
-                    onChange={handleEditorChange}  // onChange 핸들러 변경
+                    onChange={handleEditorChange}
                     placeholder="내용을 입력하세요..."
                     handleKeyCommand={handleKeyCommand}
                     keyBindingFn={keyBindingFn}
