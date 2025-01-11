@@ -74,9 +74,14 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
     onDelete: (memoId: number) => Promise<void>;
 }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
     const handleDeleteClick = () => {
         setIsDeleteModalOpen(true);
+    };
+
+    const handleShareClick = () => {
+        setIsShareModalOpen(true);
     };
 
     const handleDeleteConfirm = async () => {
@@ -126,7 +131,11 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                 <button className={styles.backButton} onClick={onBack}>
                     뒤로가기
                 </button>
-                {viewMode === 'mine' && (
+                {viewMode === 'all' ? (
+                    <button className={styles.shareButton} onClick={handleShareClick}>
+                        퍼가기
+                    </button>
+                ) : (
                     <div className={styles.buttonGroup}>
                         <button className={styles.editButton} onClick={() => { }}>
                             작성하기
@@ -190,6 +199,16 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                 message="정말 삭제하시겠습니까?"
                 onConfirm={handleDeleteConfirm}
                 onCancel={() => setIsDeleteModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={isShareModalOpen}
+                message="해당 메모를 기반으로 작성을 시작하시겠습니까?"
+                onConfirm={() => {
+                    setIsShareModalOpen(false);
+                    // 퍼가기 로직 구현 예정
+                }}
+                onCancel={() => setIsShareModalOpen(false)}
             />
         </div>
     );
