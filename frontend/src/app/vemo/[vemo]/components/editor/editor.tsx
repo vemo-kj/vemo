@@ -90,10 +90,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
     const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
-<<<<<<< HEAD
     const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
-=======
->>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
@@ -102,7 +99,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
-    
                 if (props.onPauseVideo) {
                     props.onPauseVideo();
                 }
@@ -219,10 +215,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (props.onMemoSaved) {
                     props.onMemoSaved();
                 }
-
-                // 캡처 추가 후 스크롤 이동
-                setTimeout(scrollToBottom, 100);
-
             } catch (error) {
                 console.error('[Capture Event] Error:', {
                     message: error instanceof Error ? error.message : 'Unknown error',
@@ -367,7 +359,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         setEditorState(newState);
     };
 
-<<<<<<< HEAD
     // 스크롤을 맨 아래로 이동시키는 함수
     const scrollToBottom = () => {
         if (displayAreaRef.current) {
@@ -375,9 +366,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
     };
 
-
-=======
->>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
     // handleSave 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
@@ -440,16 +428,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             props.onMemoSaved?.();
 
 
-<<<<<<< HEAD
             // 저장 후 스크롤 이동
             setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
 
-=======
-            // 저장 후 타임스탬프 초기화
-            setMemoStartTimestamp(null);
-            setEditorState(EditorState.createEmpty());
-            props.onMemoSaved?.();
->>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
