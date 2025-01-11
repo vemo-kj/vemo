@@ -347,10 +347,6 @@ export default function VemoPage() {
         }
     }, [videoId, fetchVemoData]);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
     // 이미지 데이터 처리를 위한 함수 추가
     const processImageData = (dataUrl: string) => {
         try {
@@ -366,7 +362,6 @@ export default function VemoPage() {
         }
     };
 
-<<<<<<< HEAD
     // 그리기 시작 핸들러
     const handleDrawingStart = async (captureId: string) => {
         console.log('Drawing start with capture ID:', captureId);
@@ -392,43 +387,13 @@ export default function VemoPage() {
         }
     };
 
-=======
-=======
->>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
-    // 그리기 시작 핸들러
-    const handleDrawingStart = async (captureId: string) => {
-        console.log('Drawing start with capture ID:', captureId);
-        
-        try {
-            if (!vemoData?.captures) {
-                throw new Error('No captures data available');
-            }
-            
-            const capture = vemoData.captures.find(c => `capture-${c.id}` === `capture-${captureId}`);
-            
-            if (!capture?.image) {
-                throw new Error('Capture image not found');
-            }
 
-            setEditingCaptureImage(capture.image);
-            setEditingCaptureId(captureId);
-            setIsDrawingMode(true);
-        } catch (error) {
-            console.error('Error starting drawing mode:', error);
-            // 사용자에게 에러 메시지 표시
-            alert('이미지를 불러오는데 실패했습니다. 다시 시도해주세요.');
-        }
-    };
-
->>>>>>> b825c83 (fix: 그리기 배경 못불러오는 부분 & 저장 못하는 부분 수정)
     // 그리기 저장 핸들러
     const handleDrawingSave = async (editedImageUrl: string, captureId?: string) => {
         if (editorRef.current?.addCaptureItem) {
             const currentTime = currentTimestamp;
             try {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
+
 >>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
                 const processedImage = processImageData(editedImageUrl);
                 if (!processedImage) {
