@@ -210,23 +210,33 @@ function removeSelectionOverlay() {
 
 function onMouseDown(e) {
     if (!isSelecting) return;
+    
+    // 시작 위치 저장
     startX = e.clientX;
     startY = e.clientY;
     endX = startX;
     endY = startY;
 
-    selectionBox.style.left = `${startX}px`;
-    selectionBox.style.top = `${startY}px`;
-    selectionBox.style.width = `0px`;
-    selectionBox.style.height = `0px`;
+    // 선택 박스 초기화
     selectionBox.style.display = 'block';
+    updateSelectionBox();
+    
+    // 선택 중임을 표시
+    document.body.style.cursor = 'crosshair';
 }
 
 function onMouseMove(e) {
-    if (!isSelecting) return;
+    if (!isSelecting || !selectionBox) return;
+    
+    // 현재 마우스 위치 업데이트
     endX = e.clientX;
     endY = e.clientY;
+    
+    // 선택 박스 업데이트
     updateSelectionBox();
+    
+    // 선택 중임을 표시
+    document.body.style.cursor = 'crosshair';
 }
 
 function onMouseUp(e) {
@@ -303,15 +313,21 @@ function onMouseUp(e) {
 function updateSelectionBox() {
     if (!selectionBox) return;
 
+    // 시작점과 현재 위치 중 작은/큰 값을 찾아서 적용
     const left = Math.min(startX, endX);
     const top = Math.min(startY, endY);
     const width = Math.abs(endX - startX);
     const height = Math.abs(endY - startY);
 
+    // 음수 값이 발생하지 않도록 보정
+    const adjustedWidth = Math.max(0, width);
+    const adjustedHeight = Math.max(0, height);
+
+    // 선택 박스 스타일 업데이트
     selectionBox.style.left = `${left}px`;
     selectionBox.style.top = `${top}px`;
-    selectionBox.style.width = `${width}px`;
-    selectionBox.style.height = `${height}px`;
+    selectionBox.style.width = `${adjustedWidth}px`;
+    selectionBox.style.height = `${adjustedHeight}px`;
 }
 
 // -----------------------------------------------------------
