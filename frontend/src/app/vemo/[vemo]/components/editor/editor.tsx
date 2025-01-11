@@ -102,7 +102,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
-
+    
                 if (props.onPauseVideo) {
                     props.onPauseVideo();
                 }
