@@ -8,12 +8,18 @@ import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴
 type BrushType = 'pen' | 'highlighter' | 'eraser' | 'rectangle' | 'circle';
 
 interface DrawingCanvasProps {
-    backgroundImage: string;  // 캡처된 이미지 URL
-    onSave: (editedImageUrl: string) => void;
+    backgroundImage: string;
+    captureId?: string;  // 수정할 캡처 ID
+    onSave: (editedImageUrl: string, captureId?: string) => void;
     onClose: () => void;
 }
 
-export default function DrawingCanvas({ backgroundImage, onSave, onClose }: DrawingCanvasProps) {
+export default function DrawingCanvas({ 
+    backgroundImage, 
+    captureId,
+    onSave, 
+    onClose 
+}: DrawingCanvasProps) {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [strokeColor, setStrokeColor] = useState('#000000');
     const [strokeWidth, setStrokeWidth] = useState(3);
@@ -80,52 +86,27 @@ export default function DrawingCanvas({ backgroundImage, onSave, onClose }: Draw
         }
     };
 
-    const handleSave = async () => {
+     const handleSave = async () => {
         if (canvasRef.current) {
             try {
-                // 그린 내용만 가져오기
+                console.log('1. 그리기 저장 시작');
+                // 배경 이미지와 그린 내용을 합쳐서 내보내기
                 const drawingData = await canvasRef.current.exportImage('png');
-                
-                // 배경 이미지와 그린 내용 합치기
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                if (!ctx) {
-                    throw new Error('Canvas context not available');
+                // 이미지 데이터 검증
+                if (!drawingData?.startsWith('data:image/')) {
+                    throw new Error('Invalid image data after drawing');
                 }
-
-                // 이미지 크기 설정
-                canvas.width = canvasWidth;
-                canvas.height = canvasHeight;
-
-                // 배경 이미지 그리기
-                const bgImg = new Image();
-                bgImg.crossOrigin = 'anonymous';
+                // 이미지 압축
+                const compressedImage = drawingData;
                 
-                await new Promise<void>((resolve, reject) => {
-                    bgImg.onload = () => {
-                        ctx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
-                        
-                        // 그린 내용 그리기
-                        const drawingImg = new Image();
-                        drawingImg.onload = () => {
-                            ctx.drawImage(drawingImg, 0, 0);
-                            const finalImageUrl = canvas.toDataURL('image/png');
-                            // 부모 콜백 onSave 호출(base64 전달)
-                            onSave(finalImageUrl);
-                            resolve();
-                        };
-                        drawingImg.onerror = reject;
-                        drawingImg.src = drawingData;
-                    };
-                    bgImg.onerror = reject;
-                    bgImg.src = backgroundImage;
-                });
-
+                // captureId와 함께 저장 처리를 위해 부모 컴포넌트로 전달
+                onSave(compressedImage, captureId);
+                console.log('2. 그리기 저장 완료');
             } catch (error) {
-                console.error('Drawing save failed:', error);
+                console.error('그리기 저장 중 오류:', error);
             }
         }
+        onClose();
     };
 
     // 확대/축소 핸들러
@@ -183,134 +164,148 @@ export default function DrawingCanvas({ backgroundImage, onSave, onClose }: Draw
         };
     }, []);
 
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, [onClose]);
+
     return (
-        <div className={styles.drawingCanvasContainer}>
-            <div className={styles.toolbar}>
-                {/* 브러시 굵기 프리셋 */}
-                <div className={styles.widthPresets}>
-                    {widthPresets.map((preset, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setStrokeWidth(preset.width)}
-                            className={`${styles.presetButton} ${
-                                strokeWidth === preset.width ? styles.active : ''
-                            }`}
-                            title={`${preset.width}px`}
-                        >
-                            {preset.icon}
-                        </button>
-                    ))}
-                </div>
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <div className={styles.drawingCanvasContainer}>
+                    <div className={styles.toolbar}>
+                        {/* 브러시 굵기 프리셋 */}
+                        <div className={styles.widthPresets}>
+                            {widthPresets.map((preset, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setStrokeWidth(preset.width)}
+                                    className={`${styles.presetButton} ${
+                                        strokeWidth === preset.width ? styles.active : ''
+                                    }`}
+                                    title={`${preset.width}px`}
+                                >
+                                    {preset.icon}
+                                </button>
+                            ))}
+                        </div>
 
-                {/* 색상 프리셋 */}
-                <div className={styles.colorPresets}>
-                    {colorPresets.map((preset, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setStrokeColor(preset.color)}
-                            className={`${styles.colorButton} ${
-                                strokeColor === preset.color ? styles.active : ''
-                            }`}
-                            style={{ backgroundColor: preset.color }}
-                            title={preset.name}
-                        />
-                    ))}
-                    <input
-                        type="color"
-                        value={strokeColor}
-                        onChange={e => setStrokeColor(e.target.value)}
-                        className={styles.colorPicker}
-                        title="커스텀 색상"
-                    />
-                </div>
+                        {/* 색상 프리셋 */}
+                        <div className={styles.colorPresets}>
+                            {colorPresets.map((preset, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setStrokeColor(preset.color)}
+                                    className={`${styles.colorButton} ${
+                                        strokeColor === preset.color ? styles.active : ''
+                                    }`}
+                                    style={{ backgroundColor: preset.color }}
+                                    title={preset.name}
+                                />
+                            ))}
+                            <input
+                                type="color"
+                                value={strokeColor}
+                                onChange={e => setStrokeColor(e.target.value)}
+                                className={styles.colorPicker}
+                                title="커스텀 색상"
+                            />
+                        </div>
 
-                {/* 브러시 프리셋 버튼들 */}
-                <div className={styles.brushPresets}>
-                    {brushPresets.map(preset => (
-                        <button
-                            key={preset.type}
-                            onClick={() => handleBrushChange(preset)}
-                            className={`${styles.presetButton} ${
-                                brushType === preset.type ? styles.active : ''
-                            }`}
-                            title={preset.name}
-                        >
-                            {preset.icon}
-                        </button>
-                    ))}
-                </div>
+                        {/* 브러시 프리셋 버튼들 */}
+                        <div className={styles.brushPresets}>
+                            {brushPresets.map(preset => (
+                                <button
+                                    key={preset.type}
+                                    onClick={() => handleBrushChange(preset)}
+                                    className={`${styles.presetButton} ${
+                                        brushType === preset.type ? styles.active : ''
+                                    }`}
+                                    title={preset.name}
+                                >
+                                    {preset.icon}
+                                </button>
+                            ))}
+                        </div>
 
-                {/* 투명도 조절 (형광펜용) */}
-                {brushType === 'highlighter' && (
-                    <div className={styles.opacity}>
-                        <input
-                            type="range"
-                            min="0.1"
-                            max="1"
-                            step="0.1"
-                            value={opacity}
-                            onChange={e => setOpacity(Number(e.target.value))}
-                        />
+                        {/* 투명도 조절 (형광펜용) */}
+                        {brushType === 'highlighter' && (
+                            <div className={styles.opacity}>
+                                <input
+                                    type="range"
+                                    min="0.1"
+                                    max="1"
+                                    step="0.1"
+                                    value={opacity}
+                                    onChange={e => setOpacity(Number(e.target.value))}
+                                />
+                            </div>
+                        )}
+
+                        {/* 확대/축소 컨트롤 */}
+                        <div className={styles.zoomControls}>
+                            <button onClick={() => handleZoom('in')} title="확대">
+                                🔍+
+                            </button>
+                            <button onClick={() => handleZoom('out')} title="축소">
+                                🔍-
+                            </button>
+                            <span>{Math.round(scale * 100)}%</span>
+                            <div className={styles.moveInfo}>
+                                스페이스바를 누른 상태에서 드래그하여 이동
+                            </div>
+                        </div>
                     </div>
-                )}
 
-                {/* 확대/축소 컨트롤 */}
-                <div className={styles.zoomControls}>
-                    <button onClick={() => handleZoom('in')} title="확대">
-                        🔍+
-                    </button>
-                    <button onClick={() => handleZoom('out')} title="축소">
-                        🔍-
-                    </button>
-                    <span>{Math.round(scale * 100)}%</span>
-                    <div className={styles.moveInfo}>
-                        스페이스바를 누른 상태에서 드래그하여 이동
+                    <div
+                        className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                    >
+                        <div
+                            style={{
+                                transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                                transformOrigin: '0 0',
+                                transition: isDragging ? 'none' : 'transform 0.3s ease',
+                                cursor: isMovingMode ? 'grab' : 'default',
+                            }}
+                        >
+                            <DynamicReactSketchCanvas
+                                ref={canvasRef}
+                                width={`${canvasWidth}px`}
+                                height={`${canvasHeight}px`}
+                                strokeWidth={strokeWidth}
+                                strokeColor={getStrokeColor()}
+                                backgroundImage={backgroundImage}
+                                exportWithBackgroundImage={true}
+                                canvasColor="transparent"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 액션 버튼들 */}
+                    <div className={styles.actions}>
+                        <button onClick={() => canvasRef.current?.undo()}>undo</button>
+                        <button onClick={() => canvasRef.current?.redo()}>redo</button>
+                        <button
+                            onClick={() => {
+                                canvasRef.current?.clearCanvas();
+                                setStrokeColor('#000000');
+                            }}
+                        >
+                            전체 지우기
+                        </button>
+                        <button onClick={handleSave}>저장</button>
+                        <button onClick={onClose}>닫기</button>
                     </div>
                 </div>
-            </div>
-
-            <div
-                className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-            >
-                <div
-                    style={{
-                        transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                        transformOrigin: '0 0',
-                        transition: isDragging ? 'none' : 'transform 0.3s ease',
-                        cursor: isMovingMode ? 'grab' : 'default',
-                    }}
-                >
-                    <DynamicReactSketchCanvas
-                        ref={canvasRef}
-                        width={`${canvasWidth}px`}
-                        height={`${canvasHeight}px`}
-                        strokeWidth={strokeWidth}
-                        strokeColor={getStrokeColor()}
-                        backgroundImage={backgroundImage}
-                        exportWithBackgroundImage={true}
-                        canvasColor="transparent"
-                    />
-                </div>
-            </div>
-
-            {/* 액션 버튼들 */}
-            <div className={styles.actions}>
-                <button onClick={() => canvasRef.current?.undo()}>undo</button>
-                <button onClick={() => canvasRef.current?.redo()}>redo</button>
-                <button
-                    onClick={() => {
-                        canvasRef.current?.clearCanvas();
-                        setStrokeColor('#000000');
-                    }}
-                >
-                    전체 지우기
-                </button>
-                <button onClick={handleSave}>저장</button>
-                <button onClick={onClose}>닫기</button>
             </div>
         </div>
     );

@@ -16,6 +16,7 @@ interface MemoItemProps {
     onPauseVideo?: () => void;
     isEditable?: boolean;
     addTextToEditor?: (text: string) => void;
+    onDrawingStart?: (captureId: string) => void;
 }
 
 const MemoItem = memo(
@@ -30,14 +31,19 @@ const MemoItem = memo(
         onPauseVideo,
         isEditable,
         addTextToEditor,
+        onDrawingStart,
     }: MemoItemProps) => {
         // ====== (1) 그리기 영역 ======
         const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
         // 그리기 영역 열기
         const handleOpenDrawing = () => {
-            onPauseVideo?.();
-            setIsDrawingOpen(true);
+            if (onDrawingStart && id.startsWith('capture-')) {
+                const captureId = id.split('-')[1];
+                console.log('Opening drawing for capture:', captureId);
+                onDrawingStart(captureId);
+                console.log('isDrawingOpen:', captureId);
+            }
         };
 
         // 그리기 영역 닫기
@@ -46,35 +52,35 @@ const MemoItem = memo(
         };
 
         // 그리기 저장 핸들러
-        const handleSaveDrawing = async (editedImageData: string) => {
+        const handleSaveDrawing = async (editedImageData: string, captureId?: string) => {
             try {
                 const token = sessionStorage.getItem('token');
                 if (!token) throw new Error('No token found');
 
-                const captureId = id.split('-')[1]; // 'capture-123' -> '123'
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`, {
+                const targetCaptureId = captureId || id.split('-')[1];
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${targetCaptureId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        id: Number(captureId),
+                        id: Number(targetCaptureId),
                         image: editedImageData
                     })
                 });
-
+                console.log('isDrawingOpen 111111111111:', targetCaptureId);
                 if (!response.ok) throw new Error('Failed to update capture');
 
                 // 이미지 엘리먼트 업데이트
-                const imgElem = document.getElementById(`capture-${id}`) as HTMLImageElement;
+                const imgElem = document.getElementById(`capture-${targetCaptureId}`) as HTMLImageElement;
                 if (imgElem) {
                     imgElem.src = editedImageData;
                 }
             } catch (error) {
                 console.error('Failed to save edited image:', error);
             }
-            setIsDrawingMode(false);
+            
         };
 
         // ====== (2) 텍스트 편집 ======
@@ -183,14 +189,7 @@ const MemoItem = memo(
             }
         }, [id]);
 
-        const [isDrawingMode, setIsDrawingMode] = useState(false);
 
-        const handleEditImage = () => {
-            setIsDrawingMode(true);
-            if (onPauseVideo) {
-                onPauseVideo();
-            }
-        };
 
         return (
             <div className={styles.memoItemContainer}>
@@ -295,20 +294,13 @@ const MemoItem = memo(
                         <div className={styles.drawPopup}>
                             <h3>그리기</h3>
                             <DrawingCanvas
+                                captureId={id}
                                 onSave={handleSaveDrawing}
                                 onClose={handleCloseDrawing}
-                                backgroundImage={screenshot} // 배경 이미지 전달
+                                backgroundImage={screenshot}
                             />
                         </div>
                     </div>
-                )}
-
-                {isDrawingMode && (
-                    <DrawingCanvas
-                        backgroundImage={screenshot || ''}
-                        onSave={handleSaveDrawing}
-                        onClose={() => setIsDrawingMode(false)}
-                    />
                 )}
             </div>
         );
