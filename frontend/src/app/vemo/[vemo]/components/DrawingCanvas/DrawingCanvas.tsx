@@ -172,6 +172,7 @@ export default function DrawingCanvas({
             console.error('[DrawingCanvas] Save error:', err);
             alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
         }
+        onClose();
     };
 
     /**
@@ -334,20 +335,20 @@ export default function DrawingCanvas({
                             </div>
                         )}
 
-                {/* 확대/축소 컨트롤 */}
-                <div className={styles.zoomControls}>
-                    <button onClick={() => handleZoom('in')} title="확대">
-                        🔍+
-                    </button>
-                    <button onClick={() => handleZoom('out')} title="축소">
-                        🔍-
-                    </button>
-                    <span>{Math.round(scale * 100)}%</span>
-                    <div className={styles.moveInfo}>
-                        스페이스바를 누른 상태에서 드래그하여 이동
+                        {/* 확대/축소 컨트롤 */}
+                        <div className={styles.zoomControls}>
+                            <button onClick={() => handleZoom('in')} title="확대">
+                                🔍+
+                            </button>
+                            <button onClick={() => handleZoom('out')} title="축소">
+                                🔍-
+                            </button>
+                            <span>{Math.round(scale * 100)}%</span>
+                            <div className={styles.moveInfo}>
+                                스페이스바를 누른 상태에서 드래그하여 이동
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
             <div
                 className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
