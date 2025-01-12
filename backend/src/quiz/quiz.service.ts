@@ -62,11 +62,12 @@ export class QuizService {
                     {
                         role: 'system',
                         content: `
-                        당신은 자막의 요약 및 퀴즈 생성 전문가입니다.  
+                            당신은 자막의 요약 및 퀴즈 생성 전문가입니다.  
                             주어진 주요 내용을 바탕으로 다음 사항을 작성하세요:                              
-                            1. **퀴즈**: 영상의 중요 내용을 묻는 5개의 퀴즈와 타임스탬프, (O/X)정답을 작성하세요.  
-                            2. 영상 자막을 기반으로 영상의 핵심을 찾아 퀴즈로 만들어주세요.
-                            3. 다음 예시외의 다른 어떤 것도 작성하지 마세요.
+                            1. **퀴즈**: 영상의 중요 내용을 묻는 5개의 퀴즈와 타임스탬프, (O/X) 정답을 작성하세요.  
+                            2. 타임스탬프는 반드시 [hh:mm] 형태로 작성하세요. 
+                            3. 영상 자막을 기반으로 영상의 핵심을 찾아 퀴즈로 만들어주세요.
+                            4. 다음 예시 외의 다른 형식은 작성하지 마세요.
                             
                             ex) 다음 퀴즈의 예시입니다.
                             [02:40]
@@ -86,17 +87,36 @@ export class QuizService {
             });
 
             // respense 값 전처리하여 DB에 데이터 create
+            // console.log(response.choices[0]?.message?.content);
+
             const result: QuizResultDto[] = this.parseQuizToArray(
                 response.choices[0]?.message?.content,
             ).map(
                 ([timestamp, question, answer]) => new QuizResultDto(timestamp, question, answer),
             );
-            await this.createQuizzes(videoid, result);
 
-            const text = response.choices[0]?.message?.content;
-            const parsedQuiz = this.parseQuizToArray(text);
+            const MAX_RETRIES = 3; // 최대 재시도 횟수
+            let attempts = 0;
 
-            return parsedQuiz;
+            while (attempts < MAX_RETRIES) {
+                try {
+                    // DB에 데이터 저장 시도
+                    await this.createQuizzes(videoid, result);
+                    console.log(`Successfully saved quizzes after ${attempts + 1} attempt(s).`);
+                    break; // 저장 성공 시 루프 종료
+                } catch (error) {
+                    attempts++;
+                    console.error(`Attempt ${attempts} failed:`, error.message);
+
+                    if (attempts >= MAX_RETRIES) {
+                        console.error('Failed to save quizzes after maximum retries.');
+                        throw new Error('Could not save quizzes to the database.');
+                    }
+                }
+            }
+
+            const quiz = await this.getQuiz(videoid);
+            return quiz;
         }
     }
     catch(error) {
@@ -110,7 +130,7 @@ export class QuizService {
 
     // 퀴즈의 타임스탬프/문제/정답로 파싱한 배열열
     private parseQuizToArray(text: string): string[][] {
-        const regex = /\[(\d{1,2}:\d{2})\]\s*문제:\s*(.*?)\s*정답:\s*(O|X)/g;
+        const regex = /\[(\d{1,2}:\d{2})\]\s*문제\:\s*(.*?)\s*정답\:\s*([OX])/gi;
         let match;
         const result: string[][] = [];
 
