@@ -65,6 +65,8 @@ export default function VemoPage() {
     const [isDrawingMode, setIsDrawingMode] = useState(false);
     const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
     const [editingCaptureImage, setEditingCaptureImage] = useState<string | null>(null);
+    const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
+    const [editingCaptureImage, setEditingCaptureImage] = useState<string | null>(null);
 
     // videoId 값 확인
     console.log('page.tsx videoId:', videoId);
@@ -463,6 +465,7 @@ export default function VemoPage() {
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
                             vemoData={vemoData}
+                            onDrawingStart={handleDrawingStart}
                             onDrawingStart={handleDrawingStart}
                         />
                     )}
