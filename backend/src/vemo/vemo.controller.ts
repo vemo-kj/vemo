@@ -26,6 +26,11 @@ export class VemoController {
         return await this.vemoService.getCommunityMemos(videoId, filter, userId);
     }
 
+    /**
+     * @param memosId
+     * @param req
+     * @returns Memos
+     */
     @Post(':memosId')
     async scrapCommunityMemos(
         @Param('memosId') memosId: number,
