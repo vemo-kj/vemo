@@ -1,5 +1,7 @@
 'use client';
 
+import { CreateMemosResponseDto } from '@/app/types/vemo.types';
+import Image from 'next/image';
 import React, { useState } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
@@ -8,8 +10,6 @@ import QuizView from '../quizView/QuizView';
 import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
-import { CreateMemosResponseDto } from '@/app/types/vemo.types';
-import Image from 'next/image';
 
 export interface SideBarNavProps {
     selectedOption: string;
@@ -66,8 +66,6 @@ export default function SidebarNav({
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
 
-    // 토큰 가져오기
-    const token = sessionStorage.getItem('token');
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
 
