@@ -43,11 +43,12 @@ interface CustomEditorProps {
     onMemoSaved?: () => void;
     memosId: number | null;
     vemoData: CreateMemosResponseDto | null;
+    onDrawingStart?: (captureId: string) => void;
 }
 
 // ref 타입 정의
 interface EditorRef {
-    addCaptureItem: (timestamp: string, imageUrl: string) => void;
+    addCaptureItem: (timestamp: string, imageUrl: string, captureId?: string) => void;
 }
 
 function parseTimeToSeconds(timestamp: string): number {
@@ -130,7 +131,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
 
     useImperativeHandle(ref, () => ({
-        addCaptureItem: async (timestamp: string, imageUrl: string) => {
+        addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
@@ -153,6 +154,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
                 // base64 데이터 정제
                 let processedImage = imageUrl;
+
+                if (!processedImage.startsWith('data:image/')) {
+                    // 순수 Base64만 넘어온 경우 (확장 프로그램 sanitize 상태)
+                    processedImage = `data:image/png;base64,${processedImage}`;
+                  }
+
                 if (imageUrl.includes('base64')) {
                     const base64Match = imageUrl.match(/base64,(.+)/);
                     if (base64Match) {
@@ -653,6 +660,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                         onDelete={() => handleDeleteItem(item.id)}
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
+                        onDrawingStart={props.onDrawingStart}
                         addTextToEditor={text => {
                             // 현재 컨텐츠 상태 가져오기
                             const contentState = editorState.getCurrentContent();
