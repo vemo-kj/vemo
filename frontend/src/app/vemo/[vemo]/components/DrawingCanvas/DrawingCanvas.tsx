@@ -334,15 +334,48 @@ export default function DrawingCanvas({
                             </div>
                         )}
 
-                        {/* 확대/축소 */}
-                        <div className={styles.zoomControls}>
-                            <button onClick={() => handleZoom('in')}>🔍+</button>
-                            <button onClick={() => handleZoom('out')}>🔍-</button>
-                            <span>{Math.round(scale * 100)}%</span>
-                            <div className={styles.moveInfo}>스페이스+드래그=이동</div>
-                        </div>
+                {/* 확대/축소 컨트롤 */}
+                <div className={styles.zoomControls}>
+                    <button onClick={() => handleZoom('in')} title="확대">
+                        🔍+
+                    </button>
+                    <button onClick={() => handleZoom('out')} title="축소">
+                        🔍-
+                    </button>
+                    <span>{Math.round(scale * 100)}%</span>
+                    <div className={styles.moveInfo}>
+                        스페이스바를 누른 상태에서 드래그하여 이동
                     </div>
+                </div>
+            </div>
 
+            <div
+                className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
+                <div
+                    style={{
+                        transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                        transformOrigin: '0 0',
+                        transition: isDragging ? 'none' : 'transform 0.3s ease',
+                        cursor: isMovingMode ? 'grab' : 'default',
+                    }}
+                >
+                    <DynamicReactSketchCanvas
+                        ref={canvasRef}
+                        width={`${canvasWidth}px`}
+                        height={`${canvasHeight}px`}
+                        strokeWidth={strokeWidth}
+                        strokeColor={getStrokeColor()}
+                        backgroundImage={backgroundImage}
+                        exportWithBackgroundImage={true}
+                        canvasColor="transparent"
+                    />
+                </div>
+            </div>
                     {/* 실제 Canvas 영역 */}
                     <div
                         className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
