@@ -3,6 +3,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/jwt/jwt.guard';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -36,6 +37,9 @@ async function bootstrap() {
     );
 
     app.useGlobalGuards(new JwtAuthGuard(new Reflector()));
+
+    app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
     if (process.env.NODE_ENV === 'development') {
         const config = new DocumentBuilder()
