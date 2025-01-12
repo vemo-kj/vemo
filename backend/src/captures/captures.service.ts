@@ -21,8 +21,12 @@ export class CapturesService {
     private readonly logger = new Logger(CapturesService.name);
 
     constructor(
-        @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
-        @InjectRepository(Captures) private capturesRepository: Repository<Captures>,
+        @InjectRepository(Memos)
+        private readonly memosRepository: Repository<Memos>,
+
+        @InjectRepository(Captures)
+        private capturesRepository: Repository<Captures>,
+
         @Inject('S3')
         private readonly s3: S3,
 
@@ -31,7 +35,11 @@ export class CapturesService {
         this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
     }
 
-    async createCapture(createCapturesDto: CreateCapturesDto, isScrap = false): Promise<Captures> {
+    /**
+     * 새 캡처 생성
+     *  - Base64 → S3 업로드 → DB 저장
+     */
+    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
         try {
             const { memosId, image, ...rest } = createCapturesDto;
             const memos = await this.memosRepository.findOne({
@@ -44,13 +52,8 @@ export class CapturesService {
                 memos,
             });
 
-            if (!isScrap) {
-                const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
-                this.logger.log('uploadUrl', uploadUrl);
-                captures.image = uploadUrl;
-            } else {
-                captures.image = image;
-            }
+            const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
+            captures.image = uploadUrl;
 
             // (4) DB 저장
             return await this.capturesRepository.save(captures);
