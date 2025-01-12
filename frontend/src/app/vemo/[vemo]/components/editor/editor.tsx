@@ -567,10 +567,33 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     const handleKeyCommand = (command: string) => {
         if (command === 'split-block') {
-            handleSave();
-            return 'handled';
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 현재 블록의 텍스트가 있을 때만 저장 처리
+            if (currentBlock.getText().length > 0) {
+                handleSave();
+                return 'handled';
+            }
         }
         return 'not-handled';
+    };
+
+    // keyBindingFn 수정
+    const keyBindingFn = (e: React.KeyboardEvent<{}>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();  // 기본 Enter 동작 방지
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 텍스트가 있을 때만 'split-block' 커맨드 반환
+            if (currentBlock.getText().length > 0) {
+                return 'split-block';
+            }
+        }
+        return getDefaultKeyBinding(e);
     };
 
     // 메모카드 변경 감지
@@ -620,12 +643,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     onChange={setEditorState}
                     placeholder="내용을 입력하세요..."
                     handleKeyCommand={handleKeyCommand}
-                    keyBindingFn={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            return 'split-block';
-                        }
-                        return getDefaultKeyBinding(e);
-                    }}
+                    keyBindingFn={keyBindingFn}
                 />
                 <div className={styles.toolbar}>
                     <button
