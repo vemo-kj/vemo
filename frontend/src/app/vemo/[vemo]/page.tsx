@@ -346,24 +346,43 @@ export default function VemoPage() {
         }
     }, [videoId, fetchVemoData]);
 
+    // 이미지 데이터 처리를 위한 함수 추가
+    const processImageData = (dataUrl: string) => {
+        try {
+            // 이미지 데이터가 유효한지 확인
+            if (!dataUrl.startsWith('data:image/')) {
+                console.error('Invalid image data URL');
+                return null;
+            }
+            return dataUrl;
+        } catch (error) {
+            console.error('Image processing error:', error);
+            return null;
+        }
+    };
+
     // 그리기 시작 핸들러
     const handleDrawingStart = async (captureId: string) => {
         console.log('Drawing start with capture ID:', captureId);
         
         try {
-            // 1. 현재 vemoData에서 해당 캡처 찾기
-            const capture = vemoData?.captures.find(c => `capture-${c.id}` === `capture-${captureId}`);
-            
-            if (capture) {
-                console.log('Found capture:', capture);
-                setEditingCaptureImage(capture.image);  // 기존 이미지 설정
-                setEditingCaptureId(captureId);
-                setIsDrawingMode(true);
-            } else {
-                console.error('Capture not found:', captureId);
+            if (!vemoData?.captures) {
+                throw new Error('No captures data available');
             }
+            
+            const capture = vemoData.captures.find(c => `capture-${c.id}` === `capture-${captureId}`);
+            
+            if (!capture?.image) {
+                throw new Error('Capture image not found');
+            }
+
+            setEditingCaptureImage(capture.image);
+            setEditingCaptureId(captureId);
+            setIsDrawingMode(true);
         } catch (error) {
             console.error('Error starting drawing mode:', error);
+            // 사용자에게 에러 메시지 표시
+            alert('이미지를 불러오는데 실패했습니다. 다시 시도해주세요.');
         }
     };
 
@@ -372,12 +391,15 @@ export default function VemoPage() {
         if (editorRef.current?.addCaptureItem) {
             const currentTime = currentTimestamp;
             try {
+                const processedImage = processImageData(editedImageUrl);
+                if (!processedImage) {
+                    throw new Error('Invalid image data');
+                }
+                
                 if (captureId) {
-                    // 기존 캡처 수정
-                    await editorRef.current.addCaptureItem(currentTime, editedImageUrl, captureId);
+                    await editorRef.current.addCaptureItem(currentTime, processedImage, captureId);
                 } else {
-                    // 새 캡처 생성
-                    await editorRef.current.addCaptureItem(currentTime, editedImageUrl);
+                    await editorRef.current.addCaptureItem(currentTime, processedImage);
                 }
                 setIsDrawingMode(false);
                 setCapturedImage(null);

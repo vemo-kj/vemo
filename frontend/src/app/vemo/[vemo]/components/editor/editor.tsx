@@ -84,44 +84,6 @@ const validateBase64Image = (base64String: string) => {
     return true;
 };
 
-const compressImage = async (base64Image: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            // 원본 비율 유지하면서 최대 너비/높이 설정
-            const MAX_WIDTH = 1024;
-            const MAX_HEIGHT = 1024;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-            } else {
-                if (height > MAX_HEIGHT) {
-                    width *= MAX_HEIGHT / height;
-                    height = MAX_HEIGHT;
-                }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0, width, height);
-
-            // 0.8은 80% 품질을 의미합니다 - 적절한 압축률
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-            resolve(compressedBase64);
-        };
-        img.onerror = reject;
-        img.src = base64Image;
-    });
-};
-
 const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const { resetData } = useSummary();
     const [sections, setSections] = useState<Section[]>([]);
