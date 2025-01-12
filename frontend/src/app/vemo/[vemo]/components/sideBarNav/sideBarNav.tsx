@@ -24,32 +24,6 @@ export interface SideBarNavProps {
     memosId: number | null;
 }
 
-// 응답 타입
-interface MemosidResponse {
-    id: number; // memosid
-    title: string; // 메모 제목
-    createdAt: Date; // 메모 생성 시간
-}
-
-interface Memo {
-    id: number;
-    timestamp: string;
-    description: string;
-}
-
-interface Captures {
-    id: number;
-    createdAt: Date;
-    imageUrl: string;
-}
-
-interface MemoListResponse {
-    id: number;
-    title: string;
-    createdAt: Date;
-    memo: Memo[];
-    captures: Captures[];
-}
 
 // 메모 생성 함수
 export default function SidebarNav({
@@ -79,19 +53,6 @@ export default function SidebarNav({
     console.log('sideBarNav.tsx props videoId:', videoId);
 
     // 메튼 클릭 핸들러
-    const handleWriteClick = async () => {
-        try {
-            console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
-
-            if (!videoId) {
-                console.error('No videoId available');
-                return;
-            }
-            console.log('handleWriteClick videoId:', videoId);
-        } catch (error) {
-            console.error('Failed to handle write click:', error);
-        }
-    };
 
     const handleTitleSave = async () => {
         try {

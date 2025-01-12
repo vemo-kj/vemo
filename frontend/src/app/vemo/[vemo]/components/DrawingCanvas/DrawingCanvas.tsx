@@ -8,12 +8,12 @@ import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴
 type BrushType = 'pen' | 'highlighter' | 'eraser' | 'rectangle' | 'circle';
 
 interface DrawingCanvasProps {
-    onSave: (dataUrl: string) => void;
+    backgroundImage: string;  // 캡처된 이미지 URL
+    onSave: (editedImageUrl: string) => void;
     onClose: () => void;
-    backgroundImage: string;
 }
 
-export default function DrawingCanvas({ onSave, onClose, backgroundImage }: DrawingCanvasProps) {
+export default function DrawingCanvas({ backgroundImage, onSave, onClose }: DrawingCanvasProps) {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [strokeColor, setStrokeColor] = useState('#000000');
     const [strokeWidth, setStrokeWidth] = useState(3);
@@ -83,13 +83,49 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     const handleSave = async () => {
         if (canvasRef.current) {
             try {
-                const dataUrl = await canvasRef.current.exportImage('png');
-                onSave(dataUrl);
+                // 그린 내용만 가져오기
+                const drawingData = await canvasRef.current.exportImage('png');
+                
+                // 배경 이미지와 그린 내용 합치기
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                if (!ctx) {
+                    throw new Error('Canvas context not available');
+                }
+
+                // 이미지 크기 설정
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+
+                // 배경 이미지 그리기
+                const bgImg = new Image();
+                bgImg.crossOrigin = 'anonymous';
+                
+                await new Promise<void>((resolve, reject) => {
+                    bgImg.onload = () => {
+                        ctx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+                        
+                        // 그린 내용 그리기
+                        const drawingImg = new Image();
+                        drawingImg.onload = () => {
+                            ctx.drawImage(drawingImg, 0, 0);
+                            const finalImageUrl = canvas.toDataURL('image/png');
+                            // 부모 콜백 onSave 호출(base64 전달)
+                            onSave(finalImageUrl);
+                            resolve();
+                        };
+                        drawingImg.onerror = reject;
+                        drawingImg.src = drawingData;
+                    };
+                    bgImg.onerror = reject;
+                    bgImg.src = backgroundImage;
+                });
+
             } catch (error) {
-                console.error('이미지 저장 중 오류:', error);
+                console.error('Drawing save failed:', error);
             }
         }
-        onClose();
     };
 
     // 확대/축소 핸들러
@@ -148,7 +184,7 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
     }, []);
 
     return (
-        <div className={styles.drawingContainer}>
+        <div className={styles.drawingCanvasContainer}>
             <div className={styles.toolbar}>
                 {/* 브러시 굵기 프리셋 */}
                 <div className={styles.widthPresets}>
@@ -254,18 +290,9 @@ export default function DrawingCanvas({ onSave, onClose, backgroundImage }: Draw
                         height={`${canvasHeight}px`}
                         strokeWidth={strokeWidth}
                         strokeColor={getStrokeColor()}
-                        eraserWidth={brushType === 'eraser' ? strokeWidth : 0}
-                        style={{
-                            border: '1px solid #000',
-                            opacity: 1,
-                            pointerEvents: isMovingMode ? 'none' : 'auto', // 이동 모드일 때 그리기 비활성화
-                        }}
                         backgroundImage={backgroundImage}
-                        preserveBackgroundImageAspectRatio="none"
-                        allowOnlyPointerType="all"
-                        canvasColor="transparent"
                         exportWithBackgroundImage={true}
-                        withTimestamp={false}
+                        canvasColor="transparent"
                     />
                 </div>
             </div>

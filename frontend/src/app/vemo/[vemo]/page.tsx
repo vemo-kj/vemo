@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
+import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -58,14 +59,12 @@ export default function VemoPage() {
     const [memosId, setMemosId] = useState<number | null>(null);
 
     //  capture status tracking
-    const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
-    const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
     const [isPlayerReady, setIsPlayerReady] = useState(false);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
 
     // videoId 값 확인
     console.log('page.tsx videoId:', videoId);
-
-
     // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     // fetchVemoData 함수를 먼저 선언
     const fetchVemoData = useCallback(async () => {
@@ -344,6 +343,60 @@ export default function VemoPage() {
         }
     }, [videoId, fetchVemoData]);
 
+    // 그리기 저장 핸들러
+    const handleDrawingSave = async (editedImageUrl: string) => {
+        // 1) 부모 state 업데이트 (그림 모드 off, 이미지 null)
+        setIsDrawingMode(false);
+        setCapturedImage(null);
+
+        // 2) 백엔드로 최종 합성 이미지를 저장
+        try {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                alert('로그인이 필요한 서비스입니다.');
+                router.push('/login');
+                return;
+            }
+
+            if (!memosId) {
+                console.error('memosId가 없습니다. 메모를 먼저 생성하세요.');
+                return;
+            }
+
+            // [수정됨] POST /captures 엔드포인트에 전송
+            // timestamp, memosId, image(base64)를 body로 넘김
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    memosId,
+                    timestamp: currentTimestamp,
+                    image: editedImageUrl, // base64
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error('이미지 저장에 실패했습니다.');
+            }
+
+            console.log('이미지 저장 완료');
+            // 저장 후 갱신(원한다면 memos 데이터 재조회)
+            fetchVemoData();
+        } catch (error) {
+            console.error('이미지 저장 중 오류:', error);
+        }
+    };
+
+    // 그리기 취소 핸들러
+    const handleDrawingClose = () => {
+        setIsDrawingMode(false);
+        setCapturedImage(null);
+    };
+
     if (error) {
         return (
             <div className={styles.errorContainer}>
@@ -404,6 +457,15 @@ export default function VemoPage() {
                     memosId={memosId}
                 />
             </div>
+
+            {/* DrawingCanvas 조건부 렌더링 */}
+            {isDrawingMode && capturedImage && (
+                <DrawingCanvas
+                    backgroundImage={capturedImage}
+                    onSave={handleDrawingSave}
+                    onClose={handleDrawingClose}
+                />
+            )}
         </div>
     );
 }
