@@ -46,15 +46,35 @@ const MemoItem = memo(
         };
 
         // 그리기 저장 핸들러
-        const handleSaveDrawing = (dataUrl: string) => {
-            const imgElem = document.getElementById(`capture-${id}`) as HTMLImageElement;
-            if (imgElem) {
-                imgElem.src = dataUrl;
-                imgElem.style.width = '100%';
-                imgElem.style.height = '100%';
-                imgElem.style.objectFit = 'cover';
+        const handleSaveDrawing = async (editedImageData: string) => {
+            try {
+                const token = sessionStorage.getItem('token');
+                if (!token) throw new Error('No token found');
+
+                const captureId = id.split('-')[1]; // 'capture-123' -> '123'
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: Number(captureId),
+                        image: editedImageData
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to update capture');
+
+                // 이미지 엘리먼트 업데이트
+                const imgElem = document.getElementById(`capture-${id}`) as HTMLImageElement;
+                if (imgElem) {
+                    imgElem.src = editedImageData;
+                }
+            } catch (error) {
+                console.error('Failed to save edited image:', error);
             }
-            setIsDrawingOpen(false);
+            setIsDrawingMode(false);
         };
 
         // ====== (2) 텍스트 편집 ======
@@ -162,6 +182,15 @@ const MemoItem = memo(
                 });
             }
         }, [id]);
+
+        const [isDrawingMode, setIsDrawingMode] = useState(false);
+
+        const handleEditImage = () => {
+            setIsDrawingMode(true);
+            if (onPauseVideo) {
+                onPauseVideo();
+            }
+        };
 
         return (
             <div className={styles.memoItemContainer}>
@@ -272,6 +301,14 @@ const MemoItem = memo(
                             />
                         </div>
                     </div>
+                )}
+
+                {isDrawingMode && (
+                    <DrawingCanvas
+                        backgroundImage={screenshot || ''}
+                        onSave={handleSaveDrawing}
+                        onClose={() => setIsDrawingMode(false)}
+                    />
                 )}
             </div>
         );
