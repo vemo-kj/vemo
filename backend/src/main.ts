@@ -38,7 +38,6 @@ async function bootstrap() {
 
     app.useGlobalGuards(new JwtAuthGuard(new Reflector()));
 
-    // HTTP 요청 크기 제한 설정 추가
     app.use(bodyParser.json({ limit: '50mb' }));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
