@@ -66,8 +66,6 @@ export default function SidebarNav({
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
 
-    // 토큰 가져오기
-    const token = sessionStorage.getItem('token');
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
 
