@@ -154,6 +154,16 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         }
     };
 
+    const handleEditClick = () => {
+        if (!memo || !memo.video || !memo.video.id) {
+            console.error('메모 데이터가 올바르지 않습니다.');
+            return;
+        }
+
+        // mode=edit 파라미터 추가
+        window.location.href = `/vemo/${memo.video.id}?memosId=${memo.id}&mode=edit`;
+    };
+
     if (!memo) {
         return (
             <div className={styles.detailView}>
@@ -200,7 +210,10 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                     </button>
                 ) : (
                     <div className={styles.buttonGroup}>
-                        <button className={styles.editButton} onClick={() => { }}>
+                        <button
+                            className={styles.editButton}
+                            onClick={handleEditClick}
+                        >
                             작성하기
                         </button>
                         <button
