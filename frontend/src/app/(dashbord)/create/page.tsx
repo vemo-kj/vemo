@@ -17,7 +17,7 @@ export default function CreatePage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token');
         if (!token) {
             alert('로그인이 필요합니다.');
             router.push('/login');
@@ -64,7 +64,7 @@ export default function CreatePage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
                 body: JSON.stringify(data),
             });
@@ -84,7 +84,7 @@ export default function CreatePage() {
                 const errorData = await response.json();
                 if (response.status === 401) {
                     alert('로그인이 만료되었습니다. 다시 로그인하세요.');
-                    sessionStorage.removeItem('token');
+                    localStorage.removeItem('token');
                     router.push('/login');
                 } else {
                     alert(`저장 실패: ${errorData.message}`);

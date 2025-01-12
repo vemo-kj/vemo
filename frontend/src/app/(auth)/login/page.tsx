@@ -46,7 +46,7 @@ export default function LoginPage() {
             }
 
             // 토큰 저장
-            sessionStorage.setItem('token', data.access_token);
+            localStorage.setItem('token', data.access_token);
 
             router.push('/');
         } catch (err) {

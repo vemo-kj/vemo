@@ -63,7 +63,7 @@ export default function VemoPage() {
     // fetchVemoData 함수를 먼저 선언
     const fetchVemoData = useCallback(async () => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 setError('로그인이 필요한 서비스입니다.');
@@ -85,7 +85,7 @@ export default function VemoPage() {
                             Authorization: `Bearer ${token}`,
                         },
                         credentials: 'include',
-                    }
+                    },
                 );
 
                 if (!memosResponse.ok) {
@@ -115,7 +115,7 @@ export default function VemoPage() {
                         'Content-Type': 'application/json',
                     },
                     credentials: 'include',
-                }
+                },
             );
 
             if (!response.ok) {

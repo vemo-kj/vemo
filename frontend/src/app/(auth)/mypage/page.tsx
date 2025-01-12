@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import Header from '../../components/Layout/Header';
-import MyCard from './components/mycard/MyCard';
 import MyCardHeader from '../mypage/components/myCardHeader/MyCardHeader';
+import MyCard from './components/mycard/MyCard';
 import MyProfile from './components/myProfile/myProfile';
 import styles from './MyPage.module.css';
-import Image from 'next/image';
 
 interface PlaylistResponse {
     id: number;
@@ -29,7 +29,7 @@ export default function MyPage() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const accessToken = sessionStorage.getItem('token');
+                const accessToken = localStorage.getItem('token');
                 if (!accessToken) {
                     setError('로그인이 필요합니다.');
                     return;
