@@ -6,9 +6,10 @@ import { ConfigModule } from '@nestjs/config';
 import { Quiz } from './entity/quiz.entity';
 import { Quizzes } from './entity/quizzes.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Quiz, Quizzes]), ConfigModule, SubtitlesModule],
+    imports: [HttpModule, TypeOrmModule.forFeature([Quiz, Quizzes]), ConfigModule, SubtitlesModule],
     providers: [QuizService],
     controllers: [QuizController],
 })

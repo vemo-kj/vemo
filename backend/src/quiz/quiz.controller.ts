@@ -14,14 +14,18 @@ export class QuizController {
     @Post()
     async quizVideo(@Body() body: { videoId: string }) {
         const { videoId } = body;
+
         if (!videoId) {
             throw new Error('Video ID is required');
         }
-
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        // const url = `https://www.youtube.com/watch?v=${videoId}`;
         try {
-            const subtitles = await this.subtitlesService.getVideoSubtitles(url);
-            return this.quizService.extractQuiz(subtitles, videoId);
+            const data = await this.quizService.fetchData(videoId);
+
+            // console.log('✨', JSON.stringify(data, null, 2));
+
+            // const subtitles = await this.subtitlesService.getVideoSubtitles(url);
+            return this.quizService.extractQuiz(data, videoId);
         } catch (error) {
             console.error('Error generating quiz:', error);
             throw new Error('Failed to generate quiz');
