@@ -8,9 +8,7 @@ import {
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
-import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
 import styles from './editor.module.css';
-import MemoItem from './MemoItem';
 
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import { useSummary } from '../../context/SummaryContext';
@@ -144,7 +142,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: props.getTimestamp(),
                     image: processedImage,
                     memosId: props.memosId
-                    memosId: props.memosId
                     
                 };
 
@@ -187,17 +184,13 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
                 const captureData = await captureResponse.json();
                 console.log('[Capture Event] Capture saved:', captureData);
-                console.log('[Capture Event] Capture saved:', captureData);
-                console.log('[Capture Event] Capture saved:', captureData);
-                console.log('[Capture Event] Capture saved:', captureData);
+
 
                 const newSection: Section = {
                     id: `capture-${captureData.id}`,
                     timestamp: timestamp,
                     htmlContent: '',
                     screenshot: captureData.image
-                    screenshot: captureData.image
-                    
                 };
 
                 setSections(prev =>
