@@ -1,5 +1,7 @@
 'use client';
 
+import { CreateMemosResponseDto } from '@/app/types/vemo.types';
+import Image from 'next/image';
 import React, { useState } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
@@ -8,8 +10,6 @@ import QuizView from '../quizView/QuizView';
 import SummaryButton from '../summaryButton/SummaryButton';
 import SummaryView from '../summaryView/SummaryView';
 import styles from './sideBarNav.module.css';
-import { CreateMemosResponseDto } from '@/app/types/vemo.types';
-import Image from 'next/image';
 
 export interface SideBarNavProps {
     selectedOption: string;
