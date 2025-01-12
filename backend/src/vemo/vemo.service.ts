@@ -76,6 +76,12 @@ export class VemoService {
         return await this.playlistService.createPlaylist(createPlaylistDto, userId);
     }
 
+    /**
+     * 커뮤니티 메모 퍼가기
+     * @param memosId
+     * @param userId
+     * @returns Memos
+     */
     async scrapCommunityMemos(memosId: number, userId: number): Promise<Memos> {
         // 1. 기존 메모와 사용자 조회
         const memos = await this.memosService.getMemosById(memosId);
