@@ -7,6 +7,8 @@ import { Summary } from './entity/summarization.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Summaries } from './entity/summaries.entity';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class SummarizationService {
@@ -20,10 +22,30 @@ export class SummarizationService {
         private summaryRepository: Repository<Summary>,
 
         private configService: ConfigService,
+        private readonly httpService: HttpService,
     ) {
         this.openai = new OpenAI({
             apiKey: this.configService.get<string>('OPENAI_API_KEY'),
         });
+    }
+
+    async fetchData(videoId: string): Promise<any> {
+        const url = `http://3.36.51.121:5050/subtitles?url=https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+        try {
+            const response = await firstValueFrom(
+                this.httpService.get(url, {
+                    headers: {
+                        'User-Agent': 'curl/7.68.0', // curl과 동일한 User-Agent 설정
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                }),
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching data:', error.message, error.response?.data);
+            throw new Error('Failed to fetch data from API');
+        }
     }
 
     // 요약본 추출 함수
@@ -31,7 +53,8 @@ export class SummarizationService {
     // videoid가 존재하지 않으면, DB에 저장
     async extractSummary(subtitles: SubtitleDto[], videoid: string): Promise<SummaryResultDto[]> {
         if (await this.findSummary(videoid)) {
-            return this.getSummary(videoid);
+            const quiz = await this.getSummary(videoid); // `await`으로 결과를 가져옴
+            return quiz;
         } else {
             const formattedText = this.formatSubtitles(subtitles);
             const response = await this.openai.chat.completions.create({
@@ -132,13 +155,20 @@ export class SummarizationService {
         if (!existingSummaries) return [];
 
         return existingSummaries.summaries.map(summary => {
-            const date = new Date(summary.timestamp);
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
+            // `quiz.timestamp`이 Date 객체라면 문자열로 변환
+            const timestampString =
+                summary.timestamp instanceof Date
+                    ? summary.timestamp.toISOString().slice(11, 19) // "HH:mm:ss" 형식
+                    : summary.timestamp; // 이미 문자열인 경우 그대로 사용
+
+            // "HH:mm:ss"에서 분:초만 추출
+            const timestampParts = timestampString.split(':');
+            const minutes = timestampParts[1]; // "00"
+            const seconds = timestampParts[2]; // "03"
 
             return {
                 ...summary,
-                timestamp: `${minutes}:${seconds}`,
+                timestamp: `${minutes}:${seconds}`, // "00:03"
             };
         });
     }

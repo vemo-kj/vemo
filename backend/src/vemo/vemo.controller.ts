@@ -1,12 +1,13 @@
-import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { VemoService } from './vemo.service';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 import { RequestWithUserInterface } from '../auth/interface/request-with-user.interface';
 import { Playlist } from '../playlist/entities/playlist.entity';
+import { Memos } from '../memos/memos.entity';
 
 @Controller('vemo')
 export class VemoController {
-    constructor(private readonly vemoService: VemoService) { }
+    constructor(private readonly vemoService: VemoService) {}
 
     /**
      * 커뮤니티 메모를 조회
@@ -16,13 +17,26 @@ export class VemoController {
      * @returns GetCommunityMemosResponseDto
      */
     @Get('video/:videoId/community')
-    async getCommunityMemos(
+    async getCommunityMemosByVideo(
         @Param('videoId') videoId: string,
         @Query('filter') filter: 'all' | 'mine' = 'all',
         @Req() req: RequestWithUserInterface,
     ): Promise<GetCommunityMemosResponseDto> {
         const userId = filter === 'mine' ? req.user.id : null;
         return await this.vemoService.getCommunityMemos(videoId, filter, userId);
+    }
+
+    /**
+     * @param memosId
+     * @param req
+     * @returns Memos
+     */
+    @Post(':memosId')
+    async scrapCommunityMemos(
+        @Param('memosId') memosId: number,
+        @Req() req: RequestWithUserInterface,
+    ): Promise<Memos> {
+        return this.vemoService.scrapCommunityMemos(memosId, req.user.id);
     }
 
     /**
