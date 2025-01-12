@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styles from './Community.module.css';
+import { useRouter } from 'next/navigation';
 
 interface Memos {
     id: number;
@@ -75,6 +76,9 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
 }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     const handleDeleteClick = () => {
         setIsDeleteModalOpen(true);
@@ -95,6 +99,61 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         }
     };
 
+    const handleShareConfirm = async () => {
+        try {
+            setIsLoading(true);
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+                throw new Error('인증 토큰이 없습니다.');
+            }
+
+            // memo 객체 검증
+            if (!memo || !memo.id || !memo.video || !memo.video.id) {
+                console.error('메모 데이터 구조:', memo);
+                throw new Error('잘못된 메모 데이터입니다.');
+            }
+
+            console.log('퍼가기 요청 전 memo:', memo);
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/vemo/${memo.id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                }
+            );
+
+            const responseData = await response.json();
+            console.log('서버 응답:', responseData);
+
+            if (!response.ok) {
+                throw new Error(responseData.message || '메모 복사에 실패했습니다.');
+            }
+
+            if (!responseData || !responseData.id) {
+                console.error('응답 데이터 구조:', responseData);
+                throw new Error('서버 응답 데이터가 올바르지 않습니다.');
+            }
+
+            // 새로운 URL 생성 및 이동
+            const newUrl = `/vemo/${memo.video.id}?memosId=${responseData.id}`;
+            console.log('이동할 URL:', newUrl);
+            window.location.href = newUrl;
+
+        } catch (error) {
+            console.error('메모 복사 실패:', error);
+            setError(error instanceof Error ? error.message : '메모 복사에 실패했습니다.');
+        } finally {
+            setIsLoading(false);
+            setIsShareModalOpen(false);
+        }
+    };
+
     if (!memo) {
         return (
             <div className={styles.detailView}>
@@ -108,13 +167,13 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         );
     }
 
-    // 메모와 캡처 데이터를 시간 기준으로 역순 정렬
+    // 메모와 캡처 데이터를 시간 기준으로 정순 정렬
     const sortedMemos = memo.memo?.slice().sort((a, b) => {
         const timeA = a.timestamp.split(':').map(Number);
         const timeB = b.timestamp.split(':').map(Number);
         const secondsA = timeA[0] * 60 + timeA[1];
         const secondsB = timeB[0] * 60 + timeB[1];
-        return secondsB - secondsA;  // 역순 정렬
+        return secondsA - secondsB;  // 정순 정렬
     });
 
     const sortedCaptures = memo.captures?.slice().sort((a, b) => {
@@ -122,7 +181,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         const timeB = b.timestamp.split(':').map(Number);
         const secondsA = timeA[0] * 60 + timeA[1];
         const secondsB = timeB[0] * 60 + timeB[1];
-        return secondsB - secondsA;  // 역순 정렬
+        return secondsA - secondsB;  // 정순 정렬
     });
 
     return (
@@ -132,8 +191,12 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                     뒤로가기
                 </button>
                 {viewMode === 'all' ? (
-                    <button className={styles.shareButton} onClick={handleShareClick}>
-                        퍼가기
+                    <button
+                        className={styles.shareButton}
+                        onClick={handleShareClick}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? '처리중...' : '퍼가기'}
                     </button>
                 ) : (
                     <div className={styles.buttonGroup}>
@@ -143,12 +206,14 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                         <button
                             className={styles.deleteButton}
                             onClick={handleDeleteClick}
+                            disabled={isLoading}
                         >
                             삭제
                         </button>
                     </div>
                 )}
             </div>
+            {error && <div className={styles.error}>{error}</div>}
             <div className={styles.detailContent}>
                 <h3 className={styles.detailTitle}>{memo.title}</h3>
                 <div className={styles.detailInfo}>
@@ -204,10 +269,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
             <ConfirmModal
                 isOpen={isShareModalOpen}
                 message="해당 메모를 기반으로 작성을 시작하시겠습니까?"
-                onConfirm={() => {
-                    setIsShareModalOpen(false);
-                    // 퍼가기 로직 구현 예정
-                }}
+                onConfirm={handleShareConfirm}
                 onCancel={() => setIsShareModalOpen(false)}
             />
         </div>
@@ -220,6 +282,7 @@ export default function Community() {
     const [selectedCard, setSelectedCard] = useState<DetailedMemos | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     const getVideoIdFromURL = () => {
         try {
@@ -308,6 +371,12 @@ export default function Community() {
                 throw new Error('인증 토큰이 없습니다.');
             }
 
+            // 현재 비디오 ID 가져오기
+            const videoId = getVideoIdFromURL();
+            if (!videoId) {
+                throw new Error('비디오 ID를 찾을 수 없습니다.');
+            }
+
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memo.id}`,
                 {
@@ -321,15 +390,25 @@ export default function Community() {
             );
 
             const data = await response.json();
+            console.log('받은 상세 데이터:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || '메모 상세 정보를 불러오는데 실패했습니다.');
             }
 
-            // 데이터 형식 검증
-            console.log('받은 상세 데이터:', data);
+            // video 정보 추가
+            const enrichedData = {
+                ...data,
+                video: {
+                    id: videoId,
+                    title: '',  // 필요한 경우 비디오 정보 API로 가져오기
+                    channel: {
+                        name: ''
+                    }
+                }
+            };
 
-            setSelectedCard(data);
+            setSelectedCard(enrichedData);
         } catch (error) {
             console.error('메모 상세 조회 실패:', error);
             setError(error instanceof Error ? error.message : '메모를 불러오는데 실패했습니다.');
