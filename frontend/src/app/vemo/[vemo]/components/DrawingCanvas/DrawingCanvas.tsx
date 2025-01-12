@@ -6,8 +6,11 @@ import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴
 
 // 브러시 타입 정의
 type BrushType = 'pen' | 'highlighter' | 'eraser';
+type BrushType = 'pen' | 'highlighter' | 'eraser';
 
 interface DrawingCanvasProps {
+    backgroundImage: string;       // 배경(캡처) 이미지 (URL, base64, data:image/... 상관없음)
+    captureId?: string;           // 수정할 캡처 ID
     backgroundImage: string;       // 배경(캡처) 이미지 (URL, base64, data:image/... 상관없음)
     captureId?: string;           // 수정할 캡처 ID
     onSave: (editedImageUrl: string, captureId?: string) => void;
@@ -25,10 +28,14 @@ export default function DrawingCanvas({
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
     // 드로잉(펜/형광펜/지우개) 관련 상태
+
+    // 드로잉(펜/형광펜/지우개) 관련 상태
     const [strokeColor, setStrokeColor] = useState('#000000');
     const [strokeWidth, setStrokeWidth] = useState(3);
     const [brushType, setBrushType] = useState<BrushType>('pen');
     const [opacity, setOpacity] = useState(1);
+
+    // 이동/확대 관련 상태
 
     // 이동/확대 관련 상태
     const [scale, setScale] = useState(1);
@@ -37,6 +44,7 @@ export default function DrawingCanvas({
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [isMovingMode, setIsMovingMode] = useState(false);
 
+    // 캔버스 크기
     // 캔버스 크기
     const canvasWidth = 1280;
     const canvasHeight = 720;
