@@ -47,6 +47,41 @@ export default function VemoPage() {
                 return;
             }
 
+            // URL에서 memosId와 mode 파라미터 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const existingMemosId = urlParams.get('memosId');
+            const mode = urlParams.get('mode');
+
+            // 기존 메모 수정 모드인 경우 getOrCreate 호출하지 않고 직접 메모 조회
+            if (existingMemosId && mode === 'edit') {
+                const memosResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${existingMemosId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        credentials: 'include',
+                    }
+                );
+
+                if (!memosResponse.ok) {
+                    throw new Error('메모를 불러오는데 실패했습니다.');
+                }
+
+                const memosData = await memosResponse.json();
+                // 타입 변환하여 저장
+                setVemoData({
+                    id: Number(existingMemosId),
+                    title: memosData.title || '',
+                    createdAt: memosData.createdAt || new Date(),
+                    memo: memosData.memo || [],
+                    captures: memosData.captures || [],
+                });
+                setMemosId(Number(existingMemosId));
+                return;
+            }
+
+            // 일반적인 경우 getOrCreate 호출 (퍼가기 등)
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
                 {
@@ -56,7 +91,7 @@ export default function VemoPage() {
                         'Content-Type': 'application/json',
                     },
                     credentials: 'include',
-                },
+                }
             );
 
             // 응답 타입 확인
