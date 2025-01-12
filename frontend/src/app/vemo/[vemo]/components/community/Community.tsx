@@ -301,52 +301,31 @@ export default function Community() {
         try {
             setIsLoading(true);
             const token = sessionStorage.getItem('token');
-            if (!token) {
-                setError('로그인이 필요합니다.');
-                return;
-            }
-
             const videoId = getVideoIdFromURL();
-            if (!videoId) {
-                setError('비디오 ID를 찾을 수 없습니다.');
-                return;
+
+            if (!token || !videoId) {
+                throw new Error('필요한 정보가 없습니다.');
             }
 
-            console.log('요청 정보:', {
-                videoId,
-                filter,
-                token: token.substring(0, 10) + '...',
-            });
-
-            // filter 파라미터를 명시적으로 추가
-            const apiUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/vemo/video/${videoId}/community?filter=${filter}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_BASE_URL}/vemo/video/${videoId}/community?filter=${filter}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    credentials: 'include',
+                }
+            );
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '데이터 요청 실패');
+                throw new Error('메모 목록을 불러오는데 실패했습니다.');
             }
 
-            const responseData = await response.json();
-            console.log('서버 응답:', responseData);
-
-            // 백엔드 응답 구조에 맞게 데이터 설정
-            if (responseData && responseData.memos) {
-                setMemos(responseData.memos);
-            } else {
-                setMemos([]);
-            }
-            setError(null);
+            const data: CommunityResponse = await response.json();
+            setMemos(data.memos);
         } catch (error) {
-            console.error('데이터 요청 실패:', error);
-            setError(error instanceof Error ? error.message : '데이터를 불러오는데 실패했습니다.');
+            console.error('메모 목록 조회 실패:', error);
+            setError(error instanceof Error ? error.message : '메모 목록을 불러오는데 실패했습니다.');
         } finally {
             setIsLoading(false);
         }
