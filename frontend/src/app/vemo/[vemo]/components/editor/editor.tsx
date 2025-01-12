@@ -138,14 +138,14 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: props.getTimestamp(),
                     memosId: props.memosId,
                     imageDataLength: processedImage.length
-                    imageDataLength: processedImage.length
+                    
                 });
 
                 const requestBody = {
                     timestamp: props.getTimestamp(),
                     image: processedImage,
                     memosId: props.memosId
-                    memosId: props.memosId
+                    
                 };
 
                 // 요청 데이터 검증
@@ -181,7 +181,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     console.error('[Capture Event] Server response:', {
                         status: captureResponse.status,
                         body: errorText
-                        body: errorText
+                        
                     });
                     throw new Error(`Failed to save capture: ${captureResponse.status} ${errorText}`);
                     throw new Error(`Failed to save capture: ${captureResponse.status} ${errorText}`);
@@ -197,7 +197,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: timestamp,
                     htmlContent: '',
                     screenshot: captureData.image
-                    screenshot: captureData.image
+                    
                 };
 
                 setSections(prev =>
@@ -232,8 +232,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
         }
     }));
-    console.log('Editor.tsx의 memosId:', props.memosId);
-    console.log('Editor.tsx의 vemoData:', props.vemoData);
 
     useEffect(() => {
         const fetchMemos = async () => {
