@@ -101,6 +101,8 @@ export default function DrawingCanvas({
                 
                 // captureId와 함께 저장 처리를 위해 부모 컴포넌트로 전달
                 onSave(compressedImage, captureId);
+                console.log('captureId:', captureId);
+
                 console.log('2. 그리기 저장 완료');
             } catch (error) {
                 console.error('그리기 저장 중 오류:', error);

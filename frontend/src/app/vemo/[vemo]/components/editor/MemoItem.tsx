@@ -69,7 +69,8 @@ const MemoItem = memo(
                         image: editedImageData
                     })
                 });
-                console.log('isDrawingOpen 111111111111:', targetCaptureId);
+                console.log('response 1231312312312312312:', response);
+
                 if (!response.ok) throw new Error('Failed to update capture');
 
                 // 이미지 엘리먼트 업데이트
@@ -80,7 +81,6 @@ const MemoItem = memo(
             } catch (error) {
                 console.error('Failed to save edited image:', error);
             }
-            
         };
 
         // ====== (2) 텍스트 편집 ======
