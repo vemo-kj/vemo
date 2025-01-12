@@ -53,8 +53,8 @@ export class SummarizationService {
     // videoid가 존재하지 않으면, DB에 저장
     async extractSummary(subtitles: SubtitleDto[], videoid: string): Promise<SummaryResultDto[]> {
         if (await this.findSummary(videoid)) {
-            const quiz = await this.getSummary(videoid); // `await`으로 결과를 가져옴
-            return quiz;
+            const Summary = await this.getSummary(videoid); // `await`으로 결과를 가져옴
+            return Summary;
         } else {
             const formattedText = this.formatSubtitles(subtitles);
             const response = await this.openai.chat.completions.create({
@@ -65,10 +65,10 @@ export class SummarizationService {
                         content: `
                             당신은 자막을 분석해 **모든 주요 내용**을 타임스탬프와 함께 추출하는 전문가입니다.  
                             주어진 자막을 **순서대로 분석**하여 중요한 정보만 간결하게 정리해 주세요.  
-                            타임스탬프는 반드시 포함해야 합니다. 
+                            타임스탬프는 반드시 포함해야 하며, 형식은 [hh:mm] 형태로 작성하세요. 
                             ex) 다음은 표현 방식입니다.
                             [40:30] CSR의 동작 과정 설명: 초기 로딩은 느리지만 이후 빠른 구동 속도.
-                            `,
+                        `,
                     },
                     {
                         role: 'user',
@@ -84,9 +84,29 @@ export class SummarizationService {
             const result: SummaryResultDto[] = this.parseTimestampedText(
                 response.choices[0]?.message?.content,
             ).map(([timestamp, content]) => new SummaryResultDto(timestamp, content));
-            await this.createSummaries(videoid, result);
 
-            return result;
+            const MAX_RETRIES = 3; // 최대 재시도 횟수
+            let attempts = 0;
+
+            while (attempts < MAX_RETRIES) {
+                try {
+                    // DB에 데이터 저장 시도
+                    await this.createSummaries(videoid, result);
+                    console.log(`Successfully saved summaries after ${attempts + 1} attempt(s).`);
+                    break; // 저장 성공 시 루프 종료
+                } catch (error) {
+                    attempts++;
+                    console.error(`Attempt ${attempts} failed:`, error.message);
+
+                    if (attempts >= MAX_RETRIES) {
+                        console.error('Failed to save summaries after maximum retries.');
+                        throw new Error('Could not save summaries to the database.');
+                    }
+                }
+            }
+
+            const Summary = await this.getSummary(videoid);
+            return Summary;
         }
     }
     catch(error) {
@@ -100,7 +120,8 @@ export class SummarizationService {
 
     // 자막 텍스트에서 타임스탬프와 내용을 추출
     private parseTimestampedText(text: string): [string, string][] {
-        const regex = /\[(\d{1,2}:\d{2})\](.*?)\s*(?=\[\d{1,2}:\d{2}\]|$)/g;
+        const regex = /\[(\d{1,2}:\d{2})\]\s*([\s\S]*?)(?=\[\d{1,2}:\d{2}\]|$)/g;
+
         let matches;
         const result: [string, string][] = [];
         while ((matches = regex.exec(text)) !== null) {
