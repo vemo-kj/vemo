@@ -156,6 +156,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: props.getTimestamp(),
                     memosId: props.memosId,
                     imageDataLength: processedImage.length
+                    
                 });
 
                 const requestBody = {
@@ -216,6 +217,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     timestamp: timestamp,
                     htmlContent: '',
                     screenshot: captureData.image
+                    
                 };
 
                 setSections(prev =>
