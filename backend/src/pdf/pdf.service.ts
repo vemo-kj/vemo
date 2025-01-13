@@ -73,7 +73,7 @@ export class PdfService {
         summaries: any[],
     ): Promise<string> {
         // summaries 데이터 확인
-        console.log('💡 Summaries before processing:', summaries);
+        // console.log('💡 Summaries before processing:', summaries);
 
         const combined = [
             ...memos.map(memo => ({
@@ -100,7 +100,7 @@ export class PdfService {
         });
 
         console.log('💡 Combined data:', combined);
-        console.log('💡 About to call AIUtils.extractSummary with:', summaries);
+        // console.log('💡 About to call AIUtils.extractSummary with:', summaries);
 
         const result = await AIUtils.extractSummary(summaries);
         console.log('💡 Result from AIUtils.extractSummary:', result);
@@ -160,48 +160,48 @@ export class PdfService {
             <h2>${title}</h2>
             `;
 
-        for (const item of combined) {
-            console.log('💡item 출력 ', item);
-            // if (item.type === 'memo' && 'description' in item) {
-            //     htmlContent += `
-            //         <div class="memo">
-            //             <div class="timestamp">[${item.timestamp}]</div>
-            //             <div>${item.description}</div>
-            //         </div>`;
-            // } else if (item.type === 'capture' && 'image' in item) {
-            //     try {
-            //         let imageUrl = item.image;
-            //         if (!item.image.startsWith('data:image')) {
-            //             const response = await firstValueFrom(
-            //                 this.httpService.get(item.image, { responseType: 'arraybuffer' }),
-            //             );
-            //             const base64 = Buffer.from(response.data, 'binary').toString('base64');
-            //             imageUrl = `data:image/jpeg;base64,${base64}`;
-            //         }
+        // for (const item of combined) {
+        //     console.log('💡item 출력 ', item);
+        // if (item.type === 'memo' && 'description' in item) {
+        //     htmlContent += `
+        //         <div class="memo">
+        //             <div class="timestamp">[${item.timestamp}]</div>
+        //             <div>${item.description}</div>
+        //         </div>`;
+        // } else if (item.type === 'capture' && 'image' in item) {
+        //     try {
+        //         let imageUrl = item.image;
+        //         if (!item.image.startsWith('data:image')) {
+        //             const response = await firstValueFrom(
+        //                 this.httpService.get(item.image, { responseType: 'arraybuffer' }),
+        //             );
+        //             const base64 = Buffer.from(response.data, 'binary').toString('base64');
+        //             imageUrl = `data:image/jpeg;base64,${base64}`;
+        //         }
 
-            //         htmlContent += `
-            //             <div class="capture">
-            //                 <div class="timestamp">[${item.timestamp}]</div>
-            //                 <div class="image">
-            //                     <img src="${imageUrl}" alt="Captured Image" />
-            //                 </div>
-            //             </div>`;
-            //     } catch (error) {
-            //         console.error(`이미지 로드 실패: ${item.image}`, error);
-            //         htmlContent += `
-            //             <div class="capture">
-            //                 <div class="timestamp">[${item.timestamp}]</div>
-            //                 <div>이미지를 불러올 수 없습니다.</div>
-            //             </div>`;
-            //     }
-            // } else if (item.type === 'summaries' && 'summary' in item) {
-            //     htmlContent += `
-            //         <div class="summaries">
-            //             <div class="timestamp">[${item.timestamp}]</div>
-            //             <div>${item.summary}</div>
-            //         </div>`;
-            // }
-        }
+        //         htmlContent += `
+        //             <div class="capture">
+        //                 <div class="timestamp">[${item.timestamp}]</div>
+        //                 <div class="image">
+        //                     <img src="${imageUrl}" alt="Captured Image" />
+        //                 </div>
+        //             </div>`;
+        //     } catch (error) {
+        //         console.error(`이미지 로드 실패: ${item.image}`, error);
+        //         htmlContent += `
+        //             <div class="capture">
+        //                 <div class="timestamp">[${item.timestamp}]</div>
+        //                 <div>이미지를 불러올 수 없습니다.</div>
+        //             </div>`;
+        //     }
+        // } else if (item.type === 'summaries' && 'summary' in item) {
+        //     htmlContent += `
+        //         <div class="summaries">
+        //             <div class="timestamp">[${item.timestamp}]</div>
+        //             <div>${item.summary}</div>
+        //         </div>`;
+        // }
+        // }
 
         htmlContent += `</body></html>`;
         return htmlContent;
