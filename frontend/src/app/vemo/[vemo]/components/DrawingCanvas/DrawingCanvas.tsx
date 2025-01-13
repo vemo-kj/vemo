@@ -1,4 +1,7 @@
-// components/DrawingCanvas/DrawingCanvas.tsx
+// !!수정: crossOrigin 적용, backgroundImage URL인 경우에도 통합 이미지 생성 등
+// !!수정: drawImage 시 꽉 차게 그리도록 수정
+// !!수정: 저장 후 onRefetch() + window.location.reload()로 재랜더링 유도
+
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import styles from './DrawingCanvas.module.css';
 import { ReactSketchCanvasRef } from 'react-sketch-canvas';
@@ -6,36 +9,28 @@ import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴
 
 // 브러시 타입 정의
 type BrushType = 'pen' | 'highlighter' | 'eraser';
-type BrushType = 'pen' | 'highlighter' | 'eraser';
 
 interface DrawingCanvasProps {
-    backgroundImage: string;       // 배경(캡처) 이미지 (URL, base64, data:image/... 상관없음)
-    captureId?: string;           // 수정할 캡처 ID
-    backgroundImage: string;       // 배경(캡처) 이미지 (URL, base64, data:image/... 상관없음)
-    captureId?: string;           // 수정할 캡처 ID
+    backgroundImage: string; // 배경(캡처) 이미지 (URL, base64, data:image/... 상관없음)
+    captureId?: string; // 수정할 캡처 ID
     onSave: (editedImageUrl: string, captureId?: string) => void;
     onClose: () => void;
     onRefetch?: () => void;
 }
 
-export default function DrawingCanvas({ 
-    backgroundImage, 
+export default function DrawingCanvas({
+    backgroundImage,
     captureId,
-    onSave, 
+    onSave,
     onClose,
-    onRefetch
+    onRefetch,
 }: DrawingCanvasProps) {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
-    // 드로잉(펜/형광펜/지우개) 관련 상태
-
-    // 드로잉(펜/형광펜/지우개) 관련 상태
     const [strokeColor, setStrokeColor] = useState('#000000');
     const [strokeWidth, setStrokeWidth] = useState(3);
     const [brushType, setBrushType] = useState<BrushType>('pen');
     const [opacity, setOpacity] = useState(1);
-
-    // 이동/확대 관련 상태
 
     // 이동/확대 관련 상태
     const [scale, setScale] = useState(1);
@@ -44,19 +39,15 @@ export default function DrawingCanvas({
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [isMovingMode, setIsMovingMode] = useState(false);
 
-    // 캔버스 크기
-    // 캔버스 크기
     const canvasWidth = 1280;
     const canvasHeight = 720;
 
-    // 브러시 두께 프리셋
     const widthPresets = [
         { width: 2, icon: '•' },
         { width: 5, icon: '⚪' },
         { width: 10, icon: '⭕' },
     ];
 
-    // 색상 프리셋
     const colorPresets = [
         { color: '#000000', name: '검정' },
         { color: '#FFFFFF', name: '하양' },
@@ -66,20 +57,17 @@ export default function DrawingCanvas({
         { color: '#FFC107', name: '노랑' },
     ];
 
-    // 브러시 종류 (펜, 형광펜, 지우개)
     const brushPresets = [
         { type: 'pen', name: '펜', icon: '✏️', width: 3 },
-        { type: 'highlighter', name: '형광펜', icon: '🖍️', width: 15 },
+        { type: 'highlighter', name: '형광펜', icon: '🖍️', width: 30 },
         { type: 'eraser', name: '지우개', icon: '🧽', width: 20 },
     ];
 
-    // 현재 브러시 색상 얻기
     const getStrokeColor = () => {
         if (brushType === 'eraser') {
             return 'transparent';
         }
         if (brushType === 'highlighter') {
-            // RGBA 변환 (opacity 반영)
             const r = parseInt(strokeColor.slice(1, 3), 16);
             const g = parseInt(strokeColor.slice(3, 5), 16);
             const b = parseInt(strokeColor.slice(5, 7), 16);
@@ -88,38 +76,101 @@ export default function DrawingCanvas({
         return strokeColor;
     };
 
-    // 브러시 프리셋 적용
     const handleBrushChange = (preset: (typeof brushPresets)[0]) => {
         setBrushType(preset.type as BrushType);
         setStrokeWidth(preset.width);
 
         if (preset.type === 'eraser') {
-            // 지우개 모드
             canvasRef.current?.eraseMode(true);
             setStrokeColor('transparent');
         } else {
-            // 펜/형광펜
             canvasRef.current?.eraseMode(false);
             setStrokeColor('#000000');
             setOpacity(preset.type === 'highlighter' ? 0.5 : 1);
         }
     };
 
-    /**
-     * [핵심] 저장하기
-     *  - exportImage('png') 시, "배경이미지+드로잉"이 통합된 PNG(Base64)가 반환됨
-     */
     const handleSave = async () => {
         if (!canvasRef.current) return;
         try {
-            // 1) "배경 + 선" 합쳐진 이미지 → data:image/png;base64,xxx
+            console.log('[DrawingCanvas] Save Start', {
+                captureId,
+                hasBackgroundImage: !!backgroundImage,
+                backgroundImageType: typeof backgroundImage,
+                backgroundImageStart: backgroundImage?.substring(0, 50) + '...',
+            });
+
             const drawingDataUrl = await canvasRef.current.exportImage('png');
+            console.log('[DrawingCanvas] Drawing Data', {
+                hasDrawingData: !!drawingDataUrl,
+                drawingDataType: typeof drawingDataUrl,
+                drawingDataStart: drawingDataUrl?.substring(0, 50) + '...',
+            });
+
             if (!drawingDataUrl) {
                 throw new Error('No image data from canvasRef');
             }
 
-            // 2) data:image/png;base64, 접두어 제거 후 순수 Base64로
+            // !!수정: 어떤 형태든 (URL/base64) 배경 이미지를 합성하도록 변경
             let processedImage = drawingDataUrl;
+            const shouldMerge = !!backgroundImage; // 배경이 있다면 항상 합성 로직 수행
+
+            if (shouldMerge) {
+                console.log('[DrawingCanvas] Merging with background');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const backgroundImg = new Image();
+                const drawingImg = new Image();
+
+                // !!수정: CORS 방지 및 S3 이미지 로딩 가능하도록
+                backgroundImg.crossOrigin = 'anonymous'; 
+                drawingImg.crossOrigin = 'anonymous';
+
+                await new Promise((resolve, reject) => {
+                    backgroundImg.onload = () => {
+                        console.log('[DrawingCanvas] Background loaded', {
+                            width: backgroundImg.width,
+                            height: backgroundImg.height,
+                        });
+                        canvas.width = backgroundImg.width;
+                        canvas.height = backgroundImg.height;
+                        
+                        ctx?.drawImage(backgroundImg, 0, 0, backgroundImg.width, backgroundImg.height);
+
+                        drawingImg.onload = () => {
+                            console.log('[DrawingCanvas] Drawing loaded', {
+                                width: drawingImg.width,
+                                height: drawingImg.height,
+                            });
+                            // !!수정: 꽉 차게 그리도록 (배경 크기에 맞춰서)
+                            ctx?.drawImage(drawingImg, 0, 0, backgroundImg.width, backgroundImg.height);
+                            resolve(null);
+                        };
+                        drawingImg.onerror = (e) => {
+                            console.error('[DrawingCanvas] Drawing load error:', e);
+                            reject(e);
+                        };
+                        drawingImg.src = drawingDataUrl;
+                    };
+                    backgroundImg.onerror = (e) => {
+                        console.error('[DrawingCanvas] Background load error:', e);
+                        reject(e);
+                    };
+                    const processedBg = processedBackgroundImage();
+                    console.log('[DrawingCanvas] Processed background', {
+                        processedBgType: typeof processedBg,
+                        processedBgStart: processedBg.substring(0, 50) + '...',
+                    });
+                    backgroundImg.src = processedBg;
+                });
+
+                processedImage = canvas.toDataURL('image/png');
+                console.log('[DrawingCanvas] Merged image created', {
+                    processedImageType: typeof processedImage,
+                    processedImageStart: processedImage.substring(0, 50) + '...',
+                });
+            }
+
             if (!processedImage.startsWith('data:image/')) {
                 processedImage = `data:image/png;base64,${processedImage}`;
             }
@@ -128,63 +179,74 @@ export default function DrawingCanvas({
                 processedImage = base64Match[1];
             }
 
-            // 3) 서버에 PUT (updateCapture)
+            console.log('[DrawingCanvas] Final processed image', {
+                processedImageType: typeof processedImage,
+                processedImageLength: processedImage.length,
+                processedImageStart: processedImage.substring(0, 50) + '...',
+            });
+
             const token = localStorage.getItem('token');
             if (!token) {
-                console.error('토큰이 없습니다. 다시 로그인해주세요.');
-                return;
+                throw new Error('토큰이 없습니다. 다시 로그인해주세요.');
             }
 
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: Number(captureId),
-                        image: processedImage, 
-                    }),
-                }
-            );
+            console.log('[DrawingCanvas] Sending to server', {
+                captureId,
+                endpoint: `${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`,
+            });
+
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: Number(captureId),
+                    image: processedImage,
+                }),
+            });
 
             if (!res.ok) {
                 const errorText = await res.text();
+                console.error('[DrawingCanvas] Server error response:', errorText);
                 throw new Error(`Failed to update capture: ${res.status} ${errorText}`);
             }
 
-            // 4) 응답 (S3 URL? Base64?) 받으면, <img> src에 반영
             const data = await res.json();
-            const newImage = data.image || processedImage; 
-            console.log('[DrawingCanvas] update capture => ', newImage);
-
-            // 5) UI 업데이트 (메모 Item 내 이미지 엘리먼트)
+            console.log('[DrawingCanvas] Server response', {
+                hasImage: !!data.image,
+                responseDataType: typeof data.image,
+                responseDataStart: data.image?.substring(0, 50) + '...',
+            });
+            
             const imgElem = document.getElementById(`capture-${captureId}`) as HTMLImageElement;
-            if (imgElem && newImage) {
-                // S3 주소면 그대로
-                if (newImage.startsWith('http')) {
-                    imgElem.src = newImage;
-                } else {
-                    // base64면 다시 data:image 붙이기
-                    imgElem.src = `data:image/png;base64,${newImage}`;
-                }
+            if (imgElem) {
+                const newImage = data.image || processedImage;
+                const finalSrc = newImage.startsWith('http') 
+                    ? newImage 
+                    : `data:image/png;base64,${newImage}`;
+                console.log('[DrawingCanvas] Updating image element', {
+                    elementId: `capture-${captureId}`,
+                    finalSrcType: typeof finalSrc,
+                    finalSrcStart: finalSrc.substring(0, 50) + '...',
+                });
+                imgElem.src = finalSrc;
             }
 
-            // 닫기
             onClose();
-            onRefetch?.();
+            if (onRefetch) {
+                await onRefetch();
+                // !!수정: 저장 후 페이지 재랜더링
+                window.location.reload();
+            }
+
         } catch (err) {
             console.error('[DrawingCanvas] Save error:', err);
             alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
         }
-        onClose();
     };
 
-    /**
-     * 확대/축소
-     */
     const handleZoom = (type: 'in' | 'out') => {
         setScale(prev => {
             const newScale = type === 'in' ? prev * 1.2 : prev / 1.2;
@@ -192,9 +254,6 @@ export default function DrawingCanvas({
         });
     };
 
-    /**
-     * 이동(드래그)
-     */
     const handleMouseDown = (e: React.MouseEvent) => {
         if (isMovingMode && e.button === 0) {
             setIsDragging(true);
@@ -216,14 +275,11 @@ export default function DrawingCanvas({
         setIsDragging(false);
     };
 
-    /**
-     * 스페이스바로 이동 모드 on/off
-     */
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === 'Space') {
                 setIsMovingMode(true);
-                e.preventDefault(); 
+                e.preventDefault();
             }
         };
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -239,9 +295,6 @@ export default function DrawingCanvas({
         };
     }, []);
 
-    /**
-     * ESC로 모달 닫기
-     */
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -252,33 +305,34 @@ export default function DrawingCanvas({
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
-    /**
-     * 배경 이미지 전처리
-     *  - data:image/... 로 시작하면 그대로
-     *  - 순수 base64이면 접두어 붙이기
-     *  - http://...이면 그대로
-     */
     const processedBackgroundImage = useCallback(() => {
+        console.log('[DrawingCanvas] Processing background image:', {
+            originalImage: backgroundImage?.substring(0, 100),
+            type: typeof backgroundImage,
+            isDataUrl: backgroundImage?.startsWith('data:image/'),
+            isHttpUrl: backgroundImage?.startsWith('http'),
+        });
+
         if (!backgroundImage) return '';
-        
+
         if (backgroundImage.startsWith('data:image/')) {
             return backgroundImage;
         }
-        if (backgroundImage.match(/^[A-Za-z0-9+/=]+$/)) {
-            return `data:image/png;base64,${backgroundImage}`;
+
+        if (backgroundImage.startsWith('http://') || backgroundImage.startsWith('https://')) {
+            return backgroundImage;
         }
-        return backgroundImage;
+
+        const result = `data:image/png;base64,${backgroundImage}`;
+        console.log('[DrawingCanvas] Processed background result:', result.substring(0, 100));
+        return result;
     }, [backgroundImage]);
 
-    // ---------------- UI ----------------
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
                 <div className={styles.drawingCanvasContainer}>
-
-                    {/* 툴바 */}
                     <div className={styles.toolbar}>
-                        {/* 브러시 두께 */}
                         <div className={styles.widthPresets}>
                             {widthPresets.map((preset, index) => (
                                 <button
@@ -293,7 +347,6 @@ export default function DrawingCanvas({
                             ))}
                         </div>
 
-                        {/* 색상 */}
                         <div className={styles.colorPresets}>
                             {colorPresets.map((preset, index) => (
                                 <button
@@ -313,9 +366,8 @@ export default function DrawingCanvas({
                             />
                         </div>
 
-                        {/* 브러시 유형 */}
                         <div className={styles.brushPresets}>
-                            {brushPresets.map((preset) => (
+                            {brushPresets.map(preset => (
                                 <button
                                     key={preset.type}
                                     onClick={() => handleBrushChange(preset)}
@@ -328,7 +380,6 @@ export default function DrawingCanvas({
                             ))}
                         </div>
 
-                        {/* 형광펜 투명도 */}
                         {brushType === 'highlighter' && (
                             <div className={styles.opacity}>
                                 <input
@@ -342,7 +393,6 @@ export default function DrawingCanvas({
                             </div>
                         )}
 
-                        {/* 확대/축소 */}
                         <div className={styles.zoomControls}>
                             <button onClick={() => handleZoom('in')}>🔍+</button>
                             <button onClick={() => handleZoom('out')}>🔍-</button>
@@ -351,7 +401,6 @@ export default function DrawingCanvas({
                         </div>
                     </div>
 
-                    {/* 실제 Canvas 영역 - 중복된 첫 번째 canvasWrapper 제거 */}
                     <div
                         className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
                         onMouseDown={handleMouseDown}
@@ -367,6 +416,13 @@ export default function DrawingCanvas({
                                 cursor: isMovingMode ? 'grab' : 'default',
                             }}
                         >
+                            {console.log('[DrawingCanvas] Rendering canvas with props:', {
+                                width: `${canvasWidth}px`,
+                                height: `${canvasHeight}px`,
+                                exportWithBackgroundImage: true,
+                                backgroundImage: processedBackgroundImage()?.substring(0, 100),
+                                hasBackgroundImage: !!backgroundImage,
+                            })}
                             <DynamicReactSketchCanvas
                                 ref={canvasRef}
                                 width={`${canvasWidth}px`}
@@ -380,7 +436,6 @@ export default function DrawingCanvas({
                         </div>
                     </div>
 
-                    {/* 액션 버튼 */}
                     <div className={styles.actions}>
                         <button onClick={() => canvasRef.current?.undo()}>undo</button>
                         <button onClick={() => canvasRef.current?.redo()}>redo</button>
