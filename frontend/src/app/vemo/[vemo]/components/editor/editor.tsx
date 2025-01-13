@@ -91,13 +91,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
     const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
 <<<<<<< HEAD
-<<<<<<< HEAD
     const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
 =======
 >>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
-=======
-    const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
->>>>>>> dc93535 (메모 작성시 자동 스크롤 추가)
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
@@ -368,9 +364,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     };
 
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dc93535 (메모 작성시 자동 스크롤 추가)
     // 스크롤을 맨 아래로 이동시키는 함수
     const scrollToBottom = () => {
         if (displayAreaRef.current) {
@@ -378,11 +371,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
     };
 
-<<<<<<< HEAD
+
 =======
 >>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
-=======
->>>>>>> dc93535 (메모 작성시 자동 스크롤 추가)
     // handleSave 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
@@ -444,7 +435,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             setMemoStartTimestamp(null);
             props.onMemoSaved?.();
 
-<<<<<<< HEAD
+
 <<<<<<< HEAD
             // 저장 후 스크롤 이동
             setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
@@ -455,11 +446,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
 >>>>>>> 34fc229 (타임스탬프 생성 기준 엔터->입력창 입력시)
-=======
-            // 저장 후 스크롤 이동
-            setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
-
->>>>>>> dc93535 (메모 작성시 자동 스크롤 추가)
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
