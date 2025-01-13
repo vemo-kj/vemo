@@ -393,8 +393,7 @@ export default function VemoPage() {
             const currentTime = currentTimestamp;
             try {
 
->>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
-                const processedImage = processImageData(editedImageUrl);
+               const processedImage = processImageData(editedImageUrl);
                 if (!processedImage) {
                     throw new Error('Invalid image data');
                 }
