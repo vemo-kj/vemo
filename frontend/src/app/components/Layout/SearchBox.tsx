@@ -1,7 +1,6 @@
 'use client'
 // style
 import styles from './SearchBox.module.css'
-import Image from 'next/image'
 // next
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,7 +17,6 @@ export default function SearchBox() {
     } else {
       router.push(`/?q=${encodeURIComponent(trimmedQuery)}`);
     }
-    // setValue(''); // 검색 후 입력값 유지
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
