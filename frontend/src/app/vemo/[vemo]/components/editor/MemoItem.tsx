@@ -4,6 +4,7 @@ import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import ExtractButton from '../extractButton/ExtractButton';
 import styles from './editor.module.css';
 import DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify';
 
 interface MemoItemProps {
   id: string;
