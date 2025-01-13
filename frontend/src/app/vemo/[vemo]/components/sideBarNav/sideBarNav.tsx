@@ -2,7 +2,7 @@
 
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
 import PlayList from '../playList/PlayList';
@@ -65,6 +65,15 @@ export default function SidebarNav({
     memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
+
+    // vemoData가 변경될 때마다 editedTitle 업데이트
+    useEffect(() => {
+        if (vemoData?.title) {
+            setEditedTitle(vemoData.title);
+        }
+    }, [vemoData]);
 
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
@@ -81,6 +90,36 @@ export default function SidebarNav({
             console.log('handleWriteClick videoId:', videoId);
         } catch (error) {
             console.error('Failed to handle write click:', error);
+        }
+    };
+
+    const handleTitleSave = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token || !memosId) {
+                console.error('토큰 또는 memosId가 없습니다.');
+                return;
+            }
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memosId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: editedTitle }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error('제목 수정에 실패했습니다.');
+            }
+
+            setIsEditingTitle(false);
+        } catch (error) {
+            console.error('제목 수정 중 오류 발생:', error);
+            // 에러 발생 시 원래 제목으로 복원
+            setEditedTitle(vemoData?.title || '');
         }
     };
 
@@ -143,12 +182,31 @@ export default function SidebarNav({
                     <>
                         <div className={styles.headerContainer}>
                             <div className={styles.titleContainer}>
-                                {/* <p className={styles.notesSubHeader}>
-                                    자바 스크립트 스터디 재생목록
-                                </p> */}
-                                <h1 className={styles.notesHeaderText}>
-                                    {vemoData?.title || '제목 없음'}
-                                </h1>
+                                {isEditingTitle ? (
+                                    <input
+                                        type="text"
+                                        value={editedTitle}
+                                        onChange={(e) => setEditedTitle(e.target.value)}
+                                        onBlur={handleTitleSave}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleTitleSave();
+                                            }
+                                        }}
+                                        className={styles.titleInput}
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <h1
+                                        className={styles.notesHeaderText}
+                                        onClick={() => {
+                                            setIsEditingTitle(true);
+                                            setEditedTitle(vemoData?.title || '');
+                                        }}
+                                    >
+                                        {editedTitle || '제목 없음'}
+                                    </h1>
+                                )}
                             </div>
 
                             <div className={styles.dropdown}>
