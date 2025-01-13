@@ -675,7 +675,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
                         onMouseDown={e => {
-                            e.preventDefault();
+                            e.preventDefault();  // 이벤트 기본 동작 방지
                             toggleInlineStyle('BOLD');
                         }}
                     >
