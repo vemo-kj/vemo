@@ -12,13 +12,15 @@ interface DrawingCanvasProps {
     captureId?: string;           // 수정할 캡처 ID
     onSave: (editedImageUrl: string, captureId?: string) => void;
     onClose: () => void;
+    onRefetch?: () => void;
 }
 
 export default function DrawingCanvas({ 
     backgroundImage, 
     captureId,
     onSave, 
-    onClose 
+    onClose,
+    onRefetch
 }: DrawingCanvasProps) {
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
@@ -165,6 +167,7 @@ export default function DrawingCanvas({
 
             // 닫기
             onClose();
+            onRefetch?.();
         } catch (err) {
             console.error('[DrawingCanvas] Save error:', err);
             alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');

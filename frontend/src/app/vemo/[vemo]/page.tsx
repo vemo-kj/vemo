@@ -9,6 +9,7 @@ import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
+import MemoItem from './components/editor/MemoItem';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -456,6 +457,9 @@ export default function VemoPage() {
                 setIsDrawingMode(false);
                 setCapturedImage(null);
                 setEditingCaptureId(null);
+                
+                // 저장 후 데이터 리프레시
+                await fetchVemoData();
             } catch (error) {
                 console.error('Drawing save failed:', error);
             }
@@ -536,6 +540,7 @@ export default function VemoPage() {
                         setEditingCaptureId(null);
                         setEditingCaptureImage(null);
                     }}
+                    onRefetch={fetchVemoData}
                 />
             )}
         </div>
