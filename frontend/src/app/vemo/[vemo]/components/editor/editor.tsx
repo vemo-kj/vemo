@@ -219,6 +219,10 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (props.onMemoSaved) {
                     props.onMemoSaved();
                 }
+
+                // 캡처 추가 후 스크롤 이동
+                setTimeout(scrollToBottom, 100);
+
             } catch (error) {
                 console.error('[Capture Event] Error:', {
                     message: error instanceof Error ? error.message : 'Unknown error',
