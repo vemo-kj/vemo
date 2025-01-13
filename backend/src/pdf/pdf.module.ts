@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Summaries } from '../summarization/entity/summaries.entity';
 import { Summary } from '../summarization/entity/summarization.entity';
+import { AIUtils } from './pdf.utils';
 
 @Module({
     imports: [
@@ -20,6 +21,6 @@ import { Summary } from '../summarization/entity/summarization.entity';
         TypeOrmModule.forFeature([Summaries, Summary]),
     ],
     controllers: [PdfController],
-    providers: [PdfService],
+    providers: [AIUtils, PdfService],
 })
 export class PdfModule {}
