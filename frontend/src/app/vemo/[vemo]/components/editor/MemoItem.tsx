@@ -18,7 +18,6 @@ interface MemoItemProps {
   isEditable?: boolean;
   addTextToEditor?: (text: string) => void;
   onDrawingStart?: (captureId: string) => void;
-  onRefetch?: () => void;
 }
 
 // (수정) "URL / dataURL / base64"를 구분해서 최종 src를 만드는 헬퍼 함수
@@ -51,8 +50,7 @@ const MemoItem = memo((props: MemoItemProps) => {
     onPauseVideo,
     isEditable,
     addTextToEditor,
-    onDrawingStart,
-    onRefetch
+    onDrawingStart
   } = props;
 
   // ====== (1) 그리기 영역 ======
@@ -276,7 +274,6 @@ const MemoItem = memo((props: MemoItemProps) => {
           onSave={handleSaveDrawing}
           onClose={handleCloseDrawing}
           backgroundImage={getImageSrc(screenshot)}
-          onRefetch={onRefetch}
         />
       )}
     </div>
