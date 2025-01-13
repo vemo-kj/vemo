@@ -126,6 +126,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
+    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
@@ -356,6 +357,24 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         fetchMemos();
     }, [props.memosId]);
 
+    // 에디터 상태 변경 핸들러 추가
+    const handleEditorChange = (newState: EditorState) => {
+        const contentState = newState.getCurrentContent();
+        const prevContentState = editorState.getCurrentContent();
+
+        // 이전에 텍스트가 없었고, 현재 텍스트가 있는 경우 (새로운 입력 시작)
+        if (!prevContentState.hasText() && contentState.hasText()) {
+            setMemoStartTimestamp(props.getTimestamp());
+        }
+        // 이전에 텍스트가 있었고, 현재 텍스트가 없는 경우 (모든 텍스트 삭제)
+        else if (prevContentState.hasText() && !contentState.hasText()) {
+            setMemoStartTimestamp(null);
+        }
+
+        setEditorState(newState);
+    };
+
+    // handleSave 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
@@ -368,16 +387,11 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             }
 
             const html = convertToHTML(contentState);
-            const timestamp = props.getTimestamp();
-
-            // timestamp 형식 변환 추가
-            const [minutes, seconds] = timestamp.split(':').map(Number);
-            const date = new Date();
-            date.setMinutes(minutes);
-            date.setSeconds(seconds);
+            // 저장 시 메모 시작 시점의 타임스탬프 사용
+            const timestamp = memoStartTimestamp || props.getTimestamp();
 
             const requestData = {
-                timestamp: timestamp, // ISO 문자열로 변환
+                timestamp,
                 description: html,
                 memosId: Number(props.memosId),
             };
@@ -417,6 +431,11 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             };
 
             setSections(prev => [...prev, newItem]);
+            setEditorState(EditorState.createEmpty());
+            props.onMemoSaved?.();
+
+            // 저장 후 타임스탬프 초기화
+            setMemoStartTimestamp(null);
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
         } catch (error) {
@@ -567,10 +586,33 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     const handleKeyCommand = (command: string) => {
         if (command === 'split-block') {
-            handleSave();
-            return 'handled';
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 현재 블록의 텍스트가 있을 때만 저장 처리
+            if (currentBlock.getText().length > 0) {
+                handleSave();
+                return 'handled';
+            }
         }
         return 'not-handled';
+    };
+
+    // keyBindingFn 수정
+    const keyBindingFn = (e: React.KeyboardEvent<{}>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();  // 기본 Enter 동작 방지
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 텍스트가 있을 때만 'split-block' 커맨드 반환
+            if (currentBlock.getText().length > 0) {
+                return 'split-block';
+            }
+        }
+        return getDefaultKeyBinding(e);
     };
 
     // 메모카드 변경 감지
@@ -617,15 +659,10 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             <div className={styles.editorArea}>
                 <Editor
                     editorState={editorState}
-                    onChange={setEditorState}
+                    onChange={handleEditorChange}  // onChange 핸들러 변경
                     placeholder="내용을 입력하세요..."
                     handleKeyCommand={handleKeyCommand}
-                    keyBindingFn={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            return 'split-block';
-                        }
-                        return getDefaultKeyBinding(e);
-                    }}
+                    keyBindingFn={keyBindingFn}
                 />
                 <div className={styles.toolbar}>
                     <button
