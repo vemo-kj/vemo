@@ -105,7 +105,6 @@ export default function DrawingCanvas({
         if (!canvasRef.current) return;
         try {
             // 1) "배경 + 선" 합쳐진 이미지 → data:image/png;base64,xxx
-            //    (exportWithBackgroundImage={true}가 반드시 켜져 있어야 합쳐짐)
             const drawingDataUrl = await canvasRef.current.exportImage('png');
             if (!drawingDataUrl) {
                 throw new Error('No image data from canvasRef');

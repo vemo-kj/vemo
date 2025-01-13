@@ -9,7 +9,6 @@ import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
 import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
-import MemoItem from './components/editor/MemoItem';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -400,31 +399,15 @@ export default function VemoPage() {
                     throw new Error('Invalid image data');
                 }
                 
-<<<<<<< HEAD
+                
                 if (captureId) {
                     await editorRef.current.addCaptureItem(currentTime, processedImage, captureId);
                 } else {
                     await editorRef.current.addCaptureItem(currentTime, processedImage);
-=======
-=======
->>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
-                if (captureId) {
-                    await editorRef.current.addCaptureItem(currentTime, processedImage, captureId);
-                } else {
-<<<<<<< HEAD
-                    // 새 캡처 생성
-                    await editorRef.current.addCaptureItem(currentTime, editedImageUrl);
->>>>>>> b825c83 (fix: 그리기 배경 못불러오는 부분 & 저장 못하는 부분 수정)
-=======
-                    await editorRef.current.addCaptureItem(currentTime, processedImage);
->>>>>>> 29f9abc (feat: 그리기 이후 이미지 변경 구현)
                 }
                 setIsDrawingMode(false);
                 setCapturedImage(null);
                 setEditingCaptureId(null);
-                
-                // 저장 후 데이터 리프레시
-                await fetchVemoData();
             } catch (error) {
                 console.error('Drawing save failed:', error);
             }
@@ -505,7 +488,6 @@ export default function VemoPage() {
                         setEditingCaptureId(null);
                         setEditingCaptureImage(null);
                     }}
-                    onRefetch={fetchVemoData}
                 />
             )}
         </div>
