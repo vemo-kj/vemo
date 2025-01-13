@@ -1,25 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { HttpService } from '@nestjs/axios';
 import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
 import { firstValueFrom } from 'rxjs';
+import { S3 } from 'aws-sdk';
+import OpenAI from 'openai';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Summaries } from 'src/summarization/entity/summaries.entity';
+import { Summary } from 'src/summarization/entity/summarization.entity';
+import { Repository } from 'typeorm';
+import { Memos } from 'src/memos/memos.entity';
 
 @Injectable()
 export class PdfService {
-    constructor(private readonly httpService: HttpService) {}
+    private readonly openai: OpenAI;
 
+    constructor(
+        private readonly httpService: HttpService,
+        @Inject('S3') private readonly s3: S3,
+        private configService: ConfigService,
+
+        @InjectRepository(Summaries)
+        private summariesRepository: Repository<Summaries>,
+
+        @InjectRepository(Summary)
+        private summaryRepository: Repository<Summary>,
+
+        @InjectRepository(Memos)
+        private readonly memosRepository: Repository<Memos>,
+    ) {
+        this.openai = new OpenAI({
+            apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+        });
+    }
+
+    // PDF 생성
     async createMemoCapturePDF(
         title: string,
         memos: pdfMemoeDto[],
         capture: pdfCaptureDto[],
+        memosId: number,
     ): Promise<Buffer> {
         const browser = await puppeteer.launch({
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
         const page = await browser.newPage();
+        const videoId = await this.getVideoId(memosId);
+        const summaries = await this.getSummary(videoId);
+        const htmlContent = await this.generateHTML(title, memos, capture, summaries);
 
-        const htmlContent = await this.generateHTML(title, memos, capture);
         await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
         const pdfBuffer = Buffer.from(
@@ -33,16 +64,23 @@ export class PdfService {
         return pdfBuffer;
     }
 
+    // HTML 생성
     private async generateHTML(
         title: string,
         memos: pdfMemoeDto[],
         capture: pdfCaptureDto[],
+        summaries: any[],
     ): Promise<string> {
         const combined = [
             ...memos.map(memo => ({
                 ...memo,
                 type: 'memo',
                 timestamp: memo.timestamp,
+            })),
+            ...summaries.map(summary => ({
+                ...summary,
+                type: 'summaries',
+                timestamp: summary.timestamp,
             })),
             ...capture.map(capture => ({
                 ...capture,
@@ -56,6 +94,8 @@ export class PdfService {
             const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
             return secondsA - secondsB;
         });
+
+        console.log('💡combined 출력 ', combined);
 
         let htmlContent = `
             <!DOCTYPE html>
@@ -152,22 +192,39 @@ export class PdfService {
         return htmlContent;
     }
 
-    private async fetchBase64FromUrl(url: string): Promise<{ base64: string; mimeType?: string }> {
-        try {
-            if (url.startsWith('data:image')) {
-                const [header, base64] = url.split(',');
-                const mimeType = header.split(';')[0].split(':')[1];
-                return { base64, mimeType };
-            }
+    private async getVideoId(memosId: number): Promise<string> {
+        const memos = await this.memosRepository.findOne({
+            where: { id: memosId },
+            relations: ['video'],
+        });
+        return memos.video.id;
+    }
 
-            const response = await firstValueFrom(
-                this.httpService.get(url, { responseType: 'arraybuffer' }),
-            );
-            const base64 = Buffer.from(response.data, 'binary').toString('base64');
-            return { base64, mimeType: 'image/jpeg' };
-        } catch (error) {
-            console.error(`Base64 이미지 다운로드 실패: ${url}`);
-            return { base64: '' };
-        }
+    // summaries 테이블에서 videoid 가져오기
+    private async getSummary(videoid: string): Promise<any[]> {
+        const existingSummaries = await this.summariesRepository.findOne({
+            where: { videoid },
+            relations: ['summaries'],
+        });
+
+        if (!existingSummaries) return [];
+
+        return existingSummaries.summaries.map(summary => {
+            // `quiz.timestamp`이 Date 객체라면 문자열로 변환
+            const timestampString =
+                summary.timestamp instanceof Date
+                    ? summary.timestamp.toISOString().slice(11, 19) // "HH:mm:ss" 형식
+                    : summary.timestamp; // 이미 문자열인 경우 그대로 사용
+
+            // "HH:mm:ss"에서 분:초만 추출
+            const timestampParts = timestampString.split(':');
+            const minutes = timestampParts[1]; // "00"
+            const seconds = timestampParts[2]; // "03"
+
+            return {
+                ...summary,
+                timestamp: `${minutes}:${seconds}:00`, // "00:03:00"
+            };
+        });
     }
 }
