@@ -23,12 +23,13 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [showAnswers, setShowAnswers] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [showCheckButton, setShowCheckButton] = useState(false);
 
-  // 하드코딩된 비디오 ID로 퀴즈 데이터 가져오기
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const videoId = "4-JBG_AZtT0"; // 여기에 특정 비디오 ID 입력
+        const videoId = "4-JBG_AZtT0";
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/quiz`, {
           method: 'POST',
           headers: {
@@ -61,6 +62,15 @@ export default function QuizPage() {
         isCorrect: showAnswers ? answer === quizData[index].answer : undefined
       }
     }));
+
+    // 답을 선택하면 잠시 후 다음 문제로 넘어감
+    setTimeout(() => {
+      if (index === quizData.length - 1) {
+        setShowCheckButton(true);
+      } else {
+        setCurrentQuizIndex(prev => prev + 1);
+      }
+    }, 500);
   };
 
   const toggleShowAnswers = () => {
@@ -77,6 +87,8 @@ export default function QuizPage() {
           }
         });
         setAnswers(updatedAnswers);
+        // 모든 퀴즈 표시
+        setCurrentQuizIndex(quizData.length);
       }
       return newShowAnswers;
     });
@@ -109,41 +121,80 @@ export default function QuizPage() {
     <div className={styles.container}>
       <h2 className={styles.title}>이벤트 퀴즈</h2>
       <div className={styles.quizList}>
-        {quizData.map((quiz, index) => (
-          <div key={index} className={styles.quizItem}>
-            <div className={styles.question}>{quiz.question}</div>
+        {showAnswers ? (
+          // 정답 확인 시 모든 문제 표시
+          <div className={styles.answersGrid}>
+            {quizData.map((quiz, index) => (
+              <div
+                key={index}
+                className={`${styles.quizItem} ${styles.showAnswer}`}
+              >
+                <div className={styles.question}>{quiz.question}</div>
+                <div className={styles.answerButtons}>
+                  <button
+                    className={`${styles.answerButton} ${answers[index]?.selected === 'O' ? styles.selected : ''}`}
+                    disabled
+                  >
+                    O
+                  </button>
+                  <button
+                    className={`${styles.answerButton} ${answers[index]?.selected === 'X' ? styles.selected : ''}`}
+                    disabled
+                  >
+                    X
+                  </button>
+                </div>
+                {answers[index]?.selected && (
+                  <div className={`${styles.result} ${answers[index].isCorrect ? styles.correct : styles.incorrect}`}>
+                    {answers[index].isCorrect ? (
+                      <span>정답입니다! ✓</span>
+                    ) : (
+                      <span>오답입니다. 정답은 {quiz.answer}입니다 ✗</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          // 퀴즈 진행 중에는 현재 문제만 표시
+          <div className={`${styles.quizItem} ${styles.slideIn}`}>
+            <div className={styles.question}>{quizData[currentQuizIndex].question}</div>
             <div className={styles.answerButtons}>
               <button
-                className={`${styles.answerButton} ${answers[index]?.selected === 'O' ? styles.selected : ''}`}
-                onClick={() => handleAnswerSelect(index, 'O')}
+                className={`${styles.answerButton} ${answers[currentQuizIndex]?.selected === 'O' ? styles.selected : ''}`}
+                onClick={() => !answers[currentQuizIndex] && handleAnswerSelect(currentQuizIndex, 'O')}
+                disabled={!!answers[currentQuizIndex]}
               >
                 O
               </button>
               <button
-                className={`${styles.answerButton} ${answers[index]?.selected === 'X' ? styles.selected : ''}`}
-                onClick={() => handleAnswerSelect(index, 'X')}
+                className={`${styles.answerButton} ${answers[currentQuizIndex]?.selected === 'X' ? styles.selected : ''}`}
+                onClick={() => !answers[currentQuizIndex] && handleAnswerSelect(currentQuizIndex, 'X')}
+                disabled={!!answers[currentQuizIndex]}
               >
                 X
               </button>
             </div>
-            {showAnswers && answers[index]?.selected && (
-              <div className={`${styles.result} ${answers[index].isCorrect ? styles.correct : styles.incorrect}`}>
-                {answers[index].isCorrect ? (
-                  <span>정답입니다! ✓</span>
-                ) : (
-                  <span>오답입니다. 정답은 {quiz.answer}입니다 ✗</span>
-                )}
-              </div>
-            )}
           </div>
-        ))}
+        )}
       </div>
-      <button
-        className={styles.checkAnswerButton}
-        onClick={toggleShowAnswers}
-      >
-        {showAnswers ? '정답 숨기기' : '정답 확인하기'}
-      </button>
+      {showCheckButton && !showAnswers && (
+        <button
+          className={`${styles.checkAnswerButton} ${styles.fadeIn}`}
+          onClick={toggleShowAnswers}
+        >
+          정답 확인하기
+        </button>
+      )}
+      {showAnswers && (
+        <button
+          className={`${styles.checkAnswerButton} ${styles.fadeIn}`}
+          onClick={toggleShowAnswers}
+        >
+          다시 풀기
+        </button>
+      )}
     </div>
   );
 }
