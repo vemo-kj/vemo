@@ -1,3 +1,4 @@
+// page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -7,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
+import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -56,10 +58,17 @@ export default function VemoPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [memosId, setMemosId] = useState<number | null>(null);
-    const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
-    const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
-    const [isPlayerReady, setIsPlayerReady] = useState(false);
 
+    //  capture status tracking
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
+    const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
+    const [editingCaptureImage, setEditingCaptureImage] = useState<string | null>(null);
+
+    // videoId 값 확인
+    console.log('page.tsx videoId:', videoId);
+    // fetchVemoData 함수를 useCallback으로 상위 스코프로 이동
     // fetchVemoData 함수를 먼저 선언
     const fetchVemoData = useCallback(async () => {
         try {
@@ -337,6 +346,73 @@ export default function VemoPage() {
         }
     }, [videoId, fetchVemoData]);
 
+    // 이미지 데이터 처리를 위한 함수 추가
+    const processImageData = (dataUrl: string) => {
+        try {
+            // 이미지 데이터가 유효한지 확인
+            if (!dataUrl.startsWith('data:image/')) {
+                console.error('Invalid image data URL');
+                return null;
+            }
+            return dataUrl;
+        } catch (error) {
+            console.error('Image processing error:', error);
+            return null;
+        }
+    };
+
+    // 그리기 시작 핸들러
+    const handleDrawingStart = async (captureId: string) => {
+        console.log('Drawing start with capture ID:', captureId);
+        
+        try {
+            if (!vemoData?.captures) {
+                throw new Error('No captures data available');
+            }
+            
+            const capture = vemoData.captures.find(c => `capture-${c.id}` === `capture-${captureId}`);
+            
+            if (!capture?.image) {
+                throw new Error('Capture image not found');
+            }
+
+            setEditingCaptureImage(capture.image);
+            setEditingCaptureId(captureId);
+            setIsDrawingMode(true);
+        } catch (error) {
+            console.error('Error starting drawing mode:', error);
+            // 사용자에게 에러 메시지 표시
+            alert('이미지를 불러오는데 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
+
+    // 그리기 저장 핸들러
+    const handleDrawingSave = async (editedImageUrl: string, captureId?: string) => {
+        if (editorRef.current?.addCaptureItem) {
+            const currentTime = currentTimestamp;
+            try {
+
+               const processedImage = processImageData(editedImageUrl);
+                if (!processedImage) {
+                    throw new Error('Invalid image data');
+                }
+                
+                
+                if (captureId) {
+                    await editorRef.current.addCaptureItem(currentTime, processedImage, captureId);
+                } else {
+                    await editorRef.current.addCaptureItem(currentTime, processedImage);
+                }
+                setIsDrawingMode(false);
+                setCapturedImage(null);
+                setEditingCaptureId(null);
+            } catch (error) {
+                console.error('Drawing save failed:', error);
+            }
+        }
+    };
+
     if (error) {
         return (
             <div className={styles.errorContainer}>
@@ -387,6 +463,7 @@ export default function VemoPage() {
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
                             vemoData={vemoData}
+                            onDrawingStart={handleDrawingStart}
                         />
                     )}
                     currentTimestamp={currentTimestamp}
@@ -397,6 +474,21 @@ export default function VemoPage() {
                     memosId={memosId}
                 />
             </div>
+
+            {/* DrawingCanvas 조건부 렌더링 */}
+            {isDrawingMode && (
+                <DrawingCanvas
+                    backgroundImage={editingCaptureImage || capturedImage || ''}
+                    captureId={editingCaptureId || ''}
+                    onSave={handleDrawingSave}
+                    onClose={() => {
+                        setIsDrawingMode(false);
+                        setCapturedImage(null);
+                        setEditingCaptureId(null);
+                        setEditingCaptureImage(null);
+                    }}
+                />
+            )}
         </div>
     );
 }
