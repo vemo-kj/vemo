@@ -3,6 +3,7 @@ import {
     Injectable,
     InternalServerErrorException,
     Logger,
+    Logger,
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,14 +20,11 @@ import { v4 as uuidv4 } from 'uuid';
 export class CapturesService {
     private readonly bucketName: string;
     private readonly logger = new Logger(CapturesService.name);
+    
 
     constructor(
-        @InjectRepository(Memos)
-        private readonly memosRepository: Repository<Memos>,
-
-        @InjectRepository(Captures)
-        private capturesRepository: Repository<Captures>,
-
+        @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
+        @InjectRepository(Captures) private capturesRepository: Repository<Captures>,
         @Inject('S3')
         private readonly s3: S3,
 
@@ -35,11 +33,7 @@ export class CapturesService {
         this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
     }
 
-    /**
-     * 새 캡처 생성
-     *  - Base64 → S3 업로드 → DB 저장
-     */
-    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
+    async createCapture(createCapturesDto: CreateCapturesDto, isScrap = false): Promise<Captures> {
         try {
             const { memosId, image, ...rest } = createCapturesDto;
             const memos = await this.memosRepository.findOne({
@@ -52,8 +46,13 @@ export class CapturesService {
                 memos,
             });
 
-            const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
-            captures.image = uploadUrl;
+            if (!isScrap) {
+                const uploadUrl = await this.uploadBase64ToS3(createCapturesDto.image, 'captures');
+                this.logger.log('uploadUrl', uploadUrl);
+                captures.image = uploadUrl;
+            } else {
+                captures.image = image;
+            }
 
             // (4) DB 저장
             return await this.capturesRepository.save(captures);
