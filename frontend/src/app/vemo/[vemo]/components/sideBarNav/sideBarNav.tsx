@@ -2,7 +2,7 @@
 
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
 import PlayList from '../playList/PlayList';
@@ -66,7 +66,14 @@ export default function SidebarNav({
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
     const [isEditingTitle, setIsEditingTitle] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(vemoData?.title || '');
+    const [editedTitle, setEditedTitle] = useState('');
+
+    // vemoData가 변경될 때마다 editedTitle 업데이트
+    useEffect(() => {
+        if (vemoData?.title) {
+            setEditedTitle(vemoData.title);
+        }
+    }, [vemoData]);
 
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
