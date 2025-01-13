@@ -34,6 +34,9 @@ jobs:
                       --name backend-vemo-1 \
                       -p 5050:5050 \
                       --env-file .env \
+                      --security-opt seccomp=unconfined \
+                      --shm-size=2gb \
+                      --cap-add=SYS_ADMIN \
                       --restart unless-stopped \
                       backend-vemo-1 &&
                     docker ps -a
