@@ -130,7 +130,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
-                const token = sessionStorage.getItem('token');
+                const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
@@ -249,7 +249,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     useEffect(() => {
         const fetchMemos = async () => {
             try {
-                const token = sessionStorage.getItem('token');
+                const token = localStorage.getItem('token');
                 if (!token || !props.memosId) {
                     console.log('Token or memosId is missing');
                     return;
@@ -361,7 +361,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         if (!contentState.hasText()) return;
 
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token || !props.memosId) {
                 console.error('토큰 또는 memosId가 없습니다.');
                 return;
@@ -426,7 +426,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     const handleChangeItem = async (id: string, newHTML: string) => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
@@ -479,7 +479,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     // 캡처 삭제를 위한 새로운 함수
     const handleDeleteCapture = async (captureId: string) => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
@@ -523,7 +523,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
         // 기존 메모 삭제 로직
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;

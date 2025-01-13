@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import styles from './PlayList.module.css';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import styles from './PlayList.module.css';
 
 interface Playlist {
     id: number;
@@ -35,7 +35,7 @@ export default function Playlist() {
                 return;
             }
 
-            const accessToken = sessionStorage.getItem('token');
+            const accessToken = localStorage.getItem('token');
             if (!accessToken) {
                 setError('로그인이 필요합니다.');
                 setIsLoading(false);

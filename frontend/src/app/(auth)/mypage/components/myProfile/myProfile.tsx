@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './MyProfile.module.css';
 
 // src/app/(auth)/mypage/components/myProfile/myProfile.tsx
@@ -22,7 +22,7 @@ export default function MyProfile() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const accessToken = sessionStorage.getItem('token');
+                const accessToken = localStorage.getItem('token');
                 if (!accessToken) {
                     setError('로그인이 필요합니다');
                     return;
