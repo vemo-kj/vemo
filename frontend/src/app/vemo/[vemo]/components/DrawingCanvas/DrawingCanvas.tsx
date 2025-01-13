@@ -120,9 +120,10 @@ export default function DrawingCanvas({
             }
 
             // 3) 서버에 PUT (updateCapture)
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
-                throw new Error('No authentication token found');
+                console.error('토큰이 없습니다. 다시 로그인해주세요.');
+                return;
             }
 
             const res = await fetch(
@@ -130,7 +131,7 @@ export default function DrawingCanvas({
                 {
                     method: 'PUT',
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -166,6 +167,7 @@ export default function DrawingCanvas({
             onClose();
         } catch (err) {
             console.error('[DrawingCanvas] Save error:', err);
+            alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
         }
     };
 
