@@ -253,7 +253,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 }));
             }
         }
-        }
     }));
 
     useEffect(() => {
