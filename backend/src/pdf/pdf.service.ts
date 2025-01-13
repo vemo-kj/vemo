@@ -11,7 +11,7 @@ import { Summaries } from 'src/summarization/entity/summaries.entity';
 import { Summary } from 'src/summarization/entity/summarization.entity';
 import { Repository } from 'typeorm';
 import { Memos } from 'src/memos/memos.entity';
-
+import { AIUtils } from './pdf.utils';
 @Injectable()
 export class PdfService {
     private readonly openai: OpenAI;
@@ -20,6 +20,7 @@ export class PdfService {
         private readonly httpService: HttpService,
         @Inject('S3') private readonly s3: S3,
         private configService: ConfigService,
+        private readonly aiUtils: AIUtils,
 
         @InjectRepository(Summaries)
         private summariesRepository: Repository<Summaries>,
@@ -71,6 +72,9 @@ export class PdfService {
         capture: pdfCaptureDto[],
         summaries: any[],
     ): Promise<string> {
+        // summaries 데이터 확인
+        console.log('💡 Summaries before processing:', summaries);
+
         const combined = [
             ...memos.map(memo => ({
                 ...memo,
@@ -95,7 +99,11 @@ export class PdfService {
             return secondsA - secondsB;
         });
 
-        console.log('💡combined 출력 ', combined);
+        console.log('💡 Combined data:', combined);
+        console.log('💡 About to call AIUtils.extractSummary with:', summaries);
+
+        const result = await AIUtils.extractSummary(summaries);
+        console.log('💡 Result from AIUtils.extractSummary:', result);
 
         let htmlContent = `
             <!DOCTYPE html>
@@ -153,39 +161,46 @@ export class PdfService {
             `;
 
         for (const item of combined) {
-            if (item.type === 'memo' && 'description' in item) {
-                htmlContent += `
-                    <div class="memo">
-                        <div class="timestamp">[${item.timestamp}]</div>
-                        <div>${item.description}</div>
-                    </div>`;
-            } else if (item.type === 'capture' && 'image' in item) {
-                try {
-                    let imageUrl = item.image;
-                    if (!item.image.startsWith('data:image')) {
-                        const response = await firstValueFrom(
-                            this.httpService.get(item.image, { responseType: 'arraybuffer' }),
-                        );
-                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
-                        imageUrl = `data:image/jpeg;base64,${base64}`;
-                    }
+            console.log('💡item 출력 ', item);
+            // if (item.type === 'memo' && 'description' in item) {
+            //     htmlContent += `
+            //         <div class="memo">
+            //             <div class="timestamp">[${item.timestamp}]</div>
+            //             <div>${item.description}</div>
+            //         </div>`;
+            // } else if (item.type === 'capture' && 'image' in item) {
+            //     try {
+            //         let imageUrl = item.image;
+            //         if (!item.image.startsWith('data:image')) {
+            //             const response = await firstValueFrom(
+            //                 this.httpService.get(item.image, { responseType: 'arraybuffer' }),
+            //             );
+            //             const base64 = Buffer.from(response.data, 'binary').toString('base64');
+            //             imageUrl = `data:image/jpeg;base64,${base64}`;
+            //         }
 
-                    htmlContent += `
-                        <div class="capture">
-                            <div class="timestamp">[${item.timestamp}]</div>
-                            <div class="image">
-                                <img src="${imageUrl}" alt="Captured Image" />
-                            </div>
-                        </div>`;
-                } catch (error) {
-                    console.error(`이미지 로드 실패: ${item.image}`, error);
-                    htmlContent += `
-                        <div class="capture">
-                            <div class="timestamp">[${item.timestamp}]</div>
-                            <div>이미지를 불러올 수 없습니다.</div>
-                        </div>`;
-                }
-            }
+            //         htmlContent += `
+            //             <div class="capture">
+            //                 <div class="timestamp">[${item.timestamp}]</div>
+            //                 <div class="image">
+            //                     <img src="${imageUrl}" alt="Captured Image" />
+            //                 </div>
+            //             </div>`;
+            //     } catch (error) {
+            //         console.error(`이미지 로드 실패: ${item.image}`, error);
+            //         htmlContent += `
+            //             <div class="capture">
+            //                 <div class="timestamp">[${item.timestamp}]</div>
+            //                 <div>이미지를 불러올 수 없습니다.</div>
+            //             </div>`;
+            //     }
+            // } else if (item.type === 'summaries' && 'summary' in item) {
+            //     htmlContent += `
+            //         <div class="summaries">
+            //             <div class="timestamp">[${item.timestamp}]</div>
+            //             <div>${item.summary}</div>
+            //         </div>`;
+            // }
         }
 
         htmlContent += `</body></html>`;
