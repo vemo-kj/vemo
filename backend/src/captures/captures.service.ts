@@ -31,15 +31,9 @@ export class CapturesService {
         this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
     }
 
-    /**
-     * 새 캡처 생성
-     *  - Base64 → S3 업로드 → DB 저장
-     */
-    async createCapture(createCapturesDto: CreateCapturesDto): Promise<Captures> {
+    async createCapture(createCapturesDto: CreateCapturesDto, isScrap = false): Promise<Captures> {
         try {
-            const { memosId, ...rest } = createCapturesDto;
-
-            // (1) Memos FK 관계 매핑
+            const { memosId, image, ...rest } = createCapturesDto;
             const memos = await this.memosRepository.findOne({
                 where: { id: memosId },
             });
