@@ -1,6 +1,5 @@
 // next
 import Link from 'next/link';
-import Image from 'next/image';
 // style
 import styles from './Header.module.css';
 //component
@@ -14,7 +13,7 @@ export default function Header() {
       <div>
         <Link href="/" className={styles.buttonHome}>
           <img
-            src="/icons/Button_home.svg"
+            src="/icons/Button_home_.svg"
             alt='home'
           />
         </Link>
