@@ -8,6 +8,7 @@ import {
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
 import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 
