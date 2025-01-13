@@ -7,7 +7,7 @@ import {
     RichUtils,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 
@@ -127,6 +127,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
     const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
+    const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
@@ -374,6 +375,13 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         setEditorState(newState);
     };
 
+    // 스크롤을 맨 아래로 이동시키는 함수
+    const scrollToBottom = () => {
+        if (displayAreaRef.current) {
+            displayAreaRef.current.scrollTop = displayAreaRef.current.scrollHeight;
+        }
+    };
+
     // handleSave 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
@@ -432,12 +440,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
             setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
+            setMemoStartTimestamp(null);
             props.onMemoSaved?.();
 
-            // 저장 후 타임스탬프 초기화
-            setMemoStartTimestamp(null);
-            setEditorState(EditorState.createEmpty());
-            props.onMemoSaved?.();
+            // 저장 후 스크롤 이동
+            setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
+
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -622,7 +630,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     return (
         <div className={styles.container}>
-            <div className={styles.displayArea}>
+            <div ref={displayAreaRef} className={styles.displayArea}>
                 {sections.map(item => (
                     <MemoItem
                         key={item.id}
