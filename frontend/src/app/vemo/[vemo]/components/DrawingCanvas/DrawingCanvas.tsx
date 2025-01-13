@@ -343,34 +343,7 @@ export default function DrawingCanvas({
                         </div>
                     </div>
 
-            <div
-                className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-            >
-                <div
-                    style={{
-                        transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
-                        transformOrigin: '0 0',
-                        transition: isDragging ? 'none' : 'transform 0.3s ease',
-                        cursor: isMovingMode ? 'grab' : 'default',
-                    }}
-                >
-                    <DynamicReactSketchCanvas
-                        ref={canvasRef}
-                        width={`${canvasWidth}px`}
-                        height={`${canvasHeight}px`}
-                        strokeWidth={strokeWidth}
-                        strokeColor={getStrokeColor()}
-                        backgroundImage={backgroundImage}
-                        exportWithBackgroundImage={true}
-                        canvasColor="transparent"
-                    />
-                </div>
-            </div>
-                    {/* 실제 Canvas 영역 */}
+                    {/* 실제 Canvas 영역 - 중복된 첫 번째 canvasWrapper 제거 */}
                     <div
                         className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
                         onMouseDown={handleMouseDown}
@@ -390,11 +363,7 @@ export default function DrawingCanvas({
                                 ref={canvasRef}
                                 width={`${canvasWidth}px`}
                                 height={`${canvasHeight}px`}
-
-                                // 꼭 exportWithBackgroundImage={true}를 해야
-                                // "배경 + 드로잉" 합쳐진 PNG가 export됨
                                 exportWithBackgroundImage={true}
-
                                 strokeWidth={strokeWidth}
                                 strokeColor={getStrokeColor()}
                                 backgroundImage={processedBackgroundImage()}
