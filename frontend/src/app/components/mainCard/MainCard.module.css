@@ -1,27 +1,27 @@
 .mainCard {
     width: 100%;
-    height: 295px;
-    padding: 12px;
+    height: 420px;
+    padding: 20px;
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .mainCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .thumbnailContainer {
     width: 100%;
-    height: 160px;
+    height: 240px;
     overflow: hidden;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 16px;
+    margin-bottom: 20px;
     position: relative;
 }
 
@@ -43,30 +43,30 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     line-height: 1.4;
-    height: 40px;
+    height: 48px;
 }
 
 .channelInfo {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .channelThumbnails {
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     margin-right: 8px;
     object-fit: cover;
 }
 
 .channelTitle {
-    font-size: 12px;
+    font-size: 16px;
     color: #666;
     white-space: nowrap;
     overflow: hidden;
@@ -75,7 +75,7 @@
 }
 
 .vemoCount {
-    font-size: 12px;
+    font-size: 16px;
     color: #888;
     margin-top: auto;
 }
@@ -85,4 +85,38 @@
     color: inherit;
     width: 100%;
     display: block;
+}
+
+@media (max-width: 1800px) {
+    .mainCard {
+        height: 380px;
+    }
+
+    .thumbnailContainer {
+        height: 220px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .mainCard {
+        height: 360px;
+    }
+
+    .thumbnailContainer {
+        height: 200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .mainCard {
+        height: 340px;
+    }
+
+    .thumbnailContainer {
+        height: 180px;
+    }
+
+    .title {
+        font-size: 16px;
+    }
 }
