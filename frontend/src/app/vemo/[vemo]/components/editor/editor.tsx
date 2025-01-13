@@ -198,7 +198,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify(requestBody),
-                        body: JSON.stringify(requestBody),
                     },
                 );
 
