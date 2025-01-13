@@ -7,7 +7,7 @@ import {
     RichUtils,
 } from 'draft-js';
 import 'draft-js/dist/Draft.css';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState, useRef } from 'react';
 import styles from './editor.module.css';
 import MemoItem from './MemoItem';
 
@@ -126,11 +126,13 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
+    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
+    const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string) => {
             try {
-                const token = sessionStorage.getItem('token');
+                const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No authentication token found');
                 }
@@ -229,13 +231,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (props.onMemoSaved) {
                     props.onMemoSaved();
                 }
-            } catch (error) {
-                console.error('[Capture Event] Error:', {
-                    message: error instanceof Error ? error.message : 'Unknown error',
-                    type: typeof error,
-                    error,
-                });
 
+                // 캡처 추가 후 스크롤 이동
+                setTimeout(scrollToBottom, 100);
+
+            } catch (error) {
+                console.error('[Capture Event] Error:', error);
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
@@ -249,7 +250,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     useEffect(() => {
         const fetchMemos = async () => {
             try {
-                const token = sessionStorage.getItem('token');
+                const token = localStorage.getItem('token');
                 if (!token || !props.memosId) {
                     console.log('Token or memosId is missing');
                     return;
@@ -356,28 +357,48 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         fetchMemos();
     }, [props.memosId]);
 
+    // 에디터 상태 변경 핸들러 추가
+    const handleEditorChange = (newState: EditorState) => {
+        const contentState = newState.getCurrentContent();
+        const prevContentState = editorState.getCurrentContent();
+
+        // 이전에 텍스트가 없었고, 현재 텍스트가 있는 경우 (새로운 입력 시작)
+        if (!prevContentState.hasText() && contentState.hasText()) {
+            setMemoStartTimestamp(props.getTimestamp());
+        }
+        // 이전에 텍스트가 있었고, 현재 텍스트가 없는 경우 (모든 텍스트 삭제)
+        else if (prevContentState.hasText() && !contentState.hasText()) {
+            setMemoStartTimestamp(null);
+        }
+
+        setEditorState(newState);
+    };
+
+    // 스크롤을 맨 아래로 이동시키는 함수
+    const scrollToBottom = () => {
+        if (displayAreaRef.current) {
+            displayAreaRef.current.scrollTop = displayAreaRef.current.scrollHeight;
+        }
+    };
+
+    // handleSave 수정
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token || !props.memosId) {
                 console.error('토큰 또는 memosId가 없습니다.');
                 return;
             }
 
             const html = convertToHTML(contentState);
-            const timestamp = props.getTimestamp();
-
-            // timestamp 형식 변환 추가
-            const [minutes, seconds] = timestamp.split(':').map(Number);
-            const date = new Date();
-            date.setMinutes(minutes);
-            date.setSeconds(seconds);
+            // 저장 시 메모 시작 시점의 타임스탬프 사용
+            const timestamp = memoStartTimestamp || props.getTimestamp();
 
             const requestData = {
-                timestamp: timestamp, // ISO 문자열로 변환
+                timestamp,
                 description: html,
                 memosId: Number(props.memosId),
             };
@@ -418,7 +439,12 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
             setSections(prev => [...prev, newItem]);
             setEditorState(EditorState.createEmpty());
+            setMemoStartTimestamp(null);
             props.onMemoSaved?.();
+
+            // 저장 후 스크롤 이동
+            setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
+
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -426,7 +452,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     const handleChangeItem = async (id: string, newHTML: string) => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
@@ -479,7 +505,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     // 캡처 삭제를 위한 새로운 함수
     const handleDeleteCapture = async (captureId: string) => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
@@ -523,7 +549,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
         // 기존 메모 삭제 로직
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 console.error('토큰이 없습니다.');
                 return;
@@ -567,10 +593,33 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     const handleKeyCommand = (command: string) => {
         if (command === 'split-block') {
-            handleSave();
-            return 'handled';
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 현재 블록의 텍스트가 있을 때만 저장 처리
+            if (currentBlock.getText().length > 0) {
+                handleSave();
+                return 'handled';
+            }
         }
         return 'not-handled';
+    };
+
+    // keyBindingFn 수정
+    const keyBindingFn = (e: React.KeyboardEvent<{}>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();  // 기본 Enter 동작 방지
+            const contentState = editorState.getCurrentContent();
+            const selection = editorState.getSelection();
+            const currentBlock = contentState.getBlockForKey(selection.getStartKey());
+
+            // 텍스트가 있을 때만 'split-block' 커맨드 반환
+            if (currentBlock.getText().length > 0) {
+                return 'split-block';
+            }
+        }
+        return getDefaultKeyBinding(e);
     };
 
     // 메모카드 변경 감지
@@ -580,7 +629,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
     return (
         <div className={styles.container}>
-            <div className={styles.displayArea}>
+            <div ref={displayAreaRef} className={styles.displayArea}>
                 {sections.map(item => (
                     <MemoItem
                         key={item.id}
@@ -617,21 +666,16 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             <div className={styles.editorArea}>
                 <Editor
                     editorState={editorState}
-                    onChange={setEditorState}
+                    onChange={handleEditorChange}  // onChange 핸들러 변경
                     placeholder="내용을 입력하세요..."
                     handleKeyCommand={handleKeyCommand}
-                    keyBindingFn={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            return 'split-block';
-                        }
-                        return getDefaultKeyBinding(e);
-                    }}
+                    keyBindingFn={keyBindingFn}
                 />
                 <div className={styles.toolbar}>
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
                         onMouseDown={e => {
-                            e.preventDefault();
+                            e.preventDefault();  // 이벤트 기본 동작 방지
                             toggleInlineStyle('BOLD');
                         }}
                     >

@@ -3,6 +3,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import DrawingCanvas from '../DrawingCanvas/DrawingCanvas';
 import ExtractButton from '../extractButton/ExtractButton';
 import styles from './editor.module.css';
+import DOMPurify from 'dompurify';
 
 interface MemoItemProps {
     id: string;
@@ -226,6 +227,12 @@ const MemoItem = memo(
                         onCompositionEnd={handleCompositionEnd}
                         onBlur={handleBlur}
                         ref={contentRef}
+                        dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(htmlContent, {
+                                ALLOWED_TAGS: ['p', 'strong', 'em', 'u'],
+                                ALLOWED_ATTR: []
+                            })
+                        }}
                     />
                 )}
 

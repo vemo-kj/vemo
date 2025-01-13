@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import styles from './Community.module.css';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import styles from './Community.module.css';
 
 interface Memos {
     id: number;
@@ -27,7 +27,7 @@ interface DetailedMemos {
         title: string;
         channel: {
             name: string;
-        }
+        };
     };
     memo: Array<{
         id: number;
@@ -60,15 +60,24 @@ const ConfirmModal = ({ isOpen, message, onConfirm, onCancel }: ConfirmModalProp
             <div className={styles.modal}>
                 <p className={styles.modalMessage}>{message}</p>
                 <div className={styles.modalButtons}>
-                    <button onClick={onConfirm} className={styles.confirmButton}>네</button>
-                    <button onClick={onCancel} className={styles.cancelButton}>아니요</button>
+                    <button onClick={onConfirm} className={styles.confirmButton}>
+                        네
+                    </button>
+                    <button onClick={onCancel} className={styles.cancelButton}>
+                        아니요
+                    </button>
                 </div>
             </div>
         </div>
     );
 };
 
-const DetailView = ({ memo, onBack, viewMode, onDelete }: {
+const DetailView = ({
+    memo,
+    onBack,
+    viewMode,
+    onDelete,
+}: {
     memo: DetailedMemos;
     onBack: () => void;
     viewMode: 'all' | 'mine';
@@ -102,7 +111,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
     const handleShareConfirm = async () => {
         try {
             setIsLoading(true);
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
 
             if (!token) {
                 throw new Error('인증 토큰이 없습니다.');
@@ -116,17 +125,14 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
 
             console.log('퍼가기 요청 전 memo:', memo);
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/vemo/${memo.id}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                }
-            );
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/vemo/${memo.id}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
 
             const responseData = await response.json();
             console.log('서버 응답:', responseData);
@@ -144,7 +150,6 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
             const newUrl = `/vemo/${memo.video.id}?memosId=${responseData.id}`;
             console.log('이동할 URL:', newUrl);
             window.location.href = newUrl;
-
         } catch (error) {
             console.error('메모 복사 실패:', error);
             setError(error instanceof Error ? error.message : '메모 복사에 실패했습니다.');
@@ -183,7 +188,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         const timeB = b.timestamp.split(':').map(Number);
         const secondsA = timeA[0] * 60 + timeA[1];
         const secondsB = timeB[0] * 60 + timeB[1];
-        return secondsA - secondsB;  // 정순 정렬
+        return secondsA - secondsB; // 정순 정렬
     });
 
     const sortedCaptures = memo.captures?.slice().sort((a, b) => {
@@ -191,7 +196,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
         const timeB = b.timestamp.split(':').map(Number);
         const secondsA = timeA[0] * 60 + timeA[1];
         const secondsB = timeB[0] * 60 + timeB[1];
-        return secondsA - secondsB;  // 정순 정렬
+        return secondsA - secondsB; // 정순 정렬
     });
 
     return (
@@ -210,10 +215,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                     </button>
                 ) : (
                     <div className={styles.buttonGroup}>
-                        <button
-                            className={styles.editButton}
-                            onClick={handleEditClick}
-                        >
+                        <button className={styles.editButton} onClick={handleEditClick}>
                             작성하기
                         </button>
                         <button
@@ -230,9 +232,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
             <div className={styles.detailContent}>
                 <h3 className={styles.detailTitle}>{memo.title}</h3>
                 <div className={styles.detailInfo}>
-                    <span className={styles.author}>
-                        {memo.user?.nickname || '사용자 없음'}
-                    </span>
+                    <span className={styles.author}>{memo.user?.nickname || '사용자 없음'}</span>
                     <span className={styles.date}>
                         작성: {new Date(memo.createdAt).toLocaleDateString()}
                     </span>
@@ -246,7 +246,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                                 <div
                                     className={styles.description}
                                     dangerouslySetInnerHTML={{
-                                        __html: item.description || ''
+                                        __html: item.description || '',
                                     }}
                                 />
                             </div>
@@ -258,9 +258,7 @@ const DetailView = ({ memo, onBack, viewMode, onDelete }: {
                     <div className={styles.captureList}>
                         {sortedCaptures.map(capture => (
                             <div key={capture.id} className={styles.captureItem}>
-                                <span className={styles.timestamp}>
-                                    {capture.timestamp}
-                                </span>
+                                <span className={styles.timestamp}>{capture.timestamp}</span>
                                 <img
                                     src={capture.image}
                                     alt={`Capture at ${capture.timestamp}`}
@@ -313,7 +311,7 @@ export default function Community() {
     const fetchMemos = async (filter: 'all' | 'mine' = 'all') => {
         try {
             setIsLoading(true);
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const videoId = getVideoIdFromURL();
 
             if (!token || !videoId) {
@@ -327,7 +325,7 @@ export default function Community() {
                         Authorization: `Bearer ${token}`,
                     },
                     credentials: 'include',
-                }
+                },
             );
 
             if (!response.ok) {
@@ -338,7 +336,9 @@ export default function Community() {
             setMemos(data.memos);
         } catch (error) {
             console.error('메모 목록 조회 실패:', error);
-            setError(error instanceof Error ? error.message : '메모 목록을 불러오는데 실패했습니다.');
+            setError(
+                error instanceof Error ? error.message : '메모 목록을 불러오는데 실패했습니다.',
+            );
         } finally {
             setIsLoading(false);
         }
@@ -357,7 +357,7 @@ export default function Community() {
         try {
             setIsLoading(true);
             setError(null);
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
 
             if (!token) {
                 throw new Error('인증 토큰이 없습니다.');
@@ -369,17 +369,14 @@ export default function Community() {
                 throw new Error('비디오 ID를 찾을 수 없습니다.');
             }
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memo.id}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                }
-            );
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memo.id}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
 
             const data = await response.json();
             console.log('받은 상세 데이터:', data);
@@ -393,11 +390,11 @@ export default function Community() {
                 ...data,
                 video: {
                     id: videoId,
-                    title: '',  // 필요한 경우 비디오 정보 API로 가져오기
+                    title: '', // 필요한 경우 비디오 정보 API로 가져오기
                     channel: {
-                        name: ''
-                    }
-                }
+                        name: '',
+                    },
+                },
             };
 
             setSelectedCard(enrichedData);
@@ -411,21 +408,18 @@ export default function Community() {
 
     const handleDeleteMemo = async (memoId: number) => {
         try {
-            const token = sessionStorage.getItem('token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('인증 토큰이 없습니다.');
             }
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memoId}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    credentials: 'include',
-                }
-            );
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memoId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: 'include',
+            });
 
             if (!response.ok) {
                 throw new Error('메모 삭제에 실패했습니다.');
