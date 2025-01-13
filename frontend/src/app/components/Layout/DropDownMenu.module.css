@@ -25,12 +25,12 @@
 
 .dropdownContent {
   position: absolute;
-  top: calc(100% + 5px);
+  top: calc(100% + -1px);
   right: 0;
   background-color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-  min-width: 120px;
+  min-width: 250px;
   z-index: 1000;
   padding: 8px 0;
 }
@@ -41,7 +41,7 @@
   padding: 8px 0;
   text-decoration: none;
   color: #333;
-  font-size: 14px;
+  font-size: 30px;
   text-align: center;
   background: none;
   border: none;
