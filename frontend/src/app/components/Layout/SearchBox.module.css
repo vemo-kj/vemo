@@ -1,6 +1,6 @@
 .searchBox {
-  width: 400px;
-  height: 40px;
+  width: 650px;
+  height: 55px;
   border: 1px solid #e0e0e0;
   border-radius: 20px;
   background-color: #f5f5f5;
@@ -13,7 +13,7 @@
 .searchBox:focus-within {
   border-color: #007AFF;
   background-color: white;
-  box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
 .searchIcon {
@@ -50,4 +50,3 @@
 .searchButton:hover {
   background-color: #0056b3;
 }
-
