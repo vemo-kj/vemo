@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
 import { MemosService } from '../memos/memos.service';
 import { GetCommunityMemosResponseDto } from './dto/get-community-memos-response.dto';
 import { PlaylistService } from '../playlist/playlist.service';
@@ -13,6 +18,8 @@ import { MemoService } from '../memo/memo.service';
 
 @Injectable()
 export class VemoService {
+    private readonly logger = new Logger(VemoService.name);
+
     constructor(
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
@@ -118,11 +125,15 @@ export class VemoService {
         if (memos.captures && memos.captures.length > 0) {
             for (const oldCapture of memos.captures) {
                 try {
-                    await this.capturesService.createCapture({
-                        timestamp: oldCapture.timestamp,
-                        image: oldCapture.image,
-                        memosId: newMemos.id,
-                    });
+                    this.logger.log('image: ', oldCapture.image);
+                    await this.capturesService.createCapture(
+                        {
+                            timestamp: oldCapture.timestamp,
+                            image: oldCapture.image,
+                            memosId: newMemos.id,
+                        },
+                        true,
+                    );
                 } catch (error) {
                     throw new InternalServerErrorException('Captures 복제 중 오류 발생', {
                         cause: error,
