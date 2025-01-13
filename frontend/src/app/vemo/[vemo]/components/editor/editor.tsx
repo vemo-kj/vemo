@@ -157,11 +157,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     throw new Error('Image data must be a string');
                 }
 
-                // 요청 데이터 검증
-                if (typeof requestBody.image !== 'string') {
-                    throw new Error('Image data must be a string');
-                }
-
                 const captureResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/captures`,
                     {
@@ -228,7 +223,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     [timestamp]: false,
                 }));
             }
-        }
         }
     }));
 
