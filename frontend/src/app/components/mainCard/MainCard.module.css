@@ -4,7 +4,7 @@
     padding: 20px;
     background-color: white;
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     cursor: pointer;
     display: flex;
@@ -12,8 +12,8 @@
 }
 
 .mainCard:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-20px);
+    box-shadow: 0 6px 20px #60a5fa;
 }
 
 .thumbnailContainer {
@@ -21,7 +21,7 @@
     height: 280px;
     overflow: hidden;
     border-radius: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     position: relative;
 }
 
@@ -55,7 +55,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 23px;
+    font-size: 25px;
     font-weight: 800;
     color: #333;
     line-height: 1.4;
@@ -69,6 +69,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    margin-top: 10px;
 }
 
 .channelLeft {
@@ -86,7 +87,7 @@
 }
 
 .channelTitle {
-    font-size: 20px;
+    font-size: 22px;
     color: #666;
     font-weight: 700;
     white-space: nowrap;
@@ -96,7 +97,7 @@
 }
 
 .vemoCount {
-    font-size: 20px;
+    font-size: 22px;
     color: #3b82f6;
     font-weight: 700;
     white-space: nowrap;
