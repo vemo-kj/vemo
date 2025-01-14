@@ -165,53 +165,7 @@ const MemoItem = memo((props: MemoItemProps) => {
     }, [id]);
 
     const handleSaveDrawing = async (editedImageData: string) => {
-        try {
-            // 배경 이미지와 그림을 합성
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const backgroundImg = new Image();
-            const drawingImg = new Image();
-
-            // Promise를 사용하여 이미지 로딩 처리
-            await new Promise((resolve, reject) => {
-                backgroundImg.onload = () => {
-                    canvas.width = backgroundImg.width;
-                    canvas.height = backgroundImg.height;
-                    
-                    // 배경 이미지 먼저 그리기
-                    ctx?.drawImage(backgroundImg, 0, 0);
-                    
-                    // 그 위에 그림 그리기
-                    drawingImg.onload = () => {
-                        ctx?.drawImage(drawingImg, 0, 0);
-                        resolve(null);
-                    };
-                    drawingImg.onerror = reject;
-                    drawingImg.src = editedImageData;
-                };
-                backgroundImg.onerror = reject;
-                backgroundImg.src = getImageSrc(screenshot || '');
-            });
-
-            // 최종 합성된 이미지
-            const finalImageData = canvas.toDataURL('image/png');
-            
-            // 저장 처리
-            if (onDrawingStart && id.startsWith('capture-')) {
-                const captureId = id.split('-')[1];
-                onDrawingStart(captureId);
-            }
-
-            setIsDrawingOpen(false);
-            
-            // 필요한 경우 서버에 저장하는 로직 추가
-            if (props.onRefetch) {
-                props.onRefetch();
-            }
-        } catch (error) {
-            console.error('Drawing save failed:', error);
-            alert('이미지 저장에 실패했습니다.');
-        }
+        setIsDrawingOpen(false);
     };
 
     // isValidImageUrl도 아래처럼 수정할 수 있음 (URL + dataURL 체크)
@@ -225,95 +179,111 @@ const MemoItem = memo((props: MemoItemProps) => {
     return (
         <div className={styles.memoItemContainer}>
             <div className={styles.memoHeader}>
-                <button className={styles.timestampBtn} onClick={handleTimestampClick}>
-                    {timestamp}
-                </button>
-            </div>
-
-            {/* 2) 중앙 영역: 이미지 or HTML */}
-            {/* contentEditable 영역 (노션처럼 인라인 수정) */}
-            {screenshot ? (
-                <div className={styles.imageContainer}>
-                    {imageLoading && <div className={styles.loadingIndicator}>로딩중...</div>}
-                    {imageError && (
-                        <div className={styles.errorMessage}>
-                            이미지를 불러올 수 없습니다
-                            <button
-                                onClick={() => {
-                                    setImageLoading(true);
+                {/* contentEditable 영역 (노션처럼 인라인 수정) */}
+                {screenshot ? (
+                    <div className={styles.imageContainer}>
+                        {imageLoading && <div className={styles.loadingIndicator}>로딩중...</div>}
+                        {imageError && (
+                            <div className={styles.errorMessage}>
+                                이미지를 불러올 수 없습니다
+                                <button
+                                    onClick={() => {
+                                        setImageLoading(true);
+                                        setImageError(false);
+                                        if (imgRef.current) {
+                                            imgRef.current.src = screenshot;
+                                        }
+                                    }}
+                                    className={styles.retryButton}
+                                >
+                                    다시 시도
+                                </button>
+                            </div>
+                        )}
+                        <div className={styles.captureImageWrapper}>
+                            <img
+                                ref={imgRef}
+                                id={`capture-${id}`}
+                                src={screenshot}
+                                alt="capture"
+                                className={styles.captureImage}
+                                onLoad={() => {
+                                    setImageLoading(false);
                                     setImageError(false);
-                                    if (imgRef.current) {
-                                        imgRef.current.src = screenshot;
-                                    }
                                 }}
-                                className={styles.retryButton}
-                            >
-                                다시 시도
-                            </button>
+                                onError={() => {
+                                    console.error('이미지 로드 실패:', { id, url: screenshot });
+                                    setImageLoading(false);
+                                    setImageError(true);
+                                }}
+                            />
+                            <div className={styles.memoHeader}>
+                                <button
+                                    className={styles.timestampBtn}
+                                    onClick={handleTimestampClick}
+                                >
+                                    {timestamp}
+                                </button>
+                                <div className={styles.actionButtons}>
+                                    <button
+                                        className={`${styles.drawBtn}`}
+                                        onClick={handleOpenDrawing}
+                                        aria-label="그리기"
+                                    />
+                                    <ExtractButton
+                                        // className={styles.actionButton}
+                                        imageUrl={screenshot}
+                                        onExtracted={text => {
+                                            if (addTextToEditor) {
+                                                addTextToEditor(text);
+                                            }
+                                        }}
+                                        onDelete={onDelete}
+                                    />
+                                    <button
+                                        className={styles.deleteBtn}
+                                        onClick={onDelete}
+                                        aria-label="삭제"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    )}
-                    <div className={styles.captureImageWrapper}>
-                        <img
-                            ref={imgRef}
-                            id={`capture-${id}`}
-                            src={screenshot}
-                            alt="capture"
-                            className={styles.captureImage}
-                            onLoad={() => {
-                                setImageLoading(false);
-                                setImageError(false);
-                            }}
-                            onError={() => {
-                                console.error('이미지 로드 실패:', { id, url: screenshot });
-                                setImageLoading(false);
-                                setImageError(true);
+                    </div>
+                ) : (
+                    <div className={styles.memoHeader}>
+                        <button className={styles.timestampBtn} onClick={handleTimestampClick}>
+                            {timestamp}
+                        </button>
+                        <div
+                            className={styles.itemContent}
+                            contentEditable={isEditable}
+                            suppressContentEditableWarning={true}
+                            onFocus={() => setIsEditing(true)}
+                            onInput={handleInput}
+                            onCompositionStart={handleCompositionStart}
+                            onCompositionEnd={handleCompositionEnd}
+                            onBlur={handleBlur}
+                            ref={contentRef}
+                            dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(htmlContent, {
+                                    ALLOWED_TAGS: ['p', 'strong', 'em', 'u'],
+                                    ALLOWED_ATTR: [],
+                                }),
                             }}
                         />
+                        <div className={styles.actionButtons}>
+                            <button
+                                className={styles.deleteBtn}
+                                onClick={onDelete}
+                                aria-label="삭제"
+                            />
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <div
-                    className={styles.itemContent}
-                    contentEditable={isEditable}
-                    suppressContentEditableWarning={true}
-                    onFocus={() => setIsEditing(true)}
-                    onInput={handleInput}
-                    onCompositionStart={handleCompositionStart}
-                    onCompositionEnd={handleCompositionEnd}
-                    onBlur={handleBlur}
-                    ref={contentRef}
-                    dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(htmlContent, {
-                            ALLOWED_TAGS: ['p', 'strong', 'em', 'u'],
-                            ALLOWED_ATTR: [],
-                        }),
-                    }}
-                />
-            )}
+                )}
+            </div>
 
             {/* 3) 하단에 그리기, 삭제 버튼 */}
-            <div className={styles.memoFooter}>
-                {screenshot && (
-                    <>
-                        <button className={styles.drawBtn} onClick={handleOpenDrawing}>
-                            그리기
-                        </button>
-                        <ExtractButton
-                            imageUrl={screenshot}
-                            onExtracted={text => {
-                                if (addTextToEditor) {
-                                    console.log('Adding text to editor input:', text);
-                                    addTextToEditor(text);
-                                }
-                            }}
-                            onDelete={onDelete}
-                        />
-                    </>
-                )}
-                <button className={styles.deleteBtn} onClick={onDelete}>
-                    삭제
-                </button>
-            </div>
+            {screenshot && <div className={styles.memoFooter}></div>}
 
             {isDrawingOpen && screenshot && (
                 <DrawingCanvas

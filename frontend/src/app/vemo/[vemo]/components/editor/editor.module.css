@@ -165,10 +165,21 @@
 
 /* 삭제 버튼 */
 .deleteBtn {
-    color: red;
-    background: none;
+    width: 17px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
     border: none;
     cursor: pointer;
+    background-image: url('/icons/bt_edit_delete.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.deleteBtn:hover {
+    opacity: 1;
 }
 
 /* 그리기 모달 (SignatureCanvas) */
@@ -395,9 +406,95 @@
 }
 
 .memoItemContainer {
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #F8F9FA;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+    border-radius: 0;
+    margin-bottom: 1px;
+    box-shadow: none;
+}
+
+.memoHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.timestampBtn {
+    color: #0066FF;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.deleteBtn {
+    width: 17px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    background-image: url('/icons/bt_edit_delete.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.deleteBtn:hover {
+    opacity: 1;
+}
+
+.memoFooter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.actionButton {
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drawBtn {
+    width: 20px;
+    height: 20px;
+    background-image: url('/icons/bt_edit_draw.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.deleteBtn {
+    width: 17px;
+    height: 20px;
+    background-image: url('/icons/bt_edit_delete.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.drawBtn:hover,
+.deleteBtn:hover {
+    opacity: 1;
+}
+
+.actionButton:hover {
+    opacity: 1;
 }
