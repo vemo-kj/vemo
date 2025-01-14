@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { HttpService } from '@nestjs/axios';
 import { pdfCaptureDto, pdfMemoeDto } from './dto/pdf.dto';
-import { firstValueFrom } from 'rxjs';
 import { S3 } from 'aws-sdk';
 import OpenAI from 'openai';
 import { ConfigService } from '@nestjs/config';
