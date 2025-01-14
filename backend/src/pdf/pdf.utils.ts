@@ -76,10 +76,10 @@ export class AIUtils {
                     top_p: 0.8,
                 });
 
-                console.log(
-                    '💡 response response.choices[0]?.message?.content:',
-                    response.choices[0]?.message?.content,
-                );
+                // console.log(
+                //     '💡 response response.choices[0]?.message?.content:',
+                //     response.choices[0]?.message?.content,
+                // );
 
                 const parsedResult = AIUtils.parseTimestampedText(
                     response.choices[0]?.message?.content,
