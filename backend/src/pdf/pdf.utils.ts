@@ -1,5 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import OpenAI from 'openai';
+import { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 
 interface Summary {
@@ -11,15 +12,23 @@ interface Summary {
 export class AIUtils {
     private static openai: OpenAI;
     private static isInitialized = false;
+    private static configService: ConfigService;
+    private static s3: S3;
 
-    constructor(private configService: ConfigService) {
+    constructor(configService: ConfigService, @Inject('S3') s3: S3) {
+        AIUtils.configService = configService;
+        AIUtils.s3 = s3;
         this.initializeOpenAI();
     }
 
     private initializeOpenAI() {
         if (!AIUtils.isInitialized) {
-            const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+            const apiKey = AIUtils.configService.get<string>('OPENAI_API_KEY');
+            if (!apiKey) {
+                throw new Error('OpenAI API 키가 설정되지 않았습니다.');
+            }
             AIUtils.openai = new OpenAI({ apiKey });
+            AIUtils.isInitialized = true;
         }
     }
 
@@ -28,12 +37,16 @@ export class AIUtils {
      */
     static async extractSummary(
         summaries: Summary[],
+        videoId: string,
     ): Promise<{ timestamp: string; summary: string; type: string }[]> {
+        if (!AIUtils.openai) {
+            throw new Error('OpenAI가 초기화되지 않았습니다.');
+        }
+
         const formattedSummaries = summaries
             .map(item => `[${item.timestamp}] ${item.summary}`)
             .join('\n');
 
-        // console.log('💡 Formatted summaries:', formattedSummaries);
         try {
             const response = await AIUtils.openai.chat.completions.create({
                 model: 'gpt-4',
@@ -58,13 +71,14 @@ export class AIUtils {
                 top_p: 0.8,
             });
 
-            console.log(
-                '💡response.choices[0]?.message?.content',
+            const parsedResult = AIUtils.parseTimestampedText(
                 response.choices[0]?.message?.content,
             );
 
-            const result = AIUtils.parseTimestampedText(response.choices[0]?.message?.content);
-            return result;
+            // S3에 결과 업로드
+            await AIUtils.uploadToS3(parsedResult, videoId);
+
+            return parsedResult;
         } catch (error) {
             console.error('💡 OpenAI API 호출 실패:', error);
             throw new BadRequestException(`요약 생성 실패: ${error.message}`);
@@ -90,7 +104,38 @@ export class AIUtils {
                 });
             }
         }
-
         return result;
+    }
+
+    private static async uploadToS3(
+        summaries: { timestamp: string; summary: string; type: string }[],
+        videoId: string,
+    ): Promise<void> {
+        if (!AIUtils.s3) {
+            throw new Error('S3가 초기화되지 않았습니다.');
+        }
+
+        const bucketName = AIUtils.configService.get<string>('AWS_S3_BUCKET');
+        if (!bucketName) {
+            throw new Error('S3 버킷 이름이 설정되지 않았습니다.');
+        }
+
+        const key = `summaries/${videoId}.json`;
+        const content = JSON.stringify(summaries, null, 2);
+
+        const params = {
+            Bucket: bucketName,
+            Key: key,
+            Body: content,
+            ContentType: 'application/json',
+        };
+
+        try {
+            await AIUtils.s3.upload(params).promise();
+            console.log(`✅ 요약본이 S3에 업로드되었습니다: ${bucketName}/${key}`);
+        } catch (error) {
+            console.error(`❌ S3 업로드 실패: ${error.message}`);
+            throw new Error(`요약본 S3 업로드 실패: ${error.message}`);
+        }
     }
 }
