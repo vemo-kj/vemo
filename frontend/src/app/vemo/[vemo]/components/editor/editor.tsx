@@ -14,14 +14,14 @@ import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import { useSummary } from '../../context/SummaryContext';
 import MemoItem from '../editor/MemoItem';
 
-// DraftEditor를 위한 타입 정의 추가
+// DraftEditor를 위한 타입 정의 수정
 const Editor = DraftEditor as unknown as React.ComponentType<{
     editorState: EditorState;
     onChange: (state: EditorState) => void;
     placeholder?: string;
-    keybinding?: (e: any) => void;
     handleKeyCommand?: (command: string) => 'handled' | 'not-handled';
-    keyBindingFn?: (e: any) => string | null;
+    keyBindingFn?: (e: React.KeyboardEvent) => string | null;
+    onFocus?: () => void;
 }>;
 
 interface Section {
@@ -109,8 +109,8 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
-    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null); // 메모 시작 시점 타임스탬프
-    const displayAreaRef = useRef<HTMLDivElement>(null); // displayArea에 대한 ref 추가
+    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);
+    const displayAreaRef = useRef<HTMLDivElement>(null);
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
@@ -360,18 +360,22 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         fetchMemos();
     }, [props.memosId]);
 
-    // 에디터 상태 변경 핸들러 추가
-    const handleEditorChange = (newState: EditorState) => {
-        const contentState = newState.getCurrentContent();
-        const prevContentState = editorState.getCurrentContent();
-
-        // 이전에 텍스트가 없었고, 현재 텍스트가 있는 경우 (새로운 입력 시작)
-        if (!prevContentState.hasText() && contentState.hasText()) {
+    // 에디터에 포커스가 들어올 때 타임스탬프 설정
+    const handleEditorFocus = () => {
+        if (!editorState.getCurrentContent().hasText()) {
+            // 에디터가 비어있을 때만 새 타임스탬프 설정
             setMemoStartTimestamp(props.getTimestamp());
         }
-        // 이전에 텍스트가 있었고, 현재 텍스트가 없는 경우 (모든 텍스트 삭제)
-        else if (prevContentState.hasText() && !contentState.hasText()) {
-            setMemoStartTimestamp(null);
+    };
+
+    // 에디터 내용이 변경될 때
+    const handleEditorChange = (newState: EditorState) => {
+        const hasText = newState.getCurrentContent().hasText();
+        const hadText = editorState.getCurrentContent().hasText();
+
+        // 텍스트가 모두 지워졌다가 다시 입력 시작할 때
+        if (!hadText && hasText) {
+            setMemoStartTimestamp(props.getTimestamp());
         }
 
         setEditorState(newState);
@@ -384,20 +388,20 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         }
     };
 
-    // handleSave 수정
+    // 저장 시에는 memoStartTimestamp 사용
     const handleSave = async () => {
         const contentState = editorState.getCurrentContent();
         if (!contentState.hasText()) return;
 
         try {
-            // 현재 시간을 캡처와 동일한 방식으로 가져오기
-            const currentTime = props.getTimestamp();
-            console.log('Current timestamp before save:', currentTime);
+            // 저장할 때는 메모 시작 시점의 타임스탬프 사용
+            const timestamp = memoStartTimestamp || props.getTimestamp();
+            console.log('Saving with timestamp:', timestamp);
 
             const html = convertToHTML(contentState);
             const requestData = {
-                timestamp: currentTime, // 직접 받은 시간을 사용
-                description: convertToHTML(contentState),
+                timestamp,
+                description: html,
                 memosId: Number(props.memosId),
             };
 
@@ -410,25 +414,28 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 body: JSON.stringify(requestData),
             });
 
+            if (!response.ok) {
+                throw new Error('메모 저장에 실패했습니다.');
+            }
+
             const data = await response.json();
 
             const newItem: Section = {
                 id: `memo-${data.id}`,
-                timestamp: currentTime, // 동일한 시간 포맷 사용
-                htmlContent: convertToHTML(contentState),
+                timestamp,
+                htmlContent: html,
             };
 
             setSections(prev => sortByTimestamp([...prev, newItem]));
+
+            // 저장 후 초기화
+            setMemoStartTimestamp(null);
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
 
             // 저장 후 스크롤 이동
-            setTimeout(scrollToBottom, 100); // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
+            setTimeout(scrollToBottom, 100);
 
-            // 저장 후 타임스탬프 초기화
-            setMemoStartTimestamp(null);
-            setEditorState(EditorState.createEmpty());
-            props.onMemoSaved?.();
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -637,6 +644,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     placeholder="내용을 입력하세요..."
                     handleKeyCommand={handleKeyCommand}
                     keyBindingFn={keyBindingFn}
+                    onFocus={handleEditorFocus}
                 />
                 <div className={styles.toolbar}>
                     <button
