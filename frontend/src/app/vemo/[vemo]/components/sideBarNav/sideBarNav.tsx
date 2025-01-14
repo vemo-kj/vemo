@@ -2,7 +2,7 @@
 
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Community from '../community/Community';
 import ExportButton from '../exportButton/ExportButton';
 import PlayList from '../playList/PlayList';
@@ -24,32 +24,6 @@ export interface SideBarNavProps {
     memosId: number | null;
 }
 
-// 응답 타입
-interface MemosidResponse {
-    id: number; // memosid
-    title: string; // 메모 제목
-    createdAt: Date; // 메모 생성 시간
-}
-
-interface Memo {
-    id: number;
-    timestamp: string;
-    description: string;
-}
-
-interface Captures {
-    id: number;
-    createdAt: Date;
-    imageUrl: string;
-}
-
-interface MemoListResponse {
-    id: number;
-    title: string;
-    createdAt: Date;
-    memo: Memo[];
-    captures: Captures[];
-}
 
 // 메모 생성 함수
 export default function SidebarNav({
@@ -65,22 +39,48 @@ export default function SidebarNav({
     memosId,
 }: SideBarNavProps) {
     const [activeTab, setActiveTab] = useState('write');
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
+
+    // vemoData가 변경될 때마다 editedTitle 업데이트
+    useEffect(() => {
+        if (vemoData?.title) {
+            setEditedTitle(vemoData.title);
+        }
+    }, [vemoData]);
 
     // videoId 값 확인
     console.log('sideBarNav.tsx props videoId:', videoId);
 
     // 메튼 클릭 핸들러
-    const handleWriteClick = async () => {
-        try {
-            console.log('handleWriteClick memosId: 111111111111', memosId); // 클릭 시점의 memosId 값 확인
 
-            if (!videoId) {
-                console.error('No videoId available');
+    const handleTitleSave = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token || !memosId) {
+                console.error('토큰 또는 memosId가 없습니다.');
                 return;
             }
-            console.log('handleWriteClick videoId:', videoId);
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/memos/${memosId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title: editedTitle }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error('제목 수정에 실패했습니다.');
+            }
+
+            setIsEditingTitle(false);
         } catch (error) {
-            console.error('Failed to handle write click:', error);
+            console.error('제목 수정 중 오류 발생:', error);
+            // 에러 발생 시 원래 제목으로 복원
+            setEditedTitle(vemoData?.title || '');
         }
     };
 
@@ -143,12 +143,31 @@ export default function SidebarNav({
                     <>
                         <div className={styles.headerContainer}>
                             <div className={styles.titleContainer}>
-                                {/* <p className={styles.notesSubHeader}>
-                                    자바 스크립트 스터디 재생목록
-                                </p> */}
-                                <h1 className={styles.notesHeaderText}>
-                                    {vemoData?.title || '제목 없음'}
-                                </h1>
+                                {isEditingTitle ? (
+                                    <input
+                                        type="text"
+                                        value={editedTitle}
+                                        onChange={(e) => setEditedTitle(e.target.value)}
+                                        onBlur={handleTitleSave}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleTitleSave();
+                                            }
+                                        }}
+                                        className={styles.titleInput}
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <h1
+                                        className={styles.notesHeaderText}
+                                        onClick={() => {
+                                            setIsEditingTitle(true);
+                                            setEditedTitle(vemoData?.title || '');
+                                        }}
+                                    >
+                                        {editedTitle || '제목 없음'}
+                                    </h1>
+                                )}
                             </div>
 
                             <div className={styles.dropdown}>

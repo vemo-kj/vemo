@@ -16,10 +16,30 @@ interface MemoItemProps {
     onPauseVideo?: () => void;
     isEditable?: boolean;
     addTextToEditor?: (text: string) => void;
+    onDrawingStart?: (captureId: string) => void;
+    onRefetch?: () => void;
 }
 
-const MemoItem = memo(
-    ({
+// (수정) "URL / dataURL / base64"를 구분해서 최종 src를 만드는 헬퍼 함수
+function getImageSrc(screenshot?: string) {
+    if (!screenshot) return '';
+
+    // 1) 이미 data:image/... 형태면 그대로
+    if (screenshot.startsWith('data:image/')) {
+        return screenshot;
+    }
+
+    // 2) http:// 또는 https:// 로 시작하면 외부 URL로 간주
+    if (screenshot.startsWith('http://') || screenshot.startsWith('https://')) {
+        return screenshot;
+    }
+
+    // 3) 나머지는 순수 base64 → 접두어 붙이기
+    return `data:image/png;base64,${screenshot}`;
+}
+
+const MemoItem = memo((props: MemoItemProps) => {
+    const {
         id,
         timestamp,
         htmlContent,
@@ -30,253 +50,283 @@ const MemoItem = memo(
         onPauseVideo,
         isEditable,
         addTextToEditor,
-    }: MemoItemProps) => {
-        // ====== (1) 그리기 영역 ======
-        const [isDrawingOpen, setIsDrawingOpen] = useState(false);
+        onDrawingStart,
+        onRefetch,
+    } = props;
 
-        // 그리기 영역 열기
-        const handleOpenDrawing = () => {
-            onPauseVideo?.();
-            setIsDrawingOpen(true);
-        };
+    // ====== (1) 그리기 영역 ======
+    const [isDrawingOpen, setIsDrawingOpen] = useState(false);
 
-        // 그리기 영역 닫기
-        const handleCloseDrawing = () => {
-            setIsDrawingOpen(false);
-        };
-
-        // 그리기 저장 핸들러
-        const handleSaveDrawing = (dataUrl: string) => {
-            const imgElem = document.getElementById(`capture-${id}`) as HTMLImageElement;
-            if (imgElem) {
-                imgElem.src = dataUrl;
-                imgElem.style.width = '100%';
-                imgElem.style.height = '100%';
-                imgElem.style.objectFit = 'cover';
-            }
-            setIsDrawingOpen(false);
-        };
-
-        // ====== (2) 텍스트 편집 ======
-        const contentRef = useRef<HTMLDivElement>(null);
-        const [isEditing, setIsEditing] = useState(false);
-        const [isComposing, setIsComposing] = useState(false);
-
-        // 초기 내용 설정
-        useEffect(() => {
-            if (contentRef.current && !isEditing) {
-                contentRef.current.innerHTML = htmlContent;
-            }
-        }, [htmlContent, isEditing]);
-
-        const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-            if (!isComposing) {
-                const newContent = e.currentTarget.innerHTML;
-            }
-        };
-
-        const handleCompositionStart = () => {
-            setIsComposing(true);
-        };
-
-        const handleCompositionEnd = (e: React.CompositionEvent<HTMLDivElement>) => {
-            setIsComposing(false);
-        };
-
-        // 편집 완료할 때
-        const handleBlur = () => {
-            setIsEditing(false);
-            if (!contentRef.current) return;
-
-            const newValue = contentRef.current.innerHTML;
-            if (newValue.trim().length === 0) {
-                onDelete();
-            } else {
-                onChangeHTML(newValue);
-            }
-        };
-
-        const handleTimestampClick = () => {
-            onTimestampClick?.(timestamp);
-        };
-
-        // debounce를 적용하여 잦은 상태 업데이트 방지
-        const debouncedOnChangeHTML = useCallback(
-            debounce((newValue: string) => {
-                onChangeHTML(newValue);
-            }, 300),
-            [onChangeHTML],
-        );
-
-        const [imageLoading, setImageLoading] = useState(false);
-        const [imageError, setImageError] = useState(false);
-
-        // 이미지 로딩 시작 시 호출
-        useEffect(() => {
+    const handleOpenDrawing = () => {
+        if (onDrawingStart && id.startsWith('capture-')) {
+            const captureId = id.split('-')[1];
+            // 굳이 여기서 imageData를 만들 필요 없긴 하지만,
+            // 만약 onDrawingStart에 넘기려면 getImageSrc(screenshot)로 변환
             if (screenshot) {
-                console.log('이미지 로딩 시작:', {
-                    id,
-                    screenshotStart: screenshot.substring(0, 50) + '...',
-                });
-
-                setImageLoading(true);
-                const img = new Image();
-
-                img.onload = () => {
-                    console.log('이미지 로드 성공:', {
-                        id,
-                        width: img.width,
-                        height: img.height,
-                    });
-                    setImageLoading(false);
-                    setImageError(false);
-                };
-
-                img.onerror = error => {
-                    console.error('이미지 로드 실패:', {
-                        id,
-                        error,
-                    });
-                    setImageLoading(false);
-                    setImageError(true);
-                };
-
-                img.src = screenshot;
+                const imageData = getImageSrc(screenshot);
+                onDrawingStart(captureId);
             }
-        }, [screenshot, id]);
+        }
+    };
 
-        // 이미지 엘리먼트 참조 추가
-        const imgRef = useRef<HTMLImageElement>(null);
+    const handleCloseDrawing = () => {
+        setIsDrawingOpen(false);
+    };
 
-        // 이미지 엘리먼트 마운트 후 확인
-        useEffect(() => {
-            if (imgRef.current) {
-                console.log('이미지 엘리먼트 상태:', {
-                    id,
-                    element: imgRef.current,
-                    displayStyle: window.getComputedStyle(imgRef.current).display,
-                    dimensions: {
-                        width: imgRef.current.offsetWidth,
-                        height: imgRef.current.offsetHeight,
-                    },
-                });
+    // ====== (2) 텍스트 편집 ======
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isComposing, setIsComposing] = useState(false);
+
+    useEffect(() => {
+        if (contentRef.current && !isEditing) {
+            contentRef.current.innerHTML = htmlContent;
+        }
+    }, [htmlContent, isEditing]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        if (!isComposing) {
+            const newContent = e.currentTarget.innerHTML;
+            // 필요하면 debouncedOnChangeHTML(newContent);
+        }
+    };
+
+    const handleCompositionStart = () => {
+        setIsComposing(true);
+    };
+
+    const handleCompositionEnd = (e: React.CompositionEvent<HTMLDivElement>) => {
+        setIsComposing(false);
+    };
+
+    const handleBlur = () => {
+        setIsEditing(false);
+        if (!contentRef.current) return;
+
+        const newValue = contentRef.current.innerHTML;
+        if (newValue.trim().length === 0) {
+            onDelete();
+        } else {
+            onChangeHTML(newValue);
+        }
+    };
+
+    const debouncedOnChangeHTML = useCallback(
+        debounce((newValue: string) => {
+            onChangeHTML(newValue);
+        }, 300),
+        [onChangeHTML],
+    );
+
+    const handleTimestampClick = () => {
+        onTimestampClick?.(timestamp);
+    };
+
+    // ====== (3) 이미지 로딩 상태 ======
+    const [imageLoading, setImageLoading] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    const handleImageLoad = () => {
+        setImageLoading(false);
+        setImageError(false);
+    };
+
+    const handleImageError = () => {
+        console.error('이미지 로드 실패:', { id, url: screenshot });
+        setImageLoading(false);
+        setImageError(true);
+    };
+
+    // (수정) useEffect에서 getImageSrc() 사용
+    useEffect(() => {
+        if (screenshot) {
+            setImageLoading(true);
+            const img = new Image();
+            img.onload = handleImageLoad;
+            img.onerror = handleImageError;
+            img.src = getImageSrc(screenshot); // data:image/... 또는 URL
+        }
+    }, [screenshot, id]);
+
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    useEffect(() => {
+        if (imgRef.current) {
+            console.log('이미지 엘리먼트 상태:', {
+                id,
+                element: imgRef.current,
+                displayStyle: window.getComputedStyle(imgRef.current).display,
+                dimensions: {
+                    width: imgRef.current.offsetWidth,
+                    height: imgRef.current.offsetHeight,
+                },
+            });
+        }
+    }, [id]);
+
+    const handleSaveDrawing = async (editedImageData: string) => {
+        try {
+            // 배경 이미지와 그림을 합성
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const backgroundImg = new Image();
+            const drawingImg = new Image();
+
+            // Promise를 사용하여 이미지 로딩 처리
+            await new Promise((resolve, reject) => {
+                backgroundImg.onload = () => {
+                    canvas.width = backgroundImg.width;
+                    canvas.height = backgroundImg.height;
+                    
+                    // 배경 이미지 먼저 그리기
+                    ctx?.drawImage(backgroundImg, 0, 0);
+                    
+                    // 그 위에 그림 그리기
+                    drawingImg.onload = () => {
+                        ctx?.drawImage(drawingImg, 0, 0);
+                        resolve(null);
+                    };
+                    drawingImg.onerror = reject;
+                    drawingImg.src = editedImageData;
+                };
+                backgroundImg.onerror = reject;
+                backgroundImg.src = getImageSrc(screenshot || '');
+            });
+
+            // 최종 합성된 이미지
+            const finalImageData = canvas.toDataURL('image/png');
+            
+            // 저장 처리
+            if (onDrawingStart && id.startsWith('capture-')) {
+                const captureId = id.split('-')[1];
+                onDrawingStart(captureId);
             }
-        }, [id]);
 
-        return (
-            <div className={styles.memoItemContainer}>
-                {/* 1) 상단에 타임스탬프 */}
-                <div className={styles.memoHeader}>
-                    <button
-                        className={styles.timestampBtn}
-                        onClick={() => onTimestampClick?.(timestamp)}
-                    >
-                        {timestamp}
-                    </button>
-                </div>
+            setIsDrawingOpen(false);
+            
+            // 필요한 경우 서버에 저장하는 로직 추가
+            if (props.onRefetch) {
+                props.onRefetch();
+            }
+        } catch (error) {
+            console.error('Drawing save failed:', error);
+            alert('이미지 저장에 실패했습니다.');
+        }
+    };
 
-                {/* 2) 중앙 영역: 이미지 or HTML */}
-                {/* contentEditable 영역 (노션처럼 인라인 수정) */}
-                {screenshot ? (
-                    <div className={styles.imageContainer}>
-                        {imageLoading && <div className={styles.loadingIndicator}>로딩중...</div>}
-                        {imageError && (
-                            <div className={styles.errorMessage}>
-                                이미지를 불러올 수 없습니다
-                                <button
-                                    onClick={() => {
-                                        setImageLoading(true);
-                                        setImageError(false);
-                                        if (imgRef.current) {
-                                            imgRef.current.src = screenshot;
-                                        }
-                                    }}
-                                    className={styles.retryButton}
-                                >
-                                    다시 시도
-                                </button>
-                            </div>
-                        )}
-                        <div className={styles.captureImageWrapper}>
-                            <img
-                                ref={imgRef}
-                                id={`capture-${id}`}
-                                src={screenshot}
-                                alt="capture"
-                                className={styles.captureImage}
-                                onLoad={() => {
-                                    setImageLoading(false);
+    // isValidImageUrl도 아래처럼 수정할 수 있음 (URL + dataURL 체크)
+    const isValidImageUrl = (url: string) => {
+        if (!url) return false;
+        if (url.startsWith('data:image/')) return true;
+        if (url.startsWith('http://') || url.startsWith('https://')) return true;
+        return false;
+    };
+
+    return (
+        <div className={styles.memoItemContainer}>
+            <div className={styles.memoHeader}>
+                <button className={styles.timestampBtn} onClick={handleTimestampClick}>
+                    {timestamp}
+                </button>
+            </div>
+
+            {/* 2) 중앙 영역: 이미지 or HTML */}
+            {/* contentEditable 영역 (노션처럼 인라인 수정) */}
+            {screenshot ? (
+                <div className={styles.imageContainer}>
+                    {imageLoading && <div className={styles.loadingIndicator}>로딩중...</div>}
+                    {imageError && (
+                        <div className={styles.errorMessage}>
+                            이미지를 불러올 수 없습니다
+                            <button
+                                onClick={() => {
+                                    setImageLoading(true);
                                     setImageError(false);
-                                }}
-                                onError={() => {
-                                    console.error('이미지 로드 실패:', { id, url: screenshot });
-                                    setImageLoading(false);
-                                    setImageError(true);
-                                }}
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    <div
-                        className={styles.itemContent}
-                        contentEditable={isEditable}
-                        suppressContentEditableWarning={true}
-                        onFocus={() => setIsEditing(true)}
-                        onInput={handleInput}
-                        onCompositionStart={handleCompositionStart}
-                        onCompositionEnd={handleCompositionEnd}
-                        onBlur={handleBlur}
-                        ref={contentRef}
-                        dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(htmlContent, {
-                                ALLOWED_TAGS: ['p', 'strong', 'em', 'u'],
-                                ALLOWED_ATTR: []
-                            })
-                        }}
-                    />
-                )}
-
-                {/* 3) 하단에 그리기, 삭제 버튼 */}
-                <div className={styles.memoFooter}>
-                    {screenshot && (
-                        <>
-                            <button className={styles.drawBtn} onClick={handleOpenDrawing}>
-                                그리기
-                            </button>
-                            <ExtractButton
-                                imageUrl={screenshot}
-                                onExtracted={text => {
-                                    if (addTextToEditor) {
-                                        console.log('Adding text to editor input:', text);
-                                        addTextToEditor(text);
+                                    if (imgRef.current) {
+                                        imgRef.current.src = screenshot;
                                     }
                                 }}
-                                onDelete={onDelete}
-                            />
-                        </>
-                    )}
-                    <button className={styles.deleteBtn} onClick={onDelete}>
-                        삭제
-                    </button>
-                </div>
-
-                {/* 4) 그리기 모달 (DrawingCanvas로 교체) */}
-                {isDrawingOpen && screenshot && (
-                    <div className={styles.drawOverlay}>
-                        <div className={styles.drawPopup}>
-                            <h3>그리기</h3>
-                            <DrawingCanvas
-                                onSave={handleSaveDrawing}
-                                onClose={handleCloseDrawing}
-                                backgroundImage={screenshot} // 배경 이미지 전달
-                            />
+                                className={styles.retryButton}
+                            >
+                                다시 시도
+                            </button>
                         </div>
+                    )}
+                    <div className={styles.captureImageWrapper}>
+                        <img
+                            ref={imgRef}
+                            id={`capture-${id}`}
+                            src={screenshot}
+                            alt="capture"
+                            className={styles.captureImage}
+                            onLoad={() => {
+                                setImageLoading(false);
+                                setImageError(false);
+                            }}
+                            onError={() => {
+                                console.error('이미지 로드 실패:', { id, url: screenshot });
+                                setImageLoading(false);
+                                setImageError(true);
+                            }}
+                        />
                     </div>
+                </div>
+            ) : (
+                <div
+                    className={styles.itemContent}
+                    contentEditable={isEditable}
+                    suppressContentEditableWarning={true}
+                    onFocus={() => setIsEditing(true)}
+                    onInput={handleInput}
+                    onCompositionStart={handleCompositionStart}
+                    onCompositionEnd={handleCompositionEnd}
+                    onBlur={handleBlur}
+                    ref={contentRef}
+                    dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(htmlContent, {
+                            ALLOWED_TAGS: ['p', 'strong', 'em', 'u'],
+                            ALLOWED_ATTR: [],
+                        }),
+                    }}
+                />
+            )}
+
+            {/* 3) 하단에 그리기, 삭제 버튼 */}
+            <div className={styles.memoFooter}>
+                {screenshot && (
+                    <>
+                        <button className={styles.drawBtn} onClick={handleOpenDrawing}>
+                            그리기
+                        </button>
+                        <ExtractButton
+                            imageUrl={screenshot}
+                            onExtracted={text => {
+                                if (addTextToEditor) {
+                                    console.log('Adding text to editor input:', text);
+                                    addTextToEditor(text);
+                                }
+                            }}
+                            onDelete={onDelete}
+                        />
+                    </>
                 )}
+                <button className={styles.deleteBtn} onClick={onDelete}>
+                    삭제
+                </button>
             </div>
-        );
-    },
-);
+
+            {isDrawingOpen && screenshot && (
+                <DrawingCanvas
+                    captureId={id.split('-')[1]}
+                    onSave={handleSaveDrawing}
+                    onClose={handleCloseDrawing}
+                    backgroundImage={getImageSrc(screenshot)}
+                    onRefetch={onRefetch}
+                />
+            )}
+        </div>
+    );
+});
 
 MemoItem.displayName = 'MemoItem';
 

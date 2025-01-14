@@ -1,11 +1,11 @@
 .mainContainer {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #fef9e9;
   padding-top: 70px;
 }
 
 .content {
-  max-width: 1200px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 20px;
 }

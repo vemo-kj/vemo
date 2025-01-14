@@ -9,7 +9,7 @@ export class PdfController {
     constructor(
         private readonly memosService: MemosService,
         private readonly pdfService: PdfService,
-    ) { }
+    ) {}
 
     @Public()
     @Get('download/:memosId')
@@ -18,7 +18,12 @@ export class PdfController {
         const memos = await this.memosService.getMemosById(memosId);
         const { title, memo, captures } = memos;
 
-        const pdfBuffer = await this.pdfService.createMemoCapturePDF(title, memo, captures);
+        const pdfBuffer = await this.pdfService.createMemoCapturePDF(
+            title,
+            memo,
+            captures,
+            memosId,
+        );
 
         const safeTitle = encodeURIComponent(title);
 

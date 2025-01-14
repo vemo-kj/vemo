@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CreateMemosResponseDto } from '../../types/vemo.types';
 import styles from './Vemo.module.css';
 import SideBarNav from './components/sideBarNav/sideBarNav';
+import DrawingCanvas from './components/DrawingCanvas/DrawingCanvas';
 
 // 동적 로드된 DraftEditor
 const EditorNoSSR = dynamic(() => import('./components/editor/editor'), {
@@ -47,20 +48,42 @@ export default function VemoPage() {
     const router = useRouter();
     const params = useParams();
     const videoId = params?.vemo as string;
+
+    // 유튜브 플레이어 Ref
     const playerRef = useRef<YouTubePlayer | null>(null);
+
+    // Editor Ref
     const editorRef = useRef<any>(null);
+
+    // 현재 타임스탬프
     const [currentTimestamp, setCurrentTimestamp] = useState('00:00');
+
+    // 사이드바 드롭다운 옵션
     const [selectedOption, setSelectedOption] = useState('내 메모 보기');
+
+    // 에디팅 중인 아이템
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
+
+    // 서버에서 불러온 메모 데이터
     const [vemoData, setVemoData] = useState<CreateMemosResponseDto | null>(null);
+    const [memosId, setMemosId] = useState<number | null>(null);
+
+    // 로딩/에러 상태
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [memosId, setMemosId] = useState<number | null>(null);
-    const [captureStatus, setCaptureStatus] = useState<'idle' | 'processing'>('idle');
-    const [lastCaptureError, setLastCaptureError] = useState<string | null>(null);
+
+    // 유튜브 플레이어 상태
     const [isPlayerReady, setIsPlayerReady] = useState(false);
 
-    // fetchVemoData 함수를 먼저 선언
+    // 그리기 모달/캡처 편집 관련 상태
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
+    const [editingCaptureId, setEditingCaptureId] = useState<string | null>(null);
+    const [editingCaptureImage, setEditingCaptureImage] = useState<string | null>(null);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+    console.log('page.tsx videoId:', videoId);
+
+    // ------------------ (1) 메모/캡처 불러오기 ------------------
     const fetchVemoData = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
@@ -71,13 +94,12 @@ export default function VemoPage() {
                 return;
             }
 
-            // URL에서 memosId와 mode 파라미터 확인
             const urlParams = new URLSearchParams(window.location.search);
             const existingMemosId = urlParams.get('memosId');
             const mode = urlParams.get('mode');
 
-            // 기존 메모 수정 모드인 경우 getOrCreate 호출하지 않고 직접 메모 조회
             if (existingMemosId && mode === 'edit') {
+                // 기존 메모 수정 모드
                 const memosResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${existingMemosId}`,
                     {
@@ -87,13 +109,10 @@ export default function VemoPage() {
                         credentials: 'include',
                     },
                 );
-
                 if (!memosResponse.ok) {
                     throw new Error('메모를 불러오는데 실패했습니다.');
                 }
-
                 const memosData = await memosResponse.json();
-                // 타입 변환하여 저장
                 setVemoData({
                     id: Number(existingMemosId),
                     title: memosData.title || '',
@@ -105,7 +124,7 @@ export default function VemoPage() {
                 return;
             }
 
-            // 일반적인 경우 getOrCreate 호출 (퍼가기 등)
+            // 일반적인 경우 (퍼가기 등)
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_BASE_URL}/home/memos/${videoId}`,
                 {
@@ -117,16 +136,15 @@ export default function VemoPage() {
                     credentials: 'include',
                 },
             );
-
             if (!response.ok) {
                 throw new Error(`메모 데이터를 불러오는데 실패했습니다. (${response.status})`);
             }
-
             const data: CreateMemosResponseDto = await response.json();
             console.log('받은 메모 데이터:', data);
             setVemoData(data);
             setMemosId(data.id);
 
+            // 추가 메모 상세 조회
             if (data.id) {
                 const memosResponse = await fetch(
                     `${process.env.NEXT_PUBLIC_BASE_URL}/memos/${data.id}`,
@@ -147,21 +165,20 @@ export default function VemoPage() {
             console.error('데이터 로딩 실패:', error);
             if (error instanceof Error) {
                 setError(error.message);
+                if (error.message.includes('로그인이 필요한 서비스입니다.')) {
+                    router.push('/login');
+                }
             } else {
                 setError('알 수 없는 오류가 발생했습니다.');
-            }
-            if (error instanceof Error && error.message.includes('로그인이 필요한 서비스입니다.')) {
-                router.push('/login');
             }
         } finally {
             setIsLoading(false);
         }
     }, [videoId, router]);
 
-    // timestamp 업데이트 함수
+    // ------------------ (2) 유튜브 Player 초기화 ------------------
     const startTimestampUpdate = useCallback(() => {
         if (!playerRef.current?.getCurrentTime) return;
-
         const interval = setInterval(() => {
             if (playerRef.current?.getCurrentTime) {
                 const currentTime = playerRef.current.getCurrentTime();
@@ -172,31 +189,23 @@ export default function VemoPage() {
                 );
             }
         }, 1000);
-
         return () => clearInterval(interval);
     }, []);
 
-    // YouTube API 로드
     const loadYouTubeAPI = useCallback(() => {
         return new Promise<void>(resolve => {
             if (window.YT) {
                 resolve();
                 return;
             }
-
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             tag.id = 'youtube-api';
-
-            window.onYouTubeIframeAPIReady = () => {
-                resolve();
-            };
-
+            window.onYouTubeIframeAPIReady = () => resolve();
             document.body.appendChild(tag);
         });
     }, []);
 
-    // Player 초기화
     const initializePlayer = useCallback(() => {
         if (!videoId || playerRef.current) return;
 
@@ -233,13 +242,10 @@ export default function VemoPage() {
         }
     }, [videoId, startTimestampUpdate, fetchVemoData]);
 
-    // 초기화
     useEffect(() => {
         let isMounted = true;
-
         const initialize = async () => {
             if (!videoId || !isMounted) return;
-
             try {
                 await loadYouTubeAPI();
                 if (window.YT) {
@@ -252,7 +258,6 @@ export default function VemoPage() {
                 }
             }
         };
-
         initialize();
 
         return () => {
@@ -264,7 +269,6 @@ export default function VemoPage() {
         };
     }, [videoId, loadYouTubeAPI, initializePlayer]);
 
-    // 노트 아이템에서 timestamp 버튼 클릭 → 해당 시각으로 이동
     const handleSeekToTime = (timestamp: string) => {
         const [m, s] = timestamp.split(':').map(Number);
         const total = (m || 0) * 60 + (s || 0);
@@ -273,21 +277,13 @@ export default function VemoPage() {
         }
     };
 
-    // 드롭다운 선택
-    const handleOptionSelect = (option: string) => {
-        setSelectedOption(option);
-    };
-
-    // (캡처) 메시지 수신 → editorRef.current?.addCaptureItem
+    // ------------------ (3) 캡처 메시지 수신 ------------------
     useEffect(() => {
         const handleMessage = (e: MessageEvent) => {
             if (e.source !== window) return;
-
             if (e.data.type === 'CAPTURE_TAB_RESPONSE') {
-                console.log('전체 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             } else if (e.data.type === 'CAPTURE_AREA_RESPONSE') {
-                console.log('부분 캡처 응답 수신');
                 editorRef.current?.addCaptureItem?.(currentTimestamp, e.data.dataUrl);
             }
         };
@@ -297,18 +293,10 @@ export default function VemoPage() {
         };
     }, [currentTimestamp]);
 
-    // 전체/부분 캡처
     const handleCaptureTab = async () => {
         if (!editorRef.current) return;
-
         try {
-            console.log('전체 캡처 요청 전송');
-            window.postMessage(
-                {
-                    type: 'CAPTURE_TAB',
-                },
-                '*',
-            );
+            window.postMessage({ type: 'CAPTURE_TAB' }, '*');
         } catch (error) {
             console.error('캡처 요청 실패:', error);
         }
@@ -316,27 +304,70 @@ export default function VemoPage() {
 
     const handleCaptureArea = async () => {
         if (!editorRef.current) return;
-
         try {
-            console.log('부분 캡처 요청 전송');
-            window.postMessage(
-                {
-                    type: 'CAPTURE_AREA',
-                },
-                '*',
-            );
+            window.postMessage({ type: 'CAPTURE_AREA' }, '*');
         } catch (error) {
             console.error('부분 캡처 요청 실패:', error);
         }
     };
 
-    // 메모 저장 후 데이터 갱신을 위한 핸들러
+    // ------------------ (4) 메모 저장 후 다시 불러오기 ------------------
     const handleMemoSaved = useCallback(() => {
         if (videoId) {
             fetchVemoData();
         }
     }, [videoId, fetchVemoData]);
 
+    // ------------------ (5) 그리기 편집 ------------------
+    const processImageData = (dataUrl: string) => {
+        if (!dataUrl.startsWith('data:image/')) {
+            console.error('Invalid image data URL');
+            return null;
+        }
+        return dataUrl;
+    };
+
+    const handleDrawingStart = async (captureId: string) => {
+        console.log('Drawing start with capture ID:', captureId);
+        try {
+            if (!vemoData?.captures) {
+                throw new Error('No captures data available');
+            }
+            const capture = vemoData.captures.find(c => `capture-${c.id}` === `capture-${captureId}`);
+            if (!capture?.image) {
+                throw new Error('Capture image not found');
+            }
+            setEditingCaptureImage(capture.image);
+            setEditingCaptureId(captureId);
+            setIsDrawingMode(true);
+        } catch (error) {
+            console.error('Error starting drawing mode:', error);
+            alert('이미지를 불러오는데 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
+    const handleDrawingSave = async (editedImageUrl: string, captureId?: string) => {
+        if (!editorRef.current?.addCaptureItem) return;
+        const currentTime = currentTimestamp;
+        try {
+            const processed = processImageData(editedImageUrl);
+            if (!processed) {
+                throw new Error('Invalid image data');
+            }
+            if (captureId) {
+                await editorRef.current.addCaptureItem(currentTime, processed, captureId);
+            } else {
+                await editorRef.current.addCaptureItem(currentTime, processed);
+            }
+            setIsDrawingMode(false);
+            setCapturedImage(null);
+            setEditingCaptureId(null);
+        } catch (error) {
+            console.error('Drawing save failed:', error);
+        }
+    };
+
+    // ------------------ (에러 화면) ------------------
     if (error) {
         return (
             <div className={styles.errorContainer}>
@@ -347,6 +378,7 @@ export default function VemoPage() {
         );
     }
 
+    // ------------------ (6) 최종 Render ------------------
     return (
         <div className={styles.container}>
             <div className={styles.section1} style={{ position: 'relative' }}>
@@ -371,14 +403,14 @@ export default function VemoPage() {
             <div className={styles.section3}>
                 <SideBarNav
                     selectedOption={selectedOption}
-                    onOptionSelect={handleOptionSelect}
+                    onOptionSelect={setSelectedOption}
                     vemoData={vemoData}
                     renderSectionContent={() => (
                         <EditorNoSSR
                             ref={editorRef}
                             getTimestamp={() => currentTimestamp}
                             onTimestampClick={handleSeekToTime}
-                            isEditable={true}
+                            isEditable
                             editingItemId={editingItemId}
                             onEditStart={(itemId: string) => setEditingItemId(itemId)}
                             onEditEnd={() => setEditingItemId(null)}
@@ -387,6 +419,7 @@ export default function VemoPage() {
                             onMemoSaved={handleMemoSaved}
                             memosId={memosId}
                             vemoData={vemoData}
+                            onDrawingStart={handleDrawingStart}
                         />
                     )}
                     currentTimestamp={currentTimestamp}
@@ -397,6 +430,22 @@ export default function VemoPage() {
                     memosId={memosId}
                 />
             </div>
+
+            {/* DrawingCanvas (그리기) 모달 */}
+            {isDrawingMode && (
+                <DrawingCanvas
+                    backgroundImage={editingCaptureImage || capturedImage || ''}
+                    captureId={editingCaptureId || ''}
+                    onSave={handleDrawingSave}
+                    onClose={() => {
+                        setIsDrawingMode(false);
+                        setCapturedImage(null);
+                        setEditingCaptureId(null);
+                        setEditingCaptureImage(null);
+                    }}
+                    onRefetch={fetchVemoData}
+                />
+            )}
         </div>
     );
 }
