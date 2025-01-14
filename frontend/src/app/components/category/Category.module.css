@@ -8,14 +8,14 @@
 }
 
 .mainCategory h2 {
-  font-size: 35px;
-  font-weight: 500;
+  font-size: 32px;
+  font-weight: 700;
 }
 
 .mainCategoryButtonContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 40px;
+  gap: 35px;
 }
 
 .mainCategoryButton {
@@ -24,7 +24,7 @@
   border-radius: 20px;
   background-color: #3b82f6;
   color: white;
-  font-size: 28px;
+  font-size: 25px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
