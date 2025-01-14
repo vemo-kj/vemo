@@ -7,8 +7,7 @@ export default function MainCard({
     title,
     thumbnails,
     duration,
-    category,
-    channel: { id: channelId, thumbnails: channelThumbnails, title: channelTitle },
+    channel: { thumbnails: channelThumbnails, title: channelTitle },
     vemoCount,
 }: MainCardProps) {
     return (
@@ -16,18 +15,21 @@ export default function MainCard({
             <div className={styles.mainCard}>
                 <div className={styles.thumbnailContainer}>
                     <img src={thumbnails} className={styles.thumbnails} alt={title} />
+                    <span className={styles.duration}>{duration}</span>
                 </div>
                 <div className={styles.contentContainer}>
                     <h3 className={styles.title}>{title}</h3>
                     <div className={styles.channelInfo}>
-                        <img 
-                            src={channelThumbnails} 
-                            className={styles.channelThumbnails} 
-                            alt={channelTitle} 
-                        />
-                        <span className={styles.channelTitle}>{channelTitle}</span>
+                        <div className={styles.channelLeft}>
+                            <img
+                                src={channelThumbnails}
+                                className={styles.channelThumbnails}
+                                alt={channelTitle}
+                            />
+                            <span className={styles.channelTitle}>{channelTitle}</span>
+                        </div>
+                        <span className={styles.vemoCount}>베모 {vemoCount}개</span>
                     </div>
-                    <span className={styles.vemoCount}>베모 {vemoCount}개</span>
                 </div>
             </div>
         </Link>
