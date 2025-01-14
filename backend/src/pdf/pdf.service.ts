@@ -10,7 +10,9 @@ import { Summaries } from 'src/summarization/entity/summaries.entity';
 import { Summary } from 'src/summarization/entity/summarization.entity';
 import { Repository } from 'typeorm';
 import { Memos } from 'src/memos/memos.entity';
+import { firstValueFrom } from 'rxjs';
 import { AIUtils } from './pdf.utils';
+
 @Injectable()
 export class PdfService {
     private readonly openai: OpenAI;
@@ -97,8 +99,6 @@ export class PdfService {
             return secondsA - secondsB;
         });
 
-        console.log('💡 Combined data:', combined);
-
         let htmlContent = `
             <!DOCTYPE html>
             <html lang="ko">
@@ -107,95 +107,112 @@ export class PdfService {
                 <title>${title}</title>
                 <style>
                     body {
-                        font-family: 'Noto Sans KR', sans-serif;
-                        margin: 40px;
-                        line-height: 1.8;
-                        background-color: #f4f6f9;
-                    }
-                    h1, h2 {
-                        text-align: center;
-                        margin: 30px 0;
-                        color: #5D73E6;
-                        font-size: 1.5em;
-                        font-weight: 700;
-                        letter-spacing: 0.5px;
-                    }
-                    .memo, .capture {
-                        background-color: #ffffff;
-                        border-radius: 10px;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                        margin: 20px auto;
+                        font-family: Arial, sans-serif;
+                        margin: 0;
                         padding: 20px;
-                        max-width: 800px;
-                    }
-                    .timestamp {
-                        font-size: 14px;
-                        color: #666;
-                        margin-bottom: 10px;
-                    }
-                    .description {
-                        font-size: 18px;
-                        color: #444;
-                    }
-                    .image {
-                        text-align: center;
-                        margin-top: 20px;
-                    }
-                    img {
-                        width: 100%;
-                        max-width: 600px;
+                        line-height: 1.6;
+                        color: #333;
+                        }
+
+                        .memo {
+                        background-color: #f9f9f9;
                         border: 1px solid #ddd;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-                    }
+                        padding: 10px;
+                        margin: 10px 0;
+                        border-radius: 5px;
+                        }
+
+                        .memo .timestamp {
+                        font-size: 12px;
+                        color: #666;
+                        }
+
+                        .summaries {
+                        background-color: #fff4d1; /* 밝은 노란색으로 강조 */
+                        border: 2px solid #ffd700; /* 노란색 테두리 */
+                        padding: 15px;
+                        margin: 15px 0;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 약간의 그림자 */
+                        }
+
+                        .summaries .timestamp {
+                        font-size: 14px;
+                        font-weight: bold;
+                        color: #333;
+                        }
+
+                        .summaries div {
+                        font-size: 16px;
+                        color: #111;
+                        }
+
+                        .capture {
+                        background-color: #f3f3f3;
+                        border: 1px solid #ccc;
+                        padding: 10px;
+                        margin: 10px 0;
+                        border-radius: 5px;
+                        }
+
+                        .capture .timestamp {
+                        font-size: 12px;
+                        color: #666;
+                        }
+
+                        .capture .image img {
+                        max-width: 100%;
+                        border-radius: 5px;
+                        margin-top: 10px;
+                        }
                 </style>
             </head>
             <body>
             <h2>${title}</h2>
             `;
 
-        // for (const item of combined) {
-        //     console.log('💡item 출력 ', item);
-        // if (item.type === 'memo' && 'description' in item) {
-        //     htmlContent += `
-        //         <div class="memo">
-        //             <div class="timestamp">[${item.timestamp}]</div>
-        //             <div>${item.description}</div>
-        //         </div>`;
-        // } else if (item.type === 'capture' && 'image' in item) {
-        //     try {
-        //         let imageUrl = item.image;
-        //         if (!item.image.startsWith('data:image')) {
-        //             const response = await firstValueFrom(
-        //                 this.httpService.get(item.image, { responseType: 'arraybuffer' }),
-        //             );
-        //             const base64 = Buffer.from(response.data, 'binary').toString('base64');
-        //             imageUrl = `data:image/jpeg;base64,${base64}`;
-        //         }
+        for (const item of combined) {
+            console.log('💡item 출력 ', item);
+            if (item.type === 'memo' && 'description' in item) {
+                htmlContent += `
+                <div class="memo">
+                    <div class="timestamp">[${item.timestamp}]</div>
+                    <div>${item.description}</div>
+                </div>`;
+            } else if (item.type === 'capture' && 'image' in item) {
+                try {
+                    let imageUrl = item.image;
+                    if (!item.image.startsWith('data:image')) {
+                        const response = await firstValueFrom(
+                            this.httpService.get(item.image, { responseType: 'arraybuffer' }),
+                        );
+                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        imageUrl = `data:image/jpeg;base64,${base64}`;
+                    }
 
-        //         htmlContent += `
-        //             <div class="capture">
-        //                 <div class="timestamp">[${item.timestamp}]</div>
-        //                 <div class="image">
-        //                     <img src="${imageUrl}" alt="Captured Image" />
-        //                 </div>
-        //             </div>`;
-        //     } catch (error) {
-        //         console.error(`이미지 로드 실패: ${item.image}`, error);
-        //         htmlContent += `
-        //             <div class="capture">
-        //                 <div class="timestamp">[${item.timestamp}]</div>
-        //                 <div>이미지를 불러올 수 없습니다.</div>
-        //             </div>`;
-        //     }
-        // } else if (item.type === 'summaries' && 'summary' in item) {
-        //     htmlContent += `
-        //         <div class="summaries">
-        //             <div class="timestamp">[${item.timestamp}]</div>
-        //             <div>${item.summary}</div>
-        //         </div>`;
-        // }
-        // }
+                    htmlContent += `
+                    <div class="capture">
+                        <div class="timestamp">[${item.timestamp}]</div>
+                        <div class="image">
+                            <img src="${imageUrl}" alt="Captured Image" />
+                        </div>
+                    </div>`;
+                } catch (error) {
+                    console.error(`이미지 로드 실패: ${item.image}`, error);
+                    htmlContent += `
+                    <div class="capture">
+                        <div class="timestamp">[${item.timestamp}]</div>
+                        <div>이미지를 불러올 수 없습니다.</div>
+                    </div>`;
+                }
+            } else if (item.type === 'summaries' && 'summary' in item) {
+                htmlContent += `
+                <div class="summaries">
+                    <div class="timestamp">[${item.timestamp}]</div>
+                    <div>${item.summary}</div>
+                </div>`;
+            }
+        }
 
         htmlContent += `</body></html>`;
         return htmlContent;
