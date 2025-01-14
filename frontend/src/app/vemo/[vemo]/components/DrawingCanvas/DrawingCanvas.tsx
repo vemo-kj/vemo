@@ -1,17 +1,13 @@
-// !!수정: 원본 이미지 크기를 로드하여 canvasWidth/canvasHeight 동적으로 설정
-// !!수정: PUT 후 onRefetch + 즉시 <img> src 업데이트
-// !!수정: exportWithBackgroundImage=true 로 이중 합성 제거
-
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import styles from './DrawingCanvas.module.css';
 import { ReactSketchCanvasRef } from 'react-sketch-canvas';
-import DynamicReactSketchCanvas from './DynamicReactSketchCanvas';
+import DynamicReactSketchCanvas from './DynamicReactSketchCanvas'; // 래퍼 컴포넌트 임포트
 
 type BrushType = 'pen' | 'highlighter' | 'eraser';
 
 interface DrawingCanvasProps {
   backgroundImage: string; // (URL, base64, data:image/...)
-  captureId?: string;      
+  captureId?: string;
   onSave: (editedImageUrl: string, captureId?: string) => void;
   onClose: () => void;
   onRefetch?: () => void;
@@ -26,29 +22,29 @@ export default function DrawingCanvas({
 }: DrawingCanvasProps) {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
 
+  // 드로잉 옵션
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [brushType, setBrushType] = useState<BrushType>('pen');
   const [opacity, setOpacity] = useState(1);
 
-  // !!수정: 배경 이미지 크기를 저장 (기본값 1280×720)
+  // 배경 이미지 크기
   const [canvasWidth, setCanvasWidth] = useState(1280);
   const [canvasHeight, setCanvasHeight] = useState(720);
 
+  // 이동/확대
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isMovingMode, setIsMovingMode] = useState(false);
 
-  // 브러시 두께
   const widthPresets = [
     { width: 2, icon: '•' },
     { width: 5, icon: '⚪' },
     { width: 10, icon: '⭕' },
   ];
 
-  // 색상
   const colorPresets = [
     { color: '#000000', name: '검정' },
     { color: '#FFFFFF', name: '하양' },
@@ -64,9 +60,11 @@ export default function DrawingCanvas({
     { type: 'eraser', name: '지우개', icon: '🧽', width: 20 },
   ];
 
-  // 브러시 색상 계산
+  // 브러시 색상
   const getStrokeColor = () => {
-    if (brushType === 'eraser') return 'transparent';
+    if (brushType === 'eraser') {
+      return 'transparent';
+    }
     if (brushType === 'highlighter') {
       const r = parseInt(strokeColor.slice(1, 3), 16);
       const g = parseInt(strokeColor.slice(3, 5), 16);
@@ -79,7 +77,6 @@ export default function DrawingCanvas({
   const handleBrushChange = (preset: (typeof brushPresets)[0]) => {
     setBrushType(preset.type as BrushType);
     setStrokeWidth(preset.width);
-
     if (preset.type === 'eraser') {
       canvasRef.current?.eraseMode(true);
       setStrokeColor('transparent');
@@ -90,25 +87,25 @@ export default function DrawingCanvas({
     }
   };
 
-  // !!수정: 배경 이미지 로딩하여 원본 크기 읽어옴 → canvasWidth, canvasHeight에 반영
+  // 배경 이미지 로딩
   const loadBackgroundSize = useCallback((url: string) => {
     return new Promise<{ width: number; height: number }>((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        resolve({ width: img.width, height: img.height });
-      };
+      img.onload = () => resolve({ width: img.width, height: img.height });
       img.onerror = reject;
       img.src = url;
     });
   }, []);
 
-  // !!수정: exportWithBackgroundImage=true로 이미 합성
+  // 저장
   const handleSave = async () => {
     if (!canvasRef.current) return;
     try {
       const drawingDataUrl = await canvasRef.current.exportImage('png');
-      if (!drawingDataUrl) throw new Error('No image data from canvasRef');
+      if (!drawingDataUrl) {
+        throw new Error('No image data from canvasRef');
+      }
 
       let processedImage = drawingDataUrl;
       if (!processedImage.startsWith('data:image/')) {
@@ -119,9 +116,10 @@ export default function DrawingCanvas({
         processedImage = base64Match[1];
       }
 
-      // PUT
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('토큰이 없습니다. 다시 로그인해주세요.');
+      if (!token) {
+        throw new Error('토큰이 없습니다. 다시 로그인해주세요.');
+      }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/captures/${captureId}`, {
         method: 'PUT',
@@ -154,7 +152,6 @@ export default function DrawingCanvas({
       }
 
       onClose();
-      // 저장 후 re-fetch
       if (onRefetch) {
         await onRefetch();
       }
@@ -164,34 +161,33 @@ export default function DrawingCanvas({
     }
   };
 
-  // !!수정: backgroundImage 전처리 + 원본 사이즈 로드
+  const [bgUrl, setBgUrl] = useState('');
+
+  // 배경 이미지 전처리 + 원본 크기 반영
   const processedBackgroundImage = useCallback(async () => {
     if (!backgroundImage) return '';
-    let bgUrl = backgroundImage;
+    let finalUrl = backgroundImage;
 
-    if (!bgUrl.startsWith('data:image/') && !bgUrl.startsWith('http')) {
-      // 순수 base64
-      bgUrl = `data:image/png;base64,${bgUrl}`;
+    // base64인지 http URL인지 판단
+    if (!finalUrl.startsWith('data:image/') && !finalUrl.startsWith('http')) {
+      finalUrl = `data:image/png;base64,${finalUrl}`;
     }
 
-    // 원본 크기 읽어서 state에 반영
     try {
-      const { width, height } = await loadBackgroundSize(bgUrl);
+      const { width, height } = await loadBackgroundSize(finalUrl);
       setCanvasWidth(width);
       setCanvasHeight(height);
       console.log('[DrawingCanvas] BG size =>', width, height);
     } catch (error) {
       console.error('[DrawingCanvas] Failed to load BG size =>', error);
     }
-    return bgUrl;
+    setBgUrl(finalUrl);
+    return finalUrl;
   }, [backgroundImage, loadBackgroundSize]);
 
-  // !!수정: 초기 로딩 시, 배경 이미지 크기 먼저 세팅
   useEffect(() => {
     (async () => {
       const finalUrl = await processedBackgroundImage();
-      // finalUrl은 backgroundImage로 쓸 값이지만,
-      // ReactSketchCanvas에선 "초기 렌더" 뒤에 한 번 더 세팅할 수도 있음
       console.log('[DrawingCanvas] final BG =>', finalUrl?.substring(0, 50));
     })();
   }, [processedBackgroundImage]);
@@ -199,7 +195,7 @@ export default function DrawingCanvas({
   // 확대/축소
   const handleZoom = (type: 'in' | 'out') => {
     setScale(prev => {
-      const newScale = (type === 'in') ? prev * 1.2 : prev / 1.2;
+      const newScale = type === 'in' ? prev * 1.2 : prev / 1.2;
       return Math.min(Math.max(newScale, 0.5), 3);
     });
   };
@@ -258,13 +254,13 @@ export default function DrawingCanvas({
     };
   }, [onClose]);
 
+  // **JSX 반환 시, 소괄호로 감싸기** => Unexpected token 에러 방지
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.drawingCanvasContainer}>
           {/* 툴바 */}
           <div className={styles.toolbar}>
-            {/* 굵기 Presets */}
             <div className={styles.widthPresets}>
               {widthPresets.map((preset, idx) => (
                 <button
@@ -279,7 +275,6 @@ export default function DrawingCanvas({
               ))}
             </div>
 
-            {/* 색상 Presets */}
             <div className={styles.colorPresets}>
               {colorPresets.map((preset, idx) => (
                 <button
@@ -299,9 +294,8 @@ export default function DrawingCanvas({
               />
             </div>
 
-            {/* 브러시 유형 */}
             <div className={styles.brushPresets}>
-              {brushPresets.map((preset) => (
+              {brushPresets.map(preset => (
                 <button
                   key={preset.type}
                   onClick={() => handleBrushChange(preset)}
@@ -314,7 +308,6 @@ export default function DrawingCanvas({
               ))}
             </div>
 
-            {/* 형광펜 투명도 */}
             {brushType === 'highlighter' && (
               <div className={styles.opacity}>
                 <input
@@ -328,7 +321,6 @@ export default function DrawingCanvas({
               </div>
             )}
 
-            {/* 확대/축소 */}
             <div className={styles.zoomControls}>
               <button onClick={() => handleZoom('in')}>🔍+</button>
               <button onClick={() => handleZoom('out')}>🔍-</button>
@@ -337,7 +329,7 @@ export default function DrawingCanvas({
             </div>
           </div>
 
-          {/* 실제 Canvas 영역 */}
+          {/* 캔버스 영역 */}
           <div
             className={`${styles.canvasWrapper} ${isMovingMode ? styles.movingMode : ''}`}
             onMouseDown={handleMouseDown}
@@ -356,24 +348,22 @@ export default function DrawingCanvas({
               {console.log('[DrawingCanvas] Rendering canvas =>', {
                 width: `${canvasWidth}px`,
                 height: `${canvasHeight}px`,
+                bgUrl,
               })}
 
               <DynamicReactSketchCanvas
                 ref={canvasRef}
-                // !!수정: canvasWidth, canvasHeight를 state로 관리 → 원본 크기 반영
                 width={`${canvasWidth}px`}
                 height={`${canvasHeight}px`}
-                exportWithBackgroundImage={true} 
+                exportWithBackgroundImage
                 strokeWidth={strokeWidth}
                 strokeColor={getStrokeColor()}
-                // !! "배경+드로잉" 합성
-                backgroundImage=""
+                backgroundImage={bgUrl}
                 canvasColor="transparent"
               />
             </div>
           </div>
 
-          {/* 액션 버튼 */}
           <div className={styles.actions}>
             <button onClick={() => canvasRef.current?.undo()}>undo</button>
             <button onClick={() => canvasRef.current?.redo()}>redo</button>
