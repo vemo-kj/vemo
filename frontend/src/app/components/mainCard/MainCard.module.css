@@ -1,27 +1,27 @@
 .mainCard {
     width: 100%;
-    height: 295px;
-    padding: 12px;
+    height: 420px;
+    padding: 20px;
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    border-radius: 16px;
+    box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
 .mainCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-20px);
+    box-shadow: 0 6px 20px #60a5fa;
 }
 
 .thumbnailContainer {
     width: 100%;
-    height: 160px;
+    height: 280px;
     overflow: hidden;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 16px;
+    margin-bottom: 5px;
     position: relative;
 }
 
@@ -29,6 +29,18 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 20px;
+    font-weight: 600;
 }
 
 .contentContainer {
@@ -43,31 +55,41 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 25px;
+    font-weight: 800;
     color: #333;
-    margin-bottom: 8px;
     line-height: 1.4;
-    height: 40px;
+    height: auto;
+    min-height: 62px;
+    margin-bottom: 16px;
 }
 
 .channelInfo {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.channelLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
 }
 
 .channelThumbnails {
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    margin-right: 8px;
     object-fit: cover;
 }
 
 .channelTitle {
-    font-size: 12px;
+    font-size: 22px;
     color: #666;
+    font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -75,9 +97,10 @@
 }
 
 .vemoCount {
-    font-size: 12px;
-    color: #888;
-    margin-top: auto;
+    font-size: 22px;
+    color: #3b82f6;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .cardLink {
@@ -85,4 +108,38 @@
     color: inherit;
     width: 100%;
     display: block;
+}
+
+@media (max-width: 1800px) {
+    .mainCard {
+        height: 380px;
+    }
+
+    .thumbnailContainer {
+        height: 220px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .mainCard {
+        height: 360px;
+    }
+
+    .thumbnailContainer {
+        height: 200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .mainCard {
+        height: 340px;
+    }
+
+    .thumbnailContainer {
+        height: 180px;
+    }
+
+    .title {
+        font-size: 16px;
+    }
 }
