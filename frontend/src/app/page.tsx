@@ -25,22 +25,23 @@ function SearchParamsComponent() {
             setIsLoading(true);
             setError(null);
             
+            // 로컬 스토리지에서 토큰 가져오기
+            const token = localStorage.getItem('accessToken');
+            
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 인증 토큰 추가
+                },
             });
 
-            // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/home/cards`, {
-            //     method: 'GET',
-            //     headers: { 'Content-Type': 'application/json' },
-            // });
-            // const response = await fetch('http://43.203.85.223:5050/home', {
-            //     method: 'GET',
-            //     headers: { 'Content-Type': 'application/json' },
-            // });
-            
-
             if (!response.ok) {
+                if (response.status === 401) {
+                    // 인증 에러 시 로그인 페이지로 리다이렉트
+                    window.location.href = '/login';
+                    return;
+                }
                 throw new Error(`Failed to fetch main cards: ${response.status}`);
             }
 

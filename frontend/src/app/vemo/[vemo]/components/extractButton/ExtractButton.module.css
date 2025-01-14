@@ -92,3 +92,26 @@
 .cancelButton:hover {
   background-color: #c82333;
 }
+
+.extractBtn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    background-image: url('/icons/bt_edit_text.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+}
+
+.extractBtn:hover {
+    opacity: 1;
+}
+
+.extractBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
