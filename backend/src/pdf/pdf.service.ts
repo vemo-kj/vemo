@@ -75,8 +75,16 @@ export class PdfService {
         videoId: string,
     ): Promise<string> {
         const extractedSummaries = await AIUtils.extractSummary(summaries, videoId);
+        const formattedMemos = memos.map(memo => {
+            const [minutes, seconds, milliseconds] = memo.timestamp.split(':');
+            return {
+                ...memo,
+                timestamp: `00:${minutes}:${seconds}`,
+            };
+        });
+
         const combined = [
-            ...memos.map(memo => ({
+            ...formattedMemos.map(memo => ({
                 ...memo,
                 type: 'memo',
                 timestamp: memo.timestamp,
@@ -105,80 +113,89 @@ export class PdfService {
         <head>
             <meta charset="UTF-8">
             <title>${title}</title>
-<style>
-@page {
-    margin: 60px 40px; /* 페이지 자체의 여백 설정 */
-}
+        <style>
+        @page {
+            margin: 60px 40px; /* 페이지 자체의 여백 설정 */
+        }
 
-body {
-    font-family: 'Georgia', serif;
-    margin: 0 auto; /* body의 여백은 제거하고 페이지 여백 사용 */
-    background-color: #fdfdfd;
-    color: #333;
-    line-height: 1.8;
-}
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0 auto; /* body의 여백은 제거하고 페이지 여백 사용 */
+            background-color: #fdfdfd;
+            color: #333;
+            line-height: 1.8;
+        }
 
-/* 이미지 컨테이너 스타일 수정 */
-.capture {
-    margin: 20px 0;
-    text-align: center; /* 이미지 중앙 정렬 */
-}
+        /* 이미지 컨테이너 스타일 수정 */
+        .capture {
+            margin: 20px 0;
+            text-align: center; /* 이미지 중앙 정렬 */
+        }
 
-.capture .image {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        .capture .image {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.capture .image img {
-    max-width: 80%; /* 이미지 최대 너비 제한 */
-    height: auto;
-    margin: 15px 0; /* 이미지 상하 여백 조정 */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 이미지에 약간의 그림자 */
-}
+        .capture .image img {
+            max-width: 80%; /* 이미지 최대 너비 제한 */
+            height: auto;
+            margin: 15px 0; /* 이미지 상하 여백 조정 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 이미지에 약간의 그림자 */
+        }
 
-/* 추가 내용 스타일 수정 */
-.summaries {
-    margin: 15px 0; /* 여백 축소 */
-    padding: 12px 15px; /* 내부 여백 축소 */
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    border-left: 4px solid #4a90e2;
-}
+        /* 추가 내용 스타일 수정 */
+        .summaries {
+            margin: 15px 0; /* 여백 축소 */
+            padding: 12px 15px; /* 내부 여백 축소 */
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #4a90e2;
+        }
 
-.summaries div:not(.timestamp) {
-    color: #2c3e50;
-    font-weight: 500;
-    line-height: 1.6; /* 줄간격 축소 */
-    margin: 8px 0; /* 문단 간격 조정 */
-}
+        .summaries div:not(.timestamp) {
+            color: #2c3e50;
+            font-weight: 500;
+            line-height: 1.6; /* 줄간격 축소 */
+            margin: 8px 0; /* 문단 간격 조정 */
+        }
 
-/* 메모 스타일 */
-.memo {
-    margin: 15px 0;
-    padding: 0 15px;
-}
+        /* 메모 스타일 */
+        .memo {
+            margin: 15px 0;
+            padding: 0 15px;
+        }
 
-/* 타임스탬프 스타일 수정 */
-.timestamp {
-    margin: 12px 0 8px 0; /* 여백 축소 */
-    font-size: 14px;
-    font-weight: bold;
-    color: #555;
-}
+        /* 타임스탬프 스타일 수정 */
+        .timestamp {
+            margin: 12px 0 8px 0; /* 여백 축소 */
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
 
-/* 섹션 구분선 스타일 */
-.memo, .capture, .summaries {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px; /* 하단 여백 축소 */
-}
-</style>
+        /* 섹션 구분선 스타일 */
+        .memo, .capture, .summaries {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px; /* 하단 여백 축소 */
+        }
 
+        h2 {
+            font-weight: 700;  /* 더 두껍게 */
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 20px 0 30px 0;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        </style>
 
         </head>
         <body>
-        <h2>${title}</h2>
+        <h2><strong>${title}</strong></h2>
         `;
 
         for (const item of combined) {
