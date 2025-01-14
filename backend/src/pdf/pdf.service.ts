@@ -50,7 +50,7 @@ export class PdfService {
         const page = await browser.newPage();
         const videoId = await this.getVideoId(memosId);
         const summaries = await this.getSummary(videoId);
-        const htmlContent = await this.generateHTML(title, memos, capture, summaries);
+        const htmlContent = await this.generateHTML(title, memos, capture, summaries, videoId);
 
         await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
@@ -71,17 +71,16 @@ export class PdfService {
         memos: pdfMemoeDto[],
         capture: pdfCaptureDto[],
         summaries: any[],
+        videoId: string,
     ): Promise<string> {
-        // summaries 데이터 확인
-        // console.log('💡 Summaries before processing:', summaries);
-
+        const extractedSummaries = await AIUtils.extractSummary(summaries, videoId);
         const combined = [
             ...memos.map(memo => ({
                 ...memo,
                 type: 'memo',
                 timestamp: memo.timestamp,
             })),
-            ...summaries.map(summary => ({
+            ...extractedSummaries.map(summary => ({
                 ...summary,
                 type: 'summaries',
                 timestamp: summary.timestamp,
@@ -100,10 +99,6 @@ export class PdfService {
         });
 
         console.log('💡 Combined data:', combined);
-        // console.log('💡 About to call AIUtils.extractSummary with:', summaries);
-
-        const result = await AIUtils.extractSummary(summaries);
-        console.log('💡 Result from AIUtils.extractSummary:', result);
 
         let htmlContent = `
             <!DOCTYPE html>
