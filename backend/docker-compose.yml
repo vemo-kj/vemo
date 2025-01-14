@@ -15,12 +15,14 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
             - DB_NAME=${DB_NAME}
+            - REDIS_HOST=${REDIS_HOST}
+            - REDIS_PORT=${REDIS_PORT}
         volumes:
             - ./src:/usr/src/app/src
         networks:
             - vemo-network
         extra_hosts:
-            - "host.docker.internal:host-gateway"
+            - 'host.docker.internal:host-gateway'
         dns:
             - 8.8.8.8
             - 8.8.4.4
