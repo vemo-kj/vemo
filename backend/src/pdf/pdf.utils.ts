@@ -54,12 +54,12 @@ export class AIUtils {
                     {
                         role: 'system',
                         content: `지금 주어진 summaries를 주요 내용으로 메모를 하는데, 내용이 너무 부족합니다.
-                    주요 내용을 중심으로 살을 붙여 상세하고 이해하기 쉬운 자료로 만들어주세요. 
-                    학습자가 쉽게 이해할 수 있도록 다음을 포함해주세요: 
-                    1) 요약본에 있는 타임스탬프는 메모에 꼭 포함해주세요.
-                    2) 주요 개념과 정의
-                    3) 실생활 예제나 코드 스니펫
-                    4) 학습에 도움이 될 추가 정보`,
+                                주요 내용을 중심으로 살을 붙여 상세하고 이해하기 쉬운 자료로 만들어주세요. 
+                                학습자가 쉽게 이해할 수 있도록 다음을 포함해주세요: 
+                                1) 요약본에 있는 타임스탬프는 메모에 꼭 포함해주세요.
+                                2) 주요 개념과 정의
+                                3) 실생활 예제나 코드 스니펫
+                                4) 학습에 도움이 될 추가 정보`,
                     },
                     {
                         role: 'user',
@@ -74,6 +74,8 @@ export class AIUtils {
             const parsedResult = AIUtils.parseTimestampedText(
                 response.choices[0]?.message?.content,
             );
+
+            console.log('💡 parsedResult data:', parsedResult);
 
             // S3에 결과 업로드
             await AIUtils.uploadToS3(parsedResult, videoId);
