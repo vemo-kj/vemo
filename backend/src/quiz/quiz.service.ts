@@ -30,7 +30,7 @@ export class QuizService {
     }
 
     async fetchData(videoId: string): Promise<any> {
-        const url = `http://54.180.240.213:5050/subtitles?url=https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+        const url = `http://15.164.244.154:5050/subtitles?url=https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
         try {
             const response = await firstValueFrom(
                 this.httpService.get(url, {
