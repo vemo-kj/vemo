@@ -106,68 +106,74 @@ export class PdfService {
             <meta charset="UTF-8">
             <title>${title}</title>
 <style>
+@page {
+    margin: 60px 40px; /* 페이지 자체의 여백 설정 */
+}
+
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px; /* 페이지의 여백을 추가 */
-  padding: 40px 20px; /* 위아래 여백을 강조하고 양옆도 적당히 설정 */
-  line-height: 1.6;
-  color: #333;
+    font-family: 'Georgia', serif;
+    margin: 0 auto; /* body의 여백은 제거하고 페이지 여백 사용 */
+    background-color: #fdfdfd;
+    color: #333;
+    line-height: 1.8;
 }
 
-.timestamp {
-  font-size: 12px;
-  font-weight: bold;
-  color: #007bff; /* 파란색 */
-  padding: 5px 10px; /* 안쪽 여백 */
-  border-radius: 5px; /* 둥근 모서리 */
-  display: inline-block; /* 텍스트 크기에 맞게 줄이 조정됨 */
-  margin-bottom: 10px; /* 아래쪽 여백 */
-}
-
-.timestamp .label {
-  font-size: 10px; /* 내 메모를 작게 표시 */
-  color: #555; /* 회색 */
-  font-weight: normal; /* 굵기 조정 */
-  margin-left: 5px; /* 타임스탬프와 간격 추가 */
-}
-
-.memo {
-  font-size: 16px;
-  font-weight: normal;
-  color: #555; /* 소타이틀 색상 */
-  margin: 20px 0; /* 상하 간격을 충분히 추가 */
-  border-left: 4px solid #ccc; /* 강조선 */
-  padding-left: 10px;
-}
-
-.summaries {
-  font-size: 18px;
-  font-weight: bold;
-  color: #222; /* 중타이틀 색상 */
-  margin: 30px 0; /* 상하 간격을 넉넉히 추가 */
-  border-left: 4px solid #ffd700; /* 노란색 강조선 */
-  padding-left: 10px;
-}
-
+/* 이미지 컨테이너 스타일 수정 */
 .capture {
-  margin: 30px 0; /* 상하 간격 */
+    margin: 20px 0;
+    text-align: center; /* 이미지 중앙 정렬 */
+}
+
+.capture .image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .capture .image img {
-  max-width: 80%;
-  max-height: 300px;
-  border-radius: 5px;
-  margin-top: 10px;
-  display: inline-block;
+    max-width: 80%; /* 이미지 최대 너비 제한 */
+    height: auto;
+    margin: 15px 0; /* 이미지 상하 여백 조정 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 이미지에 약간의 그림자 */
 }
 
-.error-message {
-  font-size: 14px;
-  color: #d9534f; /* 오류 메시지 빨간색 */
-  margin-top: 5px;
+/* 추가 내용 스타일 수정 */
+.summaries {
+    margin: 15px 0; /* 여백 축소 */
+    padding: 12px 15px; /* 내부 여백 축소 */
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #4a90e2;
+}
+
+.summaries div:not(.timestamp) {
+    color: #2c3e50;
+    font-weight: 500;
+    line-height: 1.6; /* 줄간격 축소 */
+    margin: 8px 0; /* 문단 간격 조정 */
+}
+
+/* 메모 스타일 */
+.memo {
+    margin: 15px 0;
+    padding: 0 15px;
+}
+
+/* 타임스탬프 스타일 수정 */
+.timestamp {
+    margin: 12px 0 8px 0; /* 여백 축소 */
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* 섹션 구분선 스타일 */
+.memo, .capture, .summaries {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px; /* 하단 여백 축소 */
 }
 </style>
-
 
 
         </head>
@@ -178,10 +184,10 @@ body {
         for (const item of combined) {
             if (item.type === 'memo' && 'description' in item) {
                 htmlContent += `
-    <div class="memo">
-        <div class="timestamp">[${item.timestamp}]<span class="label"> 내 메모</span></div>
-        <div>${item.description}</div>
-    </div>`;
+                    <div class="memo">
+                        <div class="timestamp">[${item.timestamp}]<span class="label"> 내 메모</span></div>
+                        <div>${item.description}</div>
+                    </div>`;
             } else if (item.type === 'capture' && 'image' in item) {
                 try {
                     let imageUrl = item.image;
@@ -194,26 +200,26 @@ body {
                     }
 
                     htmlContent += `
-        <div class="capture">
-            <div class="timestamp">[${item.timestamp}]</div>
-            <div class="image">
-                <img src="${imageUrl}" alt="Captured Image" />
-            </div>
-        </div>`;
+                        <div class="capture">
+                            <div class="timestamp">[${item.timestamp}]</div>
+                            <div class="image">
+                                <img src="${imageUrl}" alt="Captured Image" />
+                            </div>
+                        </div>`;
                 } catch (error) {
                     console.error(`이미지 로드 실패: ${item.image}`, error);
                     htmlContent += `
-        <div class="capture">
-            <div class="timestamp">[${item.timestamp}] <span class="label"> 이미지 </span></div>
-            <div>이미지를 불러올 수 없습니다.</div>
-        </div>`;
+                        <div class="capture">
+                            <div class="timestamp">[${item.timestamp}] <span class="label"> 이미지 </span></div>
+                            <div>이미지를 불러올 수 없습니다.</div>
+                        </div>`;
                 }
             } else if (item.type === 'summaries' && 'summary' in item) {
                 htmlContent += `
-    <div class="summaries">
-        <div class="timestamp">[${item.timestamp}] <span class="label"> 추가 내용</span></div>
-        <div>${item.summary}</div>
-    </div>`;
+                    <div class="summaries">
+                        <div class="timestamp">[${item.timestamp}] <span class="label"> 추가 내용</span></div>
+                        <div>${item.summary}</div>
+                    </div>`;
             }
         }
 
