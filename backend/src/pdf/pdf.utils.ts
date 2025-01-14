@@ -85,6 +85,8 @@ export class AIUtils {
                     response.choices[0]?.message?.content,
                 );
 
+                console.log('💡 parsedResult:', parsedResult);
+
                 // S3에 결과 업로드
                 await AIUtils.uploadToS3(parsedResult, videoId);
 
@@ -109,12 +111,27 @@ export class AIUtils {
         const result: { timestamp: string; summary: string; type: string }[] = [];
 
         for (const line of lines) {
-            const match = line.match(/\[(\d{2}:\d{2}:\d{2})\](.*)/); // 타임스탬프를 시:분:초 형식으로 수정
+            const match = line.match(/\[(\d{2}):(\d{2}):(\d{2})\](.*)/); // 타임스탬프 매칭
             if (match) {
+                let minutes = parseInt(match[1], 10); // "분" 추출 (실제 시 역할)
+                const seconds = parseInt(match[2], 10); // "초" 추출 (실제 분 역할)
+                const milliseconds = parseInt(match[3], 10); // "00" 추출 (초 역할)
+
+                // 분을 시와 분으로 변환
+                const hours = Math.floor(minutes / 60);
+                minutes = minutes % 60;
+
+                // 새로운 시:분:초 형식으로 변환
+                const formattedTimestamp = [
+                    String(hours).padStart(2, '0'),
+                    String(minutes).padStart(2, '0'),
+                    String(seconds).padStart(2, '0'),
+                ].join(':');
+
                 result.push({
-                    timestamp: match[1].trim(),
-                    summary: match[2].trim(),
-                    type: 'summaries', // 고정된 타입 'summaries' 추가
+                    timestamp: formattedTimestamp,
+                    summary: match[4].trim(),
+                    type: 'summaries',
                 });
             }
         }
