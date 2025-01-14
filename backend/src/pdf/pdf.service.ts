@@ -137,13 +137,17 @@ export class PdfService {
             display: flex;
             justify-content: center;
             align-items: center;
+            margin: 15px 0;
         }
 
         .capture .image img {
-            max-width: 80%; /* 이미지 최대 너비 제한 */
-            height: auto;
-            margin: 15px 0; /* 이미지 상하 여백 조정 */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 이미지에 약간의 그림자 */
+            max-width: 500px;  /* 최대 너비 제한 */
+            width: 100%;      /* 반응형으로 유지 */
+            height: auto;     /* 비율 유지 */
+            max-height: 400px; /* 최대 높이 제한 */
+            object-fit: contain; /* 비율을 유지하면서 컨테이너에 맞춤 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
         }
 
         /* 추가 내용 스타일 수정 */
@@ -173,7 +177,7 @@ export class PdfService {
             margin: 12px 0 8px 0; /* 여백 축소 */
             font-size: 14px;
             font-weight: bold;
-            color: #555;
+            color: #777;
         }
 
         /* 섹션 구분선 스타일 */
@@ -184,7 +188,7 @@ export class PdfService {
 
         h2 {
             font-weight: 700;  /* 더 두껍게 */
-            font-size: 24px;
+            font-size: 20px;
             color: #2c3e50;
             margin: 20px 0 30px 0;
             text-align: center;

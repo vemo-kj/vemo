@@ -51,7 +51,7 @@ export class AIUtils {
 
         const existsInS3 = await AIUtils.checkIfFileExistsInS3('vemo-data-bucket', s3Key);
         if (!existsInS3) {
-            console.log('🐸S3에 없음');
+            // console.log('🐸S3에 없음');
             try {
                 const response = await AIUtils.openai.chat.completions.create({
                     model: 'gpt-4',
@@ -85,8 +85,6 @@ export class AIUtils {
                     response.choices[0]?.message?.content,
                 );
 
-                console.log('💡 parsedResult:', parsedResult);
-
                 // S3에 결과 업로드
                 await AIUtils.uploadToS3(parsedResult, videoId);
 
@@ -96,7 +94,7 @@ export class AIUtils {
                 throw new BadRequestException(`요약 생성 실패: ${error.message}`);
             }
         } else {
-            console.log('🐸S3에 있음');
+            // console.log('🐸S3에 있음');
             return AIUtils.getSubtitlesFromS3('vemo-data-bucket', s3Key);
         }
     }
@@ -163,7 +161,7 @@ export class AIUtils {
 
         try {
             await AIUtils.s3.upload(params).promise();
-            console.log(`✅ 요약본이 S3에 업로드되었습니다: ${bucketName}/${key}`);
+            // console.log(`✅ 요약본이 S3에 업로드되었습니다: ${bucketName}/${key}`);
         } catch (error) {
             console.error(`❌ S3 업로드 실패: ${error.message}`);
             throw new Error(`요약본 S3 업로드 실패: ${error.message}`);
