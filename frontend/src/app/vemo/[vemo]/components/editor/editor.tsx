@@ -49,6 +49,7 @@ interface CustomEditorProps {
 // ref 타입 정의
 interface EditorRef {
     addCaptureItem: (timestamp: string, imageUrl: string, captureId?: string) => void;
+    addTextToEditor?: (text: string) => void;
 }
 
 // 시간 변환 유틸리티 함수들
@@ -111,6 +112,23 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
     const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);
     const displayAreaRef = useRef<HTMLDivElement>(null);
+
+    // 텍스트를 에디터에 추가하는 함수
+    const addTextToEditor = (text: string) => {
+        const contentState = editorState.getCurrentContent();
+        const selection = editorState.getSelection();
+        const newContent = Modifier.insertText(
+            contentState,
+            selection,
+            text
+        );
+        const newEditorState = EditorState.push(
+            editorState,
+            newContent,
+            'insert-characters'
+        );
+        setEditorState(newEditorState);
+    };
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
@@ -248,6 +266,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 }));
             }
         },
+        addTextToEditor,
     }));
 
     useEffect(() => {
@@ -634,6 +653,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                         onPauseVideo={props.onPauseVideo}
                         isEditable={props.isEditable}
                         onDrawingStart={props.onDrawingStart}
+                        addTextToEditor={addTextToEditor}
                     />
                 ))}
             </div>
