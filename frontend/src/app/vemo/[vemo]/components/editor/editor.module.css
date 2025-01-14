@@ -42,7 +42,12 @@
 .itemContent {
     flex: 1;
     min-height: 20px;
-    padding: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Noto Sans KR';
+    line-height: 1.5;
+    color:#666;
+    padding: 16px;
     cursor: text;
     /* 편집 가능하다는 암시 */
     outline: none;
@@ -154,13 +159,6 @@
     /* 4) 영역 제한 */
     height: auto;
     border: 1px solid #ccc;
-}
-
-/* 그리기 버튼 */
-.drawBtn {
-    background: #ddd;
-    border: none;
-    cursor: pointer;
 }
 
 /* 삭제 버튼 */
@@ -286,12 +284,12 @@
 }
 
 .useButton {
-    background-color: #007AFF;
+    background-color: #286BE8;
     color: white;
 }
 
 .useButton:hover {
-    background-color: #0056b3;
+    background-color: #286BE8;
 }
 
 .cancelButton {
@@ -412,9 +410,10 @@
     align-items: center;
     justify-content: space-between;
     min-height: 32px;
-    border-radius: 0;
-    margin-bottom: 1px;
-    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1); /* 사방위로 균일하게 퍼지는 그림자 */
 }
 
 .memoHeader {
@@ -422,13 +421,14 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    background: transparent;
 }
 
 .timestampBtn {
     color: #0066FF;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0;
+    font-size: 16px;
+    font-weight: 1000;
+    padding: 10px;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -436,7 +436,7 @@
 }
 
 .deleteBtn {
-    width: 17px;
+    width: 20px;
     height: 20px;
     padding: 0;
     background: transparent;
@@ -456,7 +456,7 @@
 .memoFooter {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     margin-top: 8px;
 }
 
@@ -469,10 +469,12 @@
     align-items: center;
     justify-content: center;
 }
-
+/* 그리기 버튼 */
 .drawBtn {
     width: 20px;
     height: 20px;
+    border: none;
+    cursor: pointer;
     background-image: url('/icons/bt_edit_draw.svg');
     background-repeat: no-repeat;
     background-position: center;
@@ -481,7 +483,7 @@
 }
 
 .deleteBtn {
-    width: 17px;
+    width: 20px;
     height: 20px;
     background-image: url('/icons/bt_edit_delete.svg');
     background-repeat: no-repeat;

@@ -96,6 +96,7 @@
     font-size: 32px;
     /* 크기 증가 */
     font-weight: bold;
+    margin-right: 12px;
 
     color: #286be8;
     /* 파란색으로 변경 */
@@ -299,7 +300,6 @@
     /* 양쪽 정렬 */
     align-items: center;
     /* 수직 중앙 정렬 */
-    margin-bottom: 24px;
 }
 
 /* 제목 영역 컨테이너 */
@@ -351,7 +351,7 @@
 
 .notesHeaderText {
     cursor: pointer;
-    padding: 8px;
+    /* padding: 8px; */
 }
 
 .notesHeaderText:hover {
