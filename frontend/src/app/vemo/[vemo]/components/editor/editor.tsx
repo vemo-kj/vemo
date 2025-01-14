@@ -12,6 +12,7 @@ import styles from './editor.module.css';
 
 import { CreateMemosResponseDto } from '@/app/types/vemo.types';
 import { useSummary } from '../../context/SummaryContext';
+import MemoItem from '../editor/MemoItem';
 
 // DraftEditor를 위한 타입 정의 추가
 const Editor = DraftEditor as unknown as React.ComponentType<{
@@ -61,7 +62,7 @@ const parseTimeToSeconds = (timestamp: string): number => {
     const parts = timestamp.split(':').map(Number);
     if (parts.length === 2) {
         const [minutes, seconds] = parts;
-        return (minutes * 60) + seconds;
+        return minutes * 60 + seconds;
     }
     return 0;
 };
@@ -108,9 +109,8 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     const [sections, setSections] = useState<Section[]>([]);
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [imageLoadingStates, setImageLoadingStates] = useState<Record<string, boolean>>({});
-    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null);  // 메모 시작 시점 타임스탬프
-
-    const displayAreaRef = useRef<HTMLDivElement>(null);  // displayArea에 대한 ref 추가
+    const [memoStartTimestamp, setMemoStartTimestamp] = useState<string | null>(null); // 메모 시작 시점 타임스탬프
+    const displayAreaRef = useRef<HTMLDivElement>(null); // displayArea에 대한 ref 추가
 
     useImperativeHandle(ref, () => ({
         addCaptureItem: async (timestamp: string, imageUrl: string, captureId?: string) => {
@@ -139,7 +139,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 if (!processedImage.startsWith('data:image/')) {
                     // 순수 Base64만 넘어온 경우 (확장 프로그램 sanitize 상태)
                     processedImage = `data:image/png;base64,${processedImage}`;
-                  }
+                }
 
                 if (imageUrl.includes('base64')) {
                     const base64Match = imageUrl.match(/base64,(.+)/);
@@ -156,15 +156,13 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 console.log('[Capture Event] Sending capture request:', {
                     timestamp: props.getTimestamp(),
                     memosId: props.memosId,
-                    imageDataLength: processedImage.length
-                    
+                    imageDataLength: processedImage.length,
                 });
 
                 const requestBody = {
                     timestamp: props.getTimestamp(),
                     image: processedImage,
-                    memosId: props.memosId
-                    
+                    memosId: props.memosId,
                 };
 
                 // 요청 데이터 검증
@@ -203,21 +201,21 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     const errorText = await captureResponse.text();
                     console.error('[Capture Event] Server response:', {
                         status: captureResponse.status,
-                        body: errorText
+                        body: errorText,
                     });
-                    throw new Error(`Failed to save capture: ${captureResponse.status} ${errorText}`);
+                    throw new Error(
+                        `Failed to save capture: ${captureResponse.status} ${errorText}`,
+                    );
                 }
 
                 const captureData = await captureResponse.json();
                 console.log('[Capture Event] Capture saved:', captureData);
 
-
                 const newSection: Section = {
                     id: `capture-${captureData.id}`,
                     timestamp: timestamp,
                     htmlContent: '',
-                    screenshot: captureData.image
-                    
+                    screenshot: captureData.image,
                 };
 
                 setSections(prev =>
@@ -240,16 +238,16 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                 console.error('[Capture Event] Error:', {
                     message: error instanceof Error ? error.message : 'Unknown error',
                     type: typeof error,
-                    error
+                    error,
                 });
-                
+
                 console.error('[Capture Event] Error:', error);
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
                 }));
             }
-        }
+        },
     }));
 
     useEffect(() => {
@@ -379,7 +377,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         setEditorState(newState);
     };
 
-
+    // 스크롤을 맨 아래로 이동시키는 함수
     const scrollToBottom = () => {
         if (displayAreaRef.current) {
             displayAreaRef.current.scrollTop = displayAreaRef.current.scrollHeight;
@@ -392,14 +390,14 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         if (!contentState.hasText()) return;
 
         try {
-            // 현재 영상 시간을 초 단위로 받아서 MM:SS 형식으로 변환
-            const currentTimeInSeconds = Number(props.getTimestamp());
-            const timestamp = formatVideoTime(currentTimeInSeconds);
+            // 현재 시간을 캡처와 동일한 방식으로 가져오기
+            const currentTime = props.getTimestamp();
+            console.log('Current timestamp before save:', currentTime);
 
             const html = convertToHTML(contentState);
             const requestData = {
-                timestamp,
-                description: html,
+                timestamp: currentTime, // 직접 받은 시간을 사용
+                description: convertToHTML(contentState),
                 memosId: Number(props.memosId),
             };
 
@@ -416,25 +414,21 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
 
             const newItem: Section = {
                 id: `memo-${data.id}`,
-                timestamp,
-                htmlContent: html,
+                timestamp: currentTime, // 동일한 시간 포맷 사용
+                htmlContent: convertToHTML(contentState),
             };
 
             setSections(prev => sortByTimestamp([...prev, newItem]));
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
 
-
-
             // 저장 후 스크롤 이동
-            setTimeout(scrollToBottom, 100);  // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
-
+            setTimeout(scrollToBottom, 100); // DOM 업데이트 후 스크롤하기 위해 약간의 딜레이 추가
 
             // 저장 후 타임스탬프 초기화
             setMemoStartTimestamp(null);
             setEditorState(EditorState.createEmpty());
             props.onMemoSaved?.();
-            
         } catch (error) {
             console.error('메모 저장 실패:', error);
         }
@@ -599,7 +593,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
     // keyBindingFn 수정
     const keyBindingFn = (e: React.KeyboardEvent<{}>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();  // 기본 Enter 동작 방지
+            e.preventDefault(); // 기본 Enter 동작 방지
             const contentState = editorState.getCurrentContent();
             const selection = editorState.getSelection();
             const currentBlock = contentState.getBlockForKey(selection.getStartKey());
@@ -648,7 +642,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     <button
                         className={`${styles.styleButton} ${isStyleActive('BOLD') ? styles.activeButton : ''}`}
                         onMouseDown={e => {
-                            e.preventDefault();  // 이벤트 기본 동작 방지
+                            e.preventDefault(); // 이벤트 기본 동작 방지
                             toggleInlineStyle('BOLD');
                         }}
                     >
@@ -672,7 +666,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     >
                         U
                     </button>
-                    
+
                     <button onClick={handleSave} className={styles.saveButton}>
                         저장
                     </button>
@@ -681,7 +675,6 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
         </div>
     );
 });
-
 
 CustomEditor.displayName = 'CustomEditor';
 
