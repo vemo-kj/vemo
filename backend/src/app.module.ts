@@ -39,13 +39,13 @@ import { PdfModule } from './pdf/pdf.module';
             useFactory: (configService: ConfigService) => typeOrmConfig(configService),
             inject: [ConfigService],
         }),
-        CacheModule.registerAsync({
-            useFactory: () => ({
-                store: redisStore as unknown as string,
-                host: process.env.REDIS_HOST,
-                port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-            }),
-        }),
+        // CacheModule.registerAsync({
+        //     useFactory: () => ({
+        //         store: redisStore as unknown as string,
+        //         host: process.env.REDIS_HOST,
+        //         port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+        //     }),
+        // }),
         MemoModule,
         MemosModule,
         VideoModule,
@@ -74,4 +74,4 @@ import { PdfModule } from './pdf/pdf.module';
         },
     ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -133,31 +133,17 @@ export default function DrawingCanvas({
         }),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Failed to update capture: ${res.status} ${errorText}`);
-      }
+      if (!res.ok) throw new Error('Failed to update capture');
       const data = await res.json();
-      console.log('[DrawingCanvas] Update success =>', data);
 
-      // <img> 즉시 업데이트
-      const newImage = data.image || processedImage;
-      const finalSrc = newImage.startsWith('http')
-        ? newImage
-        : `data:image/png;base64,${newImage}`;
-
-      const imgElem = document.getElementById(`capture-${captureId}`) as HTMLImageElement;
-      if (imgElem) {
-        imgElem.src = finalSrc;
+      // Editor의 sections 상태 업데이트
+      if (onSave) {
+        await onSave(data.image, captureId);
       }
-
       onClose();
-      if (onRefetch) {
-        await onRefetch();
-      }
     } catch (err) {
       console.error('[DrawingCanvas] Save error =>', err);
-      alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+      alert('저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -266,9 +252,8 @@ export default function DrawingCanvas({
                 <button
                   key={idx}
                   onClick={() => setStrokeWidth(preset.width)}
-                  className={`${styles.presetButton} ${
-                    strokeWidth === preset.width ? styles.active : ''
-                  }`}
+                  className={`${styles.presetButton} ${strokeWidth === preset.width ? styles.active : ''
+                    }`}
                 >
                   {preset.icon}
                 </button>
@@ -280,9 +265,8 @@ export default function DrawingCanvas({
                 <button
                   key={idx}
                   onClick={() => setStrokeColor(preset.color)}
-                  className={`${styles.colorButton} ${
-                    strokeColor === preset.color ? styles.active : ''
-                  }`}
+                  className={`${styles.colorButton} ${strokeColor === preset.color ? styles.active : ''
+                    }`}
                   style={{ backgroundColor: preset.color }}
                 />
               ))}
@@ -299,9 +283,8 @@ export default function DrawingCanvas({
                 <button
                   key={preset.type}
                   onClick={() => handleBrushChange(preset)}
-                  className={`${styles.presetButton} ${
-                    brushType === preset.type ? styles.active : ''
-                  }`}
+                  className={`${styles.presetButton} ${brushType === preset.type ? styles.active : ''
+                    }`}
                 >
                   {preset.icon}
                 </button>
