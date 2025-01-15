@@ -1,13 +1,13 @@
 .memoItemContainer {
-    background: white;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #F8F9FA;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    position: relative;
-    min-height: 48px;
+    justify-content: space-between;
+    min-height: 32px;
+    border-radius: 0;
+    margin-bottom: 1px;
+    box-shadow: none;
 }
 
 .memoHeader {
@@ -17,20 +17,18 @@
 }
 
 .timestampBtn {
-    color: #666;
+    color: #0066FF;
     font-size: 14px;
-    padding: 4px 8px;
-    border-radius: 4px;
+    font-weight: 500;
+    padding: 0;
     border: none;
-    background: #f5f5f5;
+    background: transparent;
     cursor: pointer;
-    white-space: nowrap;
-    margin-right: auto;
+    margin-right: 8px;
 }
 
 .itemContent {
     min-height: 40px;
-    padding: 8px;
     border-radius: 4px;
     background: #fafafa;
     outline: none;
@@ -54,21 +52,21 @@
 }
 
 .deleteBtn {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
+    width: 17px;
+    height: 20px;
+    padding: 0;
+    background: transparent;
     border: none;
-    padding: 8px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-image: url('/icons/bt_edit_delete.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
 }
 
 .deleteBtn:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .imageContainer {

@@ -94,10 +94,8 @@ export default function ExtractButton({ imageUrl, onExtracted, onDelete }: Extra
                 className={styles.extractBtn}
                 onClick={handleExtractText}
                 disabled={isExtracting}
-                style={{ cursor: isExtracting ? 'not-allowed' : 'pointer' }}
-            >
-                {isExtracting ? '추출 중...' : '추출하기'}
-            </button>
+                aria-label={isExtracting ? '추출 중...' : '추출하기'}
+            />
 
             <ResultModal
                 text={extractedText}

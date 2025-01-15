@@ -240,8 +240,8 @@ export default function SidebarNav({
                                         className={styles.defaultIcon}
                                         src="/icons/bt_edit_nav_partCapture.svg"
                                         alt="부분 캡처"
-                                        width={20}
-                                        height={20}
+                                        width={45}
+                                        height={45}
                                     />
                                     <span className={styles.iconButtonText}>부분캡처</span>
                                 </button>
