@@ -71,7 +71,7 @@ export class AIUtils {
                             content: `다음 요약본에서 적절하게 내용을 추가해주세요:\n${formattedSummaries}`,
                         },
                     ],
-                    max_tokens: 4000,
+                    max_tokens: 6000,
                     temperature: 0.3,
                     top_p: 0.8,
                 });
@@ -144,7 +144,7 @@ export class AIUtils {
             throw new Error('S3가 초기화되지 않았습니다.');
         }
 
-        const bucketName = AIUtils.configService.get<string>('AWS_S3_BUCKET');
+        const bucketName = 'vemo-data-bucket';
         if (!bucketName) {
             throw new Error('S3 버킷 이름이 설정되지 않았습니다.');
         }
@@ -161,7 +161,7 @@ export class AIUtils {
 
         try {
             await AIUtils.s3.upload(params).promise();
-            // console.log(`✅ 요약본이 S3에 업로드되었습니다: ${bucketName}/${key}`);
+            console.log(`✅ 요약본이 S3에 업로드되었습니다: ${bucketName}/${key}`);
         } catch (error) {
             console.error(`❌ S3 업로드 실패: ${error.message}`);
             throw new Error(`요약본 S3 업로드 실패: ${error.message}`);

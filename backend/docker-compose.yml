@@ -15,12 +15,16 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
             - DB_NAME=${DB_NAME}
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            - AWS_REGION=${AWS_REGION}
+            - AWS_S3_BUCKET=${AWS_S3_BUCKET}
         volumes:
             - ./src:/usr/src/app/src
         networks:
             - vemo-network
         extra_hosts:
-            - "host.docker.internal:host-gateway"
+            - 'host.docker.internal:host-gateway'
         dns:
             - 8.8.8.8
             - 8.8.4.4

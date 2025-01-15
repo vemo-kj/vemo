@@ -23,6 +23,11 @@ RUN apk add --no-cache \
 RUN apk add --no-cache \
     font-noto-cjk
 
+RUN apk add --no-cache \
+    font-urw-base35 \
+    fontconfig \
+    && fc-cache -f
+
 # Puppeteer 환경변수 설정
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser

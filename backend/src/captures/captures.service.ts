@@ -19,7 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 export class CapturesService {
     private readonly bucketName: string;
     private readonly logger = new Logger(CapturesService.name);
-    
 
     constructor(
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
@@ -29,7 +28,7 @@ export class CapturesService {
 
         private readonly configService: ConfigService,
     ) {
-        this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
+        this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
     }
 
     async createCapture(createCapturesDto: CreateCapturesDto, isScrap = false): Promise<Captures> {
@@ -130,7 +129,6 @@ export class CapturesService {
 
             // (3) DB 저장
             return await this.capturesRepository.save(capture);
-
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
