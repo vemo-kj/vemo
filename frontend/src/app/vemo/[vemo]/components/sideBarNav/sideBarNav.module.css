@@ -358,3 +358,16 @@
     background-color: rgba(40, 107, 232, 0.1);
     border-radius: 4px;
 }
+
+.iconButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.iconButton:disabled .defaultIcon {
+    opacity: 0.6;
+}
+
+.iconButton:disabled .iconButtonText {
+    color: #666;
+}

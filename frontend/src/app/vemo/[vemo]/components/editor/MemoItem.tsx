@@ -231,11 +231,10 @@ const MemoItem = memo((props: MemoItemProps) => {
                                         aria-label="그리기"
                                     />
                                     <ExtractButton
-                                        // className={styles.actionButton}
                                         imageUrl={screenshot}
                                         onExtracted={text => {
-                                            if (addTextToEditor) {
-                                                addTextToEditor(text);
+                                            if (props.addTextToEditor) {
+                                                props.addTextToEditor(text);
                                             }
                                         }}
                                         onDelete={onDelete}
