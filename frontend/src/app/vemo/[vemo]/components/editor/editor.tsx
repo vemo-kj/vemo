@@ -244,6 +244,9 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
                     }),
                 );
 
+                // 캡처 저장 후 스크롤 이동 추가
+                setTimeout(scrollToBottom, 100);
+
                 setImageLoadingStates(prev => ({
                     ...prev,
                     [timestamp]: false,
