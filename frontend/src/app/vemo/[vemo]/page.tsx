@@ -347,21 +347,14 @@ export default function VemoPage() {
     };
 
     const handleDrawingSave = async (editedImageUrl: string, captureId?: string) => {
-        if (!editorRef.current?.addCaptureItem) return;
-        const currentTime = currentTimestamp;
+        if (!editorRef.current?.updateCaptureImage || !captureId) return;
         try {
-            const processed = processImageData(editedImageUrl);
-            if (!processed) {
-                throw new Error('Invalid image data');
-            }
-            if (captureId) {
-                await editorRef.current.addCaptureItem(currentTime, processed, captureId);
-            } else {
-                await editorRef.current.addCaptureItem(currentTime, processed);
-            }
+            // 이미지 업데이트
+            editorRef.current.updateCaptureImage(captureId, editedImageUrl);
             setIsDrawingMode(false);
             setCapturedImage(null);
             setEditingCaptureId(null);
+            setEditingCaptureImage(null);
         } catch (error) {
             console.error('Drawing save failed:', error);
         }

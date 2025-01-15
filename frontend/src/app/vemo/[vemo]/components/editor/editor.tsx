@@ -50,6 +50,7 @@ interface CustomEditorProps {
 interface EditorRef {
     addCaptureItem: (timestamp: string, imageUrl: string, captureId?: string) => void;
     addTextToEditor?: (text: string) => void;
+    updateCaptureImage: (captureId: string, newImage: string) => void;
 }
 
 // 시간 변환 유틸리티 함수들
@@ -128,6 +129,16 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             'insert-characters'
         );
         setEditorState(newEditorState);
+    };
+
+    // 이미지 업데이트 함수 추가
+    const updateCaptureImage = (captureId: string, newImage: string) => {
+        setSections(prev => prev.map(section => {
+            if (section.id === `capture-${captureId}`) {
+                return { ...section, screenshot: newImage };
+            }
+            return section;
+        }));
     };
 
     useImperativeHandle(ref, () => ({
@@ -270,6 +281,7 @@ const CustomEditor = forwardRef<EditorRef, CustomEditorProps>((props, ref) => {
             }
         },
         addTextToEditor,
+        updateCaptureImage
     }));
 
     useEffect(() => {
