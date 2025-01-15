@@ -83,6 +83,15 @@ export class PdfService {
             };
         });
 
+        const formattedCaptures = capture.map(capture => {
+            const [minutes, seconds, milliseconds] = capture.timestamp.split(':');
+            return {
+                ...capture,
+                type: 'capture',
+                timestamp: `00:${minutes}:${seconds}`,
+            };
+        });
+
         const combined = [
             ...formattedMemos.map(memo => ({
                 ...memo,
@@ -94,7 +103,7 @@ export class PdfService {
                 type: 'summaries',
                 timestamp: summary.timestamp,
             })),
-            ...capture.map(capture => ({
+            ...formattedCaptures.map(capture => ({
                 ...capture,
                 type: 'capture',
                 timestamp: capture.timestamp,
@@ -106,6 +115,34 @@ export class PdfService {
             const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
             return secondsA - secondsB;
         });
+
+        // 같은 타입의 연속된 아이템들을 그룹화
+        const groupedItems = [];
+        let currentGroup = [];
+        let currentType = null;
+
+        for (const item of combined) {
+            if (currentType === null || currentType === item.type) {
+                currentGroup.push(item);
+            } else {
+                if (currentGroup.length > 0) {
+                    groupedItems.push({
+                        type: currentType,
+                        items: currentGroup,
+                    });
+                }
+                currentGroup = [item];
+            }
+            currentType = item.type;
+        }
+
+        // 마지막 그룹 추가
+        if (currentGroup.length > 0) {
+            groupedItems.push({
+                type: currentType,
+                items: currentGroup,
+            });
+        }
 
         let htmlContent = `
         <!DOCTYPE html>
@@ -119,7 +156,7 @@ export class PdfService {
         }
 
         body {
-            font-family: 'Georgia', serif;
+            font-family: 'Noto Sans CJK KR', serif;
             margin: 0 auto; /* body의 여백은 제거하고 페이지 여백 사용 */
             background-color: #fdfdfd;
             color: #333;
@@ -150,15 +187,6 @@ export class PdfService {
             border-radius: 4px;
         }
 
-        /* 추가 내용 스타일 수정 */
-        .summaries {
-            margin: 15px 0; /* 여백 축소 */
-            padding: 12px 15px; /* 내부 여백 축소 */
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            border-left: 4px solid #4a90e2;
-        }
-
         .summaries div:not(.timestamp) {
             color: #2c3e50;
             font-weight: 500;
@@ -180,20 +208,38 @@ export class PdfService {
             color: #777;
         }
 
-        /* 섹션 구분선 스타일 */
-        .memo, .capture, .summaries {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px; /* 하단 여백 축소 */
-        }
-
         h2 {
             font-weight: 700;  /* 더 두껍게 */
-            font-size: 20px;
+            font-size: 24px;
             color: #2c3e50;
             margin: 20px 0 30px 0;
             text-align: center;
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
+        }
+
+        .summaries-container {
+            margin: 25px 0;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+            padding: 15px;
+        }
+
+        .summary-item {
+            margin: 10px 0;
+            padding: 5px 0;
+        }
+
+        .summary-item .timestamp {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .content {
+            color: #2c3e50;
+            line-height: 1.6;
         }
         </style>
 
@@ -202,45 +248,63 @@ export class PdfService {
         <h2><strong>${title}</strong></h2>
         `;
 
-        for (const item of combined) {
-            if (item.type === 'memo' && 'description' in item) {
+        for (const group of groupedItems) {
+            if (group.type === 'summaries') {
                 htmlContent += `
-                    <div class="memo">
-                        <div class="timestamp">[${item.timestamp}]<span class="label"> 내 메모</span></div>
-                        <div>${item.description}</div>
-                    </div>`;
-            } else if (item.type === 'capture' && 'image' in item) {
-                try {
-                    let imageUrl = item.image;
-                    if (!item.image.startsWith('data:image')) {
-                        const response = await firstValueFrom(
-                            this.httpService.get(item.image, { responseType: 'arraybuffer' }),
-                        );
-                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
-                        imageUrl = `data:image/jpeg;base64,${base64}`;
-                    }
+                <div class="summaries-container">
+                    <div class="summaries">`;
 
+                // 모든 summary 항목을 하나의 컨테이너에 순차적으로 표시
+                for (const item of group.items) {
                     htmlContent += `
-                        <div class="capture">
-                            <div class="timestamp">[${item.timestamp}]</div>
-                            <div class="image">
-                                <img src="${imageUrl}" alt="Captured Image" />
-                            </div>
-                        </div>`;
-                } catch (error) {
-                    console.error(`이미지 로드 실패: ${item.image}`, error);
-                    htmlContent += `
-                        <div class="capture">
-                            <div class="timestamp">[${item.timestamp}] <span class="label"> 이미지 </span></div>
-                            <div>이미지를 불러올 수 없습니다.</div>
+                        <div class="summary-item">
+                            <!-- <div class="timestamp">[${item.timestamp}]</div> -->
+                            <div class="content">${item.summary}</div>
                         </div>`;
                 }
-            } else if (item.type === 'summaries' && 'summary' in item) {
+
                 htmlContent += `
-                    <div class="summaries">
-                        <div class="timestamp">[${item.timestamp}] <span class="label"> 추가 내용</span></div>
-                        <div>${item.summary}</div>
-                    </div>`;
+                    </div>
+                </div>`;
+            } else if (group.type === 'memo') {
+                htmlContent += `<div class="group memo-group">`;
+                for (const item of group.items) {
+                    htmlContent += `
+                        <div class="memo">
+                            <!-- <div class="timestamp">[${item.timestamp}]</div>  -->
+                            <div>${item.description}</div>
+                        </div>`;
+                }
+                htmlContent += `</div>`;
+            } else if (group.type === 'capture') {
+                htmlContent += `<div class="group capture-group">`;
+                for (const item of group.items) {
+                    try {
+                        let imageUrl = item.image;
+                        if (!item.image.startsWith('data:image')) {
+                            const response = await firstValueFrom(
+                                this.httpService.get(item.image, { responseType: 'arraybuffer' }),
+                            );
+                            const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                            imageUrl = `data:image/jpeg;base64,${base64}`;
+                        }
+                        htmlContent += `
+                            <div class="capture">
+                                <!-- <div class="timestamp">[${item.timestamp}]</div> -->
+                                <div class="image">
+                                    <img src="${imageUrl}" alt="Captured Image" />
+                                </div>
+                            </div>`;
+                    } catch (error) {
+                        console.error(`이미지 로드 실패: ${item.image}`, error);
+                        htmlContent += `
+                            <div class="capture">
+                                <!-- <div class="timestamp">[${item.timestamp}]</div> -->
+                                <div>이미지를 불러올 수 없습니다.</div>
+                            </div>`;
+                    }
+                }
+                htmlContent += `</div>`;
             }
         }
 
