@@ -42,11 +42,11 @@
 .itemContent {
     flex: 1;
     min-height: 20px;
-    font-size: 16px;
+    font-size: 25px;
     font-weight: 600;
     font-family: 'Noto Sans KR';
     line-height: 1.5;
-    color:#666;
+    color: #666;
     cursor: text;
     /* 편집 가능하다는 암시 */
     outline: none;
@@ -74,29 +74,32 @@
 .editorArea {
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 10px;
+    padding: 16px;
     margin-top: 10px;
 }
 
 .DraftEditor-root {
     min-height: 120px;
-    font-size: 16px;
+    font-size: 25px;
 }
 
 /* 툴바 */
 .toolbar {
     display: flex;
-    gap: 8px;
-    padding: 8px;
+    gap: 12px;
+    padding: 12px;
     border-top: 1px solid #eee;
 }
 
 .styleButton {
-    padding: 4px 8px;
+    padding: 8px 16px;
     border: 1px solid #ddd;
     background: white;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 20px;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .activeButton {
@@ -106,12 +109,13 @@
 
 .saveButton {
     margin-left: auto;
-    padding: 4px 12px;
+    padding: 8px 20px;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 20px;
 }
 
 .saveButton:hover {
@@ -412,7 +416,8 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 10px;
     border-radius: 8px;
-    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1); /* 사방위로 균일하게 퍼지는 그림자 */
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1);
+    /* 사방위로 균일하게 퍼지는 그림자 */
 }
 
 .memoHeader {
@@ -425,7 +430,7 @@
 
 .timestampBtn {
     color: #0066FF;
-    font-size: 16px;
+    font-size: 23px;
     font-weight: 1000;
     padding: 10px;
     border: none;
@@ -468,6 +473,7 @@
     align-items: center;
     justify-content: center;
 }
+
 /* 그리기 버튼 */
 .drawBtn {
     width: 20px;

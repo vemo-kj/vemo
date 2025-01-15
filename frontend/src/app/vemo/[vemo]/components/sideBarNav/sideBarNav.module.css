@@ -23,14 +23,10 @@
 
 /* 탭 버튼 스타일 */
 .tab {
-    width: 86px;
-    /* iconButton과 동일한 너비 */
-    height: 86px;
-    /* iconButton과 동일한 높이 */
+    width: 100px;
+    height: 100px;
     padding: 0;
-    /* 패딩 제거 */
-    margin: 8px auto;
-    /* 가운데 정렬을 위한 마진 */
+    margin: 12px auto;
     font-size: 14px;
     font-weight: bold;
     text-align: center;
@@ -48,13 +44,10 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    /* 부모 요소인 tab의 크기에 맞춤 */
     height: 100%;
-    /* 부모 요소인 tab의 크기에 맞춤 */
     background-color: transparent;
     border: none;
-    padding: 16px;
-    /* 내부 여백 추가 */
+    padding: 20px;
 }
 
 /* activeTab 스타일 수정 */
@@ -202,9 +195,9 @@
 .footerButtons {
     display: flex;
     justify-content: center;
-    gap: 16px;
-    margin: 16px auto;
-    padding: 8px;
+    gap: 12px;
+    margin: 12px auto;
+    padding: 6px;
     width: calc(100% - 48px);
     border-radius: 8px;
 
@@ -249,9 +242,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 86px;
-    max-width: 86px;
-    padding: 16px;
+    min-width: 80px;
+    max-width: 80px;
+    padding: 12px;
     background-color: white;
     border: none;
     border-radius: 8px;
@@ -260,13 +253,13 @@
 }
 
 .defaultIcon {
-    width: 20px;
-    height: 20px;
-    margin-bottom: 4px;
+    width: 40px !important;
+    height: 40px !important;
+    margin-bottom: 6px;
 }
 
 .iconButtonText {
-    font-size: 12px;
+    font-size: 20px;
     text-align: center;
     white-space: nowrap;
 }
@@ -317,14 +310,14 @@
 
 /* 메인 제목 */
 .notesHeaderText {
-    font-size: 24px;
+    font-size: 35px;
     font-weight: bold;
     color: #333;
 }
 
 /* 드롭다운 스타일 */
 .dropdown {
-    min-width: 160px;
+    min-width: 220px;
     /* 드롭다운 최소 너비 */
 }
 
@@ -333,13 +326,13 @@
     border-radius: 8px;
     border: 1px solid #e0e0e0;
     background-color: white;
-    font-size: 16px;
+    font-size: 25px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .titleInput {
-    font-size: 24px;
+    font-size: 35px;
     font-weight: bold;
     width: 100%;
     padding: 8px;
