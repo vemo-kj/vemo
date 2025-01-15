@@ -10,10 +10,12 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { Captures } from './captures.entity';
 import { CreateCapturesDto } from './dto/create-capture.dto';
-import { Memos } from 'src/memos/memos.entity';
 import { UpdateCapturesDto } from './dto/update-capture.dto';
+import { Memos } from '../memos/memos.entity';
 import { S3 } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class CapturesService {
@@ -23,9 +25,8 @@ export class CapturesService {
     constructor(
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
         @InjectRepository(Captures) private capturesRepository: Repository<Captures>,
-        @Inject('S3')
-        private readonly s3: S3,
-
+        @Inject('S3') private readonly s3: S3,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
     ) {
         this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
@@ -38,7 +39,6 @@ export class CapturesService {
                 where: { id: memosId },
             });
 
-            // (2) DB 엔티티 생성
             const captures = this.capturesRepository.create({
                 ...rest,
                 memos,
@@ -52,8 +52,9 @@ export class CapturesService {
                 captures.image = image;
             }
 
-            // (4) DB 저장
-            return await this.capturesRepository.save(captures);
+            const savedCapture = await this.capturesRepository.save(captures);
+            await this.invalidateCache();
+            return savedCapture;
         } catch (error) {
             throw new InternalServerErrorException('Failed to create capture', {
                 cause: error,
@@ -61,17 +62,26 @@ export class CapturesService {
         }
     }
 
-    /**
-     * 전체 캡처 목록
-     */
     async getCaptures(): Promise<Captures[]> {
         try {
-            return await this.capturesRepository.find({
+            const cacheKey = 'captures:all';
+            const cachedCaptures = await this.cacheManager.get<Captures[]>(cacheKey);
+
+            if (cachedCaptures) {
+                this.logger.log('Cache HIT for all captures');
+                return cachedCaptures;
+            }
+
+            this.logger.log('Cache MISS for all captures');
+            const captures = await this.capturesRepository.find({
                 relations: ['memos'],
                 order: {
                     timestamp: 'ASC',
                 },
             });
+
+            await this.cacheManager.set(cacheKey, captures, 3600);
+            return captures;
         } catch (error) {
             throw new InternalServerErrorException('Failed to get captures', {
                 cause: error,
@@ -79,21 +89,27 @@ export class CapturesService {
         }
     }
 
-    /**
-     * 특정 캡처 조회
-     */
     async getCaptureById(id: number): Promise<Captures> {
         try {
+            const cacheKey = `capture:${id}`;
+            const cachedCapture = await this.cacheManager.get<Captures>(cacheKey);
+
+            if (cachedCapture) {
+                this.logger.log(`Cache HIT for capture ${id}`);
+                return cachedCapture;
+            }
+
+            this.logger.log(`Cache MISS for capture ${id}`);
             const capture = await this.capturesRepository.findOne({
                 where: { id },
                 relations: ['memos'],
             });
-            this.logger.log('getCaptureById capture:', capture);
 
             if (!capture) {
                 throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
+            await this.cacheManager.set(cacheKey, capture, 3600);
             return capture;
         } catch (error) {
             if (error instanceof NotFoundException) {
@@ -105,13 +121,8 @@ export class CapturesService {
         }
     }
 
-    /**
-     * 캡처 업데이트
-     *  - Base64 있을 시, S3 재업로드 후 URL로 대체
-     */
     async updateCapture(id: number, updateCapturesDto: UpdateCapturesDto): Promise<Captures> {
         try {
-            // (1) 기존 캡처 엔티티 조회
             const capture = await this.capturesRepository.findOne({
                 where: { id },
                 relations: ['memos'],
@@ -121,14 +132,14 @@ export class CapturesService {
                 throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
-            // (2) 클라이언트가 보낸 Base64 이미지가 있으면 새로 업로드
             if (updateCapturesDto.image) {
                 const uploadUrl = await this.uploadBase64ToS3(updateCapturesDto.image, 'captures');
                 capture.image = uploadUrl;
             }
 
-            // (3) DB 저장
-            return await this.capturesRepository.save(capture);
+            const updatedCapture = await this.capturesRepository.save(capture);
+            await this.invalidateCache(id);
+            return updatedCapture;
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -139,9 +150,6 @@ export class CapturesService {
         }
     }
 
-    /**
-     * 캡처 삭제
-     */
     async deleteCapture(id: number): Promise<void> {
         const capture = await this.capturesRepository.findOne({ where: { id } });
         if (!capture) {
@@ -149,26 +157,27 @@ export class CapturesService {
                 cause: 'Capture not found',
             });
         }
+
         await this.capturesRepository.delete(id);
+        await this.invalidateCache(id);
     }
 
-    /**
-     * uploadBase64ToS3
-     *  - data:image/... 형태의 Base64를 파싱 → S3 업로드 → 업로드된 파일 URL 반환
-     */
+    private async invalidateCache(id?: number): Promise<void> {
+        const promises = ['captures:all'];
+        if (id) {
+            promises.push(`capture:${id}`);
+        }
+        await Promise.all(promises.map(key => this.cacheManager.del(key)));
+        this.logger.log('Cache invalidated');
+    }
+
     async uploadBase64ToS3(base64: string, folder: string): Promise<string> {
         try {
-            // 1) data:image/png;base64, 이 부분 제거
             const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
-            // 2) 버퍼로 변환
             const buffer = Buffer.from(base64Data, 'base64');
-
-            // 3) 확장자 추출 (png, jpg, 등)
             const ext = base64.match(/data:image\/(\w+);base64/)?.[1] || 'png';
-            // 4) 파일 이름 생성
             const fileName = `${folder}/${uuidv4()}.${ext}`;
 
-            // 5) S3 업로드
             const uploadResult = await this.s3
                 .upload({
                     Bucket: 'vemo-data-bucket',
@@ -179,7 +188,6 @@ export class CapturesService {
                 })
                 .promise();
 
-            // 업로드된 S3 파일 URL
             return uploadResult.Location;
         } catch (error) {
             throw new InternalServerErrorException('S3 업로드에 실패했습니다.', {
