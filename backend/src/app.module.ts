@@ -40,11 +40,15 @@ import { PdfModule } from './pdf/pdf.module';
             inject: [ConfigService],
         }),
         CacheModule.registerAsync({
-            useFactory: () => ({
-                store: redisStore as unknown as string,
-                host: process.env.REDIS_HOST,
-                port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+            isGlobal: true,
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+                store: redisStore,
+                host: configService.get('REDIS_HOST', 'localhost'),
+                port: configService.get('REDIS_PORT', 6379),
+                ttl: 3600,
             }),
+            inject: [ConfigService],
         }),
         MemoModule,
         MemosModule,
