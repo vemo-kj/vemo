@@ -1,12 +1,13 @@
 .container {
   padding: 1.5rem;
-  height: 100%;
+  height: 900px;
+  max-height: 900px;
   overflow-y: auto;
   background-color: #f8fafc;
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 1.5rem;
@@ -37,10 +38,10 @@
 
 .timestamp {
   display: inline-block;
-  font-size: 0.875rem;
+  font-size: 23px;
   color: #3b82f6;
   background-color: #eff6ff;
-  padding: 0.25rem 0.75rem;
+  padding: 0.5rem 1rem;
   border-radius: 1rem;
   margin-bottom: 1rem;
   cursor: pointer;
@@ -52,7 +53,7 @@
 }
 
 .question {
-  font-size: 1.125rem;
+  font-size: 25px;
   color: #334155;
   line-height: 1.6;
   margin-bottom: 1.5rem;
@@ -67,12 +68,12 @@
 }
 
 .answerButton {
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 50%;
   border: 2px solid #e2e8f0;
   background: white;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -95,11 +96,12 @@
 
 .result {
   text-align: center;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
   font-weight: 500;
   animation: fadeIn 0.3s ease-in-out;
+  font-size: 23px;
 }
 
 .result.correct {
@@ -114,12 +116,12 @@
 
 .checkAnswerButton {
   width: 100%;
-  padding: 1rem;
+  padding: 1.2rem;
   background: #3b82f6;
   color: white;
   border: none;
   border-radius: 0.75rem;
-  font-size: 1rem;
+  font-size: 23px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
