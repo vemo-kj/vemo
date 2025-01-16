@@ -94,24 +94,24 @@
 }
 
 .extractBtn {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    background-image: url('/icons/bt_edit_text.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    opacity: 0.8;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  background-image: url('/icons/bt_edit_text.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.8;
 }
 
 .extractBtn:hover {
-    opacity: 1;
+  opacity: 1;
 }
 
 .extractBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
