@@ -1,52 +1,82 @@
+.container {
+  height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+}
+
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .header h1 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 20px;
   color: #333;
-  margin-bottom: 16px;
 }
 
 .buttonContainer {
   display: flex;
   gap: 12px;
+  margin-bottom: 5px;
 }
 
 .viewButton {
-  padding: 8px 16px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  padding: 12px 24px;
   border: none;
-  border-radius: 20px;
-  background-color: #f0f0f0;
+  border-radius: 8px;
+  background-color: #f5f5f5;
   color: #666;
-  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.viewButton:hover {
-  background-color: #e0e0e0;
+.viewButton.active {
+  background-color: #007bff;
+  color: white;
 }
 
-.viewButton.active {
-  background-color: #007AFF;
+.viewButton:hover {
+  background-color: #007bff;
   color: white;
 }
 
 .memoList {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex: 1;
+  height: calc(100% - 120px);
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-right: -10px;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.memoList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.memoList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.memoList::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
 .memoCard {
-  padding: 16px;
-  background-color: white;
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .memoCard:hover {
@@ -55,21 +85,20 @@
 }
 
 .memoContent {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .memoTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 16px;
   color: #333;
-  margin-bottom: 8px;
 }
 
 .memoDescription {
   color: #666;
   font-size: 14px;
   line-height: 1.5;
-  /* 2줄 제한 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -81,12 +110,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
 }
 
 .author {
-  font-weight: 500;
-  color: #444;
+  font-size: 1.3rem;
+  color: #666;
+  font-weight: 600;
 }
 
 .dateInfo {
@@ -95,67 +127,156 @@
 }
 
 .date {
+  font-size: 1.3rem;
+  font-weight: 600;
   color: #888;
 }
 
-/* 상세 보기 스타일 */
 .detailView {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .detailHeader {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 24px;
+  align-items: center;
+  padding: 20px 0;
 }
 
-.backButton,
-.shareButton {
-  padding: 8px 16px;
+.backButton {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 12px 24px;
   border: none;
-  border-radius: 20px;
-  font-size: 14px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.backButton {
-  background-color: #f0f0f0;
-  color: #666;
+.backButton:hover {
+  background-color: #e0e0e0;
 }
 
-.shareButton {
-  background-color: #007AFF;
+.detailActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editButton,
+.shareButton,
+.deleteButton {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editButton {
+  background-color: #007bff;
   color: white;
 }
 
+.shareButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: white;
+}
+
+.editButton:hover,
+.shareButton:hover,
+.deleteButton:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
 .detailContent {
-  padding: 0 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .detailTitle {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 30px;
   color: #333;
-  margin-bottom: 16px;
-}
-
-.detailDescription {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #444;
-  margin-bottom: 24px;
 }
 
 .detailInfo {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.detailAuthor {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.detailDate {
+  font-size: 1.3rem;
+  color: #777;
+}
+
+.detailDescription {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+.memoSection,
+.captureSection {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.memoItem,
+.captureItem {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.timestamp {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.captureImage {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 8px;
+  margin: 10px 0;
 }
 
 .modalOverlay {
@@ -164,7 +285,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -172,29 +293,42 @@
 }
 
 .modal {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .modalMessage {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 .modalButtons {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 20px;
 }
 
 .confirmButton,
 .cancelButton {
-  padding: 8px 20px;
-  border-radius: 4px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 15px 40px;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .confirmButton {
@@ -203,8 +337,32 @@
 }
 
 .cancelButton {
-  background-color: #6c757d;
+  background-color: #dc3545;
   color: white;
+}
+
+.confirmButton:hover,
+.cancelButton:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.loading {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+  padding: 40px;
+}
+
+.error {
+  font-size: 1.4rem;
+  color: #dc3545;
+  text-align: center;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  margin: 20px 0;
 }
 
 .memoList {
