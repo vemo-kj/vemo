@@ -7,10 +7,10 @@
 .intro {
   height: 34vh;
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('/images/Slide 16_9 - 557.png');
-  background-size: contain;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #000;
+  background-color: transparent;
   background-attachment: fixed;
   display: flex;
   align-items: center;
