@@ -96,6 +96,8 @@
 .extractBtn {
   width: 30px;
   height: 30px;
+  margin-left: 8px;
+  margin-right: 8px;
   padding: 0;
   background: transparent;
   border: none;
