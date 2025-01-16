@@ -1,12 +1,9 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import {
     Injectable,
     Logger,
     NotFoundException,
     UnauthorizedException,
     UseInterceptors,
-    Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -24,35 +21,20 @@ export class VideoService {
         private videoRepository: Repository<Video>,
         private youtubeAuthService: YoutubeAuthService,
         private channelService: ChannelService,
-        @Inject(CACHE_MANAGER)
-        private cacheManager: Cache,
     ) {}
 
     async getVideoById(videoId: string): Promise<Video> {
-        // 1. Redis 캐시 확인
-        const cachedVideo = await this.cacheManager.get<Video>(`video:${videoId}`);
-        if (cachedVideo) {
-            return cachedVideo;
-        }
-
-        // 2. DB 조회
         const existingVideo = await this.findVideoInDatabase(videoId);
         if (existingVideo) {
-            // DB에서 찾은 데이터 캐싱 (1시간)
-            await this.cacheManager.set(`video:${videoId}`, existingVideo, 3600000);
             return existingVideo;
         }
 
-        // 3. YouTube API 호출 및 저장
         const videoData = await this.fetchVideoFromYouTube(videoId);
         if (!videoData) {
             throw new NotFoundException('Video not found');
         }
 
-        const savedVideo = await this.createAndSaveVideo(videoData);
-        await this.cacheManager.set(`video:${videoId}`, savedVideo, 3600000);
-
-        return savedVideo;
+        return await this.createAndSaveVideo(videoData);
     }
 
     async findVideoInDatabase(videoId: string): Promise<Video | null> {
@@ -100,38 +82,17 @@ export class VideoService {
         return await this.videoRepository.save(video);
     }
 
-    /**
-     * 모든 비디오 데이터를 조회합니다.
-     * @param page 페이지 번호 (기본값: 1)
-     * @param limit 페이지당 비디오 수 (기본값: 10)
-     * @returns Video[]
-     */
     async getAllVideos(page: number = 1, limit: number = 10): Promise<Video[]> {
-        const cacheKey = `videos:page:${page}:limit:${limit}`;
-
-        // 캐시 확인
-        const cachedVideos = await this.cacheManager.get<Video[]>(cacheKey);
-        if (cachedVideos) {
-            return cachedVideos;
-        }
-
-        // DB 조회
-        const videos = await this.videoRepository.find({
+        return this.videoRepository.find({
             relations: ['channel'],
             order: { id: 'DESC' },
             skip: (page - 1) * limit,
             take: limit,
         });
-
-        // 결과 캐싱 (5분)
-        await this.cacheManager.set(cacheKey, videos, 300000);
-
-        return videos;
     }
 
     async getVideosByIds(videoIds: string[]): Promise<Video[]> {
         const videos = await Promise.all(videoIds.map(videoId => this.getVideoById(videoId)));
-
         if (videos.length !== videoIds.length) {
             const foundVideoIds = videos.map(video => video.id);
             const notFoundVideoIds = videoIds.filter(id => !foundVideoIds.includes(id));

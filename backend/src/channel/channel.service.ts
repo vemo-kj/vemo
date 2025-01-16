@@ -1,6 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { Inject, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
+import { Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { YoutubeApiInterceptor } from '../youtubeauth/youtube-api.interceptor';
@@ -13,34 +11,16 @@ export class ChannelService {
         @InjectRepository(Channel)
         private channelRepository: Repository<Channel>,
         private youtubeAuthService: YoutubeAuthService,
-        @Inject(CACHE_MANAGER)
-        private cacheManager: Cache,
     ) {}
 
-    /**
-     * 채널 정보를 조회하거나 없는 경우 생성
-     * Redis 캐시 -> DB -> YouTube API 순으로 조회
-     */
     @UseInterceptors(YoutubeApiInterceptor)
     async getChannel(channelId: string): Promise<Channel> {
-        // 1. Redis 캐시 확인
-        const cachedChannel = await this.cacheManager.get<Channel>(`channel:${channelId}`);
-        if (cachedChannel) {
-            return cachedChannel;
-        }
-
-        // 2. DB 조회
         const existingChannel = await this.findChannelById(channelId);
         if (existingChannel) {
-            // DB에서 찾은 데이터 캐싱 (24시간)
-            await this.cacheManager.set(`channel:${channelId}`, existingChannel, 86400000);
             return existingChannel;
         }
 
-        // 3. YouTube API 호출 및 저장
-        const newChannel = await this.createChannelFromYoutube(channelId);
-        await this.cacheManager.set(`channel:${channelId}`, newChannel, 86400000);
-        return newChannel;
+        return await this.createChannelFromYoutube(channelId);
     }
 
     private async findChannelById(channelId: string): Promise<Channel | null> {
