@@ -14,6 +14,8 @@ import { UpdateCapturesDto } from './dto/update-capture.dto';
 import { Memos } from '../memos/memos.entity';
 import { S3 } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class CapturesService {
@@ -24,6 +26,7 @@ export class CapturesService {
         @InjectRepository(Memos) private readonly memosRepository: Repository<Memos>,
         @InjectRepository(Captures) private capturesRepository: Repository<Captures>,
         @Inject('S3') private readonly s3: S3,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
     ) {
         this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
@@ -49,7 +52,9 @@ export class CapturesService {
                 captures.image = image;
             }
 
-            return await this.capturesRepository.save(captures);
+            const savedCapture = await this.capturesRepository.save(captures);
+            await this.invalidateCache();
+            return savedCapture;
         } catch (error) {
             throw new InternalServerErrorException('Failed to create capture', {
                 cause: error,
@@ -59,12 +64,24 @@ export class CapturesService {
 
     async getCaptures(): Promise<Captures[]> {
         try {
-            return await this.capturesRepository.find({
+            const cacheKey = 'captures:all';
+            const cachedCaptures = await this.cacheManager.get<Captures[]>(cacheKey);
+
+            if (cachedCaptures) {
+                this.logger.log('Cache HIT for all captures');
+                return cachedCaptures;
+            }
+
+            this.logger.log('Cache MISS for all captures');
+            const captures = await this.capturesRepository.find({
                 relations: ['memos'],
                 order: {
                     timestamp: 'ASC',
                 },
             });
+
+            await this.cacheManager.set(cacheKey, captures, 3600);
+            return captures;
         } catch (error) {
             throw new InternalServerErrorException('Failed to get captures', {
                 cause: error,
@@ -74,6 +91,15 @@ export class CapturesService {
 
     async getCaptureById(id: number): Promise<Captures> {
         try {
+            const cacheKey = `capture:${id}`;
+            const cachedCapture = await this.cacheManager.get<Captures>(cacheKey);
+
+            if (cachedCapture) {
+                this.logger.log(`Cache HIT for capture ${id}`);
+                return cachedCapture;
+            }
+
+            this.logger.log(`Cache MISS for capture ${id}`);
             const capture = await this.capturesRepository.findOne({
                 where: { id },
                 relations: ['memos'],
@@ -83,6 +109,7 @@ export class CapturesService {
                 throw new NotFoundException(`Capture with ID ${id} not found`);
             }
 
+            await this.cacheManager.set(cacheKey, capture, 3600);
             return capture;
         } catch (error) {
             if (error instanceof NotFoundException) {
@@ -110,7 +137,9 @@ export class CapturesService {
                 capture.image = uploadUrl;
             }
 
-            return await this.capturesRepository.save(capture);
+            const updatedCapture = await this.capturesRepository.save(capture);
+            await this.invalidateCache(id);
+            return updatedCapture;
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
@@ -130,6 +159,16 @@ export class CapturesService {
         }
 
         await this.capturesRepository.delete(id);
+        await this.invalidateCache(id);
+    }
+
+    private async invalidateCache(id?: number): Promise<void> {
+        const promises = ['captures:all'];
+        if (id) {
+            promises.push(`capture:${id}`);
+        }
+        await Promise.all(promises.map(key => this.cacheManager.del(key)));
+        this.logger.log('Cache invalidated');
     }
 
     async uploadBase64ToS3(base64: string, folder: string): Promise<string> {
