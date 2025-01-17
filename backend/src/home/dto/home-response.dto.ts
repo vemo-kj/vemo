@@ -1,4 +1,4 @@
-import { IsArray, ValidateNested } from 'class-validator';
+import { IsArray, ValidateNested, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { VideoResponseDto } from '../../video/dto/video-response.dto';
 
@@ -7,4 +7,7 @@ export class HomeResponseDto {
     @ValidateNested({ each: true, message: 'videos 배열의 각 요소는 유효해야 한다.' })
     @Type(() => VideoResponseDto)
     videos: VideoResponseDto[];
+
+    @IsBoolean()
+    hasMore: boolean;
 }

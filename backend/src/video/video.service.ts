@@ -21,7 +21,7 @@ export class VideoService {
         private videoRepository: Repository<Video>,
         private youtubeAuthService: YoutubeAuthService,
         private channelService: ChannelService,
-    ) {}
+    ) { }
 
     async getVideoById(videoId: string): Promise<Video> {
         const existingVideo = await this.findVideoInDatabase(videoId);
@@ -114,5 +114,14 @@ export class VideoService {
         const minutes = match?.[2] ? parseInt(match[2]) : 0;
         const seconds = match?.[3] ? parseInt(match[3]) : 0;
         return [hours, minutes, seconds].map(unit => unit.toString().padStart(2, '0')).join(':');
+    }
+
+    async getAllVideosAndCount(page: number = 1, limit: number = 12): Promise<[Video[], number]> {
+        return await this.videoRepository.findAndCount({
+            relations: ['channel'],
+            order: { id: 'DESC' },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
     }
 }

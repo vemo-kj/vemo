@@ -24,7 +24,7 @@ import { CreateMemosResponseDto } from './dto/create-memos-response.dto';
 export class HomeController {
     private readonly logger = new Logger(HomeController.name);
 
-    constructor(private readonly homeService: HomeService) {}
+    constructor(private readonly homeService: HomeService) { }
 
     /**
      * 플레이리스트 생성 및 첫번째 비디오에 대한 메모 생성
@@ -69,8 +69,14 @@ export class HomeController {
     @Get()
     async getAllVideos(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-        @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
+        @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
     ): Promise<HomeResponseDto> {
         return this.homeService.getAllVideos(page, limit);
+    }
+
+    @Get('all')
+    @Public()
+    async getAllVideosForFilter(): Promise<HomeResponseDto> {
+        return this.homeService.getAllVideosForFilter();
     }
 }

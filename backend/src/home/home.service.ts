@@ -22,7 +22,7 @@ export class HomeService {
         private readonly videoService: VideoService,
         private readonly memosService: MemosService,
         private readonly playlistService: PlaylistService,
-    ) {}
+    ) { }
 
     async createPlaylistWithMemos(
         userId: number,
@@ -120,18 +120,15 @@ export class HomeService {
     /**
      * 모든 비디오 데이터를 조회합니다.
      * @param page 페이지 번호 (기본값: 1)
-     * @param limit 페이지당 비디오 수 (기본값: 10)
+     * @param limit 페이지당 비디오 수 (기본값: 12)
      * @returns HomeResponseDto
      */
-    async getAllVideos(page: number = 1, limit: number = 100): Promise<HomeResponseDto> {
-        const videos = await this.videoService.getAllVideos(page, limit);
+    async getAllVideos(page: number = 1, limit: number = 12): Promise<HomeResponseDto> {
+        // 일반 조회일 때는 페이지네이션 적용
+        const skip = (page - 1) * limit;
+        const [videos, total] = await this.videoService.getAllVideosAndCount(page, limit);
 
-        if (!videos.length) {
-            return { videos: [] };
-        }
-
-        // 각 비디오에 대해 메모 수를 계산
-        const videoDtos: VideoResponseDto[] = await Promise.all(
+        const videoDtos = await Promise.all(
             videos.map(async video => {
                 const vemoCount = await this.memosService.getVemoCountByVideo(video.id);
                 return {
@@ -150,6 +147,38 @@ export class HomeService {
             }),
         );
 
-        return { videos: videoDtos };
+        return {
+            videos: videoDtos,
+            hasMore: total > skip + limit
+        };
+    }
+
+    // 카테고리나 검색용 전체 데이터 조회
+    async getAllVideosForFilter(): Promise<HomeResponseDto> {
+        const videos = await this.videoService.getAllVideos();
+
+        const videoDtos = await Promise.all(
+            videos.map(async video => {
+                const vemoCount = await this.memosService.getVemoCountByVideo(video.id);
+                return {
+                    id: video.id,
+                    title: video.title,
+                    thumbnails: video.thumbnails,
+                    duration: video.duration,
+                    category: video.category,
+                    channel: {
+                        id: video.channel.id,
+                        thumbnails: video.channel.thumbnails,
+                        title: video.channel.title,
+                    },
+                    vemoCount,
+                };
+            }),
+        );
+
+        return {
+            videos: videoDtos,
+            hasMore: false  // 전체 데이터를 가져오므로 항상 false
+        };
     }
 }
