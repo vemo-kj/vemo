@@ -118,33 +118,31 @@ IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워�
 
 # 팀원 소개
 
-### Backend
-
 <table>
   <tr>
-    <td align="center" width="200px">
-      <a href="https://github.com/Hyeonjae-K" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="김제림 프로필" />
-      </a>
-    </td>
-    <td align="center" width="200px">
-      <a href="https://github.com/java-saeng" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/62413589?s=64&v=4" alt="박수호 프로필" />
-      </a>
-    </td>
-    <td align="center" width="200px">
+  <td align="center" width="200px">
       <a href="https://github.com/hong-sile" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/32128848?s=64&v=4" alt="서성진 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/32128848?s=64&v=4" alt="서성진(FE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/amaran-th" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/81465068?s=64&v=4" alt="여강수 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/81465068?s=64&v=4" alt="여강수(FE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/Hyeonjae-K" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="최진영 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="김제림(BE) 프로필" />
+      </a>
+    </td>
+    <td align="center" width="200px">
+      <a href="https://github.com/java-saeng" target="_blank">
+        <img src="https://avatars.githubusercontent.com/u/62413589?s=64&v=4" alt="박수호(BE) 프로필" />
+      </a>
+    </td>
+    <td align="center" width="200px">
+      <a href="https://github.com/Hyeonjae-K" target="_blank">
+        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="최진영(BE) 프로필" />
       </a>
     </td>
   </tr>
