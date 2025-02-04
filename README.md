@@ -21,7 +21,7 @@
 
 ## ✨ 핵심 기능
 
-### 1. Writing
+### 1. 작성하기
 
 | ![](https://private-user-images.githubusercontent.com/103885896/409444622-db6f2f25-8db4-443b-a1a5-04f3277e17c8.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTYwNTUsIm5iZiI6MTczODY1NTc1NSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NjIyLWRiNmYyZjI1LThkYjQtNDQzYi1hMWE1LTA0ZjMyNzdlMTdjOC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzU1NTVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT04ZTkzZmRhODIzNDY3M2M1ZDVjZTAyYmM5YmI4OGVkMGI5YjU3NDJjNDNmNDNlYmYzOGQwYzNmZjljOTUyYzJmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.WkACloX_Qd6t4d7fUteQfd677FM_Woynq4XuyyXSqoQ) | ![](https://private-user-images.githubusercontent.com/103885896/409444558-f3927434-99f8-41b3-b7cd-8b917ea11122.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTYwNTUsIm5iZiI6MTczODY1NTc1NSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NTU4LWYzOTI3NDM0LTk5ZjgtNDFiMy1iN2NkLThiOTE3ZWExMTEyMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzU1NTVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1jZTQ4ZTU2ZjkyNjVkOTU1OWU2N2I2NmE4NTA1NmQ4YTQ5NzUzOTgyNDBlYzRmYWRlMjA1MDU3OWNlNDBjMDI5JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.ej8s5Sj4OI5iuAET9SgMXYa1zVAsbhvrmuLX_NJXe3U) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -31,15 +31,17 @@
 
 
 
-영상을 보며 타임스탬프와 함께 메모 작성.
+영상을 보며 타임스탬프와 함께 메모 작성
 
-작성한 메모는 클릭만 하면 해당 영상 시점으로 바로 이동!
+타임스탬프와 함께 학습 내용을 복습하고 정리하세요
 
-타임스탬프와 함께 학습 내용을 복습하고 정리하세요.
+작성한 메모는 클릭만 하면 해당 영상 시점으로 바로 이동해요 !
+
 
 <br/>
+<br>
 
-### 2. Mapping
+### 2. 매핑하기
 
 ![](https://private-user-images.githubusercontent.com/103885896/409444673-69f4de46-6946-44c5-9bb5-20e4f699d04d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY4MTYsIm5iZiI6MTczODY1NjUxNiwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NjczLTY5ZjRkZTQ2LTY5NDYtNDRjNS05YmI1LTIwZTRmNjk5ZDA0ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA4MzZaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05NDg5ZWIzNTMyYzYzMzVmMDgxNTNkMTczNTMwMzU4NGZmM2VjMjU2NmI0MjcxNTc5ZWU5ZmRjMWY4MTczOTRmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.lCpxBzB5F8YQ5A5Zlr7_zaFrnzU_m0tuNwcB2tkEh2o)
 <br>
@@ -52,32 +54,31 @@
 시각적으로 정리된 학습 내용을 한눈에 확인해보세요.
 
 <br/>
+<br>
 
-### 3. Summary
+### 3. 요약하기
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/439361f4-076a-4b0c-b32e-1f236e90874a/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/eb500827-3deb-40d8-a020-44542f443140/image.png) |
+| ![](https://private-user-images.githubusercontent.com/103885896/409444842-a45e9b92-ca01-41e7-ad78-85f98f9e43df.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTc5OTksIm5iZiI6MTczODY1NzY5OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0ODQyLWE0NWU5YjkyLWNhMDEtNDFlNy1hZDc4LTg1Zjk4ZjllNDNkZi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODI4MTlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT00MmRhOTkyN2JhNDYzNzRjMjIzYzgyNjljZDUxNGRjOWVkOWYyNjk4NmVlMWMzYmQwYTI4MGVjMzI0NGIzNjMwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.xbJbCR6J6HtHkveLG7OqRWXXYE0aqX73lZA8zv4N7oY) | ![](https://private-user-images.githubusercontent.com/103885896/409444558-f3927434-99f8-41b3-b7cd-8b917ea11122.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTc5OTksIm5iZiI6MTczODY1NzY5OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NTU4LWYzOTI3NDM0LTk5ZjgtNDFiMy1iN2NkLThiOTE3ZWExMTEyMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODI4MTlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zZGVhODI0NjJkNTBiOTk1MTNhZWFlZjZkYTMxMjEwOWFjOTlhYjZjNDI0MmYwYTMyNjg0M2I4MTBkZjRkNjlkJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.6gAjn_C8uUOVOjunwGoom7L0KR-fqFNwfw7c_J4acis) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 <br>
-영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
-
+상대방의 활동 이력과 관심사를 확인하고 마음이 맞으면 `함께하기 요청` 을 시도해보세요.
 <br>
 <br>
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/0431e0bb-40f5-404a-b560-7c96309e1965/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/0a8de7ee-99d6-4cbb-9282-bf9b073c15f2/image.png) |
+약간의 채팅을 통해 상대방이 어떤 사람인지 알아보고, 만나고자 하는 시간과 장소를 정해보세요!
+<br>
+
+### 4. 공유하기
+
+| ![](https://private-user-images.githubusercontent.com/103885896/409444110-8bdeaba0-f050-47fb-ad9c-820d0133c537.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTc1OTUsIm5iZiI6MTczODY1NzI5NSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MTEwLThiZGVhYmEwLWYwNTAtNDdmYi1hZDljLTgyMGQwMTMzYzUzNy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODIxMzVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zZGRkM2Y2YmMyNDRhOTNjZTQ3YWFhYmU4MDMzYWZlZDg1ZTg4MmQyYzdhOWRhMTMyOWJkYmJkYWQ4ZGZkMTgwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.AxZ3gjYq6fAGsz36__yUzNBDO8-VWaiXUMfKR6u6cqw) | ![](https://private-user-images.githubusercontent.com/103885896/409444008-2d52ffb2-9ddd-45ab-b6d7-1b9f5e67361f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTc1OTUsIm5iZiI6MTczODY1NzI5NSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MDA4LTJkNTJmZmIyLTlkZGQtNDVhYi1iNmQ3LTFiOWY1ZTY3MzYxZi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODIxMzVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05MmQwM2RmNmE4Nzg2OGNkZjA1NmI4NTY5N2VlMmY2MTg0NDNjNWExZDAwOGViMWZhNzUzMDMyNDE5ZmVlOWJiJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.iVlPHXjBMK_a4j3UdGQ7TfSwrBRg5h5LvLEeK50IwiU) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
-
-### 4. Sharing
-
-| ![](https://private-user-images.githubusercontent.com/103885896/409444110-8bdeaba0-f050-47fb-ad9c-820d0133c537.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MTEwLThiZGVhYmEwLWYwNTAtNDdmYi1hZDljLTgyMGQwMTMzYzUzNy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT01ZGFiNjM5NzU0ZWFhMzk2YjQ3NDQ4NjU2MTU0Y2UzYzQwZGVlYTQ2YjhiYzhiNzNiZTRmMmEwZTUzNTAxMmI4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Y0MJTbROScW9dHWf5D8_iMl5owgUq3GOdcwHXVvknp4) | ![](https://private-user-images.githubusercontent.com/103885896/409444008-2d52ffb2-9ddd-45ab-b6d7-1b9f5e67361f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MDA4LTJkNTJmZmIyLTlkZGQtNDVhYi1iNmQ3LTFiOWY1ZTY3MzYxZi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02Yzg4NzI2NjVkMDg4MGRhMzJkMTIwMmFmMjMzNjljYjZhMTkwZmI1Y2E4YzZlYWE3NjcwMTEyMTQ1Y2EzYjIyJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.SQCY9OcMJ6CQnBmO5jHBFlwMknErnLFjSV6I39Lrbu0) |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-
-![](https://private-user-images.githubusercontent.com/103885896/409444789-99d971cd-6e61-485c-bed5-f4af76f0c791.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0Nzg5LTk5ZDk3MWNkLTZlNjEtNDg1Yy1iZWQ1LWY0YWY3NmYwYzc5MS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lODViMGM0NjJlMjgyMTg4MWY4YTJkZDcxMzZiZTQ1OGM2YjUxZTYwMjc3NGY2NDliYjc1Y2NmZWJmMzljNGVlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.CcCebLa0iec58jbPLMEcoyHz9gsi4izsJh3Wm3jUSqc)
+<img src="https://private-user-images.githubusercontent.com/103885896/409444789-99d971cd-6e61-485c-bed5-f4af76f0c791.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTc1OTUsIm5iZiI6MTczODY1NzI5NSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0Nzg5LTk5ZDk3MWNkLTZlNjEtNDg1Yy1iZWQ1LWY0YWY3NmYwYzc5MS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODIxMzVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xOTQxZjc5ODZjMDZhOTQ0Yzk4MmUzZjVkN2VhNTE1OWY1YjQ3MDc4MDYzYWE4ZWMwNDg5ZDE1YTUwOTJmY2Q1JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.NKnuecetQUHPR_TB2y7UmeRv4gvnbtPdQCXGNkWhIIA" alt="drawing" style="width:100%;" />
 
 작성한 메모를 공유하고, 다른 사람들의 기록을 참고하여 더 풍부한 학습을 경험해보세요!
 
+<br>
 <br>
 
 ## 🔧 아키텍처
