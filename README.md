@@ -78,6 +78,8 @@
 
 게시판 탭에서 행사에 대한 후기, QNA 등 자유롭게 이야기를 나눠 보세요!
 
+
+
 # 팀원 소개
 
 <table>
@@ -137,3 +139,10 @@
     </td>
   </tr>
 </table>
+
+
+# 프로젝트 포스터
+
+<p align="center">
+<img src="https://private-user-images.githubusercontent.com/95560713/409444762-50696830-1e55-4e89-a35c-94059d535fc5.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTQ0MDksIm5iZiI6MTczODY1NDEwOSwicGF0aCI6Ii85NTU2MDcxMy80MDk0NDQ3NjItNTA2OTY4MzAtMWU1NS00ZTg5LWEzNWMtOTQwNTlkNTM1ZmM1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAyMDQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMjA0VDA3MjgyOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTBjODM2MGRhMTExYWM3ZGUzM2IwNGNlZTUwZWJlMmE3OWQ0YWNiNTIwNTkyMzlhNzNjMzk4ZDYyMDM4ZGVhMjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.0p57QXUZAXBWAFzVIeTND3T7AcNBaHiHIX87eYFS3GM" alt="drawing" style="width:80%;"/>
+</p>
