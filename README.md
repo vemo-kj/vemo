@@ -28,13 +28,11 @@
 
 
 
-원하는 행사, 쉽게 필터링하고 찾아보세요!
+영상을 보며 타임스탬프와 함께 메모 작성.
 
-커디는 관심 분야별로 행사를 필터링할 수 있습니다.
+작성한 메모는 클릭만 하면 해당 영상 시점으로 바로 이동!
 
-만약 관심있는 행사가 있다면 스크랩 해보시는건 어떠신가요?
-
-관심있는 행사는 스크랩해서 언제든지 다시 확인해보세요!
+타임스탬프와 함께 학습 내용을 복습하고 정리하세요.
 
 <br/>
 
@@ -42,13 +40,13 @@
 
 | ![](https://private-user-images.githubusercontent.com/103885896/409444673-69f4de46-6946-44c5-9bb5-20e4f699d04d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY4MTYsIm5iZiI6MTczODY1NjUxNiwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NjczLTY5ZjRkZTQ2LTY5NDYtNDRjNS05YmI1LTIwZTRmNjk5ZDA0ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA4MzZaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05NDg5ZWIzNTMyYzYzMzVmMDgxNTNkMTczNTMwMzU4NGZmM2VjMjU2NmI0MjcxNTc5ZWU5ZmRjMWY4MTczOTRmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.lCpxBzB5F8YQ5A5Zlr7_zaFrnzU_m0tuNwcB2tkEh2o) |
 <br>
-관심 태그 설정을 통해 원하는 분야의 행사 알림을 쉽게 받아볼 수 있어요.
+작성된 메모와 영상을 타임스탬프로 연결!
 <br>
 <br>
 
 
 
-알림 보관함을 통해 나에게 온 알림을 모아볼 수 있어요!
+시각적으로 정리된 학습 내용을 한눈에 확인해보세요.
 
 <br/>
 
@@ -58,29 +56,22 @@
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 <br>
-상대방의 활동 이력과 관심사를 확인하고 마음이 맞으면 `함께하기 요청` 을 시도해보세요.
+영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
+
 <br>
 <br>
 
 | ![](https://velog.velcdn.com/images/kerdy-official/post/0431e0bb-40f5-404a-b560-7c96309e1965/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/0a8de7ee-99d6-4cbb-9282-bf9b073c15f2/image.png) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-약간의 채팅을 통해 상대방이 어떤 사람인지 알아보고, 만나고자 하는 시간과 장소를 정해보세요!
-
-간단한 소통만으로 `행사에 대한 두려움` 을 조금은 덜어냈네요!
+영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
 
 ### 4. Sharing
 
 | ![](https://private-user-images.githubusercontent.com/103885896/409444110-8bdeaba0-f050-47fb-ad9c-820d0133c537.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MTEwLThiZGVhYmEwLWYwNTAtNDdmYi1hZDljLTgyMGQwMTMzYzUzNy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT01ZGFiNjM5NzU0ZWFhMzk2YjQ3NDQ4NjU2MTU0Y2UzYzQwZGVlYTQ2YjhiYzhiNzNiZTRmMmEwZTUzNTAxMmI4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Y0MJTbROScW9dHWf5D8_iMl5owgUq3GOdcwHXVvknp4) | ![](https://private-user-images.githubusercontent.com/103885896/409444008-2d52ffb2-9ddd-45ab-b6d7-1b9f5e67361f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MDA4LTJkNTJmZmIyLTlkZGQtNDVhYi1iNmQ3LTFiOWY1ZTY3MzYxZi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02Yzg4NzI2NjVkMDg4MGRhMzJkMTIwMmFmMjMzNjljYjZhMTkwZmI1Y2E4YzZlYWE3NjcwMTEyMTQ1Y2EzYjIyJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.SQCY9OcMJ6CQnBmO5jHBFlwMknErnLFjSV6I39Lrbu0) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-![](https://private-user-images.githubusercontent.com/103885896/409444789-99d971cd-6e61-485c-bed5-f4af76f0c791.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2ODksIm5iZiI6MTczODY1NjM4OSwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0Nzg5LTk5ZDk3MWNkLTZlNjEtNDg1Yy1iZWQ1LWY0YWY3NmYwYzc5MS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2MjlaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lODViMGM0NjJlMjgyMTg4MWY4YTJkZDcxMzZiZTQ1OGM2YjUxZTYwMjc3NGY2NDliYjc1Y2NmZWJmMzljNGVlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.CcCebLa0iec58jbPLMEcoyHz9gsi4izsJh3Wm3jUSqc)
-
-커디의 행사 상세정보 페이지는 더욱 풍부한 상호작용과 소통을 위해 게시판 기능을 제공하고 있습니다.
-
-이 기능을 통해 참가자 간의 소통을 쉽게 할 수 있고, 다양한 정보를 공유하고 토론할 수 있어요.
-
-게시판 탭에서 행사에 대한 후기, QNA 등 자유롭게 이야기를 나눠 보세요!
+작성한 메모를 공유하고, 다른 사람들의 기록을 참고하여 더 풍부한 학습을 경험해보세요!
 
 <br>
 
