@@ -55,19 +55,15 @@
 
 ### 3. Summary
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/439361f4-076a-4b0c-b32e-1f236e90874a/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/eb500827-3deb-40d8-a020-44542f443140/image.png) |
+| ![](https://private-user-images.githubusercontent.com/103885896/409444842-a45e9b92-ca01-41e7-ad78-85f98f9e43df.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY5MzYsIm5iZiI6MTczODY1NjYzNiwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0ODQyLWE0NWU5YjkyLWNhMDEtNDFlNy1hZDc4LTg1Zjk4ZjllNDNkZi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODEwMzZaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1kYmExMGQxOWYyNjg4YWZiODBjNDM2MDA2OTNjMTI0OGU4YTA4NmIzYmM2NjFlMTA2NDg0YWQxNzVhNGI0NDM0JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.LKo9QRVRTEKpuSp_Jx4e_EU76Jeb2rHzRJdC5Z4o8PQ) | ![](https://private-user-images.githubusercontent.com/103885896/409444558-f3927434-99f8-41b3-b7cd-8b917ea11122.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY2MzYsIm5iZiI6MTczODY1NjMzNiwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NTU4LWYzOTI3NDM0LTk5ZjgtNDFiMy1iN2NkLThiOTE3ZWExMTEyMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA1MzZaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT01ODgyNTg4Y2Q4MWIxMzFiOTI5YWU5MTY0MDViZWRmYzVmYWJlNGQyNjIxODkyNTFiZmJhNDMxZTNjMmZmNjEwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.EPICx_p3d3cn0UDWc6L8iOOCY5QBwE_ElvFNnZqhnYI) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 <br>
-영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
-
+상대방의 활동 이력과 관심사를 확인하고 마음이 맞으면 `함께하기 요청` 을 시도해보세요.
 <br>
 <br>
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/0431e0bb-40f5-404a-b560-7c96309e1965/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/0a8de7ee-99d6-4cbb-9282-bf9b073c15f2/image.png) |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-
-영상 내용을 빠르게 요약하여 학습 시간을 절약하고 효율성을 높여보세요.
+약간의 채팅을 통해 상대방이 어떤 사람인지 알아보고, 만나고자 하는 시간과 장소를 정해보세요!
 
 ### 4. Sharing
 
