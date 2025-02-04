@@ -1,9 +1,5 @@
 # 📄 서비스 소개
 
-## 이런 적 있지 않나요?
-
-### **평소 IT 행사 정보를 찾아보기 어렵지 않으셨나요?**
-
 <p align="center">
 <img src="https://github.com/user-attachments/assets/a27fe0f3-a441-439c-807e-ca83485d9837" alt="drawing" style="width:80%;"/>
 </p>
