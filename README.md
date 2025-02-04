@@ -120,6 +120,7 @@ IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워�
 
 <table>
   <tr>
+  
   <td align="center" width="200px">
       <a href="https://github.com/hong-sile" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/32128848?s=64&v=4" alt="서성진(FE) 프로필" />
@@ -148,28 +149,28 @@ IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워�
   </tr>
   <tr>
     <td align="center">
-      <a href="https://github.com/jerry-1211" target="_blank">
-        김제림
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/clapho" target="_blank">
-        박수호
-      </a>
-    </td>
-    <td align="center">
       <a href="https://github.com/seongjin0614" target="_blank">
-        서성진
+        서성진(FE)
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/daniely7" target="_blank">
-        여강수
+        여강수(FE)
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/jerry-1211" target="_blank">
+        김제림(BE)
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/clapho" target="_blank">
+        박수호(BE)
       </a>
     </td>
     <td align="center">
       <a href="https://github.com/CDDWNE" target="_blank">
-         최진영
+         최진영(BE)
       </a>
     </td>
   </tr>
