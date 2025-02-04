@@ -5,7 +5,7 @@
 ### **평소 IT 행사 정보를 찾아보기 어렵지 않으셨나요?**
 
 <p align="center">
-<img src="https://velog.velcdn.com/images/kerdy-official/post/604e39a5-85b3-4d13-8538-8962966f23a1/image.png" alt="drawing" style="width:80%;"/>
+<img src="https://github.com/user-attachments/assets/a27fe0f3-a441-439c-807e-ca83485d9837" alt="drawing" style="width:80%;"/>
 </p>
 
 IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워킹하며 지식의 뿌리를 넓힐 수 있는 컨퍼런스  
@@ -21,7 +21,8 @@ IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워�
 ### **여러분의 관심사와 맞지 않는 행사가 너무 많지 않나요?**
 
 <p align="center">
-<img src="https://velog.velcdn.com/images/kerdy-official/post/c295c82a-30dd-46df-b318-6fe3a81e5242/image.png" alt="drawing" style="width:80%;"/>
+
+<img src="https://github.com/user-attachments/assets/236c4f33-e105-4fb1-b4c4-fd8cf616c247" alt="drawing" style="width:80%;"/>
 </p>
 
 사실, 이런 행사 정보를 모아둔 사이트는 이미 여럿 존재하고 있습니다.
@@ -35,11 +36,12 @@ IT 업계의 능력있는 사람들이 모여 지식을 공유하고, 네트워�
 그냥 자신이 관심있는 분야의 행사 정보만 골라 볼 수 있다면 좋지 않을까요?
 
 <br/>
+![Slide 16_9 - 575]()
 
 ### **행사를 함께할 친구를 찾기 힘들지 않았나요?**
 
 <p align="center">
-<img src="https://velog.velcdn.com/images/kerdy-official/post/a03911ad-2759-4463-bccb-6ae91e99f378/image.png" alt="drawing" style="width:80%;"/>
+<img src="https://github.com/user-attachments/assets/eea55af2-da91-4f40-be32-5e9a32e40a99" alt="drawing" style="width:80%;"/>
 </p>
 
 가고 싶은 행사가 생겼어도, 컨퍼런스를 가려고 하니 막상 컨퍼런스를 혼자 가기가 두렵진 않으셨나요?
