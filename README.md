@@ -1,17 +1,17 @@
 # 📄 서비스 소개
 
 <p>
-<img src="https://github.com/user-attachments/assets/a27fe0f3-a441-439c-807e-ca83485d9837" alt="drawing" style="width:80%;"/>
+<img src="https://github.com/user-attachments/assets/a27fe0f3-a441-439c-807e-ca83485d9837" alt="drawing" style="width:100%;"/>
 </p>
 
 <p>
 
-<img src="https://github.com/user-attachments/assets/236c4f33-e105-4fb1-b4c4-fd8cf616c247" alt="drawing" style="width:80%;"/>
+<img src="https://github.com/user-attachments/assets/236c4f33-e105-4fb1-b4c4-fd8cf616c247" alt="drawing" style="width:100%;"/>
 </p>
 
 
 <p>
-<img src="https://github.com/user-attachments/assets/eea55af2-da91-4f40-be32-5e9a32e40a99" alt="drawing" style="width:80%;"/>
+<img src="https://github.com/user-attachments/assets/eea55af2-da91-4f40-be32-5e9a32e40a99" alt="drawing" style="width:100%;"/>
 </p>
 
 <br/>
