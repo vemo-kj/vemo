@@ -18,10 +18,15 @@
 
 ## ✨ 핵심 기능
 
-### 1. 행사 필터링 & 스크랩
+### 1. Writing
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/10c013bf-0e44-4a5b-8e4b-fb494e8dcbd0/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/0fb37480-65bc-40aa-b4b0-b0ecb8befd13/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/02c7c3d0-2dde-4ea1-a3b4-8664773805ff/image.png) |
+| ![](https://private-user-images.githubusercontent.com/103885896/409443948-d4ac4b4b-467a-4c7e-aa47-5b847cec8b90.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTU1MDAsIm5iZiI6MTczODY1NTIwMCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQzOTQ4LWQ0YWM0YjRiLTQ2N2EtNGM3ZS1hYTQ3LTViODQ3Y2VjOGI5MC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzQ2NDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1hMzRhYjhjN2Y4YTIwOGQ4YWJiMzEyMzZiYzhiYjdiYzMyYzVmMGZlMjBkMjc4MzY5NjM4MGMxYzkzMDVlODJmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.gHGfJ8HubOU-_ohKvGUxiT-qsXYgbB6O5a4A-9lBxSM) | ![](https://private-user-images.githubusercontent.com/103885896/409444053-f61b563b-17be-47f2-a54a-dd320c520f5d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTU1MDAsIm5iZiI6MTczODY1NTIwMCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0MDUzLWY2MWI1NjNiLTE3YmUtNDdmMi1hNTRhLWRkMzIwYzUyMGY1ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzQ2NDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT01YmJmMmFlZDY4Yjk1MmQwMzE5OTAxZTg5NDYxODJlYmZhOGUwYjczZGFlODk1ZWQ2ZmFmYjE1YWJiZjk4MWNjJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.5Iz8qQBMIJfdU90LWuVSyGxv-9whJ9qfR-OqwNSXADY)
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+
+
+| ![](https://private-user-images.githubusercontent.com/103885896/409444622-db6f2f25-8db4-443b-a1a5-04f3277e17c8.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTU3NjgsIm5iZiI6MTczODY1NTQ2OCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NjIyLWRiNmYyZjI1LThkYjQtNDQzYi1hMWE1LTA0ZjMyNzdlMTdjOC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzUxMDhaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1jMmY5ODI1MjQ1NjJlNjg0ZWMyNDJlNGViZDE3MDJiNzZjOTdhZDMzOWNhYzIzYzRmMzM5YmM4NzcyODNhM2U4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.OoIa_jcaNxL7ygTEmqLBveaL3sFdnCwAASk_xvH297M) | ![](https://private-user-images.githubusercontent.com/103885896/409444558-f3927434-99f8-41b3-b7cd-8b917ea11122.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTU3NjgsIm5iZiI6MTczODY1NTQ2OCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NTU4LWYzOTI3NDM0LTk5ZjgtNDFiMy1iN2NkLThiOTE3ZWExMTEyMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwNzUxMDhaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1jNWQ3ZmYxMDdkNTI3NjQ2NDBmNGY4YjEwNTBiYmRlZjcxYjEzZDUzMWFiOGYxNmNlYzkwN2JhOTU3YzZjNTcxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.R06YiBZwjFoDc9te43vFa38L4uK_CnDqrfl_J4ms9mQ)
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+
 
 원하는 행사, 쉽게 필터링하고 찾아보세요!
 
@@ -33,7 +38,7 @@
 
 <br/>
 
-### 2. 관심 태그를 설정해 알람을 받아보세요!
+### 2. Mapping
 
 | ![](https://velog.velcdn.com/images/kerdy-official/post/c82091e5-b2ae-4ff0-9457-cdcb560229ca/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/c681ce12-73ea-4c77-b540-6c8223116a85/image.png) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -50,7 +55,7 @@
 
 <br/>
 
-### 3. 행사에 같이가요!
+### 3. Summary
 
 | ![](https://velog.velcdn.com/images/kerdy-official/post/439361f4-076a-4b0c-b32e-1f236e90874a/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/eb500827-3deb-40d8-a020-44542f443140/image.png) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -67,7 +72,7 @@
 
 간단한 소통만으로 `행사에 대한 두려움` 을 조금은 덜어냈네요!
 
-### 4. 행사 게시판을 통해 의견을 공유하세요!
+### 4. Sharing
 
 | ![](https://velog.velcdn.com/images/kerdy-official/post/7b0a19da-8adf-4995-8183-ede78039657f/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/1594c6c2-4085-45cf-977f-fa1b4f893d5e/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/dd995906-1ac5-4142-a978-4a67dd6f94b7/image.png) |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
