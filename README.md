@@ -1,9 +1,8 @@
+# 📄 서비스 소개
+
 <p>
 <img src="https://github.com/user-attachments/assets/4182f4a6-7074-4414-9aec-07094ff4e133" alt="drawing" style="width:100%;"/>
 </p>
-
-
-# 📄 서비스 소개
 
 <p>
 <img src="https://github.com/user-attachments/assets/a27fe0f3-a441-439c-807e-ca83485d9837" alt="drawing" style="width:100%;"/>
@@ -92,7 +91,7 @@ Vemo에서 다른 사람들의 기록을 참고하여 더욱 깊이 있는 학�
 
 ## 🔧 아키텍처
 <p align="center">
-<img src="https://private-user-images.githubusercontent.com/103885896/409437636-68bbc5b9-ec2b-4848-8881-cc36e6f3d2d0.svg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY3MTgsIm5iZiI6MTczODY1NjQxOCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDM3NjM2LTY4YmJjNWI5LWVjMmItNDg0OC04ODgxLWNjMzZlNmYzZDJkMC5zdmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2NThaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yYmY2ZWFiOTBmNmQ0MGQyOTQ5Zjk3ZGZiZWEyMWFjZWY1NDBlYjViMzZjNWZhYWY1NjFlZDAzNjY2OWVmYzAxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.h6hX6MLvetQRRVS27Xww41MD_TQci0zgZMSDU0BFF1s" alt="drawing" style="width:100%;"/>
+<img src="https://github.com/user-attachments/assets/9c9f3a64-a6c9-441f-bdb2-bf750888150a" alt="drawing" style="width:100%;"/>
 </p>
 <br>
 
@@ -161,7 +160,7 @@ Vemo에서 다른 사람들의 기록을 참고하여 더욱 깊이 있는 학�
 ## 📌 프로젝트 포스터
 
 <p align="center">
-<img src="https://private-user-images.githubusercontent.com/95560713/409445876-4ced241e-4c12-42fd-8428-536120891558.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTQ1NjksIm5iZiI6MTczODY1NDI2OSwicGF0aCI6Ii85NTU2MDcxMy80MDk0NDU4NzYtNGNlZDI0MWUtNGMxMi00MmZkLTg0MjgtNTM2MTIwODkxNTU4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAyMDQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMjA0VDA3MzEwOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdlNDBjMWVkYWI1ZmY4NjQ0M2UxYTlmYTFjOWZmOTQzZmMxZGRhMTViNjQ5ZmVjODk4MmIwN2VhY2Y5MmUzMGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.d_JaHsNJKE1FUaTI7gUQ6QtOJSDg0_jwiY9zfS35JAY" alt="drawing" style="width:100%;"/>
+<img src="https://github.com/user-attachments/assets/17b6456c-8e40-4374-8b3e-b1aa744813e5" alt="drawing" style="width:100%;"/>
 </p>
 
 
