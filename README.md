@@ -40,16 +40,13 @@
 
 ### 2. Mapping
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/c82091e5-b2ae-4ff0-9457-cdcb560229ca/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/c681ce12-73ea-4c77-b540-6c8223116a85/image.png) |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-
+| ![](https://private-user-images.githubusercontent.com/103885896/409444673-69f4de46-6946-44c5-9bb5-20e4f699d04d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY4MTYsIm5iZiI6MTczODY1NjUxNiwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDQ0NjczLTY5ZjRkZTQ2LTY5NDYtNDRjNS05YmI1LTIwZTRmNjk5ZDA0ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA4MzZaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05NDg5ZWIzNTMyYzYzMzVmMDgxNTNkMTczNTMwMzU4NGZmM2VjMjU2NmI0MjcxNTc5ZWU5ZmRjMWY4MTczOTRmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.lCpxBzB5F8YQ5A5Zlr7_zaFrnzU_m0tuNwcB2tkEh2o) |
 <br>
 관심 태그 설정을 통해 원하는 분야의 행사 알림을 쉽게 받아볼 수 있어요.
 <br>
 <br>
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/cd47070e-5fda-41b6-91d6-2985b87b234b/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/39b28b61-624b-4857-81ee-e3c55d5bc348/image.png) |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+
 
 알림 보관함을 통해 나에게 온 알림을 모아볼 수 있어요!
 
@@ -85,9 +82,15 @@
 
 게시판 탭에서 행사에 대한 후기, QNA 등 자유롭게 이야기를 나눠 보세요!
 
+<br>
 
+## 🔧 아키텍처
+<p align="center">
+<img src="https://private-user-images.githubusercontent.com/103885896/409437636-68bbc5b9-ec2b-4848-8881-cc36e6f3d2d0.svg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTY3MTgsIm5iZiI6MTczODY1NjQxOCwicGF0aCI6Ii8xMDM4ODU4OTYvNDA5NDM3NjM2LTY4YmJjNWI5LWVjMmItNDg0OC04ODgxLWNjMzZlNmYzZDJkMC5zdmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMjA0JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDIwNFQwODA2NThaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yYmY2ZWFiOTBmNmQ0MGQyOTQ5Zjk3ZGZiZWEyMWFjZWY1NDBlYjViMzZjNWZhYWY1NjFlZDAzNjY2OWVmYzAxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.h6hX6MLvetQRRVS27Xww41MD_TQci0zgZMSDU0BFF1s" alt="drawing" style="width:100%;"/>
+</p>
+<br>
 
-# 팀원 소개
+## 🙌 팀원 소개
 
 <table>
   <tr>
@@ -148,10 +151,9 @@
 </table>
 
 <br>
-<br>
 
-# 프로젝트 포스터
+## 📌 프로젝트 포스터
 
 <p align="center">
-<img src="https://private-user-images.githubusercontent.com/95560713/409445876-4ced241e-4c12-42fd-8428-536120891558.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTQ1NjksIm5iZiI6MTczODY1NDI2OSwicGF0aCI6Ii85NTU2MDcxMy80MDk0NDU4NzYtNGNlZDI0MWUtNGMxMi00MmZkLTg0MjgtNTM2MTIwODkxNTU4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAyMDQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMjA0VDA3MzEwOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdlNDBjMWVkYWI1ZmY4NjQ0M2UxYTlmYTFjOWZmOTQzZmMxZGRhMTViNjQ5ZmVjODk4MmIwN2VhY2Y5MmUzMGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.d_JaHsNJKE1FUaTI7gUQ6QtOJSDg0_jwiY9zfS35JAY" alt="drawing" style="width:80%;"/>
+<img src="https://private-user-images.githubusercontent.com/95560713/409445876-4ced241e-4c12-42fd-8428-536120891558.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Mzg2NTQ1NjksIm5iZiI6MTczODY1NDI2OSwicGF0aCI6Ii85NTU2MDcxMy80MDk0NDU4NzYtNGNlZDI0MWUtNGMxMi00MmZkLTg0MjgtNTM2MTIwODkxNTU4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAyMDQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMjA0VDA3MzEwOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdlNDBjMWVkYWI1ZmY4NjQ0M2UxYTlmYTFjOWZmOTQzZmMxZGRhMTViNjQ5ZmVjODk4MmIwN2VhY2Y5MmUzMGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.d_JaHsNJKE1FUaTI7gUQ6QtOJSDg0_jwiY9zfS35JAY" alt="drawing" style="width:100%;"/>
 </p>
