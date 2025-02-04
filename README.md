@@ -22,69 +22,64 @@
 
 ## ✨ 핵심 기능
 
-### 1. 작성하기
+### 📝 1. 작성하기 (Writing)
 
-| <img width="1438" alt="KakaoTalk_Photo_2025-02-04-16-26-01 011" src="https://github.com/user-attachments/assets/efea7b3e-5fbe-4bed-9310-19919194b768" /> | <img width="1438" alt="KakaoTalk_Photo_2025-02-04-16-26-01 008" src="https://github.com/user-attachments/assets/985211c6-bec0-4440-abf4-2b11c486d0e7" /> |
+| <img width="1438" src="https://github.com/user-attachments/assets/efea7b3e-5fbe-4bed-9310-19919194b768" /> | <img width="1438" src="https://github.com/user-attachments/assets/985211c6-bec0-4440-abf4-2b11c486d0e7" /> |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img width="1440" src="https://github.com/user-attachments/assets/9b1f1c34-0901-4ebc-a1b3-7ce18af29937" /> | <img width="1440" src="https://github.com/user-attachments/assets/11feaa6f-aa3a-4602-a31c-6a076a7dc124" /> |
 
-| <img width="1440" alt="KakaoTalk_Photo_2025-02-04-16-26-00 001" src="https://github.com/user-attachments/assets/9b1f1c34-0901-4ebc-a1b3-7ce18af29937" /> | <img width="1440" alt="KakaoTalk_Photo_2025-02-04-16-26-01 003" src="https://github.com/user-attachments/assets/11feaa6f-aa3a-4602-a31c-6a076a7dc124" /> |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-
-
-
-영상을 보며 타임스탬프와 함께 메모 작성
-
-타임스탬프와 함께 학습 내용을 복습하고 정리하세요
-
-작성한 메모는 클릭만 하면 해당 영상 시점으로 바로 이동해요 !
-
+- 영상을 보며 **타임스탬프와 함께 메모 작성**  
+- 타임스탬프를 활용해 **학습 내용을 정리하고 복습**  
+- **메모 클릭 시 해당 영상 시점으로 이동 가능**  
 
 <br/>
-<br>
 
-### 2. 매핑하기
+---
 
-<p>
-<img src="https://github.com/user-attachments/assets/69f4de46-6946-44c5-9bb5-20e4f699d04d" alt="drawing" style="width:100%;"/>
+### 🔗 2. 매핑하기 (Mapping)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/69f4de46-6946-44c5-9bb5-20e4f699d04d" alt="매핑 기능" style="width:100%;"/>
 </p>
-<br>
-영상을 시청하며 학습하면서 메모를 작성하면 메모와 영상의 시점을 매핑하여 언제, 영상의 어느 부분에서 메모를 작성했는지 알 수 있고 타임스탬프를 통해 바로 그 영상의 시점으로 돌아갈수 있습니다
-또한 요약하기, 퀴즈 등에서도 타임스탬프를 통해 영상의 어느 부분에 대한 요약인지 어느 부분에서 생성된 퀴즈인지 확인 및 이동이 가능합니다
-<br>
-<br>
 
-
-
-시각적으로 정리된 학습 내용을 한눈에 확인해보세요.
+- 영상을 시청하며 **메모를 작성하면 자동으로 매핑**  
+- **언제, 어느 영상 부분에서 메모를 작성했는지 확인 가능**  
+- **타임스탬프를 클릭하여 즉시 해당 영상 시점으로 이동 가능**  
+- 요약하기, 퀴즈 기능에서도 **해당 영상의 특정 부분과 연동하여 학습 가능**  
 
 <br/>
-<br>
 
-### 3. 요약하기
+---
 
-| <img width="1438" alt="KakaoTalk_Photo_2025-02-04-16-26-01 015" src="https://github.com/user-attachments/assets/1bfa289d-1849-42b4-8ad0-28a4fecb50ea" /> | <img width="1434" alt="KakaoTalk_Photo_2025-02-04-16-26-01 010" src="https://github.com/user-attachments/assets/2b5ab282-89c5-4ea9-add6-10e5f6bf319c" /> |
+### 📌 3. 요약하기 (Summary)
+
+| <img width="1438" src="https://github.com/user-attachments/assets/1bfa289d-1849-42b4-8ad0-28a4fecb50ea" /> | <img width="1434" src="https://github.com/user-attachments/assets/2b5ab282-89c5-4ea9-add6-10e5f6bf319c" /> |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-비디오 전체 내용을 간결하게 요약하여 시청시간을 절약하고 복습을 손쉽게 진행!
+- **비디오 전체 내용을 간결하게 요약하여 시청 시간 절약**  
+- 요약본을 통해 **복습이 더 쉽고 빠르게 가능**  
+- 학습 진행 후, **이해한 내용 점검 가능**  
 
-학습을 진행한 후, 이해 내용 점검!
+<br/>
 
-### 4. 공유하기
+---
 
+### 📤 4. 공유하기 (Sharing)
 
-
-| <img width="1434" alt="KakaoTalk_Photo_2025-02-04-16-26-01 004" src="https://github.com/user-attachments/assets/2e6e8126-12cc-4566-8508-6bb11db4d2bf" /> | <img width="1438" alt="KakaoTalk_Photo_2025-02-04-16-26-01 002" src="https://github.com/user-attachments/assets/60a988f5-7ed8-4e27-9d95-a957dc9b4f8e" /> |
+| <img width="1434" src="https://github.com/user-attachments/assets/2e6e8126-12cc-4566-8508-6bb11db4d2bf" /> | <img width="1438" src="https://github.com/user-attachments/assets/60a988f5-7ed8-4e27-9d95-a957dc9b4f8e" /> |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-<img width="720" alt="KakaoTalk_Photo_2025-02-04-16-26-01 014" src="https://github.com/user-attachments/assets/d9283442-1be5-43b7-81bc-8b167bd3327b" style="width: 100%;"/>
 
-작성한 메모를 자유롭게 공유하세요!
+<p align="center">
+  <img width="720" src="https://github.com/user-attachments/assets/d9283442-1be5-43b7-81bc-8b167bd3327b" style="width:100%;"/>
+</p>
 
-Vemo에서 다른 사람들의 기록을 참고하여 더욱 깊이 있는 학습 경험
+- **작성한 메모를 자유롭게 공유 가능**  
+- Vemo에서 **다른 사람들의 기록을 참고하여 더욱 깊이 있는 학습 가능**  
+- **PDF로 저장하여 온전히 나만의 학습 자료로 활용 가능**  
 
-또한, PDF로 저장하여 온전히 나만의 학습 자료로 활용해보세요!
+<br/>
 
-<br>
-<br>
+---
 
 ## 🔧 아키텍처
 <p align="center">
