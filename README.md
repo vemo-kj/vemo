@@ -40,7 +40,7 @@
 
 ### 2. Mapping
 
-| ![](https://velog.velcdn.com/images/kerdy-official/post/c82091e5-b2ae-4ff0-9457-cdcb560229ca/image.png) | ![](https://velog.velcdn.com/images/kerdy-official/post/c681ce12-73ea-4c77-b540-6c8223116a85/image.png) |
+| ![](<https://github.com/user-attachments/assets/69f4de46-6946-44c5-9bb5-20e4f699d04d" />) | |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
 <br>
