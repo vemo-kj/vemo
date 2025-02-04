@@ -85,17 +85,17 @@
   
   <td align="center" width="200px">
       <a href="https://github.com/hong-sile" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/32128848?s=64&v=4" alt="서성진(FE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/179198853?v=4" alt="서성진(FE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/amaran-th" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/81465068?s=64&v=4" alt="여강수(FE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/68220345?v=4" alt="여강수(FE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/Hyeonjae-K" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="김제림(BE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/95560713?v=4" alt="김제림(BE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
@@ -105,7 +105,7 @@
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/Hyeonjae-K" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/71651608?v=4" alt="최진영(BE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/91055103?v=4" alt="최진영(BE) 프로필" />
       </a>
     </td>
   </tr>
