@@ -93,7 +93,7 @@
   <tr>
   
   <td align="center" width="200px">
-      <a href="https://github.com/orgs/vemo-kj/people/seongjin0614" target="_blank">
+      <a href="https://github.com/seongjin0614" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/179198853?v=4" alt="서성진(FE) 프로필" />
       </a>
     </td>
