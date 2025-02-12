@@ -93,7 +93,7 @@
   <tr>
   
   <td align="center" width="200px">
-      <a href="https://github.com/hong-sile" target="_blank">
+      <a href="https://github.com/orgs/vemo-kj/people/seongjin0614" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/179198853?v=4" alt="서성진(FE) 프로필" />
       </a>
     </td>
@@ -103,17 +103,17 @@
       </a>
     </td>
     <td align="center" width="200px">
-      <a href="https://github.com/Hyeonjae-K" target="_blank">
+      <a href="https://github.com/jerry-1211" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/95560713?v=4" alt="김제림(BE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
-      <a href="https://github.com/java-saeng" target="_blank">
+      <a href="https://github.com/clapho" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/62413589?s=64&v=4" alt="박수호(BE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
-      <a href="https://github.com/Hyeonjae-K" target="_blank">
+      <a href="https://github.com/CDDWNE" target="_blank">
         <img src="https://avatars.githubusercontent.com/u/91055103?v=4" alt="최진영(BE) 프로필" />
       </a>
     </td>
