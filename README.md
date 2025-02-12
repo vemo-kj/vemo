@@ -109,12 +109,12 @@
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/clapho" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/62413589?s=64&v=4" alt="박수호(BE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/91055103?v=4" alt="박수호(BE) 프로필" />
       </a>
     </td>
     <td align="center" width="200px">
       <a href="https://github.com/CDDWNE" target="_blank">
-        <img src="https://avatars.githubusercontent.com/u/91055103?v=4" alt="최진영(BE) 프로필" />
+        <img src="https://avatars.githubusercontent.com/u/103885896?v=4" alt="최진영(BE) 프로필" />
       </a>
     </td>
   </tr>
